@@ -28,12 +28,31 @@ const MarketVisibilityScore = () => {
   const [market, setMarket] = useState("serbia");
   const [peerGroup, setPeerGroup] = useState("regional");
   const [gbpListed, setGbpListed] = useState(false);
+  const [followers, setFollowers] = useState("");
+  const [posts30d, setPosts30d] = useState("");
+  const [engagementRate, setEngagementRate] = useState("");
+  const [platforms, setPlatforms] = useState({ linkedin: false, instagram: false, twitter: false, facebook: false });
   const { loading, publishing, result, error, run, publish, reset } = useMarketVisibility();
 
   const submit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!auditedDomain.trim() || loading) return;
-    const audit = await run({ auditedDomain: auditedDomain.trim(), displayName: displayName.trim() || undefined, market, peerGroup, gbpListed });
+    const hasSocialInput = followers.trim() !== "" || posts30d.trim() !== "" || Object.values(platforms).some(Boolean);
+    const audit = await run({
+      auditedDomain: auditedDomain.trim(),
+      displayName: displayName.trim() || undefined,
+      market,
+      peerGroup,
+      gbpListed,
+      social: hasSocialInput
+        ? {
+          followers: Number(followers) || 0,
+          posts30d: Number(posts30d) || 0,
+          engagementRate: engagementRate.trim() !== "" ? Number(engagementRate) : undefined,
+          platforms,
+        }
+        : undefined,
+    });
     if (!audit) {
       toast.error(error || "Couldn't run the audit");
       return;
@@ -181,6 +200,67 @@ const MarketVisibilityScore = () => {
                       />
                       We have a claimed, active Google Business Profile
                     </label>
+
+                    <div className="border-t border-border/40 pt-4">
+                      <p className="text-[10px] tracking-[0.2em] uppercase text-muted-foreground font-body mb-3">
+                        Social presence (optional, self-reported — no clean LinkedIn API exists)
+                      </p>
+                      <div className="grid grid-cols-2 gap-3 mb-3">
+                        <div>
+                          <label className="block text-xs text-muted-foreground font-body mb-1.5">LinkedIn followers</label>
+                          <input
+                            type="number"
+                            min={0}
+                            value={followers}
+                            onChange={(e) => setFollowers(e.target.value)}
+                            placeholder="0"
+                            className="w-full bg-background border border-border rounded-sm px-3 py-2.5 text-sm font-body focus:outline-none focus:border-emerald-500/50"
+                            disabled={loading}
+                          />
+                        </div>
+                        <div>
+                          <label className="block text-xs text-muted-foreground font-body mb-1.5">Posts in last 30 days</label>
+                          <input
+                            type="number"
+                            min={0}
+                            value={posts30d}
+                            onChange={(e) => setPosts30d(e.target.value)}
+                            placeholder="0"
+                            className="w-full bg-background border border-border rounded-sm px-3 py-2.5 text-sm font-body focus:outline-none focus:border-emerald-500/50"
+                            disabled={loading}
+                          />
+                        </div>
+                      </div>
+                      <div className="mb-3">
+                        <label className="block text-xs text-muted-foreground font-body mb-1.5">
+                          Engagement rate % (optional — only if you have your own LinkedIn analytics)
+                        </label>
+                        <input
+                          type="number"
+                          min={0}
+                          step="0.1"
+                          value={engagementRate}
+                          onChange={(e) => setEngagementRate(e.target.value)}
+                          placeholder="e.g. 3.5"
+                          className="w-full bg-background border border-border rounded-sm px-3 py-2.5 text-sm font-body focus:outline-none focus:border-emerald-500/50"
+                          disabled={loading}
+                        />
+                      </div>
+                      <div className="grid grid-cols-2 gap-2">
+                        {(["linkedin", "instagram", "twitter", "facebook"] as const).map((p) => (
+                          <label key={p} className="flex items-center gap-2 text-xs font-body text-secondary-foreground/80 cursor-pointer capitalize">
+                            <input
+                              type="checkbox"
+                              checked={platforms[p]}
+                              onChange={(e) => setPlatforms((prev) => ({ ...prev, [p]: e.target.checked }))}
+                              disabled={loading}
+                              className="accent-emerald-600"
+                            />
+                            {p === "twitter" ? "X / Twitter" : p}
+                          </label>
+                        ))}
+                      </div>
+                    </div>
 
                     <button
                       type="submit"

@@ -25,12 +25,20 @@ export interface AuditResult {
   peerCount: number;
 }
 
+export interface SocialSelfReport {
+  followers: number;
+  posts30d: number;
+  engagementRate?: number;
+  platforms: { linkedin: boolean; instagram: boolean; twitter: boolean; facebook: boolean };
+}
+
 export interface RunAuditInput {
   auditedDomain: string;
   displayName?: string;
   market: string;
   peerGroup: string;
   gbpListed: boolean;
+  social?: SocialSelfReport;
 }
 
 export const useMarketVisibility = () => {

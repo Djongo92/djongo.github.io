@@ -17,6 +17,7 @@ import type { SupabaseClient } from "https://esm.sh/@supabase/supabase-js@2.45.0
 import { safeFetch, normalizeUrl } from "./safeFetch.ts";
 import { getCached, setCached } from "./cache.ts";
 import { DMV_MARKETS } from "./marketVisibilityConfig.ts";
+import { peerMaxFor } from "./peerMax.ts";
 
 const SEVEN_DAYS_MS = 7 * 24 * 60 * 60 * 1000;
 
@@ -86,31 +87,6 @@ async function extractContentItems(pageText: string, pageTitle: string, apiKey: 
   return Array.isArray(parsed.items) ? parsed.items : [];
 }
 
-async function peerMaxFor(
-  serviceClient: SupabaseClient,
-  market: string,
-  peerGroup: string,
-  metric: "postsCount" | "newsCount",
-  ownValue: number,
-): Promise<number> {
-  const { data, error } = await serviceClient
-    .from("market_visibility_audits")
-    .select("raw_metrics")
-    .eq("market", market)
-    .eq("peer_group", peerGroup)
-    .eq("is_public", true);
-
-  if (error || !data) return ownValue;
-
-  let max = ownValue;
-  for (const row of data as { raw_metrics: Record<string, unknown> }[]) {
-    const tl = row.raw_metrics?.thoughtLeadership as { postsCount?: number; newsCount?: number } | undefined;
-    const v = tl?.[metric];
-    if (typeof v === "number" && v > max) max = v;
-  }
-  return max;
-}
-
 export async function computeThoughtLeadershipScore(
   serviceClient: SupabaseClient,
   market: string,
@@ -172,8 +148,8 @@ export async function computeThoughtLeadershipScore(
   const newsCount = news.length;
   const bylinePct = postsCount > 0 ? bylined.length / postsCount : 0;
 
-  const postsPeerMax = await peerMaxFor(serviceClient, market, peerGroup, "postsCount", postsCount);
-  const newsPeerMax = await peerMaxFor(serviceClient, market, peerGroup, "newsCount", newsCount);
+  const postsPeerMax = await peerMaxFor(serviceClient, market, peerGroup, "thoughtLeadership", "postsCount", postsCount);
+  const newsPeerMax = await peerMaxFor(serviceClient, market, peerGroup, "thoughtLeadership", "newsCount", newsCount);
 
   const postsScore = postsPeerMax > 0 ? 25 * (postsCount / postsPeerMax) : 0;
   const bylineScore = 5 * bylinePct;

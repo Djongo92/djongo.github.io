@@ -4,15 +4,17 @@
 // the total, persists via service_role, and computes the live peer-group
 // percentile against other published audits.
 //
-// Social (Batch D) and SEO & Authority (Batch D, hard-stopped on
-// AHREFS_API_KEY/MOZ_API_KEY) aren't wired in yet — both score as
-// "missing"/"not_configured" so the rest of the audit still completes,
-// per CLAUDE.md's "never fabricate a total when an input is missing" rule.
+// SEO & Authority stays "not_configured" (hard-stopped on
+// AHREFS_API_KEY/MOZ_API_KEY, per CLAUDE.md) so the rest of the audit
+// still completes — nothing fabricates a total for a category that isn't
+// wired up.
 import { requireAccess, ACCESS_CORS_HEADERS } from "../_shared/access.ts";
 import { normalizeUrl } from "../_shared/safeFetch.ts";
 import { computePerformanceScore } from "../_shared/performanceScore.ts";
 import { computeReputationScore } from "../_shared/reputationScore.ts";
 import { computeThoughtLeadershipScore } from "../_shared/thoughtLeadershipScore.ts";
+import { computeSocialScore, type SocialInput } from "../_shared/socialScore.ts";
+import { computeSeoAuthorityScore } from "../_shared/seoScore.ts";
 import { DMV_MARKETS } from "../_shared/marketVisibilityConfig.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
 
@@ -47,7 +49,7 @@ Deno.serve(async (req) => {
   if (unauthorized) return unauthorized;
 
   try {
-    const { clientId, auditedDomain, displayName, market, peerGroup, gbpListed } = await req.json();
+    const { clientId, auditedDomain, displayName, market, peerGroup, gbpListed, social: socialRaw } = await req.json();
 
     if (!clientId || typeof clientId !== "string") {
       return new Response(JSON.stringify({ error: "clientId is required" }), {
@@ -78,15 +80,27 @@ Deno.serve(async (req) => {
 
     const normalizedUrl = normalizeUrl(auditedDomain);
 
-    const [performance, reputation, thoughtLeadership] = await Promise.all([
+    const socialInput: SocialInput | null = socialRaw && typeof socialRaw === "object"
+      ? {
+        followers: Number(socialRaw.followers) || 0,
+        posts30d: Number(socialRaw.posts30d) || 0,
+        engagementRate: typeof socialRaw.engagementRate === "number" ? socialRaw.engagementRate : undefined,
+        platforms: {
+          linkedin: socialRaw.platforms?.linkedin === true,
+          instagram: socialRaw.platforms?.instagram === true,
+          twitter: socialRaw.platforms?.twitter === true,
+          facebook: socialRaw.platforms?.facebook === true,
+        },
+      }
+      : null;
+
+    const [performance, reputation, thoughtLeadership, social] = await Promise.all([
       computePerformanceScore(normalizedUrl),
       computeReputationScore(serviceClient, market, auditedDomain, gbpListed === true),
       computeThoughtLeadershipScore(serviceClient, market, peerGroup, normalizedUrl),
+      computeSocialScore(serviceClient, market, peerGroup, socialInput),
     ]);
-
-    // Batch D placeholders — not wired in yet.
-    const social = { score: 0, raw: {}, provenance: "missing" as const };
-    const seoAuthority = { score: 0, raw: { status: "not_configured" }, provenance: "missing" as const };
+    const seoAuthority = computeSeoAuthorityScore();
 
     const raw_metrics = {
       performance: performance.raw,
