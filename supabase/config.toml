@@ -71,3 +71,6 @@ verify_jwt = false
 
 [functions.visibility-audit-reputation]
 verify_jwt = false
+
+[functions.visibility-audit-thought-leadership]
+verify_jwt = false

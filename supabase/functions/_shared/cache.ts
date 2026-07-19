@@ -52,7 +52,7 @@ export async function getCached(fnName: string, url: string, variant = ""): Prom
   }
 }
 
-export async function setCached(key: string, fnName: string, url: string, response: unknown) {
+export async function setCached(key: string, fnName: string, url: string, response: unknown, ttlMs = 24 * 60 * 60 * 1000) {
   try {
     await client().from("url_cache").upsert({
       cache_key: key,
@@ -60,7 +60,7 @@ export async function setCached(key: string, fnName: string, url: string, respon
       url: normalizeUrl(url),
       response,
       created_at: new Date().toISOString(),
-      expires_at: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString(),
+      expires_at: new Date(Date.now() + ttlMs).toISOString(),
     }, { onConflict: "cache_key" });
   } catch (e) {
     console.error("[cache] write exception", e);
