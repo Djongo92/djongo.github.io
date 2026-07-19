@@ -89,3 +89,6 @@ verify_jwt = false
 
 [functions.visibility-audit-seo]
 verify_jwt = false
+
+[functions.visibility-teaser]
+verify_jwt = false

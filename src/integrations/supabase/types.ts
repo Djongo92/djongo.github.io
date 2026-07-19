@@ -14,6 +14,27 @@ export type Database = {
   }
   public: {
     Tables: {
+      teaser_rate_limit: {
+        Row: {
+          ip_hash: string
+          request_count: number
+          updated_at: string
+          window_start: string
+        }
+        Insert: {
+          ip_hash: string
+          request_count?: number
+          updated_at?: string
+          window_start?: string
+        }
+        Update: {
+          ip_hash?: string
+          request_count?: number
+          updated_at?: string
+          window_start?: string
+        }
+        Relationships: []
+      }
       directory_lookup_requests: {
         Row: {
           firm_domain_or_name: string
