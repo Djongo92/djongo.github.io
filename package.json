@@ -1,5 +1,6 @@
 {
-  "name": "vite_react_shadcn_ts",
+  "name": "legalos",
+  "description": "LegalOS — interactive law firm marketing guidebook, AI Workshop, Battle Plan export, and a peer-group-normalized Market Visibility Score.",
   "private": true,
   "version": "0.0.0",
   "type": "module",

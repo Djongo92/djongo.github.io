@@ -24,7 +24,7 @@ const PasswordGate = ({ onAuthenticated }: PasswordGateProps) => {
   const [unlocking, setUnlocking] = useState(false);
   const [busy, setBusy] = useState(false);
 
-  const title = "Law Firm Marketing";
+  const title = "LegalOS";
   const titleLetters = title.split("");
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -111,7 +111,7 @@ const PasswordGate = ({ onAuthenticated }: PasswordGateProps) => {
           transition={{ delay: 1.8, duration: 0.6 }}
           className="font-display text-xl text-primary italic mb-2"
         >
-          Insights & Guidebook
+          Law Firm Marketing Insights & Guidebook
         </motion.p>
         <motion.p
           initial={{ opacity: 0 }}

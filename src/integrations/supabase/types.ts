@@ -14,6 +14,126 @@ export type Database = {
   }
   public: {
     Tables: {
+      directory_lookup_requests: {
+        Row: {
+          firm_domain_or_name: string
+          id: string
+          market: string
+          requested_at: string
+        }
+        Insert: {
+          firm_domain_or_name: string
+          id?: string
+          market: string
+          requested_at?: string
+        }
+        Update: {
+          firm_domain_or_name?: string
+          id?: string
+          market?: string
+          requested_at?: string
+        }
+        Relationships: []
+      }
+      market_directory_data: {
+        Row: {
+          chambers: Json
+          firm_domain: string | null
+          firm_name: string
+          firm_type: string | null
+          id: string
+          iflr1000: Json
+          last_verified_at: string
+          legal500: Json
+          market: string
+        }
+        Insert: {
+          chambers?: Json
+          firm_domain?: string | null
+          firm_name: string
+          firm_type?: string | null
+          id?: string
+          iflr1000?: Json
+          last_verified_at?: string
+          legal500?: Json
+          market: string
+        }
+        Update: {
+          chambers?: Json
+          firm_domain?: string | null
+          firm_name?: string
+          firm_type?: string | null
+          id?: string
+          iflr1000?: Json
+          last_verified_at?: string
+          legal500?: Json
+          market?: string
+        }
+        Relationships: []
+      }
+      market_visibility_audits: {
+        Row: {
+          audited_domain: string
+          client_id: string
+          created_at: string
+          display_name: string | null
+          id: string
+          market: string
+          peer_group: string
+          performance_score: number
+          provenance: Json
+          published_at: string | null
+          raw_metrics: Json
+          reputation_score: number
+          is_public: boolean
+          seo_authority_score: number
+          social_score: number
+          thought_leadership_score: number
+          total_score: number
+          updated_at: string
+        }
+        Insert: {
+          audited_domain: string
+          client_id: string
+          created_at?: string
+          display_name?: string | null
+          id?: string
+          market: string
+          peer_group: string
+          performance_score?: number
+          provenance?: Json
+          published_at?: string | null
+          raw_metrics?: Json
+          reputation_score?: number
+          is_public?: boolean
+          seo_authority_score?: number
+          social_score?: number
+          thought_leadership_score?: number
+          total_score?: never
+          updated_at?: string
+        }
+        Update: {
+          audited_domain?: string
+          client_id?: string
+          created_at?: string
+          display_name?: string | null
+          id?: string
+          market?: string
+          peer_group?: string
+          performance_score?: number
+          provenance?: Json
+          published_at?: string | null
+          raw_metrics?: Json
+          reputation_score?: number
+          is_public?: boolean
+          seo_authority_score?: number
+          social_score?: number
+          thought_leadership_score?: number
+          total_score?: never
+          updated_at?: string
+        }
+        Relationships: []
+      }
       firm_benchmarks: {
         Row: {
           analyses_run: number
