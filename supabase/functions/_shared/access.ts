@@ -2,7 +2,7 @@
 // AI-spending edge function. Replaces the prior client-side password gates.
 //
 // Token format:  base64url(`${scope}.${exp}`) + "." + base64url(HMAC-SHA256)
-// scope is "guidebook" or "workshop"; tokens are valid for 12 hours.
+// scope is "guidebook", "workshop", or "benchmark"; tokens are valid for 12 hours.
 
 const enc = new TextEncoder();
 const TTL_MS = 12 * 60 * 60 * 1000; // 12h
@@ -30,7 +30,7 @@ const importKey = async (secret: string) =>
     ["sign", "verify"],
   );
 
-export type Scope = "guidebook" | "workshop";
+export type Scope = "guidebook" | "workshop" | "benchmark";
 
 export async function signToken(scope: Scope): Promise<string> {
   const secret = Deno.env.get("ACCESS_TOKEN_SECRET");
@@ -56,7 +56,7 @@ export async function verifyToken(token: string | null | undefined): Promise<{ s
     return null;
   }
   const [scope, expStr] = payloadStr.split(".");
-  if (scope !== "guidebook" && scope !== "workshop") return null;
+  if (scope !== "guidebook" && scope !== "workshop" && scope !== "benchmark") return null;
   const exp = parseInt(expStr, 10);
   if (!Number.isFinite(exp) || exp < Date.now()) return null;
 

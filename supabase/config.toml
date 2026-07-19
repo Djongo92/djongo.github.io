@@ -65,3 +65,9 @@ verify_jwt = false
 
 [functions.verify-access]
 verify_jwt = false
+
+[functions.visibility-audit-performance]
+verify_jwt = false
+
+[functions.visibility-audit-reputation]
+verify_jwt = false

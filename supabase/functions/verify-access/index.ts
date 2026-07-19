@@ -1,6 +1,7 @@
-// Verifies a user-supplied password against the configured GUIDEBOOK_PASSWORD
-// or WORKSHOP_PASSWORD secret and returns a short-lived HMAC access token.
-// This is the ONLY edge function that should accept a raw password.
+// Verifies a user-supplied password against the configured GUIDEBOOK_PASSWORD,
+// WORKSHOP_PASSWORD, or BENCHMARK_PASSWORD secret and returns a short-lived
+// HMAC access token. This is the ONLY edge function that should accept a raw
+// password.
 
 import { signToken, ACCESS_CORS_HEADERS, type Scope } from "../_shared/access.ts";
 
@@ -22,7 +23,7 @@ Deno.serve(async (req) => {
     const password = typeof body?.password === "string" ? body.password : "";
     const scope = body?.scope as Scope;
 
-    if (scope !== "guidebook" && scope !== "workshop") {
+    if (scope !== "guidebook" && scope !== "workshop" && scope !== "benchmark") {
       return new Response(JSON.stringify({ error: "Invalid scope" }), {
         status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
@@ -33,7 +34,8 @@ Deno.serve(async (req) => {
       });
     }
 
-    const expected = Deno.env.get(scope === "guidebook" ? "GUIDEBOOK_PASSWORD" : "WORKSHOP_PASSWORD");
+    const SCOPE_SECRET_NAME = { guidebook: "GUIDEBOOK_PASSWORD", workshop: "WORKSHOP_PASSWORD", benchmark: "BENCHMARK_PASSWORD" } as const;
+    const expected = Deno.env.get(SCOPE_SECRET_NAME[scope]);
     if (!expected) {
       return new Response(JSON.stringify({ error: "Access not configured" }), {
         status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" },

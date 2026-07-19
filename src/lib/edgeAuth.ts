@@ -7,11 +7,13 @@ const SUPABASE_KEY = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY as string;
 const TOKEN_KEYS = {
   guidebook: "guidebook_access_token",
   workshop: "workshop_access_token",
+  benchmark: "benchmark_access_token",
 } as const;
 
 const EXPIRY_KEYS = {
   guidebook: "guidebook_access_expires",
   workshop: "workshop_access_expires",
+  benchmark: "benchmark_access_expires",
 } as const;
 
 export type Scope = keyof typeof TOKEN_KEYS;
