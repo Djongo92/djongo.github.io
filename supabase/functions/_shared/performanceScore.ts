@@ -6,17 +6,12 @@
 // gracefully rather than failing the audit: no key → provenance "missing",
 // score 0, and the rest of the audit still completes.
 import { getCached, setCached } from "./cache.ts";
+import { calculatePerformanceScore, type LighthouseCategories } from "./performanceFormula.ts";
 
 export interface PerformanceResult {
   score: number;
   raw: Record<string, unknown>;
   provenance: "api" | "missing";
-}
-
-interface LighthouseCategories {
-  performance: number;
-  accessibility: number;
-  seo: number;
 }
 
 async function runPsi(url: string, strategy: "desktop" | "mobile", apiKey: string): Promise<LighthouseCategories> {
@@ -48,11 +43,7 @@ export async function computePerformanceScore(normalizedUrl: string): Promise<Pe
       runPsi(normalizedUrl, "mobile", apiKey),
     ]);
 
-    const perfAvg = (desktop.performance + mobile.performance) / 2;
-    const accessAvg = (desktop.accessibility + mobile.accessibility) / 2;
-    const seoAvg = (desktop.seo + mobile.seo) / 2;
-
-    const score = Math.round((10 * (perfAvg / 100) + 5 * (accessAvg / 100) + 5 * (seoAvg / 100)) * 100) / 100;
+    const { score, perfAvg, accessAvg, seoAvg } = calculatePerformanceScore(desktop, mobile);
 
     const result: PerformanceResult = {
       score,

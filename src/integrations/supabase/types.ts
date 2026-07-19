@@ -14,6 +14,27 @@ export type Database = {
   }
   public: {
     Tables: {
+      benchmark_rate_limit: {
+        Row: {
+          client_id: string
+          request_count: number
+          updated_at: string
+          window_start: string
+        }
+        Insert: {
+          client_id: string
+          request_count?: number
+          updated_at?: string
+          window_start?: string
+        }
+        Update: {
+          client_id?: string
+          request_count?: number
+          updated_at?: string
+          window_start?: string
+        }
+        Relationships: []
+      }
       teaser_rate_limit: {
         Row: {
           ip_hash: string

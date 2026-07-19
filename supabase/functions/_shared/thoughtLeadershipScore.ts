@@ -18,15 +18,11 @@ import { safeFetch, normalizeUrl } from "./safeFetch.ts";
 import { getCached, setCached } from "./cache.ts";
 import { DMV_MARKETS } from "./marketVisibilityConfig.ts";
 import { peerMaxFor } from "./peerMax.ts";
+import { filterToWindow, aggregateContentItems, calculateThoughtLeadershipScore, type ContentItem } from "./thoughtLeadershipFormula.ts";
 
 const SEVEN_DAYS_MS = 7 * 24 * 60 * 60 * 1000;
 
-export interface ContentItem {
-  title: string;
-  date: string;
-  type: "blog" | "news" | "other";
-  hasNamedByline: boolean;
-}
+export type { ContentItem };
 
 export interface ThoughtLeadershipResult {
   score: number;
@@ -133,29 +129,13 @@ export async function computeThoughtLeadershipScore(
 
   const marketConfig = DMV_MARKETS[market];
   const windowDays = marketConfig?.contentWindowDays ?? 60;
-  const cutoff = Date.now() - windowDays * 24 * 60 * 60 * 1000;
-
-  const inWindow = items.filter((it) => {
-    const t = Date.parse(it.date);
-    return Number.isFinite(t) && t >= cutoff;
-  });
-
-  const posts = inWindow.filter((it) => it.type === "blog");
-  const news = inWindow.filter((it) => it.type === "news");
-  const bylined = posts.filter((it) => it.hasNamedByline);
-
-  const postsCount = posts.length;
-  const newsCount = news.length;
-  const bylinePct = postsCount > 0 ? bylined.length / postsCount : 0;
+  const inWindow = filterToWindow(items, windowDays);
+  const { postsCount, newsCount, bylinePct } = aggregateContentItems(inWindow);
 
   const postsPeerMax = await peerMaxFor(serviceClient, market, peerGroup, "thoughtLeadership", "postsCount", postsCount);
   const newsPeerMax = await peerMaxFor(serviceClient, market, peerGroup, "thoughtLeadership", "newsCount", newsCount);
 
-  const postsScore = postsPeerMax > 0 ? 25 * (postsCount / postsPeerMax) : 0;
-  const bylineScore = 5 * bylinePct;
-  const newsScore = newsPeerMax > 0 ? 15 * (newsCount / newsPeerMax) : 0;
-
-  const score = Math.round((postsScore + bylineScore + newsScore) * 100) / 100;
+  const score = calculateThoughtLeadershipScore(postsCount, newsCount, bylinePct, postsPeerMax, newsPeerMax);
 
   return {
     score,

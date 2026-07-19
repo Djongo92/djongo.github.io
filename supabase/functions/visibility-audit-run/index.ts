@@ -15,6 +15,7 @@ import { computeReputationScore } from "../_shared/reputationScore.ts";
 import { computeThoughtLeadershipScore } from "../_shared/thoughtLeadershipScore.ts";
 import { computeSocialScore, type SocialInput } from "../_shared/socialScore.ts";
 import { computeSeoAuthorityScore } from "../_shared/seoScore.ts";
+import { checkBenchmarkRateLimit } from "../_shared/rateLimit.ts";
 import { DMV_MARKETS } from "../_shared/marketVisibilityConfig.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
 
@@ -77,6 +78,15 @@ Deno.serve(async (req) => {
       Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!,
       { auth: { persistSession: false } },
     );
+
+    // Caps how often a single client can trigger the PSI/Gemini-backed
+    // audit — the benchmark password alone doesn't rate-limit anything.
+    const { allowed } = await checkBenchmarkRateLimit(serviceClient, clientId);
+    if (!allowed) {
+      return new Response(JSON.stringify({ error: "You've reached the daily audit limit. Try again tomorrow." }), {
+        status: 429, headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
 
     const normalizedUrl = normalizeUrl(auditedDomain);
 

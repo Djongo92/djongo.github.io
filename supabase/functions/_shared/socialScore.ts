@@ -8,8 +8,16 @@
 // being estimated. Platform presence is 4 independent booleans, each worth
 // 1 point — summing directly to the category's 4-point cap, no further
 // normalization needed.
+//
+// Because followers/posts30d/engagementRate feed a LIVE peer-group max
+// (peerMaxFor reads other published audits, not a fixed denominator), one
+// bad-faith or fat-fingered submission would otherwise permanently crush
+// every other firm's score in that peer group — the max only ever grows.
+// Clamp self-reported values to generous but sane ceilings before they can
+// ever reach peerMaxFor or get persisted.
 import type { SupabaseClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
 import { peerMaxFor } from "./peerMax.ts";
+import { calculateSocialScore, clamp, MAX_FOLLOWERS, MAX_POSTS_30D, MAX_ENGAGEMENT_RATE } from "./socialFormula.ts";
 
 export interface SocialInput {
   followers: number;
@@ -32,9 +40,11 @@ export async function computeSocialScore(
 ): Promise<SocialResult> {
   if (!input) return { score: 0, raw: {}, provenance: "missing" };
 
-  const followers = Math.max(0, Math.floor(input.followers) || 0);
-  const posts30d = Math.max(0, Math.floor(input.posts30d) || 0);
-  const engagementRate = typeof input.engagementRate === "number" && input.engagementRate >= 0 ? input.engagementRate : null;
+  const followers = clamp(Math.floor(input.followers) || 0, MAX_FOLLOWERS);
+  const posts30d = clamp(Math.floor(input.posts30d) || 0, MAX_POSTS_30D);
+  const engagementRate = typeof input.engagementRate === "number" && input.engagementRate >= 0
+    ? clamp(input.engagementRate, MAX_ENGAGEMENT_RATE)
+    : null;
 
   const [followersPeerMax, postsPeerMax, erPeerMax] = await Promise.all([
     peerMaxFor(serviceClient, market, peerGroup, "social", "followers", followers),
@@ -42,14 +52,8 @@ export async function computeSocialScore(
     engagementRate !== null ? peerMaxFor(serviceClient, market, peerGroup, "social", "engagementRate", engagementRate) : Promise.resolve(0),
   ]);
 
-  const followersScore = followersPeerMax > 0 ? 5 * (followers / followersPeerMax) : 0;
-  const postsScore = postsPeerMax > 0 ? 5 * (posts30d / postsPeerMax) : 0;
-  const erScore = engagementRate !== null && erPeerMax > 0 ? 6 * (engagementRate / erPeerMax) : 0;
-
+  const score = calculateSocialScore(followers, posts30d, engagementRate, input.platforms, followersPeerMax, postsPeerMax, erPeerMax);
   const platformCount = Object.values(input.platforms ?? {}).filter(Boolean).length;
-  const platformScore = Math.min(4, platformCount);
-
-  const score = Math.round((followersScore + postsScore + erScore + platformScore) * 100) / 100;
 
   return {
     score,

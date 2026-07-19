@@ -16,7 +16,7 @@
 import type { SupabaseClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
 import { DMV_MARKETS, FIRM_TYPE_TO_PEER_GROUP, type PeerGroup } from "./marketVisibilityConfig.ts";
 
-interface DirectoryRow {
+export interface DirectoryRow {
   firm_name: string;
   firm_domain: string | null;
   firm_type: string | null;
@@ -88,7 +88,7 @@ export function fuzzyMatchFirm(query: string, rows: DirectoryRow[]): DirectoryRo
   return best?.row ?? null;
 }
 
-function directoryScore(
+export function directoryScore(
   rankedTables: Record<string, number> | undefined,
   n: number,
   deepest: number,
@@ -108,7 +108,7 @@ function directoryScore(
   return { points: countScore + qualityScore, count, avgRank };
 }
 
-function invertedAvgFor(rankedTables: Record<string, number> | undefined, deepest: number): number {
+export function invertedAvgFor(rankedTables: Record<string, number> | undefined, deepest: number): number {
   const entries = Object.entries(rankedTables ?? {});
   if (entries.length === 0) return 0;
   const avgRank = entries.reduce((sum, [, rank]) => sum + rank, 0) / entries.length;
