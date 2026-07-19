@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Swords, X, Download, CheckCircle2, Circle, Loader2, Flame, Map, Target, Gauge, Trophy, UserSquare } from "lucide-react";
+import { Swords, X, Download, CheckCircle2, Circle, Loader2, Flame, Map, Target, Gauge, Trophy, UserSquare, ShieldCheck } from "lucide-react";
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
 import { useBattlePlanCache } from "@/hooks/useBattlePlanCache";
@@ -22,14 +22,15 @@ const INK: [number, number, number] = [34, 34, 38];
 const MUTED: [number, number, number] = [110, 110, 120];
 const RED: [number, number, number] = [192, 60, 60];
 const RULE: [number, number, number] = [220, 215, 205];
+const GREEN: [number, number, number] = [16, 150, 105]; // emerald — matches the Market Visibility Score's "Verified" accent
 
 const BattlePlan = ({ readChaptersCount, totalChapters, implementationScore }: Props) => {
   const [open, setOpen] = useState(false);
   const [generating, setGenerating] = useState(false);
-  const { roast, competitor, roadmap, maturity, headline, bio } = useBattlePlanCache();
+  const { roast, competitor, roadmap, maturity, headline, bio, visibilityScore } = useBattlePlanCache();
   const { context } = useFirmContext();
 
-  const hasAny = !!(roast || competitor || roadmap || maturity || headline || bio);
+  const hasAny = !!(roast || competitor || roadmap || maturity || headline || bio || visibilityScore);
   const coreSteps = [
     { key: "roast", label: "Run Roast My Homepage", done: !!roast, icon: "roast" as const },
     { key: "competitor", label: "Run Competitor Analysis", done: !!competitor, icon: "competitor" as const },
@@ -39,6 +40,7 @@ const BattlePlan = ({ readChaptersCount, totalChapters, implementationScore }: P
     { key: "maturity", label: "Firm Maturity Score", done: !!maturity, icon: "maturity" as const },
     { key: "headline", label: "Headline Lab champion", done: !!headline, icon: "headline" as const },
     { key: "bio", label: "Bio Rewriter result", done: !!bio, icon: "bio" as const },
+    { key: "visibilityScore", label: "Market Visibility Score", done: !!visibilityScore, icon: "visibilityScore" as const },
   ];
   const completedCore = coreSteps.filter((s) => s.done).length;
   const completedOptional = optionalSteps.filter((s) => s.done).length;
@@ -50,7 +52,7 @@ const BattlePlan = ({ readChaptersCount, totalChapters, implementationScore }: P
     }
     setGenerating(true);
     try {
-      buildPdf({ roast, competitor, roadmap, maturity, headline, bio, context, readChaptersCount, totalChapters, implementationScore });
+      buildPdf({ roast, competitor, roadmap, maturity, headline, bio, visibilityScore, context, readChaptersCount, totalChapters, implementationScore });
       toast.success("Battle Plan downloaded");
     } catch (err) {
       console.error(err);
@@ -154,6 +156,7 @@ const BattlePlan = ({ readChaptersCount, totalChapters, implementationScore }: P
                       {s.icon === "maturity" && <Gauge className="w-3 h-3 text-primary/60 ml-auto" />}
                       {s.icon === "headline" && <Trophy className="w-3 h-3 text-gold-light/70 ml-auto" />}
                       {s.icon === "bio" && <UserSquare className="w-3 h-3 text-primary/60 ml-auto" />}
+                      {s.icon === "visibilityScore" && <ShieldCheck className="w-3 h-3 text-emerald-500/70 ml-auto" />}
                     </div>
                   ))}
                 </div>
@@ -173,7 +176,7 @@ const BattlePlan = ({ readChaptersCount, totalChapters, implementationScore }: P
                   {generating ? (
                     <><Loader2 className="w-4 h-4 animate-spin" /> Building PDF…</>
                   ) : (
-                    <><Download className="w-4 h-4" /> {hasAny ? `Generate Battle Plan (${completedCore + completedOptional}/6 inputs)` : "Run an analysis first"}</>
+                    <><Download className="w-4 h-4" /> {hasAny ? `Generate Battle Plan (${completedCore + completedOptional}/${coreSteps.length + optionalSteps.length} inputs)` : "Run an analysis first"}</>
                   )}
                 </button>
 
@@ -202,13 +205,14 @@ interface BuildArgs {
   maturity: ReturnType<typeof useBattlePlanCache>["maturity"];
   headline: ReturnType<typeof useBattlePlanCache>["headline"];
   bio: ReturnType<typeof useBattlePlanCache>["bio"];
+  visibilityScore: ReturnType<typeof useBattlePlanCache>["visibilityScore"];
   context: { practiceArea: string; firmSize: string; primaryGoal: string } | null;
   readChaptersCount: number;
   totalChapters: number;
   implementationScore: number;
 }
 
-function buildPdf({ roast, competitor, roadmap, maturity, headline, bio, context, readChaptersCount, totalChapters, implementationScore }: BuildArgs) {
+function buildPdf({ roast, competitor, roadmap, maturity, headline, bio, visibilityScore, context, readChaptersCount, totalChapters, implementationScore }: BuildArgs) {
   const doc = new jsPDF({ unit: "pt", format: "letter" });
   const pageW = doc.internal.pageSize.getWidth();
   const pageH = doc.internal.pageSize.getHeight();
@@ -253,8 +257,9 @@ function buildPdf({ roast, competitor, roadmap, maturity, headline, bio, context
   const statY = pageH / 2 + 20;
   drawStat(doc, margin, statY, "READING PROGRESS", `${readChaptersCount}/${totalChapters}`, `chapters absorbed`);
   drawStat(doc, margin + (contentW / 3), statY, "IMPLEMENTATION", `${implementationScore}%`, `actions executed`);
-  const inputsCount = [roast, competitor, roadmap, maturity, headline, bio].filter(Boolean).length;
-  drawStat(doc, margin + (contentW / 3) * 2, statY, "ANALYSES RUN", `${inputsCount}/6`, `intelligence gathered`);
+  const allInputs = [roast, competitor, roadmap, maturity, headline, bio, visibilityScore];
+  const inputsCount = allInputs.filter(Boolean).length;
+  drawStat(doc, margin + (contentW / 3) * 2, statY, "ANALYSES RUN", `${inputsCount}/${allInputs.length}`, `intelligence gathered`);
 
   // Footer on cover
   const today = new Date().toLocaleDateString("en-US", { year: "numeric", month: "long", day: "numeric" });
@@ -519,6 +524,50 @@ function buildPdf({ roast, competitor, roadmap, maturity, headline, bio, context
     }
     cursor = drawParagraph(doc, stripMd(bio.rewrite), cursor, contentW, margin);
     cursor += 8;
+  }
+
+  // ── Market Visibility Score ──
+  if (visibilityScore) {
+    cursor = ensureSpace(doc, cursor, 160);
+    cursor = drawSectionHeader(doc, "Market Visibility Score", cursor);
+
+    doc.setFont("times", "bold");
+    doc.setFontSize(48);
+    doc.setTextColor(...GREEN);
+    doc.text(`${Math.round(visibilityScore.totalScore)}`, margin, cursor + 36);
+    doc.setFont("helvetica", "normal");
+    doc.setFontSize(10);
+    doc.setTextColor(...MUTED);
+    doc.text("/ 200", margin + 68, cursor + 36);
+    doc.setFont("helvetica", "italic");
+    doc.setFontSize(9);
+    doc.setTextColor(...GREEN);
+    const peerLabel = visibilityScore.percentile !== null
+      ? `Better than ${visibilityScore.percentile}% of ${visibilityScore.peerCount} peer firms in ${visibilityScore.market}`
+      : `Externally verified · ${visibilityScore.market}, ${visibilityScore.peerGroup.replace(/_/g, " ")}`;
+    doc.text(peerLabel, margin + 110, cursor + 24, { maxWidth: contentW - 110 });
+    cursor += 56;
+
+    const categoryLabels: Record<string, string> = {
+      performance: "Performance", social: "Social Media", seoAuthority: "SEO & Authority",
+      thoughtLeadership: "Thought Leadership", reputation: "Reputation",
+    };
+    autoTable(doc, {
+      startY: cursor,
+      margin: { left: margin, right: margin },
+      head: [["Category", "Score", "Source"]],
+      body: Object.entries(visibilityScore.categories).map(([key, cat]) => [
+        categoryLabels[key] ?? key,
+        `${Math.round(cat.score * 10) / 10}`,
+        cat.provenance === "missing" ? "Pending setup" : cat.provenance.replace(/_/g, " "),
+      ]),
+      headStyles: { fillColor: NAVY, textColor: GOLD_LIGHT, fontStyle: "bold", fontSize: 9 },
+      bodyStyles: { fontSize: 9, textColor: INK, valign: "top", cellPadding: 6 },
+      columnStyles: { 0: { cellWidth: contentW * 0.5 }, 1: { cellWidth: contentW * 0.2, halign: "right", fontStyle: "bold" }, 2: { cellWidth: contentW * 0.3 } },
+      theme: "grid",
+      styles: { lineColor: RULE, lineWidth: 0.5 },
+    });
+    cursor = (doc as any).lastAutoTable.finalY + 16;
   }
 
   // ── Final page: signature line ──

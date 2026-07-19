@@ -7,6 +7,7 @@ import RoadmapGenerator from "./RoadmapGenerator";
 import ScoreWebsite from "./ScoreWebsite";
 import RoastHomepage from "./RoastHomepage";
 import CompetitorAnalysis from "./CompetitorAnalysis";
+import MarketVisibilityScore from "./MarketVisibilityScore";
 import BattlePlan from "./BattlePlan";
 import AskTheBook from "./AskTheBook";
 import Achievements from "./Achievements";
@@ -144,6 +145,7 @@ const ProgressDashboard = ({
         <ScoreWebsite />
         <RoastHomepage />
         <CompetitorAnalysis />
+        <MarketVisibilityScore />
         <AskTheBook onSelectChapter={onSelectChapter} />
       </div>
 

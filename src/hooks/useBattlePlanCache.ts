@@ -59,12 +59,24 @@ export interface BioCache {
   capturedAt: number;
 }
 
+export interface VisibilityScoreCache {
+  auditedDomain: string;
+  market: string;
+  peerGroup: string;
+  totalScore: number;       // / 200
+  categories: Record<string, { score: number; provenance: string }>;
+  percentile: number | null;
+  peerCount: number;
+  capturedAt: number;
+}
+
 const ROAST_KEY = "guidebook_battleplan_roast";
 const COMP_KEY = "guidebook_battleplan_competitor";
 const ROADMAP_KEY = "guidebook_battleplan_roadmap";
 const MATURITY_KEY = "guidebook_battleplan_maturity";
 const HEADLINE_KEY = "guidebook_battleplan_headline";
 const BIO_KEY = "guidebook_battleplan_bio";
+const VISIBILITY_KEY = "guidebook_battleplan_visibility";
 
 const read = <T,>(key: string): T | null => {
   try {
@@ -105,6 +117,11 @@ export const saveBio = (data: Omit<BioCache, "capturedAt">) => {
   window.dispatchEvent(new Event("battleplan:update"));
 };
 
+export const saveVisibilityScore = (data: Omit<VisibilityScoreCache, "capturedAt">) => {
+  localStorage.setItem(VISIBILITY_KEY, JSON.stringify({ ...data, capturedAt: Date.now() }));
+  window.dispatchEvent(new Event("battleplan:update"));
+};
+
 export const useBattlePlanCache = () => {
   const [roast, setRoast] = useState<RoastCache | null>(() => read<RoastCache>(ROAST_KEY));
   const [competitor, setCompetitor] = useState<CompetitorCache | null>(() => read<CompetitorCache>(COMP_KEY));
@@ -112,6 +129,7 @@ export const useBattlePlanCache = () => {
   const [maturity, setMaturity] = useState<MaturityCache | null>(() => read<MaturityCache>(MATURITY_KEY));
   const [headline, setHeadline] = useState<HeadlineWinnerCache | null>(() => read<HeadlineWinnerCache>(HEADLINE_KEY));
   const [bio, setBio] = useState<BioCache | null>(() => read<BioCache>(BIO_KEY));
+  const [visibilityScore, setVisibilityScore] = useState<VisibilityScoreCache | null>(() => read<VisibilityScoreCache>(VISIBILITY_KEY));
 
   const refresh = useCallback(() => {
     setRoast(read<RoastCache>(ROAST_KEY));
@@ -120,6 +138,7 @@ export const useBattlePlanCache = () => {
     setMaturity(read<MaturityCache>(MATURITY_KEY));
     setHeadline(read<HeadlineWinnerCache>(HEADLINE_KEY));
     setBio(read<BioCache>(BIO_KEY));
+    setVisibilityScore(read<VisibilityScoreCache>(VISIBILITY_KEY));
   }, []);
 
   useEffect(() => {
@@ -139,8 +158,9 @@ export const useBattlePlanCache = () => {
     localStorage.removeItem(MATURITY_KEY);
     localStorage.removeItem(HEADLINE_KEY);
     localStorage.removeItem(BIO_KEY);
+    localStorage.removeItem(VISIBILITY_KEY);
     refresh();
   }, [refresh]);
 
-  return { roast, competitor, roadmap, maturity, headline, bio, clear, refresh };
+  return { roast, competitor, roadmap, maturity, headline, bio, visibilityScore, clear, refresh };
 };
