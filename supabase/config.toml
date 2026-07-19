@@ -1,0 +1,67 @@
+project_id = "vheeetyavsedtnkxhepd"
+
+[functions.chapter-chat]
+verify_jwt = false
+
+[functions.global-advisor]
+verify_jwt = false
+
+[functions.score-website]
+verify_jwt = false
+
+[functions.generate-roadmap]
+verify_jwt = false
+
+[functions.personalize-actions]
+verify_jwt = false
+
+[functions.generate-quiz]
+verify_jwt = false
+
+[functions.roast-homepage]
+verify_jwt = false
+
+[functions.competitor-analysis]
+verify_jwt = false
+
+[functions.steal-homepage]
+verify_jwt = false
+
+[functions.ask-the-book]
+verify_jwt = false
+
+[functions.firm-maturity-plan]
+verify_jwt = false
+
+[functions.workshop-copywriter]
+verify_jwt = false
+
+[functions.workshop-rewrite]
+verify_jwt = false
+
+[functions.workshop-autopsy]
+verify_jwt = false
+
+[functions.workshop-practice-audit]
+verify_jwt = false
+
+[functions.workshop-headlines]
+verify_jwt = false
+
+[functions.workshop-competitor-teardown]
+verify_jwt = false
+
+[functions.workshop-pitch-deck]
+verify_jwt = false
+
+[functions.workshop-bio-rewrite]
+verify_jwt = false
+
+[functions.workshop-calendar]
+verify_jwt = false
+
+[functions.create-share]
+verify_jwt = false
+
+[functions.verify-access]
+verify_jwt = false
