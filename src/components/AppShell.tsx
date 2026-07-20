@@ -1,5 +1,5 @@
 import { ReactNode } from "react";
-import { LayoutDashboard, Hammer, BookOpen, FlaskConical, Settings, Circle } from "lucide-react";
+import { LayoutDashboard, Hammer, BookOpen, FlaskConical, Settings, Circle, LogOut } from "lucide-react";
 
 export type Section = "dashboard" | "workshop" | "guidebook";
 
@@ -9,6 +9,7 @@ interface AppShellProps {
   children: ReactNode;
   demoMode?: boolean;
   onExitDemo?: () => void;
+  onSignOut?: () => void;
   firmName?: string;
   scoreLabel?: string;
   hasAlerts?: boolean;
@@ -28,7 +29,7 @@ const NAV_ITEMS: { id: Section; label: string; icon: typeof LayoutDashboard }[] 
  * sticky left sidebar; mobile gets a bottom tab bar.
  */
 const AppShell = ({
-  active, onNavigate, children, demoMode, onExitDemo, firmName, scoreLabel, hasAlerts, onOpenSettings,
+  active, onNavigate, children, demoMode, onExitDemo, onSignOut, firmName, scoreLabel, hasAlerts, onOpenSettings,
 }: AppShellProps) => {
   return (
     <div className="min-h-screen bg-background md:flex">
@@ -81,7 +82,7 @@ const AppShell = ({
             </button>
           </div>
         )}
-        {demoMode && (
+        {demoMode ? (
           <div className="px-3 pb-6">
             <div className="flex items-center gap-2 px-3 py-2.5 rounded-sm bg-amber-500/10 border border-amber-500/30">
               <FlaskConical className="w-3.5 h-3.5 text-amber-500 shrink-0" />
@@ -95,7 +96,17 @@ const AppShell = ({
               )}
             </div>
           </div>
-        )}
+        ) : onSignOut ? (
+          <div className="px-3 pb-6">
+            <button
+              onClick={onSignOut}
+              className="w-full flex items-center gap-3 px-3 py-2.5 rounded-sm text-sm font-body text-muted-foreground hover:text-foreground hover:bg-secondary/50 transition-colors"
+            >
+              <LogOut className="w-4 h-4" />
+              Sign out
+            </button>
+          </div>
+        ) : null}
       </aside>
 
       {/* Content area */}
