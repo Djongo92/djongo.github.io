@@ -1,0 +1,327 @@
+@import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500&family=Inter:wght@300;400;500;600;700&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --background: 220 30% 7%;
+    --foreground: 40 20% 90%;
+
+    --card: 220 25% 10%;
+    --card-foreground: 40 20% 90%;
+
+    --popover: 220 25% 10%;
+    --popover-foreground: 40 20% 90%;
+
+    --primary: 38 45% 60%;
+    --primary-foreground: 220 30% 7%;
+
+    --secondary: 220 20% 15%;
+    --secondary-foreground: 40 15% 80%;
+
+    --muted: 220 20% 13%;
+    --muted-foreground: 220 10% 50%;
+
+    --accent: 38 45% 60%;
+    --accent-foreground: 220 30% 7%;
+
+    --destructive: 0 84.2% 60.2%;
+    --destructive-foreground: 210 40% 98%;
+
+    --border: 220 15% 18%;
+    --input: 220 15% 18%;
+    --ring: 38 45% 60%;
+
+    /* Apple-native radii — softer, more iOS/macOS-like */
+    --radius: 0.875rem;
+
+    --gold: 38 45% 60%;
+    --gold-light: 38 50% 72%;
+    --gold-dark: 38 40% 45%;
+    --navy: 220 30% 7%;
+    --navy-light: 220 25% 12%;
+    --cream: 40 20% 90%;
+    --cream-muted: 40 10% 65%;
+
+    --font-display: 'Cormorant Garamond', 'New York', Georgia, serif;
+    --font-body: -apple-system, BlinkMacSystemFont, 'SF Pro Text', 'SF Pro Display', 'Inter', system-ui, sans-serif;
+
+    /* Apple-native materials */
+    --surface-elevated: 220 25% 12%;
+    --shadow-sm: 0 1px 2px hsl(220 30% 3% / 0.4);
+    --shadow-md: 0 8px 24px -8px hsl(220 30% 3% / 0.5), 0 2px 6px hsl(220 30% 3% / 0.3);
+    --shadow-lg: 0 24px 48px -12px hsl(220 30% 3% / 0.6), 0 4px 12px hsl(220 30% 3% / 0.4);
+    --hairline: 220 15% 100% / 0.06;
+  }
+
+  /* Light mode */
+  .light {
+    --background: 40 20% 96%;
+    --foreground: 220 30% 12%;
+
+    --card: 0 0% 100%;
+    --card-foreground: 220 30% 12%;
+
+    --popover: 0 0% 100%;
+    --popover-foreground: 220 30% 12%;
+
+    --primary: 38 50% 42%;
+    --primary-foreground: 0 0% 100%;
+
+    --secondary: 40 15% 90%;
+    --secondary-foreground: 220 20% 30%;
+
+    --muted: 40 10% 92%;
+    --muted-foreground: 220 10% 45%;
+
+    --accent: 38 50% 42%;
+    --accent-foreground: 0 0% 100%;
+
+    --destructive: 0 84.2% 50%;
+    --destructive-foreground: 0 0% 100%;
+
+    --border: 40 10% 85%;
+    --input: 40 10% 85%;
+    --ring: 38 50% 42%;
+
+    --gold: 38 50% 42%;
+    --gold-light: 38 45% 55%;
+    --gold-dark: 38 45% 32%;
+    --navy: 220 30% 12%;
+    --navy-light: 220 20% 25%;
+    --cream: 40 20% 96%;
+    --cream-muted: 220 10% 45%;
+
+    --surface-elevated: 0 0% 100%;
+    --shadow-sm: 0 1px 2px hsl(220 30% 12% / 0.06);
+    --shadow-md: 0 8px 24px -8px hsl(220 30% 12% / 0.12), 0 2px 6px hsl(220 30% 12% / 0.06);
+    --shadow-lg: 0 24px 48px -12px hsl(220 30% 12% / 0.18), 0 4px 12px hsl(220 30% 12% / 0.08);
+    --hairline: 220 15% 12% / 0.08;
+  }
+
+  /* Sepia / library mode — warm, paper-like, easy on the eyes */
+  .sepia {
+    --background: 36 32% 91%;
+    --foreground: 28 35% 18%;
+
+    --card: 38 38% 95%;
+    --card-foreground: 28 35% 18%;
+
+    --popover: 38 38% 95%;
+    --popover-foreground: 28 35% 18%;
+
+    --primary: 28 55% 35%;
+    --primary-foreground: 38 38% 95%;
+
+    --secondary: 36 25% 85%;
+    --secondary-foreground: 28 30% 25%;
+
+    --muted: 36 22% 86%;
+    --muted-foreground: 28 20% 40%;
+
+    --accent: 28 55% 35%;
+    --accent-foreground: 38 38% 95%;
+
+    --destructive: 0 70% 42%;
+    --destructive-foreground: 38 38% 95%;
+
+    --border: 32 20% 78%;
+    --input: 32 20% 78%;
+    --ring: 28 55% 35%;
+
+    --gold: 28 55% 35%;
+    --gold-light: 28 50% 48%;
+    --gold-dark: 28 60% 25%;
+    --navy: 28 35% 18%;
+    --navy-light: 28 30% 25%;
+    --cream: 36 32% 91%;
+    --cream-muted: 28 20% 40%;
+
+    --surface-elevated: 38 38% 95%;
+    --shadow-sm: 0 1px 2px hsl(28 35% 18% / 0.06);
+    --shadow-md: 0 8px 24px -8px hsl(28 35% 18% / 0.12), 0 2px 6px hsl(28 35% 18% / 0.06);
+    --shadow-lg: 0 24px 48px -12px hsl(28 35% 18% / 0.18), 0 4px 12px hsl(28 35% 18% / 0.08);
+    --hairline: 28 35% 18% / 0.08;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply bg-background text-foreground;
+    font-family: var(--font-body);
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    font-feature-settings: 'cv11', 'ss01', 'ss03';
+    letter-spacing: -0.011em;
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    font-family: var(--font-display);
+    letter-spacing: -0.02em;
+  }
+
+  /* Apple-style tighter tracking on display text, looser on small caps */
+  .font-body {
+    letter-spacing: -0.011em;
+  }
+  .text-xs, .text-\[10px\], .text-\[11px\] {
+    letter-spacing: 0.01em;
+  }
+
+  ::selection {
+    background: hsl(var(--gold) / 0.3);
+    color: hsl(var(--cream));
+  }
+
+  /* Apple-style thin scrollbar */
+  ::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+  }
+  ::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  ::-webkit-scrollbar-thumb {
+    background: hsl(var(--foreground) / 0.18);
+    border-radius: 8px;
+    border: 2px solid transparent;
+    background-clip: content-box;
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    background: hsl(var(--foreground) / 0.3);
+    background-clip: content-box;
+  }
+
+  /* Apple-style focus ring */
+  :focus-visible {
+    outline: none;
+    box-shadow: 0 0 0 3px hsl(var(--ring) / 0.35);
+    border-radius: calc(var(--radius) - 4px);
+  }
+
+  button, a, [role="button"] {
+    -webkit-tap-highlight-color: transparent;
+  }
+}
+
+/* Apple-native utility classes */
+@layer utilities {
+  .material-thick {
+    background: hsl(var(--card) / 0.72);
+    backdrop-filter: saturate(180%) blur(20px);
+    -webkit-backdrop-filter: saturate(180%) blur(20px);
+  }
+  .material-thin {
+    background: hsl(var(--background) / 0.6);
+    backdrop-filter: saturate(180%) blur(12px);
+    -webkit-backdrop-filter: saturate(180%) blur(12px);
+  }
+  .hairline {
+    border-color: hsl(var(--hairline));
+  }
+  .shadow-apple-sm { box-shadow: var(--shadow-sm); }
+  .shadow-apple { box-shadow: var(--shadow-md); }
+  .shadow-apple-lg { box-shadow: var(--shadow-lg); }
+
+  /* Spring-like transition timing — Apple uses critically damped springs */
+  .ease-apple {
+    transition-timing-function: cubic-bezier(0.32, 0.72, 0, 1);
+  }
+  .ease-apple-bounce {
+    transition-timing-function: cubic-bezier(0.34, 1.56, 0.64, 1);
+  }
+}
+
+/* Reading font-scale — applied to chapter article body copy */
+:root[data-font-scale="sm"] article p,
+:root[data-font-scale="sm"] article li {
+  font-size: 14px;
+  line-height: 1.8;
+}
+:root[data-font-scale="md"] article p,
+:root[data-font-scale="md"] article li {
+  font-size: 15px;
+  line-height: 1.85;
+}
+:root[data-font-scale="lg"] article p,
+:root[data-font-scale="lg"] article li {
+  font-size: 17px;
+  line-height: 1.9;
+}
+:root[data-font-scale="xl"] article p,
+:root[data-font-scale="xl"] article li {
+  font-size: 19px;
+  line-height: 1.95;
+}
+
+/* Print styles */
+@media print {
+  body {
+    background: white !important;
+    color: black !important;
+    font-size: 12pt;
+  }
+
+  .print\\:hidden {
+    display: none !important;
+  }
+
+  h1 {
+    font-size: 24pt !important;
+    color: black !important;
+  }
+
+  h2 {
+    font-size: 18pt !important;
+    color: #333 !important;
+  }
+
+  blockquote {
+    border-left-color: #999 !important;
+    page-break-inside: avoid;
+  }
+
+  blockquote p {
+    color: #444 !important;
+  }
+
+  article {
+    max-width: 100% !important;
+  }
+
+  a {
+    text-decoration: none !important;
+    color: black !important;
+  }
+
+  @page {
+    margin: 2cm;
+  }
+}
+
+/* ============================================================
+   Ambient reading mode — warmer tint after 21:00 local time.
+   Nudges background/card hue toward gold and softens contrast.
+   ============================================================ */
+html.ambient {
+  --background: 28 22% 8%;
+  --card: 28 20% 11%;
+  --secondary: 28 18% 16%;
+  --muted: 28 18% 14%;
+  --border: 30 18% 19%;
+  --foreground: 38 25% 88%;
+  transition: background-color 1.2s ease, color 1.2s ease;
+}
+html.ambient body {
+  filter: saturate(0.96);
+}
+html.ambient.light {
+  --background: 34 30% 94%;
+  --card: 36 32% 97%;
+}
