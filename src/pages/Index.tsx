@@ -1,5 +1,5 @@
 import { useState, useEffect, lazy, Suspense } from "react";
-import PasswordGate from "@/components/PasswordGate";
+import SignInGate from "@/components/SignInGate";
 import TableOfContents from "@/components/TableOfContents";
 import ChapterView from "@/components/ChapterView";
 import ProgressDashboard from "@/components/ProgressDashboard";
@@ -17,9 +17,10 @@ import { useImplementation } from "@/hooks/useImplementation";
 import { useFirmContext } from "@/hooks/useFirmContext";
 import { useAmbientMode, useScrollVelocity } from "@/hooks/useAmbientMode";
 import { AnimatePresence, motion } from "framer-motion";
-import { hasValidAccess, edgeHeaders } from "@/lib/edgeAuth";
+import { edgeHeaders } from "@/lib/edgeAuth";
 import { getOrCreateClientId } from "@/lib/clientId";
-import { isDemoMode, disableDemoMode } from "@/lib/demoMode";
+import { isDemoMode, disableDemoMode, enableDemoMode } from "@/lib/demoMode";
+import { getSessionMode, setSessionMode, clearSession, type SessionMode } from "@/lib/session";
 import { DEMO_AUDIT, DEMO_HISTORY } from "@/data/demoData";
 import type { WorkshopToolId } from "@/lib/handoff";
 import type { AuditRow, HistoryRow } from "@/components/dashboard/CommandCenter";
@@ -33,7 +34,11 @@ const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL as string;
 type GuidebookView = "toc" | "chapter" | "progress" | "bookmarks";
 
 const Index = () => {
-  const [authenticated, setAuthenticated] = useState(false);
+  // Demo mode implies a signed-in session even if the session key predates
+  // this flag (e.g. demo mode enabled before the sign-in gate shipped) —
+  // heals forward instead of showing the gate to someone already inside.
+  const [session, setSession] = useState<SessionMode | null>(() => (isDemoMode() ? "demo" : getSessionMode()));
+  const authenticated = session !== null;
   useAmbientMode();
   useScrollVelocity();
 
@@ -52,10 +57,6 @@ const Index = () => {
   const { hasContext } = useFirmContext();
   const [personalizeOpen, setPersonalizeOpen] = useState(false);
   const [maturityOpen, setMaturityOpen] = useState(false);
-
-  useEffect(() => {
-    if (hasValidAccess("guidebook")) setAuthenticated(true);
-  }, []);
 
   // Fetch the firm's own visibility data once authenticated — the
   // Dashboard section renders its own empty state if there isn't any yet,
@@ -100,7 +101,23 @@ const Index = () => {
     }
   }, [authenticated, hasContext]);
 
-  const handleAuthenticated = () => setAuthenticated(true);
+  // "Demo" seeds the sample dataset and reloads (enableDemoMode already
+  // marks the session before reloading, so the gate stays dismissed).
+  // "Live" needs no reload — nothing about data loading depends on it,
+  // so it's a smooth in-app transition straight into the real flow.
+  const handleSignIn = (mode: SessionMode) => {
+    if (mode === "demo") {
+      enableDemoMode();
+      return;
+    }
+    setSessionMode("live");
+    setSession("live");
+  };
+
+  const handleSignOut = () => {
+    clearSession();
+    window.location.reload();
+  };
 
   const handleSelectChapter = (id: string) => {
     setCurrentChapterId(id);
@@ -170,7 +187,7 @@ const Index = () => {
   });
 
   if (!authenticated) {
-    return <PasswordGate onAuthenticated={handleAuthenticated} />;
+    return <SignInGate onSignIn={handleSignIn} />;
   }
 
   // Hide the floating advisor while actively reading a chapter to reduce clutter.
@@ -262,6 +279,7 @@ const Index = () => {
         onNavigate={goToSection}
         demoMode={isDemoMode()}
         onExitDemo={disableDemoMode}
+        onSignOut={handleSignOut}
         firmName={firmName}
         scoreLabel={scoreLabel}
         hasAlerts={hasAlerts}
