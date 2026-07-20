@@ -168,6 +168,12 @@ export const DEMO_ROADMAP: Omit<RoadmapCache, "capturedAt"> = {
   ],
 };
 
+export const DEMO_STRATEGY_BRIEF = {
+  headline: "Your reputation is carrying a firm that isn't talking.",
+  narrative:
+    "Petrović & Partners has real standing — the Chambers and Legal 500 bands back it up, and that's the hardest thing to fake. But Thought Leadership is scoring under half its points, and Social sits even lower, which means that credibility isn't being converted into visible momentum. A firm with your reputation should be the one setting the narrative on cross-border M&A in this market, not a quiet name in a directory. The stale copyright year on your homepage doesn't help either — it's a small thing, but it's the kind of detail a prospective client notices right before they decide you're not actively maintaining your public presence.",
+};
+
 export function seedDemoData() {
   localStorage.setItem("guidebook_firm_context", JSON.stringify(DEMO_FIRM_CONTEXT));
   localStorage.setItem("guidebook_reading_progress", JSON.stringify(DEMO_READ_CHAPTER_IDS));

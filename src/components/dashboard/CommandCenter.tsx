@@ -12,6 +12,7 @@ import {
 import { useCommandCenterInsights, type InsightAction } from "@/hooks/useCommandCenterInsights";
 import { useWorkshopHistory } from "@/hooks/useWorkshopHistory";
 import { useBattlePlanCache } from "@/hooks/useBattlePlanCache";
+import { useStrategyBrief } from "@/hooks/useStrategyBrief";
 import { PEER_GROUPS } from "@/lib/marketVisibilityConfig";
 import MarketVisibilityScore from "@/components/MarketVisibilityScore";
 import type { WorkshopToolId } from "@/lib/handoff";
@@ -117,6 +118,16 @@ const CommandCenter = ({
     };
   }, [primary]);
 
+  const categoriesWithMax = useMemo(() => {
+    if (!categories) return null;
+    return Object.fromEntries(
+      Object.entries(categories).map(([key, cat]) => [
+        key,
+        { ...cat, max: CATEGORY_LABELS[key]?.max ?? 0 },
+      ]),
+    );
+  }, [categories]);
+
   const siteHealthIssues = useMemo(() => {
     const health = primary?.raw_metrics?.siteHealth;
     if (!health) return [];
@@ -146,6 +157,29 @@ const CommandCenter = ({
   const insights = useCommandCenterInsights({
     categories, siteHealthIssues, maturity, implementationScore, readChaptersCount, totalChapters,
   });
+
+  const briefParams = useMemo(() => {
+    if (!primary || !categoriesWithMax) return null;
+    return {
+      domain: primary.audited_domain,
+      market: primary.market,
+      peerGroup: primary.peer_group,
+      totalScore: primary.total_score,
+      categories: categoriesWithMax,
+      siteHealthIssues,
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [primary?.audited_domain, primary?.market, primary?.total_score]);
+
+  const { brief } = useStrategyBrief(briefParams);
+
+  const recommendedToolIds = useMemo(() => {
+    const ids = new Set<WorkshopToolId>();
+    insights.forEach((insight) => {
+      if (insight.action.kind === "workshop") ids.add(insight.action.toolId);
+    });
+    return ids;
+  }, [insights]);
 
   const resolveAction = (action: InsightAction) => {
     if (action.kind === "workshop") return () => onOpenWorkshopTool(action.toolId);
@@ -236,6 +270,19 @@ const CommandCenter = ({
         </div>
       </header>
 
+      {brief && (
+        <div className="max-w-5xl mx-auto px-6 mb-6">
+          <div className="bg-gradient-to-br from-primary/10 to-transparent border border-primary/30 rounded-sm p-6">
+            <div className="flex items-center gap-2 mb-2">
+              <Sparkles className="w-4 h-4 text-primary" />
+              <span className="text-[10px] tracking-[0.2em] uppercase text-primary font-body">Strategy Brief</span>
+            </div>
+            <h2 className="font-display text-xl text-foreground font-semibold mb-2">{brief.headline}</h2>
+            <p className="text-sm text-secondary-foreground/80 font-body leading-relaxed">{brief.narrative}</p>
+          </div>
+        </div>
+      )}
+
       <div className="max-w-5xl mx-auto px-6 grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Left / main column */}
         <div className="lg:col-span-2 space-y-6">
@@ -286,21 +333,23 @@ const CommandCenter = ({
           {/* Key Insights */}
           <div>
             <h2 className="font-display text-lg text-foreground mb-3">Key Insights</h2>
-            <div className="space-y-3">
+            <div className="space-y-2">
               {insights.map((insight) => {
                 const style = TONE_STYLES[insight.tone];
                 const Icon = style.icon;
                 const action = resolveAction(insight.action);
                 return (
-                  <div key={insight.id} className={`bg-card border ${style.border} rounded-sm p-5`}>
-                    <div className="flex items-center gap-2 mb-2">
-                      <Icon className={`w-4 h-4 ${style.text}`} />
-                      <h3 className="font-display text-base text-foreground">{insight.title}</h3>
+                  <div key={insight.id} className={`bg-card border ${style.border} rounded-sm px-4 py-3 flex items-start gap-3`}>
+                    <Icon className={`w-4 h-4 ${style.text} shrink-0 mt-0.5`} />
+                    <div className="min-w-0 flex-1">
+                      <div className="flex flex-wrap items-baseline gap-x-2 gap-y-0.5">
+                        <h3 className="font-display text-sm text-foreground">{insight.title}</h3>
+                        <p className="text-xs text-secondary-foreground/70 font-body">{insight.body}</p>
+                      </div>
                     </div>
-                    <p className="text-sm text-secondary-foreground/80 font-body mb-3">{insight.body}</p>
                     {action && (
-                      <button onClick={action} className={`inline-flex items-center gap-1.5 text-sm font-body ${style.text} hover:opacity-80`}>
-                        {insight.actionLabel} <ArrowRight className="w-3.5 h-3.5" />
+                      <button onClick={action} className={`inline-flex items-center gap-1 text-xs font-body ${style.text} hover:opacity-80 shrink-0 whitespace-nowrap`}>
+                        {insight.actionLabel} <ArrowRight className="w-3 h-3" />
                       </button>
                     )}
                   </div>
@@ -313,16 +362,24 @@ const CommandCenter = ({
           <div>
             <h2 className="font-display text-lg text-foreground mb-3">Quick Actions</h2>
             <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
-              {QUICK_ACTIONS.map(({ toolId, label, icon: Icon }) => (
-                <button
-                  key={toolId}
-                  onClick={() => onOpenWorkshopTool(toolId)}
-                  className="flex items-center gap-2.5 p-4 bg-card border border-border/40 rounded-sm hover:border-primary/40 transition-colors text-left"
-                >
-                  <Icon size={16} className="text-primary shrink-0" />
-                  <span className="text-sm font-body text-foreground">{label}</span>
-                </button>
-              ))}
+              {QUICK_ACTIONS.map(({ toolId, label, icon: Icon }) => {
+                const recommended = recommendedToolIds.has(toolId);
+                return (
+                  <button
+                    key={toolId}
+                    onClick={() => onOpenWorkshopTool(toolId)}
+                    className={`relative flex items-center gap-2.5 p-4 bg-card border rounded-sm transition-colors text-left ${
+                      recommended ? "border-primary/60 bg-primary/5" : "border-border/40 hover:border-primary/40"
+                    }`}
+                  >
+                    <Icon size={16} className="text-primary shrink-0" />
+                    <span className="text-sm font-body text-foreground">{label}</span>
+                    {recommended && (
+                      <span className="absolute top-1.5 right-1.5 w-1.5 h-1.5 rounded-full bg-primary" />
+                    )}
+                  </button>
+                );
+              })}
             </div>
           </div>
 
