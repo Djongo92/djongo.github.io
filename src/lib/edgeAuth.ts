@@ -30,7 +30,13 @@ export function getAccessToken(scope?: Scope): string | null {
   return tryGet("workshop") || tryGet("guidebook");
 }
 
+// TEMPORARY: password gating disabled at the user's request while the app
+// is private/pre-launch. Set back to false to re-enable — nothing else
+// needs to change, hasValidAccess falls straight back to the real check.
+const BYPASS_ACCESS_CONTROL = true;
+
 export function hasValidAccess(scope: Scope): boolean {
+  if (BYPASS_ACCESS_CONTROL) return true;
   return !!getAccessToken(scope);
 }
 
