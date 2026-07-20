@@ -72,7 +72,7 @@ const PersonalizeOnboarding = ({ open, onClose, onComplete }: Props) => {
             <div className="px-6 py-5 border-b border-border/50 flex items-center justify-between">
               <div className="flex items-center gap-2">
                 <Sparkles className="w-4 h-4 text-primary" />
-                <h3 className="font-display text-lg text-foreground">Personalize your guidebook</h3>
+                <h3 className="font-display text-lg text-foreground">Firm Profile</h3>
               </div>
               <button onClick={close} className="p-1.5 text-muted-foreground hover:text-foreground">
                 <X className="w-4 h-4" />
