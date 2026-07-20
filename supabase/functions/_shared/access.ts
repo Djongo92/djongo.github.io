@@ -72,6 +72,11 @@ export async function verifyToken(token: string | null | undefined): Promise<{ s
   return { scope: scope as Scope, exp };
 }
 
+// TEMPORARY: password gating disabled at the user's request while the app
+// is private/pre-launch. Set back to false to re-enable — nothing else
+// needs to change, requireAccess falls straight back to normal HMAC checks.
+const BYPASS_ACCESS_CONTROL = true;
+
 /**
  * Edge-function middleware. Returns null if access is granted, or a Response
  * to send back to the caller if not. Reads the token from `x-access-token`.
@@ -83,6 +88,7 @@ export async function requireAccess(
   corsHeaders: Record<string, string>,
   required: Scope | "any" = "any",
 ): Promise<Response | null> {
+  if (BYPASS_ACCESS_CONTROL) return null;
   const token = req.headers.get("x-access-token");
   const claims = await verifyToken(token);
   const ok = claims && (required === "any" || claims.scope === required);
