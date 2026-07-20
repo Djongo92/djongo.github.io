@@ -1,4 +1,5 @@
 import { requireAccess, ACCESS_CORS_HEADERS } from "../_shared/access.ts";
+import { callClaudeTool, ClaudeApiError } from "../_shared/anthropic.ts";
 const corsHeaders = ACCESS_CORS_HEADERS;
 
 /**
@@ -8,7 +9,7 @@ const corsHeaders = ACCESS_CORS_HEADERS;
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
 
-  
+
 
     const unauthorized = await requireAccess(req, corsHeaders, "any");
     if (unauthorized) return unauthorized;try {
@@ -24,9 +25,6 @@ Deno.serve(async (req) => {
         status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
-
-    const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
-    if (!LOVABLE_API_KEY) throw new Error("LOVABLE_API_KEY not configured");
 
     const firmBlock = firmContext
       ? `\nReader firm: ${firmContext.practiceArea}, ${firmContext.firmSize}, primary goal: ${firmContext.primaryGoal}. Personalize your answer.`
@@ -48,84 +46,62 @@ Rules:
 
     const userPrompt = `Question: ${question}\n\nThe book:${corpus}`;
 
-    const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
-      method: "POST",
-      headers: { Authorization: `Bearer ${LOVABLE_API_KEY}`, "Content-Type": "application/json" },
-      body: JSON.stringify({
-        model: "google/gemini-2.5-flash",
-        messages: [
-          { role: "system", content: systemPrompt },
-          { role: "user", content: userPrompt },
-        ],
-        tools: [{
-          type: "function",
-          function: {
-            name: "answer_with_citations",
-            description: "Answer the question with structured citations to chapters used.",
-            parameters: {
-              type: "object",
-              properties: {
-                answer: {
-                  type: "string",
-                  description: "The synthesized answer in markdown. 2-5 short paragraphs. Strategic, opinionated.",
-                },
-                keyTakeaways: {
-                  type: "array",
-                  description: "3-5 sharp takeaways the reader should act on.",
-                  items: { type: "string" },
-                  minItems: 3,
-                  maxItems: 5,
-                },
-                citations: {
-                  type: "array",
-                  description: "The chapters that informed the answer. Only include chapters you actually used.",
-                  items: {
-                    type: "object",
-                    properties: {
-                      chapterId: { type: "string" },
-                      chapterNumber: { type: "number" },
-                      title: { type: "string" },
-                      relevance: { type: "string", description: "1 sentence on why this chapter is relevant." },
-                    },
-                    required: ["chapterId", "chapterNumber", "title", "relevance"],
+    let result: Record<string, unknown>;
+    try {
+      result = await callClaudeTool({
+        system: systemPrompt,
+        user: userPrompt,
+        tool: {
+          name: "answer_with_citations",
+          description: "Answer the question with structured citations to chapters used.",
+          input_schema: {
+            type: "object",
+            properties: {
+              answer: {
+                type: "string",
+                description: "The synthesized answer in markdown. 2-5 short paragraphs. Strategic, opinionated.",
+              },
+              keyTakeaways: {
+                type: "array",
+                description: "3-5 sharp takeaways the reader should act on.",
+                items: { type: "string" },
+                minItems: 3,
+                maxItems: 5,
+              },
+              citations: {
+                type: "array",
+                description: "The chapters that informed the answer. Only include chapters you actually used.",
+                items: {
+                  type: "object",
+                  properties: {
+                    chapterId: { type: "string" },
+                    chapterNumber: { type: "number" },
+                    title: { type: "string" },
+                    relevance: { type: "string", description: "1 sentence on why this chapter is relevant." },
                   },
-                },
-                confidence: {
-                  type: "string",
-                  enum: ["high", "medium", "low"],
-                  description: "How well does the book answer this? Low = the question is outside the book's scope.",
+                  required: ["chapterId", "chapterNumber", "title", "relevance"],
                 },
               },
-              required: ["answer", "keyTakeaways", "citations", "confidence"],
-              additionalProperties: false,
+              confidence: {
+                type: "string",
+                enum: ["high", "medium", "low"],
+                description: "How well does the book answer this? Low = the question is outside the book's scope.",
+              },
             },
+            required: ["answer", "keyTakeaways", "citations", "confidence"],
           },
-        }],
-        tool_choice: { type: "function", function: { name: "answer_with_citations" } },
-      }),
-    });
-
-    if (response.status === 429) {
-      return new Response(JSON.stringify({ error: "Rate limit reached." }), {
-        status: 429, headers: { ...corsHeaders, "Content-Type": "application/json" },
+        },
       });
-    }
-    if (response.status === 402) {
-      return new Response(JSON.stringify({ error: "AI credits exhausted." }), {
-        status: 402, headers: { ...corsHeaders, "Content-Type": "application/json" },
-      });
-    }
-    if (!response.ok) {
-      console.error("AI error:", response.status, await response.text());
-      return new Response(JSON.stringify({ error: "AI service error" }), {
-        status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" },
-      });
+    } catch (e) {
+      if (e instanceof ClaudeApiError) {
+        return new Response(JSON.stringify({ error: e.message }), {
+          status: e.status, headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
+      throw e;
     }
 
-    const data = await response.json();
-    const args = data.choices?.[0]?.message?.tool_calls?.[0]?.function?.arguments;
-    if (!args) throw new Error("No answer returned");
-    return new Response(args, { headers: { ...corsHeaders, "Content-Type": "application/json" } });
+    return new Response(JSON.stringify(result), { headers: { ...corsHeaders, "Content-Type": "application/json" } });
   } catch (e) {
     console.error("ask-the-book error:", e);
     return new Response(

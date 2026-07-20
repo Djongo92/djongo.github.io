@@ -19,6 +19,7 @@ import { getCached, setCached } from "./cache.ts";
 import { DMV_MARKETS } from "./marketVisibilityConfig.ts";
 import { peerMaxFor } from "./peerMax.ts";
 import { filterToWindow, aggregateContentItems, calculateThoughtLeadershipScore, type ContentItem } from "./thoughtLeadershipFormula.ts";
+import { callClaudeTool } from "./anthropic.ts";
 
 const SEVEN_DAYS_MS = 7 * 24 * 60 * 60 * 1000;
 
@@ -30,57 +31,37 @@ export interface ThoughtLeadershipResult {
   provenance: "ai_classified" | "missing";
 }
 
-async function extractContentItems(pageText: string, pageTitle: string, apiKey: string): Promise<ContentItem[]> {
-  const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
-    method: "POST",
-    headers: { Authorization: `Bearer ${apiKey}`, "Content-Type": "application/json" },
-    body: JSON.stringify({
-      model: "google/gemini-2.5-flash",
-      messages: [
-        {
-          role: "system",
-          content:
-            "You extract a list of articles/posts from a law firm's blog or news page. For each distinct article you can identify, return its title, its publication date (ISO 8601 'YYYY-MM-DD' if determinable, otherwise your best estimate), whether it's the firm's own blog/thought-leadership content ('blog'), a news/press mention about the firm ('news'), or neither ('other'), and whether it's attributed to a named individual (a named partner/associate) rather than the firm generically or no byline at all.",
-        },
-        { role: "user", content: `Page title: ${pageTitle}\n\nPage content (excerpted):\n${pageText}` },
-      ],
-      tools: [{
-        type: "function",
-        function: {
-          name: "extract_content_items",
-          description: "Return the list of articles/posts found on the page",
-          parameters: {
-            type: "object",
-            properties: {
-              items: {
-                type: "array",
-                items: {
-                  type: "object",
-                  properties: {
-                    title: { type: "string" },
-                    date: { type: "string", description: "ISO 8601 date if determinable, else best-guess YYYY-MM-DD" },
-                    type: { type: "string", enum: ["blog", "news", "other"] },
-                    hasNamedByline: { type: "boolean" },
-                  },
-                  required: ["title", "date", "type", "hasNamedByline"],
-                },
+async function extractContentItems(pageText: string, pageTitle: string): Promise<ContentItem[]> {
+  const result = await callClaudeTool({
+    system:
+      "You extract a list of articles/posts from a law firm's blog or news page. For each distinct article you can identify, return its title, its publication date (ISO 8601 'YYYY-MM-DD' if determinable, otherwise your best estimate), whether it's the firm's own blog/thought-leadership content ('blog'), a news/press mention about the firm ('news'), or neither ('other'), and whether it's attributed to a named individual (a named partner/associate) rather than the firm generically or no byline at all.",
+    user: `Page title: ${pageTitle}\n\nPage content (excerpted):\n${pageText}`,
+    tool: {
+      name: "extract_content_items",
+      description: "Return the list of articles/posts found on the page",
+      input_schema: {
+        type: "object",
+        properties: {
+          items: {
+            type: "array",
+            items: {
+              type: "object",
+              properties: {
+                title: { type: "string" },
+                date: { type: "string", description: "ISO 8601 date if determinable, else best-guess YYYY-MM-DD" },
+                type: { type: "string", enum: ["blog", "news", "other"] },
+                hasNamedByline: { type: "boolean" },
               },
+              required: ["title", "date", "type", "hasNamedByline"],
             },
-            required: ["items"],
-            additionalProperties: false,
           },
         },
-      }],
-      tool_choice: { type: "function", function: { name: "extract_content_items" } },
-    }),
+        required: ["items"],
+      },
+    },
   });
 
-  if (!response.ok) throw new Error(`AI gateway HTTP ${response.status}`);
-  const data = await response.json();
-  const args = data.choices?.[0]?.message?.tool_calls?.[0]?.function?.arguments;
-  if (!args) throw new Error("No extraction result");
-  const parsed = JSON.parse(args);
-  return Array.isArray(parsed.items) ? parsed.items : [];
+  return Array.isArray(result.items) ? (result.items as ContentItem[]) : [];
 }
 
 export async function computeThoughtLeadershipScore(
@@ -89,9 +70,9 @@ export async function computeThoughtLeadershipScore(
   peerGroup: string,
   url: string,
 ): Promise<ThoughtLeadershipResult> {
-  const apiKey = Deno.env.get("LOVABLE_API_KEY");
+  const apiKey = Deno.env.get("ANTHROPIC_API_KEY");
   if (!apiKey) {
-    console.warn("[visibility-audit-thought-leadership] LOVABLE_API_KEY not configured — scoring as missing");
+    console.warn("[visibility-audit-thought-leadership] ANTHROPIC_API_KEY not configured — scoring as missing");
     return { score: 0, raw: { postsCount: 0, newsCount: 0, bylinePct: 0, items: [] }, provenance: "missing" };
   }
 
@@ -119,7 +100,7 @@ export async function computeThoughtLeadershipScore(
         .trim()
         .slice(0, 12000);
 
-      items = await extractContentItems(pageText, pageTitle, apiKey);
+      items = await extractContentItems(pageText, pageTitle);
       await setCached(cached.key, "visibility-audit-thought-leadership", normalizedUrl, { items }, SEVEN_DAYS_MS);
     } catch (e) {
       console.error("[visibility-audit-thought-leadership] fetch/extract failed:", e);

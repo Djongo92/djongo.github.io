@@ -1,6 +1,7 @@
 import { requireAccess, ACCESS_CORS_HEADERS } from "../_shared/access.ts";
 import { safeFetch, normalizeUrl, SafeFetchError } from "../_shared/safeFetch.ts";
 import { getCached, setCached } from "../_shared/cache.ts";
+import { callClaudeTool, ClaudeApiError } from "../_shared/anthropic.ts";
 
 const corsHeaders = ACCESS_CORS_HEADERS;
 
@@ -34,8 +35,6 @@ Deno.serve(async (req) => {
     const unauthorized = await requireAccess(req, corsHeaders, "workshop");
     if (unauthorized) return unauthorized;try {
     const { url, pastedContent, practiceArea, idealClient, firmContext } = await req.json();
-    const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
-    if (!LOVABLE_API_KEY) throw new Error("LOVABLE_API_KEY not configured");
 
     let pageBlock = "";
     let meta: Record<string, unknown> = {};
@@ -73,63 +72,49 @@ Deno.serve(async (req) => {
 
     const systemPrompt = `You audit law-firm practice-area pages against the "Revitalizing Practice Area Pages" framework: clear positioning, specific ideal client signaling, real expertise proof, narrative structure, scannability, CTA strength, and search optimization. Cite phrases from the page.`;
 
-    const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
-      method: "POST",
-      headers: { Authorization: `Bearer ${LOVABLE_API_KEY}`, "Content-Type": "application/json" },
-      body: JSON.stringify({
-        model: "google/gemini-2.5-flash",
-        messages: [
-          { role: "system", content: systemPrompt },
-          { role: "user", content: `${ctx ? ctx + "\n\n" : ""}${pageBlock}\n\nAudit this practice area page.` },
-        ],
-        tools: [{
-          type: "function",
-          function: {
-            name: "audit",
-            parameters: {
-              type: "object",
-              properties: {
-                overallGrade: { type: "string", enum: ["A", "B", "C", "D", "F"] },
-                overallScore: { type: "number", description: "0-100" },
-                verdict: { type: "string", description: "1-2 sentence honest take." },
-                criteria: {
-                  type: "array",
-                  items: {
-                    type: "object",
-                    properties: {
-                      name: { type: "string", enum: ["Positioning Clarity", "Ideal-Client Signal", "Proof of Expertise", "Narrative Structure", "Scannability", "Call to Action", "SEO & Search Intent"] },
-                      score: { type: "number", description: "0-10" },
-                      finding: { type: "string", description: "What the page does or doesn't do, citing the page." },
-                    },
-                    required: ["name", "score", "finding"],
+    let result: Record<string, unknown>;
+    try {
+      result = await callClaudeTool({
+        system: systemPrompt,
+        user: `${ctx ? ctx + "\n\n" : ""}${pageBlock}\n\nAudit this practice area page.`,
+        tool: {
+          name: "audit",
+          description: "Return a structured practice-area page audit.",
+          input_schema: {
+            type: "object",
+            properties: {
+              overallGrade: { type: "string", enum: ["A", "B", "C", "D", "F"] },
+              overallScore: { type: "number", description: "0-100" },
+              verdict: { type: "string", description: "1-2 sentence honest take." },
+              criteria: {
+                type: "array",
+                items: {
+                  type: "object",
+                  properties: {
+                    name: { type: "string", enum: ["Positioning Clarity", "Ideal-Client Signal", "Proof of Expertise", "Narrative Structure", "Scannability", "Call to Action", "SEO & Search Intent"] },
+                    score: { type: "number", description: "0-10" },
+                    finding: { type: "string", description: "What the page does or doesn't do, citing the page." },
                   },
-                  minItems: 7, maxItems: 7,
+                  required: ["name", "score", "finding"],
                 },
-                quickWins: { type: "array", items: { type: "string" }, description: "3-5 fixes doable today." },
-                strategicFixes: { type: "array", items: { type: "string" }, description: "2-4 deeper rewrites." },
-                suggestedHeadline: { type: "string", description: "A drop-in replacement H1." },
-                suggestedSubhead: { type: "string", description: "A drop-in supporting subhead." },
+                minItems: 7, maxItems: 7,
               },
-              required: ["overallGrade", "overallScore", "verdict", "criteria", "quickWins", "strategicFixes", "suggestedHeadline", "suggestedSubhead"],
-              additionalProperties: false,
+              quickWins: { type: "array", items: { type: "string" }, description: "3-5 fixes doable today." },
+              strategicFixes: { type: "array", items: { type: "string" }, description: "2-4 deeper rewrites." },
+              suggestedHeadline: { type: "string", description: "A drop-in replacement H1." },
+              suggestedSubhead: { type: "string", description: "A drop-in supporting subhead." },
             },
+            required: ["overallGrade", "overallScore", "verdict", "criteria", "quickWins", "strategicFixes", "suggestedHeadline", "suggestedSubhead"],
           },
-        }],
-        tool_choice: { type: "function", function: { name: "audit" } },
-      }),
-    });
-
-    if (response.status === 429) return new Response(JSON.stringify({ error: "Rate limit reached." }), { status: 429, headers: { ...corsHeaders, "Content-Type": "application/json" } });
-    if (response.status === 402) return new Response(JSON.stringify({ error: "AI credits exhausted." }), { status: 402, headers: { ...corsHeaders, "Content-Type": "application/json" } });
-    if (!response.ok) {
-      console.error("AI error:", response.status, await response.text());
-      return new Response(JSON.stringify({ error: "AI service error" }), { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } });
+        },
+      });
+    } catch (e) {
+      if (e instanceof ClaudeApiError) {
+        return new Response(JSON.stringify({ error: e.message }), { status: e.status, headers: { ...corsHeaders, "Content-Type": "application/json" } });
+      }
+      throw e;
     }
-    const data = await response.json();
-    const args = data.choices?.[0]?.message?.tool_calls?.[0]?.function?.arguments;
-    if (!args) throw new Error("No result");
-    const parsed = JSON.parse(args);
-    const out = { ...parsed, meta };
+    const out = { ...result, meta };
     if (cacheKey && url) await setCached(cacheKey, "workshop-practice-audit", url, out);
     return new Response(JSON.stringify(out), { headers: { ...corsHeaders, "Content-Type": "application/json" } });
   } catch (e) {

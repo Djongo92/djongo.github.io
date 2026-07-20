@@ -1,4 +1,5 @@
 import { requireAccess, ACCESS_CORS_HEADERS } from "../_shared/access.ts";
+import { streamClaudeText } from "../_shared/anthropic.ts";
 const corsHeaders = ACCESS_CORS_HEADERS;
 
 Deno.serve(async (req) => {
@@ -9,8 +10,6 @@ Deno.serve(async (req) => {
     const unauthorized = await requireAccess(req, corsHeaders, "any");
     if (unauthorized) return unauthorized;try {
     const { messages, guidebookSummary, userProgress, firmContext } = await req.json();
-    const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
-    if (!LOVABLE_API_KEY) throw new Error("LOVABLE_API_KEY not configured");
 
     const firmBlock = firmContext
       ? `\n\nReader's firm: ${firmContext.practiceArea} practice, ${firmContext.firmSize}, primary goal: ${firmContext.primaryGoal}.`
@@ -33,40 +32,7 @@ Rules:
 - Be tactical. Give next-step thinking, not theory.
 - Use markdown. Keep replies under 250 words unless depth is requested.`;
 
-    const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
-      method: "POST",
-      headers: {
-        Authorization: `Bearer ${LOVABLE_API_KEY}`,
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        model: "google/gemini-2.5-flash",
-        messages: [{ role: "system", content: systemPrompt }, ...messages],
-        stream: true,
-      }),
-    });
-
-    if (response.status === 429) {
-      return new Response(JSON.stringify({ error: "Rate limit reached. Try again shortly." }), {
-        status: 429, headers: { ...corsHeaders, "Content-Type": "application/json" },
-      });
-    }
-    if (response.status === 402) {
-      return new Response(JSON.stringify({ error: "AI credits exhausted." }), {
-        status: 402, headers: { ...corsHeaders, "Content-Type": "application/json" },
-      });
-    }
-    if (!response.ok) {
-      const t = await response.text();
-      console.error("AI error:", response.status, t);
-      return new Response(JSON.stringify({ error: "AI service error" }), {
-        status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" },
-      });
-    }
-
-    return new Response(response.body, {
-      headers: { ...corsHeaders, "Content-Type": "text/event-stream" },
-    });
+    return await streamClaudeText({ system: systemPrompt, messages }, corsHeaders);
   } catch (e) {
     console.error("global-advisor error:", e);
     return new Response(JSON.stringify({ error: e instanceof Error ? e.message : "Unknown error" }), {

@@ -1,10 +1,11 @@
 import { requireAccess, ACCESS_CORS_HEADERS } from "../_shared/access.ts";
+import { callClaudeTool, ClaudeApiError } from "../_shared/anthropic.ts";
 const corsHeaders = ACCESS_CORS_HEADERS;
 
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
 
-  
+
 
     const unauthorized = await requireAccess(req, corsHeaders, "workshop");
     if (unauthorized) return unauthorized;try {
@@ -14,8 +15,6 @@ Deno.serve(async (req) => {
         status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
-    const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
-    if (!LOVABLE_API_KEY) throw new Error("LOVABLE_API_KEY not configured");
 
     const months = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
     const startIdx = Math.max(0, months.indexOf(startMonth || months[new Date().getMonth()]));
@@ -38,58 +37,49 @@ Known slow seasons: ${slowSeasons || "(not specified)"}
 Start month: ${ordered[0]}
 Months in order: ${ordered.join(", ")}`;
 
-    const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
-      method: "POST",
-      headers: { Authorization: `Bearer ${LOVABLE_API_KEY}`, "Content-Type": "application/json" },
-      body: JSON.stringify({
-        model: "google/gemini-2.5-flash",
-        messages: [{ role: "system", content: systemPrompt }, { role: "user", content: userPrompt }],
-        tools: [{
-          type: "function",
-          function: {
-            name: "calendar",
-            parameters: {
-              type: "object",
-              properties: {
-                annualTheme: { type: "string", description: "One sentence narrative arc across the year." },
-                pillars: { type: "array", items: { type: "string" }, description: "3-5 strategic content pillars to repeat." },
-                months: {
-                  type: "array",
-                  minItems: 12, maxItems: 12,
-                  items: {
-                    type: "object",
-                    properties: {
-                      month: { type: "string", description: "Month name." },
-                      tempo: { type: "string", enum: ["push", "steady", "slow"], description: "Energy level — push hard, steady, or slow." },
-                      theme: { type: "string", description: "Specific monthly theme tied to seasonality." },
-                      flagshipContent: { type: "string", description: "One big anchor piece this month." },
-                      supportingContent: { type: "array", items: { type: "string" }, description: "2-4 supporting pieces (articles, posts, newsletters, talks)." },
-                      channelPushes: { type: "array", items: { type: "string" }, description: "2-3 channel-specific plays (LinkedIn, email, events, PR)." },
-                      keyMoments: { type: "array", items: { type: "string" }, description: "0-3 dates or deadlines to align around." },
-                    },
-                    required: ["month", "tempo", "theme", "flagshipContent", "supportingContent", "channelPushes"],
+    let result: Record<string, unknown>;
+    try {
+      result = await callClaudeTool({
+        system: systemPrompt,
+        user: userPrompt,
+        maxTokens: 8192,
+        tool: {
+          name: "calendar",
+          description: "Return a 12-month marketing calendar",
+          input_schema: {
+            type: "object",
+            properties: {
+              annualTheme: { type: "string", description: "One sentence narrative arc across the year." },
+              pillars: { type: "array", items: { type: "string" }, description: "3-5 strategic content pillars to repeat." },
+              months: {
+                type: "array",
+                minItems: 12, maxItems: 12,
+                items: {
+                  type: "object",
+                  properties: {
+                    month: { type: "string", description: "Month name." },
+                    tempo: { type: "string", enum: ["push", "steady", "slow"], description: "Energy level — push hard, steady, or slow." },
+                    theme: { type: "string", description: "Specific monthly theme tied to seasonality." },
+                    flagshipContent: { type: "string", description: "One big anchor piece this month." },
+                    supportingContent: { type: "array", items: { type: "string" }, description: "2-4 supporting pieces (articles, posts, newsletters, talks)." },
+                    channelPushes: { type: "array", items: { type: "string" }, description: "2-3 channel-specific plays (LinkedIn, email, events, PR)." },
+                    keyMoments: { type: "array", items: { type: "string" }, description: "0-3 dates or deadlines to align around." },
                   },
+                  required: ["month", "tempo", "theme", "flagshipContent", "supportingContent", "channelPushes"],
                 },
               },
-              required: ["annualTheme", "pillars", "months"],
-              additionalProperties: false,
             },
+            required: ["annualTheme", "pillars", "months"],
           },
-        }],
-        tool_choice: { type: "function", function: { name: "calendar" } },
-      }),
-    });
-
-    if (response.status === 429) return new Response(JSON.stringify({ error: "Rate limit reached." }), { status: 429, headers: { ...corsHeaders, "Content-Type": "application/json" } });
-    if (response.status === 402) return new Response(JSON.stringify({ error: "AI credits exhausted." }), { status: 402, headers: { ...corsHeaders, "Content-Type": "application/json" } });
-    if (!response.ok) {
-      console.error("AI error:", response.status, await response.text());
-      return new Response(JSON.stringify({ error: "AI service error" }), { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } });
+        },
+      });
+    } catch (e) {
+      if (e instanceof ClaudeApiError) {
+        return new Response(JSON.stringify({ error: e.message }), { status: e.status, headers: { ...corsHeaders, "Content-Type": "application/json" } });
+      }
+      throw e;
     }
-    const data = await response.json();
-    const args = data.choices?.[0]?.message?.tool_calls?.[0]?.function?.arguments;
-    if (!args) throw new Error("No result");
-    return new Response(args, { headers: { ...corsHeaders, "Content-Type": "application/json" } });
+    return new Response(JSON.stringify(result), { headers: { ...corsHeaders, "Content-Type": "application/json" } });
   } catch (e) {
     console.error("workshop-calendar error:", e);
     return new Response(JSON.stringify({ error: e instanceof Error ? e.message : "Unknown error" }), {
