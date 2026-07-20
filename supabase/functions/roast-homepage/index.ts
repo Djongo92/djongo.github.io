@@ -1,13 +1,14 @@
 import { requireAccess, ACCESS_CORS_HEADERS } from "../_shared/access.ts";
 import { safeFetch, normalizeUrl, SafeFetchError } from "../_shared/safeFetch.ts";
 import { getCached, setCached } from "../_shared/cache.ts";
+import { callClaudeTool, ClaudeApiError } from "../_shared/anthropic.ts";
 
 const corsHeaders = ACCESS_CORS_HEADERS;
 
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
 
-  
+
 
     const unauthorized = await requireAccess(req, corsHeaders, "any");
     if (unauthorized) return unauthorized;try {
@@ -17,9 +18,6 @@ Deno.serve(async (req) => {
         status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
-
-    const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
-    if (!LOVABLE_API_KEY) throw new Error("LOVABLE_API_KEY not configured");
 
     const normalizedUrl = normalizeUrl(url);
 
@@ -83,95 +81,71 @@ Meta description: ${metaDescription || "(none found)"}
 Page content (excerpted, may include nav/footer noise):
 ${pageText}`;
 
-    const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
-      method: "POST",
-      headers: { Authorization: `Bearer ${LOVABLE_API_KEY}`, "Content-Type": "application/json" },
-      body: JSON.stringify({
-        model: "google/gemini-2.5-flash",
-        messages: [
-          { role: "system", content: systemPrompt },
-          { role: "user", content: userPrompt },
-        ],
-        tools: [{
-          type: "function",
-          function: {
-            name: "roast_homepage",
-            description: "Return a brutal but constructive critique of the homepage",
-            parameters: {
-              type: "object",
-              properties: {
-                verdict: {
-                  type: "string",
-                  description: "One-sentence verdict — punchy and quotable. Example: 'A law firm allergic to specifics.'",
-                },
-                grade: {
-                  type: "string",
-                  enum: ["A", "B", "C", "D", "F"],
-                  description: "School-style letter grade. Most firms get C or D.",
-                },
-                burn: {
-                  type: "string",
-                  description: "The headline roast — 2-3 sentences of brutally honest, but witty, criticism. The line they'll quote to their team.",
-                },
-                annotations: {
-                  type: "array",
-                  description: "5-7 specific elements on the page with critique and rewrite",
-                  items: {
-                    type: "object",
-                    properties: {
-                      element: {
-                        type: "string",
-                        enum: ["headline", "subhead", "CTA", "about", "services", "trust", "design", "copy"],
-                      },
-                      whatYouSaid: { type: "string", description: "Quote or describe what's actually on the page" },
-                      whatItSounds: { type: "string", description: "What this actually communicates to a prospect — be brutal" },
-                      rewrite: { type: "string", description: "A specific, better version they could use today" },
+    let result: Record<string, unknown>;
+    try {
+      result = await callClaudeTool({
+        system: systemPrompt,
+        user: userPrompt,
+        tool: {
+          name: "roast_homepage",
+          description: "Return a brutal but constructive critique of the homepage",
+          input_schema: {
+            type: "object",
+            properties: {
+              verdict: {
+                type: "string",
+                description: "One-sentence verdict — punchy and quotable. Example: 'A law firm allergic to specifics.'",
+              },
+              grade: {
+                type: "string",
+                enum: ["A", "B", "C", "D", "F"],
+                description: "School-style letter grade. Most firms get C or D.",
+              },
+              burn: {
+                type: "string",
+                description: "The headline roast — 2-3 sentences of brutally honest, but witty, criticism. The line they'll quote to their team.",
+              },
+              annotations: {
+                type: "array",
+                description: "5-7 specific elements on the page with critique and rewrite",
+                items: {
+                  type: "object",
+                  properties: {
+                    element: {
+                      type: "string",
+                      enum: ["headline", "subhead", "CTA", "about", "services", "trust", "design", "copy"],
                     },
-                    required: ["element", "whatYouSaid", "whatItSounds", "rewrite"],
+                    whatYouSaid: { type: "string", description: "Quote or describe what's actually on the page" },
+                    whatItSounds: { type: "string", description: "What this actually communicates to a prospect — be brutal" },
+                    rewrite: { type: "string", description: "A specific, better version they could use today" },
                   },
-                },
-                topThreeFixes: {
-                  type: "array",
-                  description: "The 3 highest-impact changes ranked by what would move the needle most",
-                  items: { type: "string" },
-                  minItems: 3,
-                  maxItems: 3,
-                },
-                redemption: {
-                  type: "string",
-                  description: "1-2 things the site genuinely does WELL. Be honest — if there's nothing, say so.",
+                  required: ["element", "whatYouSaid", "whatItSounds", "rewrite"],
                 },
               },
-              required: ["verdict", "grade", "burn", "annotations", "topThreeFixes", "redemption"],
-              additionalProperties: false,
+              topThreeFixes: {
+                type: "array",
+                description: "The 3 highest-impact changes ranked by what would move the needle most",
+                items: { type: "string" },
+                minItems: 3,
+                maxItems: 3,
+              },
+              redemption: {
+                type: "string",
+                description: "1-2 things the site genuinely does WELL. Be honest — if there's nothing, say so.",
+              },
             },
+            required: ["verdict", "grade", "burn", "annotations", "topThreeFixes", "redemption"],
           },
-        }],
-        tool_choice: { type: "function", function: { name: "roast_homepage" } },
-      }),
-    });
-
-    if (response.status === 429) {
-      return new Response(JSON.stringify({ error: "Rate limit reached. Try again shortly." }), {
-        status: 429, headers: { ...corsHeaders, "Content-Type": "application/json" },
+        },
       });
+    } catch (e) {
+      if (e instanceof ClaudeApiError) {
+        return new Response(JSON.stringify({ error: e.message }), {
+          status: e.status, headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
+      throw e;
     }
-    if (response.status === 402) {
-      return new Response(JSON.stringify({ error: "AI credits exhausted." }), {
-        status: 402, headers: { ...corsHeaders, "Content-Type": "application/json" },
-      });
-    }
-    if (!response.ok) {
-      console.error("AI error:", response.status, await response.text());
-      return new Response(JSON.stringify({ error: "AI service error" }), {
-        status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" },
-      });
-    }
-
-    const data = await response.json();
-    const args = data.choices?.[0]?.message?.tool_calls?.[0]?.function?.arguments;
-    if (!args) throw new Error("No roast result");
-    const result = JSON.parse(args);
 
     // Build a screenshot URL via a free public service so the client can show
     // an annotated preview alongside the critique. (Microlink offers a generous

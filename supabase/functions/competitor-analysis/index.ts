@@ -1,5 +1,6 @@
 import { requireAccess, ACCESS_CORS_HEADERS } from "../_shared/access.ts";
 import { safeFetch, normalizeUrl, SafeFetchError } from "../_shared/safeFetch.ts";
+import { callClaudeTool, ClaudeApiError } from "../_shared/anthropic.ts";
 const corsHeaders = ACCESS_CORS_HEADERS;
 
 interface SiteSnapshot {
@@ -46,9 +47,6 @@ Deno.serve(async (req) => {
         status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
-
-    const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
-    if (!LOVABLE_API_KEY) throw new Error("LOVABLE_API_KEY not configured");
 
     // Fetch all sites in parallel
     const allUrls = [yourUrl, ...competitorUrls.slice(0, 3)];
@@ -97,116 +95,92 @@ ${reachableCompetitors.map((c, i) => formatSite(c, `COMPETITOR ${i + 1}`)).join(
 
 Focus on: positioning differentiation, audience targeting, proof points, content depth, calls-to-action, and the strategic narrative each firm tells.`;
 
-    const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
-      method: "POST",
-      headers: { Authorization: `Bearer ${LOVABLE_API_KEY}`, "Content-Type": "application/json" },
-      body: JSON.stringify({
-        model: "google/gemini-2.5-flash",
-        messages: [
-          { role: "system", content: systemPrompt },
-          { role: "user", content: userPrompt },
-        ],
-        tools: [{
-          type: "function",
-          function: {
-            name: "competitor_analysis",
-            description: "Return a structured competitive positioning analysis",
-            parameters: {
-              type: "object",
-              properties: {
-                executiveSummary: {
-                  type: "string",
-                  description: "2-3 sentence high-level take on the competitive landscape and where the firm sits.",
+    let result: Record<string, unknown>;
+    try {
+      result = await callClaudeTool({
+        system: systemPrompt,
+        user: userPrompt,
+        tool: {
+          name: "competitor_analysis",
+          description: "Return a structured competitive positioning analysis",
+          input_schema: {
+            type: "object",
+            properties: {
+              executiveSummary: {
+                type: "string",
+                description: "2-3 sentence high-level take on the competitive landscape and where the firm sits.",
+              },
+              yourPositioning: {
+                type: "object",
+                properties: {
+                  summary: { type: "string", description: "How the reader's firm currently positions itself" },
+                  strengths: { type: "array", items: { type: "string" }, description: "2-4 things working in the firm's favor" },
+                  weaknesses: { type: "array", items: { type: "string" }, description: "2-4 specific positioning gaps" },
                 },
-                yourPositioning: {
+                required: ["summary", "strengths", "weaknesses"],
+              },
+              competitors: {
+                type: "array",
+                description: "One entry per competitor analyzed",
+                items: {
                   type: "object",
                   properties: {
-                    summary: { type: "string", description: "How the reader's firm currently positions itself" },
-                    strengths: { type: "array", items: { type: "string" }, description: "2-4 things working in the firm's favor" },
-                    weaknesses: { type: "array", items: { type: "string" }, description: "2-4 specific positioning gaps" },
+                    url: { type: "string" },
+                    positioning: { type: "string", description: "How this competitor positions themselves in 1 sentence" },
+                    doingBetter: { type: "array", items: { type: "string" }, description: "2-3 things they do better than the reader" },
+                    doingWorse: { type: "array", items: { type: "string" }, description: "1-2 things they do worse" },
                   },
-                  required: ["summary", "strengths", "weaknesses"],
-                },
-                competitors: {
-                  type: "array",
-                  description: "One entry per competitor analyzed",
-                  items: {
-                    type: "object",
-                    properties: {
-                      url: { type: "string" },
-                      positioning: { type: "string", description: "How this competitor positions themselves in 1 sentence" },
-                      doingBetter: { type: "array", items: { type: "string" }, description: "2-3 things they do better than the reader" },
-                      doingWorse: { type: "array", items: { type: "string" }, description: "1-2 things they do worse" },
-                    },
-                    required: ["url", "positioning", "doingBetter", "doingWorse"],
-                  },
-                },
-                gaps: {
-                  type: "array",
-                  description: "3-5 specific positioning/content/proof gaps the reader should close",
-                  items: {
-                    type: "object",
-                    properties: {
-                      gap: { type: "string" },
-                      why: { type: "string", description: "Why this matters competitively" },
-                    },
-                    required: ["gap", "why"],
-                  },
-                },
-                opportunities: {
-                  type: "array",
-                  description: "2-4 unclaimed positioning angles the reader could own",
-                  items: { type: "string" },
-                },
-                recommendedMoves: {
-                  type: "array",
-                  description: "5 concrete, ordered moves the firm should make in the next 90 days",
-                  items: {
-                    type: "object",
-                    properties: {
-                      move: { type: "string" },
-                      impact: { type: "string", enum: ["high", "medium", "low"] },
-                      effort: { type: "string", enum: ["low", "medium", "high"] },
-                    },
-                    required: ["move", "impact", "effort"],
-                  },
-                  minItems: 5,
-                  maxItems: 5,
+                  required: ["url", "positioning", "doingBetter", "doingWorse"],
                 },
               },
-              required: [
-                "executiveSummary", "yourPositioning", "competitors",
-                "gaps", "opportunities", "recommendedMoves",
-              ],
-              additionalProperties: false,
+              gaps: {
+                type: "array",
+                description: "3-5 specific positioning/content/proof gaps the reader should close",
+                items: {
+                  type: "object",
+                  properties: {
+                    gap: { type: "string" },
+                    why: { type: "string", description: "Why this matters competitively" },
+                  },
+                  required: ["gap", "why"],
+                },
+              },
+              opportunities: {
+                type: "array",
+                description: "2-4 unclaimed positioning angles the reader could own",
+                items: { type: "string" },
+              },
+              recommendedMoves: {
+                type: "array",
+                description: "5 concrete, ordered moves the firm should make in the next 90 days",
+                items: {
+                  type: "object",
+                  properties: {
+                    move: { type: "string" },
+                    impact: { type: "string", enum: ["high", "medium", "low"] },
+                    effort: { type: "string", enum: ["low", "medium", "high"] },
+                  },
+                  required: ["move", "impact", "effort"],
+                },
+                minItems: 5,
+                maxItems: 5,
+              },
             },
+            required: [
+              "executiveSummary", "yourPositioning", "competitors",
+              "gaps", "opportunities", "recommendedMoves",
+            ],
           },
-        }],
-        tool_choice: { type: "function", function: { name: "competitor_analysis" } },
-      }),
-    });
-
-    if (response.status === 429) {
-      return new Response(JSON.stringify({ error: "Rate limit reached. Try again shortly." }), {
-        status: 429, headers: { ...corsHeaders, "Content-Type": "application/json" },
+        },
       });
+    } catch (e) {
+      if (e instanceof ClaudeApiError) {
+        return new Response(JSON.stringify({ error: e.message }), {
+          status: e.status, headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
+      throw e;
     }
-    if (response.status === 402) {
-      return new Response(JSON.stringify({ error: "AI credits exhausted." }), {
-        status: 402, headers: { ...corsHeaders, "Content-Type": "application/json" },
-      });
-    }
-    if (!response.ok) {
-      console.error("AI error:", response.status, await response.text());
-      return new Response(JSON.stringify({ error: "AI service error" }), {
-        status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" },
-      });
-    }
-
-    const data = await response.json();
-    const args = data.choices?.[0]?.message?.tool_calls?.[0]?.function?.arguments;
-    if (!args) throw new Error("No analysis result");
-    const result = JSON.parse(args);
 
     return new Response(
       JSON.stringify({

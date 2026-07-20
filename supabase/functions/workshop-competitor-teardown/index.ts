@@ -1,6 +1,7 @@
 import { requireAccess, ACCESS_CORS_HEADERS } from "../_shared/access.ts";
 import { safeFetch, normalizeUrl, SafeFetchError } from "../_shared/safeFetch.ts";
 import { getCached, setCached } from "../_shared/cache.ts";
+import { callClaudeTool, ClaudeApiError } from "../_shared/anthropic.ts";
 
 const corsHeaders = ACCESS_CORS_HEADERS;
 
@@ -33,8 +34,6 @@ Deno.serve(async (req) => {
     const unauthorized = await requireAccess(req, corsHeaders, "workshop");
     if (unauthorized) return unauthorized;try {
     const { competitorUrl, pastedContent, ourAngle, firmContext } = await req.json();
-    const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
-    if (!LOVABLE_API_KEY) throw new Error("LOVABLE_API_KEY not configured");
 
     let block = "";
     let meta: Record<string, unknown> = {};
@@ -71,59 +70,48 @@ Deno.serve(async (req) => {
 
     const systemPrompt = `You are a senior law-firm positioning strategist. Tear down a single competitor: their actual positioning, the proof they lean on, the audience they're hunting, and — most importantly — the gaps and angles we can credibly own that they can't. Reference their actual copy.`;
 
-    const resp = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
-      method: "POST",
-      headers: { Authorization: `Bearer ${LOVABLE_API_KEY}`, "Content-Type": "application/json" },
-      body: JSON.stringify({
-        model: "google/gemini-2.5-flash",
-        messages: [{ role: "system", content: systemPrompt }, { role: "user", content: `${ctx ? ctx + "\n\n" : ""}${block}` }],
-        tools: [{
-          type: "function",
-          function: {
-            name: "teardown",
-            parameters: {
-              type: "object",
-              properties: {
-                positioning: { type: "string", description: "1-sentence summary of how they position themselves." },
-                idealClient: { type: "string", description: "Who they appear to be hunting." },
-                proofTactics: { type: "array", items: { type: "string" }, description: "2-4 specific credibility moves they use." },
-                strongMoves: { type: "array", items: { type: "string" }, description: "2-4 things they do well." },
-                weakSpots: { type: "array", items: { type: "string" }, description: "2-4 weaknesses or generic plays." },
-                gaps: { type: "array", items: { type: "string" }, description: "3-5 unclaimed positions we could own." },
-                differentiationAngles: {
-                  type: "array",
-                  items: {
-                    type: "object",
-                    properties: {
-                      angle: { type: "string" },
-                      proofWeWouldNeed: { type: "string" },
-                    },
-                    required: ["angle", "proofWeWouldNeed"],
+    let result: Record<string, unknown>;
+    try {
+      result = await callClaudeTool({
+        system: systemPrompt,
+        user: `${ctx ? ctx + "\n\n" : ""}${block}`,
+        tool: {
+          name: "teardown",
+          description: "Return a structured competitor teardown",
+          input_schema: {
+            type: "object",
+            properties: {
+              positioning: { type: "string", description: "1-sentence summary of how they position themselves." },
+              idealClient: { type: "string", description: "Who they appear to be hunting." },
+              proofTactics: { type: "array", items: { type: "string" }, description: "2-4 specific credibility moves they use." },
+              strongMoves: { type: "array", items: { type: "string" }, description: "2-4 things they do well." },
+              weakSpots: { type: "array", items: { type: "string" }, description: "2-4 weaknesses or generic plays." },
+              gaps: { type: "array", items: { type: "string" }, description: "3-5 unclaimed positions we could own." },
+              differentiationAngles: {
+                type: "array",
+                items: {
+                  type: "object",
+                  properties: {
+                    angle: { type: "string" },
+                    proofWeWouldNeed: { type: "string" },
                   },
-                  description: "3 sharp ways to differentiate, with the proof needed.",
+                  required: ["angle", "proofWeWouldNeed"],
                 },
-                ifIWereThem: { type: "string", description: "What this competitor would do next if they were smart — so we get there first." },
+                description: "3 sharp ways to differentiate, with the proof needed.",
               },
-              required: ["positioning", "idealClient", "proofTactics", "strongMoves", "weakSpots", "gaps", "differentiationAngles", "ifIWereThem"],
-              additionalProperties: false,
+              ifIWereThem: { type: "string", description: "What this competitor would do next if they were smart — so we get there first." },
             },
+            required: ["positioning", "idealClient", "proofTactics", "strongMoves", "weakSpots", "gaps", "differentiationAngles", "ifIWereThem"],
           },
-        }],
-        tool_choice: { type: "function", function: { name: "teardown" } },
-      }),
-    });
-
-    if (resp.status === 429) return new Response(JSON.stringify({ error: "Rate limit reached." }), { status: 429, headers: { ...corsHeaders, "Content-Type": "application/json" } });
-    if (resp.status === 402) return new Response(JSON.stringify({ error: "AI credits exhausted." }), { status: 402, headers: { ...corsHeaders, "Content-Type": "application/json" } });
-    if (!resp.ok) {
-      console.error("AI error:", resp.status, await resp.text());
-      return new Response(JSON.stringify({ error: "AI service error" }), { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } });
+        },
+      });
+    } catch (e) {
+      if (e instanceof ClaudeApiError) {
+        return new Response(JSON.stringify({ error: e.message }), { status: e.status, headers: { ...corsHeaders, "Content-Type": "application/json" } });
+      }
+      throw e;
     }
-    const data = await resp.json();
-    const args = data.choices?.[0]?.message?.tool_calls?.[0]?.function?.arguments;
-    if (!args) throw new Error("No result");
-    const parsed = JSON.parse(args);
-    const out = { ...parsed, meta };
+    const out = { ...result, meta };
     if (cacheKey && competitorUrl) await setCached(cacheKey, "workshop-competitor-teardown", competitorUrl, out);
     return new Response(JSON.stringify(out), { headers: { ...corsHeaders, "Content-Type": "application/json" } });
   } catch (e) {
