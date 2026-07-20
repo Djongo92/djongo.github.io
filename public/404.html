@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>Redirecting…</title>
+    <script type="text/javascript">
+      // GitHub Pages has no server-side rewrites, so a direct hit or refresh
+      // on a client-side route (e.g. /rankings/serbia) 404s. This encodes the
+      // path into a query string and sends the browser back to index.html,
+      // which decodes it (see the inline script in index.html) before the
+      // router ever sees it. Standard rafgraph/spa-github-pages pattern.
+      var pathSegmentsToKeep = 1; // keep "/djongo.github.io"
+      var l = window.location;
+      l.replace(
+        l.protocol + "//" + l.hostname + (l.port ? ":" + l.port : "") +
+        l.pathname.split("/").slice(0, 1 + pathSegmentsToKeep).join("/") + "/?/" +
+        l.pathname.slice(1).split("/").slice(pathSegmentsToKeep).join("/").replace(/&/g, "~and~") +
+        (l.search ? "&" + l.search.slice(1).replace(/&/g, "~and~") : "") +
+        l.hash
+      );
+    </script>
+  </head>
+  <body></body>
+</html>

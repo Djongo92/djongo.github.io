@@ -16,7 +16,7 @@ const App = () => (
     <TooltipProvider>
       <Toaster />
       <Sonner />
-      <BrowserRouter>
+      <BrowserRouter basename="/djongo.github.io">
         <Routes>
           <Route path="/" element={<Index />} />
           <Route path="/share/:id" element={<Share />} />
