@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, lazy, Suspense } from "react";
 import PasswordGate from "@/components/PasswordGate";
 import TableOfContents from "@/components/TableOfContents";
 import ChapterView from "@/components/ChapterView";
@@ -17,9 +17,17 @@ import { useImplementation } from "@/hooks/useImplementation";
 import { useFirmContext } from "@/hooks/useFirmContext";
 import { useAmbientMode, useScrollVelocity } from "@/hooks/useAmbientMode";
 import { AnimatePresence, motion } from "framer-motion";
-import { hasValidAccess } from "@/lib/edgeAuth";
+import { hasValidAccess, edgeHeaders } from "@/lib/edgeAuth";
+import { getOrCreateClientId } from "@/lib/clientId";
+import type { AuditRow, HistoryRow } from "@/components/dashboard/VisibilityDashboard";
 
-type AppView = "home" | "chapter" | "dashboard" | "bookmarks" | "workshop";
+// Pulls in recharts — lazy-load so it's only fetched for returning firms
+// who actually have visibility data, not on every guidebook page load.
+const VisibilityDashboard = lazy(() => import("@/components/dashboard/VisibilityDashboard"));
+
+const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL as string;
+
+type AppView = "home" | "chapter" | "dashboard" | "bookmarks" | "workshop" | "visibility-dashboard";
 
 const Index = () => {
   const [authenticated, setAuthenticated] = useState(false);
@@ -27,6 +35,7 @@ const Index = () => {
   useScrollVelocity();
   const [currentChapterId, setCurrentChapterId] = useState<string | null>(null);
   const [view, setView] = useState<AppView>("home");
+  const [visibilityData, setVisibilityData] = useState<{ audits: AuditRow[]; history: HistoryRow[] } | null>(null);
   const { bookmarks, toggleBookmark, isBookmarked } = useBookmarks();
   const { readChapters, lastReadChapterId, markAsRead } = useReadingProgress();
   const checklistState = useChecklists();
@@ -39,6 +48,35 @@ const Index = () => {
   useEffect(() => {
     if (hasValidAccess("guidebook")) setAuthenticated(true);
   }, []);
+
+  // Returning firms with an existing visibility audit land on the dashboard
+  // instead of the table of contents. First-time visitors (no audit row)
+  // see the guidebook home unchanged — don't force a score nobody has yet.
+  useEffect(() => {
+    if (!authenticated) return;
+    let cancelled = false;
+    (async () => {
+      try {
+        const clientId = getOrCreateClientId();
+        const resp = await fetch(`${SUPABASE_URL}/functions/v1/visibility-audit-get`, {
+          method: "POST",
+          headers: edgeHeaders("benchmark"),
+          body: JSON.stringify({ clientId }),
+        });
+        const data = await resp.json();
+        if (cancelled || !resp.ok) return;
+        if (data.audits?.length > 0) {
+          setVisibilityData(data);
+          setView((v) => (v === "home" ? "visibility-dashboard" : v));
+        }
+      } catch {
+        // First-time visitors just keep the guidebook home — no error needed.
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [authenticated]);
 
   // Prompt for personalization once per session, after auth
   useEffect(() => {
@@ -64,7 +102,7 @@ const Index = () => {
 
   const handleBack = () => {
     setCurrentChapterId(null);
-    setView("home");
+    setView(visibilityData ? "visibility-dashboard" : "home");
     window.scrollTo(0, 0);
   };
 
@@ -124,6 +162,34 @@ const Index = () => {
 
   if (view === "workshop") {
     return <Workshop onBack={handleBack} />;
+  }
+
+  if (view === "visibility-dashboard" && visibilityData) {
+    return (
+      <>
+        <Suspense fallback={<div className="min-h-screen bg-background" />}>
+          <VisibilityDashboard
+            audits={visibilityData.audits}
+            history={visibilityData.history}
+            onOpenTableOfContents={() => {
+              setView("home");
+              window.scrollTo(0, 0);
+            }}
+            onOpenWorkshop={() => {
+              setView("workshop");
+              window.scrollTo(0, 0);
+            }}
+          />
+        </Suspense>
+        <MobileNav
+          currentView="home"
+          onNavigate={handleMobileNav}
+          onOpenSearch={handleOpenSearch}
+          bookmarkCount={bookmarks.length}
+        />
+        {advisorAndOnboarding(true)}
+      </>
+    );
   }
 
   if (view === "dashboard") {

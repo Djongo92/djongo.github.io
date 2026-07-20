@@ -153,6 +153,25 @@ Deno.serve(async (req) => {
       });
     }
 
+    // Append-only snapshot so a returning firm can see their own score over
+    // time — the upsert above overwrites the same row, so this is the only
+    // history that exists. Logged, never blocks the response if it fails.
+    const { error: historyError } = await serviceClient
+      .from("market_visibility_audit_history")
+      .insert({
+        client_id: clientId,
+        audited_domain: auditedDomain,
+        market,
+        peer_group: peerGroup,
+        performance_score: performance.score,
+        social_score: social.score,
+        seo_authority_score: seoAuthority.score,
+        thought_leadership_score: thoughtLeadership.score,
+        reputation_score: reputation.score,
+        total_score: savedRow.total_score,
+      });
+    if (historyError) console.error("visibility-audit-run history insert error:", historyError);
+
     const percentileResult = await computePercentile(serviceClient, market, peerGroup, savedRow.total_score);
 
     return new Response(JSON.stringify({
