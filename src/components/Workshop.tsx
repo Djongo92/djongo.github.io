@@ -105,7 +105,7 @@ const Workshop = ({ onBack }: Props) => {
               onClick={onBack}
               className="text-xs text-muted-foreground hover:text-primary font-body mt-3 inline-flex items-center gap-1"
             >
-              <ArrowLeft className="w-3 h-3" /> Back to Guidebook
+              <ArrowLeft className="w-3 h-3" /> Back to Dashboard
             </button>
           </motion.form>
         </motion.div>
@@ -138,7 +138,7 @@ const Workshop = ({ onBack }: Props) => {
             </button>
           ) : (
             <button onClick={onBack} className="flex items-center gap-2 text-sm text-muted-foreground hover:text-primary font-body">
-              <ArrowLeft className="w-4 h-4" /> Guidebook
+              <ArrowLeft className="w-4 h-4" /> Dashboard
             </button>
           )}
           <div className="flex items-center gap-3">
