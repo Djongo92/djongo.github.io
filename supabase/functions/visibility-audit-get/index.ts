@@ -40,7 +40,17 @@ Deno.serve(async (req) => {
       });
     }
 
-    return new Response(JSON.stringify({ audits: data ?? [] }), {
+    // History for the dashboard's trend line — every snapshot ever recorded
+    // for this client, newest first. The frontend groups by domain+market.
+    const { data: history, error: historyError } = await serviceClient
+      .from("market_visibility_audit_history")
+      .select("audited_domain, market, peer_group, total_score, performance_score, social_score, seo_authority_score, thought_leadership_score, reputation_score, recorded_at")
+      .eq("client_id", clientId)
+      .order("recorded_at", { ascending: true });
+
+    if (historyError) console.error("visibility-audit-get history error:", historyError);
+
+    return new Response(JSON.stringify({ audits: data ?? [], history: history ?? [] }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
   } catch (e) {
