@@ -1,9 +1,9 @@
-import { useState, useEffect, useCallback, lazy, Suspense } from "react";
+import { useState, useEffect, lazy, Suspense } from "react";
 import PasswordGate from "@/components/PasswordGate";
 import TableOfContents from "@/components/TableOfContents";
 import ChapterView from "@/components/ChapterView";
 import ProgressDashboard from "@/components/ProgressDashboard";
-import MobileNav from "@/components/MobileNav";
+import AppShell, { Section } from "@/components/AppShell";
 import GlobalAdvisor from "@/components/GlobalAdvisor";
 import PersonalizeOnboarding from "@/components/PersonalizeOnboarding";
 import Workshop from "@/components/Workshop";
@@ -21,21 +21,26 @@ import { hasValidAccess, edgeHeaders } from "@/lib/edgeAuth";
 import { getOrCreateClientId } from "@/lib/clientId";
 import type { AuditRow, HistoryRow } from "@/components/dashboard/VisibilityDashboard";
 
-// Pulls in recharts — lazy-load so it's only fetched for returning firms
-// who actually have visibility data, not on every guidebook page load.
+// Pulls in recharts — lazy-load so it's only fetched when the Dashboard
+// section is actually visited, not on every page load.
 const VisibilityDashboard = lazy(() => import("@/components/dashboard/VisibilityDashboard"));
 
 const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL as string;
 
-type AppView = "home" | "chapter" | "dashboard" | "bookmarks" | "workshop" | "visibility-dashboard";
+type GuidebookView = "toc" | "chapter" | "progress" | "bookmarks";
 
 const Index = () => {
   const [authenticated, setAuthenticated] = useState(false);
   useAmbientMode();
   useScrollVelocity();
+
+  // Dashboard is the app's home — every section lives inside the same
+  // persistent shell (AppShell) instead of replacing the whole screen.
+  const [section, setSection] = useState<Section>("dashboard");
+  const [guidebookView, setGuidebookView] = useState<GuidebookView>("toc");
   const [currentChapterId, setCurrentChapterId] = useState<string | null>(null);
-  const [view, setView] = useState<AppView>("home");
   const [visibilityData, setVisibilityData] = useState<{ audits: AuditRow[]; history: HistoryRow[] } | null>(null);
+
   const { bookmarks, toggleBookmark, isBookmarked } = useBookmarks();
   const { readChapters, lastReadChapterId, markAsRead } = useReadingProgress();
   const checklistState = useChecklists();
@@ -49,9 +54,9 @@ const Index = () => {
     if (hasValidAccess("guidebook")) setAuthenticated(true);
   }, []);
 
-  // Returning firms with an existing visibility audit land on the dashboard
-  // instead of the table of contents. First-time visitors (no audit row)
-  // see the guidebook home unchanged — don't force a score nobody has yet.
+  // Fetch the firm's own visibility data once authenticated — the
+  // Dashboard section renders its own empty state if there isn't any yet,
+  // so nothing here decides what the home view is; Dashboard always is.
   useEffect(() => {
     if (!authenticated) return;
     let cancelled = false;
@@ -65,12 +70,9 @@ const Index = () => {
         });
         const data = await resp.json();
         if (cancelled || !resp.ok) return;
-        if (data.audits?.length > 0) {
-          setVisibilityData(data);
-          setView((v) => (v === "home" ? "visibility-dashboard" : v));
-        }
+        setVisibilityData(data);
       } catch {
-        // First-time visitors just keep the guidebook home — no error needed.
+        // No audit yet (or the fetch failed) — Dashboard's empty state covers this.
       }
     })();
     return () => {
@@ -89,20 +91,23 @@ const Index = () => {
     }
   }, [authenticated, hasContext]);
 
-  const handleAuthenticated = () => {
-    setAuthenticated(true);
-  };
+  const handleAuthenticated = () => setAuthenticated(true);
 
   const handleSelectChapter = (id: string) => {
     setCurrentChapterId(id);
-    setView("chapter");
+    setGuidebookView("chapter");
     markAsRead(id);
     window.scrollTo(0, 0);
   };
 
-  const handleBack = () => {
+  const handleBackToToc = () => {
     setCurrentChapterId(null);
-    setView(visibilityData ? "visibility-dashboard" : "home");
+    setGuidebookView("toc");
+    window.scrollTo(0, 0);
+  };
+
+  const goToSection = (s: Section) => {
+    setSection(s);
     window.scrollTo(0, 0);
   };
 
@@ -120,25 +125,6 @@ const Index = () => {
     const note = annotationState.getAnnotation(c.id);
     if (note) allAnnotations[c.id] = note;
   });
-
-  const handleOpenSearch = useCallback(() => {
-    // Trigger Cmd+K
-    document.dispatchEvent(new KeyboardEvent("keydown", { key: "k", metaKey: true }));
-  }, []);
-
-  const handleMobileNav = (navView: string) => {
-    if (navView === "home") {
-      handleBack();
-    } else if (navView === "dashboard") {
-      setView("dashboard");
-      setCurrentChapterId(null);
-      window.scrollTo(0, 0);
-    } else if (navView === "bookmarks") {
-      setView("bookmarks");
-      setCurrentChapterId(null);
-      window.scrollTo(0, 0);
-    }
-  };
 
   if (!authenticated) {
     return <PasswordGate onAuthenticated={handleAuthenticated} />;
@@ -160,71 +146,11 @@ const Index = () => {
     </>
   );
 
-  if (view === "workshop") {
-    return <Workshop onBack={handleBack} />;
-  }
-
-  if (view === "visibility-dashboard" && visibilityData) {
-    return (
-      <>
-        <Suspense fallback={<div className="min-h-screen bg-background" />}>
-          <VisibilityDashboard
-            audits={visibilityData.audits}
-            history={visibilityData.history}
-            onOpenTableOfContents={() => {
-              setView("home");
-              window.scrollTo(0, 0);
-            }}
-            onOpenWorkshop={() => {
-              setView("workshop");
-              window.scrollTo(0, 0);
-            }}
-          />
-        </Suspense>
-        <MobileNav
-          currentView="home"
-          onNavigate={handleMobileNav}
-          onOpenSearch={handleOpenSearch}
-          bookmarkCount={bookmarks.length}
-        />
-        {advisorAndOnboarding(true)}
-      </>
-    );
-  }
-
-  if (view === "dashboard") {
-    return (
-      <>
-        <ProgressDashboard
-          readChapters={readChapters}
-          bookmarks={bookmarks}
-          implementationScore={overallImplScore}
-          annotations={allAnnotations}
-          onBack={handleBack}
-          onSelectChapter={handleSelectChapter}
-          getChapterScore={implementationState.getChapterScore}
-          isImplemented={implementationState.isImplemented}
-          onOpenPersonalize={() => setPersonalizeOpen(true)}
-          onOpenMaturity={() => setMaturityOpen(true)}
-          onOpenWorkshop={() => { setView("workshop"); window.scrollTo(0, 0); }}
-        />
-        <MobileNav
-          currentView="dashboard"
-          onNavigate={handleMobileNav}
-          onOpenSearch={handleOpenSearch}
-          bookmarkCount={bookmarks.length}
-        />
-        {advisorAndOnboarding(true)}
-      </>
-    );
-  }
-
-  if (view === "chapter" && currentChapterId) {
-    const currentIndex = chapters.findIndex((c) => c.id === currentChapterId);
-    const chapter = chapters[currentIndex];
-
-    return (
-      <>
+  const renderGuidebook = () => {
+    if (guidebookView === "chapter" && currentChapterId) {
+      const currentIndex = chapters.findIndex((c) => c.id === currentChapterId);
+      const chapter = chapters[currentIndex];
+      return (
         <AnimatePresence mode="wait">
           <motion.div
             key={chapter.id}
@@ -235,16 +161,10 @@ const Index = () => {
           >
             <ChapterView
               chapter={chapter}
-              onBack={handleBack}
-              onPrev={
-                currentIndex > 0
-                  ? () => handleSelectChapter(chapters[currentIndex - 1].id)
-                  : undefined
-              }
+              onBack={handleBackToToc}
+              onPrev={currentIndex > 0 ? () => handleSelectChapter(chapters[currentIndex - 1].id) : undefined}
               onNext={
-                currentIndex < chapters.length - 1
-                  ? () => handleSelectChapter(chapters[currentIndex + 1].id)
-                  : undefined
+                currentIndex < chapters.length - 1 ? () => handleSelectChapter(chapters[currentIndex + 1].id) : undefined
               }
               isBookmarked={isBookmarked(chapter.id)}
               onToggleBookmark={() => toggleBookmark(chapter.id)}
@@ -254,53 +174,28 @@ const Index = () => {
             />
           </motion.div>
         </AnimatePresence>
-        <MobileNav
-          currentView="home"
-          onNavigate={handleMobileNav}
-          onOpenSearch={handleOpenSearch}
-          bookmarkCount={bookmarks.length}
-        />
-        {/* No floating advisor while reading — keep the focus on the page */}
-        {advisorAndOnboarding(false)}
-      </>
-    );
-  }
+      );
+    }
 
-  if (view === "bookmarks") {
-    return (
-      <>
-        <TableOfContents
-          onSelectChapter={handleSelectChapter}
-          bookmarks={bookmarks}
-          onToggleBookmark={toggleBookmark}
+    if (guidebookView === "progress") {
+      return (
+        <ProgressDashboard
           readChapters={readChapters}
-          lastReadChapterId={lastReadChapterId}
+          bookmarks={bookmarks}
           implementationScore={overallImplScore}
-          onOpenDashboard={() => {
-            setView("dashboard");
-            window.scrollTo(0, 0);
-          }}
-        onOpenWorkshop={() => { setView("workshop"); window.scrollTo(0, 0); }}
-        onOpenMaturity={() => setMaturityOpen(true)}
-          onlyBookmarks
-          onSetMode={(m) => {
-            setView(m === "saved" ? "bookmarks" : "home");
-            window.scrollTo(0, 0);
-          }}
+          annotations={allAnnotations}
+          onBack={() => setGuidebookView("toc")}
+          onSelectChapter={handleSelectChapter}
+          getChapterScore={implementationState.getChapterScore}
+          isImplemented={implementationState.isImplemented}
+          onOpenPersonalize={() => setPersonalizeOpen(true)}
+          onOpenMaturity={() => setMaturityOpen(true)}
+          onOpenWorkshop={() => goToSection("workshop")}
         />
-        <MobileNav
-          currentView="bookmarks"
-          onNavigate={handleMobileNav}
-          onOpenSearch={handleOpenSearch}
-          bookmarkCount={bookmarks.length}
-        />
-        {advisorAndOnboarding(true)}
-      </>
-    );
-  }
+      );
+    }
 
-  return (
-    <>
+    return (
       <TableOfContents
         onSelectChapter={handleSelectChapter}
         bookmarks={bookmarks}
@@ -308,24 +203,31 @@ const Index = () => {
         readChapters={readChapters}
         lastReadChapterId={lastReadChapterId}
         implementationScore={overallImplScore}
-        onOpenDashboard={() => {
-          setView("dashboard");
-          window.scrollTo(0, 0);
-        }}
-        onOpenWorkshop={() => { setView("workshop"); window.scrollTo(0, 0); }}
+        onOpenDashboard={() => setGuidebookView("progress")}
+        onOpenWorkshop={() => goToSection("workshop")}
         onOpenMaturity={() => setMaturityOpen(true)}
-          onSetMode={(m) => {
-            setView(m === "saved" ? "bookmarks" : "home");
-            window.scrollTo(0, 0);
-          }}
+        onlyBookmarks={guidebookView === "bookmarks"}
+        onSetMode={(m) => setGuidebookView(m === "saved" ? "bookmarks" : "toc")}
       />
-      <MobileNav
-        currentView="home"
-        onNavigate={handleMobileNav}
-        onOpenSearch={handleOpenSearch}
-        bookmarkCount={bookmarks.length}
-      />
-      {advisorAndOnboarding(true)}
+    );
+  };
+
+  return (
+    <>
+      <AppShell active={section} onNavigate={goToSection}>
+        {section === "dashboard" && (
+          <Suspense fallback={<div className="min-h-screen bg-background" />}>
+            <VisibilityDashboard
+              audits={visibilityData?.audits ?? []}
+              history={visibilityData?.history ?? []}
+              onOpenWorkshop={() => goToSection("workshop")}
+            />
+          </Suspense>
+        )}
+        {section === "workshop" && <Workshop onBack={() => goToSection("dashboard")} />}
+        {section === "guidebook" && renderGuidebook()}
+      </AppShell>
+      {advisorAndOnboarding(section !== "guidebook" || guidebookView !== "chapter")}
     </>
   );
 };

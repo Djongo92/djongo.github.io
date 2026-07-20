@@ -1,7 +1,7 @@
 import { useMemo, useState } from "react";
 import { motion } from "framer-motion";
 import { ResponsiveContainer, LineChart, Line, XAxis, YAxis, Tooltip } from "recharts";
-import { ArrowRight, ShieldCheck, TrendingUp, BookOpen, Hammer, AlertTriangle } from "lucide-react";
+import { ArrowRight, ShieldCheck, TrendingUp, Hammer, AlertTriangle } from "lucide-react";
 import { useNextBestAction } from "@/hooks/useNextBestAction";
 import { PEER_GROUPS } from "@/lib/marketVisibilityConfig";
 import MarketVisibilityScore from "@/components/MarketVisibilityScore";
@@ -49,11 +49,10 @@ export interface HistoryRow {
 interface VisibilityDashboardProps {
   audits: AuditRow[];
   history: HistoryRow[];
-  onOpenTableOfContents: () => void;
   onOpenWorkshop: () => void;
 }
 
-const VisibilityDashboard = ({ audits, history, onOpenTableOfContents, onOpenWorkshop }: VisibilityDashboardProps) => {
+const VisibilityDashboard = ({ audits, history, onOpenWorkshop }: VisibilityDashboardProps) => {
   const [rerunOpen, setRerunOpen] = useState(false);
   const primary = audits[0];
 
@@ -94,26 +93,54 @@ const VisibilityDashboard = ({ audits, history, onOpenTableOfContents, onOpenWor
       }));
   }, [history, primary]);
 
-  if (!primary || !categories) return null;
+  if (!primary || !categories) {
+    return (
+      <div className="min-h-screen bg-background">
+        <header className="max-w-4xl mx-auto px-6 pt-12 pb-8">
+          <div className="flex items-center gap-2 mb-2">
+            <ShieldCheck className="w-4 h-4 text-emerald-500" />
+            <span className="text-[10px] tracking-[0.2em] uppercase text-emerald-500 font-body">Market Visibility</span>
+          </div>
+          <h1 className="font-display text-3xl font-semibold text-foreground tracking-tight mb-2">
+            Let's see where you stand
+          </h1>
+          <p className="text-sm text-muted-foreground font-body max-w-md">
+            Run a real, externally-sourced audit of your firm's digital footprint — PageSpeed, legal-directory
+            presence, thought-leadership cadence — benchmarked against your peer group. This becomes your home
+            once it's run.
+          </p>
+        </header>
+
+        <div className="max-w-4xl mx-auto px-6 mb-10">
+          <MarketVisibilityScore />
+        </div>
+
+        <div className="max-w-4xl mx-auto px-6 pb-16">
+          <div className="bg-gradient-to-br from-primary/10 to-transparent border border-primary/30 rounded-sm p-6">
+            <div className="flex items-center gap-2 mb-3">
+              <Hammer className="w-4 h-4 text-primary" />
+              <span className="text-[10px] tracking-[0.2em] uppercase text-primary font-body">In the meantime</span>
+            </div>
+            <p className="text-sm text-secondary-foreground/80 font-body mb-4">
+              The Workshop's ten AI tools don't need an audit to be useful — draft copy, audit a page, generate a
+              marketing calendar, whatever you need right now.
+            </p>
+            <button
+              onClick={onOpenWorkshop}
+              className="inline-flex items-center gap-1.5 text-sm text-primary hover:text-gold-light font-body"
+            >
+              Open the Workshop <ArrowRight className="w-3.5 h-3.5" />
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   const peerGroupLabel = PEER_GROUPS.find((p) => p.value === primary.peer_group)?.label ?? primary.peer_group;
 
   return (
     <div className="min-h-screen bg-background">
-      <nav className="sticky top-0 z-10 bg-background/90 backdrop-blur-sm border-b border-border/50">
-        <div className="max-w-4xl mx-auto px-6 py-3 flex items-center justify-between">
-          <span className="text-sm font-body text-foreground font-medium">
-            {primary.display_name || primary.audited_domain}
-          </span>
-          <button
-            onClick={onOpenTableOfContents}
-            className="flex items-center gap-2 text-sm text-muted-foreground hover:text-primary transition-colors font-body"
-          >
-            <BookOpen className="w-4 h-4" /> Browse the guidebook
-          </button>
-        </div>
-      </nav>
-
       <header className="max-w-4xl mx-auto px-6 pt-12 pb-8">
         <div className="flex items-center gap-2 mb-2">
           <ShieldCheck className="w-4 h-4 text-emerald-500" />
