@@ -1,7 +1,7 @@
 import { useMemo, useState } from "react";
 import { motion } from "framer-motion";
 import { ResponsiveContainer, LineChart, Line, XAxis, YAxis, Tooltip } from "recharts";
-import { ArrowRight, ShieldCheck, TrendingUp, BookOpen, Hammer } from "lucide-react";
+import { ArrowRight, ShieldCheck, TrendingUp, BookOpen, Hammer, AlertTriangle } from "lucide-react";
 import { useNextBestAction } from "@/hooks/useNextBestAction";
 import { PEER_GROUPS } from "@/lib/marketVisibilityConfig";
 import MarketVisibilityScore from "@/components/MarketVisibilityScore";
@@ -27,6 +27,15 @@ export interface AuditRow {
   reputation_score: number;
   total_score: number;
   provenance: Record<string, string>;
+  raw_metrics?: {
+    siteHealth?: {
+      hasContactForm: boolean;
+      copyrightYear: number | null;
+      copyrightStale: boolean;
+      brokenLinks: string[];
+      checkedLinks: number;
+    } | null;
+  };
   updated_at: string;
 }
 
@@ -60,6 +69,20 @@ const VisibilityDashboard = ({ audits, history, onOpenTableOfContents, onOpenWor
   }, [primary]);
 
   const nextBestAction = useNextBestAction(categories);
+
+  const siteHealthIssues = useMemo(() => {
+    const health = primary?.raw_metrics?.siteHealth;
+    if (!health) return [];
+    const issues: string[] = [];
+    if (!health.hasContactForm) issues.push("No contact form detected on your homepage.");
+    if (health.copyrightStale && health.copyrightYear) {
+      issues.push(`Your footer copyright year (${health.copyrightYear}) looks out of date.`);
+    }
+    if (health.brokenLinks.length > 0) {
+      issues.push(`${health.brokenLinks.length} broken link${health.brokenLinks.length > 1 ? "s" : ""} found on your homepage.`);
+    }
+    return issues;
+  }, [primary]);
 
   const trend = useMemo(() => {
     if (!primary) return [];
@@ -149,6 +172,22 @@ const VisibilityDashboard = ({ audits, history, onOpenTableOfContents, onOpenWor
           );
         })}
       </div>
+
+      {siteHealthIssues.length > 0 && (
+        <div className="max-w-4xl mx-auto px-6 mb-10">
+          <div className="bg-card border border-amber-500/30 rounded-sm p-5">
+            <div className="flex items-center gap-2 mb-3">
+              <AlertTriangle className="w-4 h-4 text-amber-500" />
+              <span className="text-[10px] tracking-[0.2em] uppercase text-amber-500 font-body">Site health</span>
+            </div>
+            <ul className="space-y-1.5">
+              {siteHealthIssues.map((issue) => (
+                <li key={issue} className="text-sm text-secondary-foreground/80 font-body">{issue}</li>
+              ))}
+            </ul>
+          </div>
+        </div>
+      )}
 
       {nextBestAction && (
         <div className="max-w-4xl mx-auto px-6 mb-10">
