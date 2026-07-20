@@ -131,6 +131,29 @@ const Index = () => {
     }, 50);
   };
 
+  // Sidebar identity + alert dot — a lightweight version of the same
+  // "is anything worth reviewing" check CommandCenter's insights feed
+  // does, so the nav itself can flag it without duplicating that hook.
+  const primaryAudit = visibilityData?.audits[0];
+  const firmName = primaryAudit?.display_name || primaryAudit?.audited_domain;
+  const scoreLabel = primaryAudit ? `${Math.round(primaryAudit.total_score)} / 200` : undefined;
+  const weakCategoryChecks: { score: number; max: number; provenance?: string }[] = primaryAudit
+    ? [
+        { score: primaryAudit.performance_score, max: 20, provenance: primaryAudit.provenance?.performance },
+        { score: primaryAudit.social_score, max: 20, provenance: primaryAudit.provenance?.social },
+        { score: primaryAudit.thought_leadership_score, max: 45, provenance: primaryAudit.provenance?.thoughtLeadership },
+        { score: primaryAudit.reputation_score, max: 55, provenance: primaryAudit.provenance?.reputation },
+      ]
+    : [];
+  const hasWeakCategory = weakCategoryChecks.some(
+    ({ score, max, provenance }) => provenance !== "missing" && score / max < 0.5,
+  );
+  const siteHealth = primaryAudit?.raw_metrics?.siteHealth;
+  const hasSiteHealthIssue = Boolean(
+    siteHealth && (!siteHealth.hasContactForm || siteHealth.copyrightStale || siteHealth.brokenLinks.length > 0),
+  );
+  const hasAlerts = hasWeakCategory || hasSiteHealthIssue;
+
   // Calculate overall implementation score
   const chapterActions = chapters
     .filter((c) => c.actionItems && c.actionItems.length > 0)
@@ -239,6 +262,10 @@ const Index = () => {
         onNavigate={goToSection}
         demoMode={isDemoMode()}
         onExitDemo={disableDemoMode}
+        firmName={firmName}
+        scoreLabel={scoreLabel}
+        hasAlerts={hasAlerts}
+        onOpenSettings={() => setPersonalizeOpen(true)}
       >
         {section === "dashboard" && (
           <Suspense fallback={<div className="min-h-screen bg-background" />}>

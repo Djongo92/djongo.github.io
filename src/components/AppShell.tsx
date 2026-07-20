@@ -1,5 +1,5 @@
 import { ReactNode } from "react";
-import { LayoutDashboard, Hammer, BookOpen, FlaskConical } from "lucide-react";
+import { LayoutDashboard, Hammer, BookOpen, FlaskConical, Settings, Circle } from "lucide-react";
 
 export type Section = "dashboard" | "workshop" | "guidebook";
 
@@ -9,6 +9,10 @@ interface AppShellProps {
   children: ReactNode;
   demoMode?: boolean;
   onExitDemo?: () => void;
+  firmName?: string;
+  scoreLabel?: string;
+  hasAlerts?: boolean;
+  onOpenSettings?: () => void;
 }
 
 const NAV_ITEMS: { id: Section; label: string; icon: typeof LayoutDashboard }[] = [
@@ -20,26 +24,38 @@ const NAV_ITEMS: { id: Section; label: string; icon: typeof LayoutDashboard }[] 
 /**
  * Persistent app shell — the thing every section lives inside, so moving
  * between Dashboard/Workshop/Guidebook is in-app navigation, not a
- * full-screen takeover you have to "back" out of. Desktop gets a fixed
- * left sidebar; mobile gets a bottom tab bar (same nav model as the
- * guidebook's old MobileNav, just three sections instead of four).
+ * full-screen takeover you have to "back" out of. Desktop gets a fixed,
+ * sticky left sidebar; mobile gets a bottom tab bar.
  */
-const AppShell = ({ active, onNavigate, children, demoMode, onExitDemo }: AppShellProps) => {
+const AppShell = ({
+  active, onNavigate, children, demoMode, onExitDemo, firmName, scoreLabel, hasAlerts, onOpenSettings,
+}: AppShellProps) => {
   return (
     <div className="min-h-screen bg-background md:flex">
-      {/* Desktop sidebar */}
-      <aside className="hidden md:flex md:flex-col md:w-56 md:shrink-0 md:border-r md:border-border/50 md:bg-card/40">
+      {/* Desktop sidebar — sticky so it stays put while content scrolls */}
+      <aside className="hidden md:flex md:flex-col md:w-56 md:shrink-0 md:sticky md:top-0 md:h-screen md:overflow-y-auto md:border-r md:border-border/50 md:bg-card/40">
         <div className="px-6 pt-8 pb-6">
           <span className="font-display text-xl font-semibold text-foreground tracking-tight">LegalOS</span>
+          {firmName && (
+            <p className="text-xs text-muted-foreground font-body mt-1 truncate" title={firmName}>
+              {firmName}
+            </p>
+          )}
+          {scoreLabel && (
+            <p className="text-[11px] font-body mt-1.5 inline-flex items-center gap-1 text-emerald-500">
+              {scoreLabel}
+            </p>
+          )}
         </div>
         <nav className="flex-1 px-3 space-y-1">
           {NAV_ITEMS.map(({ id, label, icon: Icon }) => {
             const isActive = active === id;
+            const showAlertDot = id === "dashboard" && hasAlerts;
             return (
               <button
                 key={id}
                 onClick={() => onNavigate(id)}
-                className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-sm text-sm font-body transition-colors ${
+                className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-sm text-sm font-body transition-colors relative ${
                   isActive
                     ? "bg-primary/10 text-primary"
                     : "text-muted-foreground hover:text-foreground hover:bg-secondary/50"
@@ -47,10 +63,24 @@ const AppShell = ({ active, onNavigate, children, demoMode, onExitDemo }: AppShe
               >
                 <Icon className="w-4 h-4" />
                 {label}
+                {showAlertDot && (
+                  <Circle className="w-2 h-2 fill-amber-500 text-amber-500 absolute right-3" />
+                )}
               </button>
             );
           })}
         </nav>
+        {onOpenSettings && (
+          <div className="px-3 pb-3">
+            <button
+              onClick={onOpenSettings}
+              className="w-full flex items-center gap-3 px-3 py-2.5 rounded-sm text-sm font-body text-muted-foreground hover:text-foreground hover:bg-secondary/50 transition-colors"
+            >
+              <Settings className="w-4 h-4" />
+              Firm Profile
+            </button>
+          </div>
+        )}
         {demoMode && (
           <div className="px-3 pb-6">
             <div className="flex items-center gap-2 px-3 py-2.5 rounded-sm bg-amber-500/10 border border-amber-500/30">
@@ -88,16 +118,20 @@ const AppShell = ({ active, onNavigate, children, demoMode, onExitDemo }: AppShe
         <div className="flex items-center justify-around py-2 px-2">
           {NAV_ITEMS.map(({ id, label, icon: Icon }) => {
             const isActive = active === id;
+            const showAlertDot = id === "dashboard" && hasAlerts;
             return (
               <button
                 key={id}
                 onClick={() => onNavigate(id)}
-                className={`flex flex-col items-center gap-0.5 px-6 py-1.5 rounded-sm transition-colors ${
+                className={`flex flex-col items-center gap-0.5 px-6 py-1.5 rounded-sm transition-colors relative ${
                   isActive ? "text-primary" : "text-muted-foreground"
                 }`}
               >
                 <Icon className="w-5 h-5" />
                 <span className="text-[9px] font-body tracking-wide">{label}</span>
+                {showAlertDot && (
+                  <Circle className="w-1.5 h-1.5 fill-amber-500 text-amber-500 absolute top-1 right-4" />
+                )}
               </button>
             );
           })}
