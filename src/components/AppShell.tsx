@@ -1,5 +1,5 @@
 import { ReactNode } from "react";
-import { LayoutDashboard, Hammer, BookOpen } from "lucide-react";
+import { LayoutDashboard, Hammer, BookOpen, FlaskConical } from "lucide-react";
 
 export type Section = "dashboard" | "workshop" | "guidebook";
 
@@ -7,6 +7,8 @@ interface AppShellProps {
   active: Section;
   onNavigate: (section: Section) => void;
   children: ReactNode;
+  demoMode?: boolean;
+  onExitDemo?: () => void;
 }
 
 const NAV_ITEMS: { id: Section; label: string; icon: typeof LayoutDashboard }[] = [
@@ -22,7 +24,7 @@ const NAV_ITEMS: { id: Section; label: string; icon: typeof LayoutDashboard }[] 
  * left sidebar; mobile gets a bottom tab bar (same nav model as the
  * guidebook's old MobileNav, just three sections instead of four).
  */
-const AppShell = ({ active, onNavigate, children }: AppShellProps) => {
+const AppShell = ({ active, onNavigate, children, demoMode, onExitDemo }: AppShellProps) => {
   return (
     <div className="min-h-screen bg-background md:flex">
       {/* Desktop sidebar */}
@@ -49,10 +51,37 @@ const AppShell = ({ active, onNavigate, children }: AppShellProps) => {
             );
           })}
         </nav>
+        {demoMode && (
+          <div className="px-3 pb-6">
+            <div className="flex items-center gap-2 px-3 py-2.5 rounded-sm bg-amber-500/10 border border-amber-500/30">
+              <FlaskConical className="w-3.5 h-3.5 text-amber-500 shrink-0" />
+              <div className="flex-1 min-w-0">
+                <p className="text-xs font-body text-amber-500">Demo mode</p>
+              </div>
+              {onExitDemo && (
+                <button onClick={onExitDemo} className="text-[10px] font-body text-amber-500/70 hover:text-amber-500 underline shrink-0">
+                  Exit
+                </button>
+              )}
+            </div>
+          </div>
+        )}
       </aside>
 
       {/* Content area */}
       <div className="flex-1 min-w-0 pb-16 md:pb-0">{children}</div>
+
+      {/* Mobile demo-mode pill */}
+      {demoMode && (
+        <div className="fixed top-3 right-3 z-50 md:hidden flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-amber-500/15 border border-amber-500/40 backdrop-blur-sm">
+          <FlaskConical className="w-3 h-3 text-amber-500" />
+          {onExitDemo && (
+            <button onClick={onExitDemo} className="text-[10px] font-body text-amber-500 underline">
+              Exit demo
+            </button>
+          )}
+        </div>
+      )}
 
       {/* Mobile bottom nav */}
       <nav className="fixed bottom-0 left-0 right-0 z-40 md:hidden bg-card/95 backdrop-blur-md border-t border-border/50 safe-area-pb">

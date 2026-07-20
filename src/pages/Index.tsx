@@ -19,11 +19,14 @@ import { useAmbientMode, useScrollVelocity } from "@/hooks/useAmbientMode";
 import { AnimatePresence, motion } from "framer-motion";
 import { hasValidAccess, edgeHeaders } from "@/lib/edgeAuth";
 import { getOrCreateClientId } from "@/lib/clientId";
-import type { AuditRow, HistoryRow } from "@/components/dashboard/VisibilityDashboard";
+import { isDemoMode, disableDemoMode } from "@/lib/demoMode";
+import { DEMO_AUDIT, DEMO_HISTORY } from "@/data/demoData";
+import type { WorkshopToolId } from "@/lib/handoff";
+import type { AuditRow, HistoryRow } from "@/components/dashboard/CommandCenter";
 
 // Pulls in recharts — lazy-load so it's only fetched when the Dashboard
 // section is actually visited, not on every page load.
-const VisibilityDashboard = lazy(() => import("@/components/dashboard/VisibilityDashboard"));
+const CommandCenter = lazy(() => import("@/components/dashboard/CommandCenter"));
 
 const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL as string;
 
@@ -57,8 +60,14 @@ const Index = () => {
   // Fetch the firm's own visibility data once authenticated — the
   // Dashboard section renders its own empty state if there isn't any yet,
   // so nothing here decides what the home view is; Dashboard always is.
+  // Demo mode substitutes a rich sample dataset instead of hitting the
+  // real backend at all — see src/data/demoData.ts.
   useEffect(() => {
     if (!authenticated) return;
+    if (isDemoMode()) {
+      setVisibilityData({ audits: [DEMO_AUDIT], history: DEMO_HISTORY });
+      return;
+    }
     let cancelled = false;
     (async () => {
       try {
@@ -109,6 +118,17 @@ const Index = () => {
   const goToSection = (s: Section) => {
     setSection(s);
     window.scrollTo(0, 0);
+  };
+
+  // Deep-links straight into a specific Workshop tool from a Dashboard
+  // quick action or insight. Workshop only starts listening for the
+  // "switch tool" event once it's mounted, so the dispatch is deferred a
+  // tick behind the section switch.
+  const openWorkshopTool = (toolId: WorkshopToolId) => {
+    goToSection("workshop");
+    setTimeout(() => {
+      window.dispatchEvent(new CustomEvent("workshop:switch-tool", { detail: { toolId } }));
+    }, 50);
   };
 
   // Calculate overall implementation score
@@ -214,13 +234,24 @@ const Index = () => {
 
   return (
     <>
-      <AppShell active={section} onNavigate={goToSection}>
+      <AppShell
+        active={section}
+        onNavigate={goToSection}
+        demoMode={isDemoMode()}
+        onExitDemo={disableDemoMode}
+      >
         {section === "dashboard" && (
           <Suspense fallback={<div className="min-h-screen bg-background" />}>
-            <VisibilityDashboard
+            <CommandCenter
               audits={visibilityData?.audits ?? []}
               history={visibilityData?.history ?? []}
+              readChaptersCount={readChapters.length}
+              totalChapters={chapters.length}
+              implementationScore={overallImplScore}
               onOpenWorkshop={() => goToSection("workshop")}
+              onOpenWorkshopTool={openWorkshopTool}
+              onOpenGuidebook={() => goToSection("guidebook")}
+              onOpenMaturity={() => setMaturityOpen(true)}
             />
           </Suspense>
         )}
