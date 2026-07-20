@@ -11,6 +11,7 @@
 import { requireAccess, ACCESS_CORS_HEADERS } from "../_shared/access.ts";
 import { normalizeUrl } from "../_shared/safeFetch.ts";
 import { computePerformanceScore } from "../_shared/performanceScore.ts";
+import { checkSiteHealth } from "../_shared/siteHealth.ts";
 import { computeReputationScore } from "../_shared/reputationScore.ts";
 import { computeThoughtLeadershipScore } from "../_shared/thoughtLeadershipScore.ts";
 import { computeSocialScore, type SocialInput } from "../_shared/socialScore.ts";
@@ -104,20 +105,24 @@ Deno.serve(async (req) => {
       }
       : null;
 
-    const [performance, reputation, thoughtLeadership, social] = await Promise.all([
+    const [performance, reputation, thoughtLeadership, social, siteHealth] = await Promise.all([
       computePerformanceScore(normalizedUrl),
       computeReputationScore(serviceClient, market, auditedDomain, gbpListed === true),
       computeThoughtLeadershipScore(serviceClient, market, peerGroup, normalizedUrl),
       computeSocialScore(serviceClient, market, peerGroup, socialInput),
+      checkSiteHealth(normalizedUrl),
     ]);
     const seoAuthority = computeSeoAuthorityScore();
 
+    // siteHealth is informational only — not peer-normalized, not part of
+    // the 200-pt score, never blocks the audit if the crawl fails (null).
     const raw_metrics = {
       performance: performance.raw,
       social: social.raw,
       seoAuthority: seoAuthority.raw,
       thoughtLeadership: thoughtLeadership.raw,
       reputation: reputation.raw,
+      siteHealth,
     };
     const provenance = {
       performance: performance.provenance,

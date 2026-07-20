@@ -1,6 +1,7 @@
 import { requireAccess, ACCESS_CORS_HEADERS } from "../_shared/access.ts";
 import { normalizeUrl } from "../_shared/safeFetch.ts";
 import { computePerformanceScore } from "../_shared/performanceScore.ts";
+import { checkSiteHealth } from "../_shared/siteHealth.ts";
 
 const corsHeaders = ACCESS_CORS_HEADERS;
 
@@ -19,9 +20,12 @@ Deno.serve(async (req) => {
     }
 
     const normalizedUrl = normalizeUrl(url);
-    const result = await computePerformanceScore(normalizedUrl);
+    const [result, siteHealth] = await Promise.all([
+      computePerformanceScore(normalizedUrl),
+      checkSiteHealth(normalizedUrl),
+    ]);
 
-    return new Response(JSON.stringify({ ...result, url: normalizedUrl }), {
+    return new Response(JSON.stringify({ ...result, url: normalizedUrl, siteHealth }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
   } catch (e) {
