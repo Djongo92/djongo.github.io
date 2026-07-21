@@ -83,7 +83,7 @@ const ProgressDashboard = ({
       <nav className="sticky top-0 z-10 bg-background/90 backdrop-blur-sm border-b border-border/50">
         <div className="max-w-4xl mx-auto px-6 py-3 flex items-center justify-between">
           <button onClick={onBack} className="flex items-center gap-2 text-sm text-muted-foreground hover:text-primary transition-colors font-body">
-            <ArrowLeft className="w-4 h-4" /> Back
+            <ArrowLeft className="w-4 h-4" /> Dashboard
           </button>
           <button onClick={handleExportDigest} className="flex items-center gap-2 text-sm text-muted-foreground hover:text-primary transition-colors font-body">
             <Download className="w-4 h-4" /> Export Notes

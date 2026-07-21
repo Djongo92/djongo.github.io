@@ -2,11 +2,11 @@ import { ReactNode, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import {
   LayoutDashboard, Hammer, BookOpen, BarChart3, FlaskConical, Settings, Circle, LogOut,
-  Gauge, FileText, Trophy, Users, History, Bell, Landmark, MoreHorizontal, X,
+  Gauge, FileText, Eye, Users, History, Bell, Landmark, MoreHorizontal, X, Award,
 } from "lucide-react";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 
-export type Section = "dashboard" | "analytics" | "workshop" | "guidebook" | "settings";
+export type Section = "dashboard" | "analytics" | "workshop" | "progress" | "guidebook" | "settings";
 
 export interface SidebarAlert {
   id: string;
@@ -30,14 +30,15 @@ interface AppShellProps {
   onOpenBattlePlan?: () => void;
   onOpenCompetitors?: () => void;
   onOpenWorkshopHistory?: () => void;
-  rankingsHref?: string;
-  directoryIndexHref?: string;
+  visibilityIndexHref?: string;
+  recognitionIndexHref?: string;
 }
 
 const NAV_ITEMS: { id: Section; label: string; icon: typeof LayoutDashboard }[] = [
   { id: "dashboard", label: "Dashboard", icon: LayoutDashboard },
   { id: "analytics", label: "Analytics", icon: BarChart3 },
   { id: "workshop", label: "Workshop", icon: Hammer },
+  { id: "progress", label: "My Progress", icon: Award },
   { id: "guidebook", label: "Guidebook", icon: BookOpen },
 ];
 
@@ -49,19 +50,19 @@ const NavGroupLabel = ({ children }: { children: ReactNode }) => (
 
 /**
  * Persistent app shell — the thing every section lives inside, so moving
- * between Dashboard/Analytics/Workshop/Guidebook is in-app navigation, not
- * a full-screen takeover you have to "back" out of. Desktop gets a fixed,
- * sticky left sidebar grouped into Workspace / Tools / Account; mobile gets
- * a bottom tab bar with the four primary sections plus a "More" sheet for
- * everything the desktop sidebar's Tools/Account groups hold — those were
- * previously desktop-only and unreachable from a phone.
+ * between Dashboard/Analytics/Workshop/My Progress/Guidebook is in-app
+ * navigation, not a full-screen takeover you have to "back" out of. Desktop
+ * gets a fixed, sticky left sidebar grouped into Workspace / Tools /
+ * Account; mobile gets a bottom tab bar with the five primary sections plus
+ * a "More" sheet for everything the desktop sidebar's Tools/Account groups
+ * hold — those were previously desktop-only and unreachable from a phone.
  */
 const AppShell = ({
   active, onNavigate, children, demoMode, onExitDemo, onSignOut, firmName, firmLogo, scoreLabel, alerts,
-  onOpenSettings, onOpenMaturity, onOpenBattlePlan, onOpenCompetitors, onOpenWorkshopHistory, rankingsHref, directoryIndexHref,
+  onOpenSettings, onOpenMaturity, onOpenBattlePlan, onOpenCompetitors, onOpenWorkshopHistory, visibilityIndexHref, recognitionIndexHref,
 }: AppShellProps) => {
   const [moreOpen, setMoreOpen] = useState(false);
-  const hasTools = Boolean(onOpenMaturity || onOpenBattlePlan || onOpenCompetitors || onOpenWorkshopHistory || rankingsHref || directoryIndexHref);
+  const hasTools = Boolean(onOpenMaturity || onOpenBattlePlan || onOpenCompetitors || onOpenWorkshopHistory || visibilityIndexHref || recognitionIndexHref);
   const alertList = alerts ?? [];
   const hasAlerts = alertList.length > 0;
 
@@ -187,26 +188,26 @@ const AppShell = ({
                     Workshop History
                   </button>
                 )}
-                {rankingsHref && (
+                {visibilityIndexHref && (
                   <a
-                    href={rankingsHref}
+                    href={visibilityIndexHref}
                     target="_blank"
                     rel="noreferrer"
                     className="w-full flex items-center gap-3 px-3 py-2.5 rounded-sm text-sm font-body text-muted-foreground hover:text-foreground hover:bg-secondary/50 transition-colors"
                   >
-                    <Trophy className="w-4 h-4" />
-                    Public Rankings
+                    <Eye className="w-4 h-4" />
+                    Visibility Index
                   </a>
                 )}
-                {directoryIndexHref && (
+                {recognitionIndexHref && (
                   <a
-                    href={directoryIndexHref}
+                    href={recognitionIndexHref}
                     target="_blank"
                     rel="noreferrer"
                     className="w-full flex items-center gap-3 px-3 py-2.5 rounded-sm text-sm font-body text-muted-foreground hover:text-foreground hover:bg-secondary/50 transition-colors"
                   >
                     <Landmark className="w-4 h-4" />
-                    Directory Standing
+                    Recognition Index
                   </a>
                 )}
               </nav>
@@ -374,14 +375,14 @@ const AppShell = ({
                         <History className="w-4 h-4 text-primary" /> Workshop History
                       </button>
                     )}
-                    {rankingsHref && (
-                      <a href={rankingsHref} target="_blank" rel="noreferrer" className="w-full flex items-center gap-3 px-3 py-3 rounded-sm text-sm font-body text-foreground hover:bg-secondary/50 transition-colors">
-                        <Trophy className="w-4 h-4 text-primary" /> Public Rankings
+                    {visibilityIndexHref && (
+                      <a href={visibilityIndexHref} target="_blank" rel="noreferrer" className="w-full flex items-center gap-3 px-3 py-3 rounded-sm text-sm font-body text-foreground hover:bg-secondary/50 transition-colors">
+                        <Eye className="w-4 h-4 text-primary" /> Visibility Index
                       </a>
                     )}
-                    {directoryIndexHref && (
-                      <a href={directoryIndexHref} target="_blank" rel="noreferrer" className="w-full flex items-center gap-3 px-3 py-3 rounded-sm text-sm font-body text-foreground hover:bg-secondary/50 transition-colors">
-                        <Landmark className="w-4 h-4 text-primary" /> Directory Standing
+                    {recognitionIndexHref && (
+                      <a href={recognitionIndexHref} target="_blank" rel="noreferrer" className="w-full flex items-center gap-3 px-3 py-3 rounded-sm text-sm font-body text-foreground hover:bg-secondary/50 transition-colors">
+                        <Landmark className="w-4 h-4 text-primary" /> Recognition Index
                       </a>
                     )}
                   </div>

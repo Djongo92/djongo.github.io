@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { Link, useParams } from "react-router-dom";
-import { Loader2, ShieldCheck, ArrowRight, Flag, Download } from "lucide-react";
+import { Loader2, ShieldCheck, ArrowRight, Flag, Download, Landmark } from "lucide-react";
 import { PEER_GROUPS, FIRM_TYPE_TO_PEER_GROUP } from "@/lib/marketVisibilityConfig";
 import { toCsv, downloadCsv } from "@/lib/csv";
 import { setPageMeta } from "@/lib/pageMeta";
@@ -20,7 +20,7 @@ interface FirmStanding {
 
 const PEER_GROUP_LABEL: Record<string, string> = Object.fromEntries(PEER_GROUPS.map((p) => [p.value, p.label]));
 
-const DirectoryIndex = () => {
+const RecognitionIndex = () => {
   const { market } = useParams();
   const [firms, setFirms] = useState<FirmStanding[] | null>(null);
   const [max, setMax] = useState(45);
@@ -61,13 +61,13 @@ const DirectoryIndex = () => {
         });
         const data = await resp.json();
         if (!resp.ok) {
-          setError(data.error || "Couldn't load the directory index.");
+          setError(data.error || "Couldn't load the recognition index.");
           return;
         }
         setFirms(data.firms);
         setMax(data.max);
       } catch {
-        setError("Couldn't reach the directory index service.");
+        setError("Couldn't reach the recognition index service.");
       } finally {
         setLoading(false);
       }
@@ -77,7 +77,7 @@ const DirectoryIndex = () => {
   useEffect(() => {
     const marketLabel = market ? market[0].toUpperCase() + market.slice(1) : "Market";
     setPageMeta({
-      title: market ? `${marketLabel} Directory Standing Index · LegalOS` : "Directory Standing · LegalOS",
+      title: market ? `${marketLabel} Recognition Index · LegalOS` : "Recognition Index · LegalOS",
       description: `Chambers Europe and Legal 500 rankings for law firms in ${marketLabel}, aggregated and peer-normalized — directory breadth and depth, computed directly from published rankings.`,
     });
   }, [market]);
@@ -110,7 +110,7 @@ const DirectoryIndex = () => {
       { key: "iflr1000Points", header: "IFLR1000 points" },
       { key: "directoryPoints", header: `Directory points (/${max})` },
     ]);
-    downloadCsv(`legalos-directory-${market}.csv`, csv);
+    downloadCsv(`legalos-recognition-index-${market}.csv`, csv);
   };
 
   return (
@@ -119,20 +119,24 @@ const DirectoryIndex = () => {
         <div className="max-w-3xl mx-auto px-6 py-5 flex items-center justify-between">
           <Link to="/" className="text-[10px] tracking-[0.3em] uppercase text-primary font-body">LegalOS</Link>
           <span className="text-[10px] tracking-[0.2em] uppercase text-emerald-500 font-body flex items-center gap-1">
-            <ShieldCheck className="w-3 h-3" /> Directory standing
+            <Landmark className="w-3 h-3" /> No audit required
           </span>
         </div>
       </header>
 
       <main className="max-w-3xl mx-auto px-6 py-12">
-        <h1 className="font-display text-4xl text-foreground mb-2 leading-tight capitalize">{market} Directory Standing Index</h1>
+        <h1 className="font-display text-4xl text-foreground mb-2 leading-tight capitalize">{market} Recognition Index</h1>
         <p className="text-xs text-muted-foreground font-body mb-2">
           Chambers Europe 2026 and Legal 500 EMEA 2026 rankings, aggregated and peer-normalized — every firm tracked in
           either directory, computed directly from published rankings. No audit required to appear here.
         </p>
-        <p className="text-xs text-muted-foreground font-body mb-10">
+        <p className="text-xs text-muted-foreground font-body mb-2">
           This covers directory breadth and depth only (max {max} pts) — it excludes Google Business Profile and the
           Performance/Social/Thought Leadership categories, which need a firm to run its own audit.
+        </p>
+        <p className="text-xs text-muted-foreground font-body mb-10">
+          This is the legal-directory slice of a firm's complete 200-point score. Firms that run and publish a full
+          audit show their whole score, verified, on the Visibility Index instead.
         </p>
 
         {loading && (
@@ -237,9 +241,16 @@ const DirectoryIndex = () => {
           <p className="text-[10px] tracking-[0.2em] uppercase text-muted-foreground font-body">
             Directory data reviewed quarterly
           </p>
-          <Link to="/" className="text-xs text-primary hover:text-gold-light font-body inline-flex items-center gap-1">
-            See your full Market Visibility Score <ArrowRight className="w-3 h-3" />
-          </Link>
+          <div className="flex items-center gap-4">
+            {market && (
+              <Link to={`/visibility-index/${market}`} className="text-xs text-muted-foreground hover:text-foreground font-body inline-flex items-center gap-1">
+                Visibility Index <ArrowRight className="w-3 h-3" />
+              </Link>
+            )}
+            <Link to="/" className="text-xs text-primary hover:text-gold-light font-body inline-flex items-center gap-1">
+              Run your own <ArrowRight className="w-3 h-3" />
+            </Link>
+          </div>
         </footer>
         <p className="mt-6 text-[10px] tracking-[0.2em] uppercase text-muted-foreground/60 font-body text-center">
           For Authorized Use Only
@@ -249,4 +260,4 @@ const DirectoryIndex = () => {
   );
 };
 
-export default DirectoryIndex;
+export default RecognitionIndex;

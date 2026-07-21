@@ -2,7 +2,6 @@ import { useState, useEffect, useCallback, useMemo, lazy, Suspense } from "react
 import SignInGate from "@/components/SignInGate";
 import TableOfContents from "@/components/TableOfContents";
 import ChapterView from "@/components/ChapterView";
-import ProgressDashboard from "@/components/ProgressDashboard";
 import AppShell, { Section, SidebarAlert } from "@/components/AppShell";
 import GlobalAdvisor from "@/components/GlobalAdvisor";
 import PersonalizeOnboarding from "@/components/PersonalizeOnboarding";
@@ -29,7 +28,7 @@ import { isDemoMode, disableDemoMode, enableDemoMode } from "@/lib/demoMode";
 import { clearSession } from "@/lib/session";
 import { DEMO_AUDIT, DEMO_HISTORY } from "@/data/demoData";
 import ClaimDataBanner from "@/components/ClaimDataBanner";
-import { DashboardSkeleton, AnalyticsSkeleton, SettingsSkeleton } from "@/components/SectionSkeletons";
+import { DashboardSkeleton, AnalyticsSkeleton, SettingsSkeleton, ProgressSkeleton } from "@/components/SectionSkeletons";
 import type { WorkshopToolId } from "@/lib/handoff";
 import type { AuditRow, HistoryRow } from "@/components/dashboard/CommandCenter";
 
@@ -38,10 +37,14 @@ import type { AuditRow, HistoryRow } from "@/components/dashboard/CommandCenter"
 const CommandCenter = lazy(() => import("@/components/dashboard/CommandCenter"));
 const Analytics = lazy(() => import("@/components/analytics/Analytics"));
 const SettingsPage = lazy(() => import("@/components/settings/SettingsPage"));
+// ProgressDashboard pulls in the whole original tools grid (RoadmapGenerator,
+// ScoreWebsite, RoastHomepage, CompetitorAnalysis, MarketVisibilityScore,
+// AskTheBook) plus BattlePlan/jsPDF — same reasoning as the above three.
+const ProgressDashboard = lazy(() => import("@/components/ProgressDashboard"));
 
 const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL as string;
 
-type GuidebookView = "toc" | "chapter" | "progress" | "bookmarks";
+type GuidebookView = "toc" | "chapter" | "bookmarks";
 
 const Index = () => {
   // Demo mode (sample data, no real account) and a real Supabase Auth
@@ -161,13 +164,7 @@ const Index = () => {
     }, 50);
   };
 
-  // Battle Plan lives inside the Guidebook's progress view (ProgressDashboard)
-  // rather than as its own section — this just jumps straight there instead
-  // of making it a three-click detour through the guidebook's table of contents.
-  const openBattlePlan = () => {
-    goToSection("guidebook");
-    setGuidebookView("progress");
-  };
+  const openBattlePlan = () => goToSection("progress");
 
   // Sidebar identity + alert dot — a lightweight version of the same
   // "is anything worth reviewing" check CommandCenter's insights feed
@@ -175,8 +172,8 @@ const Index = () => {
   const primaryAudit = visibilityData?.audits[0];
   const firmName = primaryAudit?.display_name || primaryAudit?.audited_domain;
   const scoreLabel = primaryAudit ? `${Math.round(primaryAudit.total_score)} / 200` : undefined;
-  const rankingsHref = primaryAudit ? `${import.meta.env.BASE_URL}rankings/${primaryAudit.market}` : undefined;
-  const directoryIndexHref = primaryAudit ? `${import.meta.env.BASE_URL}directory/${primaryAudit.market}` : undefined;
+  const visibilityIndexHref = primaryAudit ? `${import.meta.env.BASE_URL}visibility-index/${primaryAudit.market}` : undefined;
+  const recognitionIndexHref = primaryAudit ? `${import.meta.env.BASE_URL}recognition-index/${primaryAudit.market}` : undefined;
 
   // Sidebar's alert bell — the same "is anything worth reviewing" signal
   // CommandCenter's own insights feed surfaces, but as real entries here
@@ -295,24 +292,6 @@ const Index = () => {
       );
     }
 
-    if (guidebookView === "progress") {
-      return (
-        <ProgressDashboard
-          readChapters={readChapters}
-          bookmarks={bookmarks}
-          implementationScore={overallImplScore}
-          annotations={allAnnotations}
-          onBack={() => setGuidebookView("toc")}
-          onSelectChapter={handleSelectChapter}
-          getChapterScore={implementationState.getChapterScore}
-          isImplemented={implementationState.isImplemented}
-          onOpenPersonalize={() => setPersonalizeOpen(true)}
-          onOpenMaturity={() => setMaturityOpen(true)}
-          onOpenWorkshop={() => goToSection("workshop")}
-        />
-      );
-    }
-
     return (
       <TableOfContents
         onSelectChapter={handleSelectChapter}
@@ -321,9 +300,6 @@ const Index = () => {
         readChapters={readChapters}
         lastReadChapterId={lastReadChapterId}
         implementationScore={overallImplScore}
-        onOpenDashboard={() => setGuidebookView("progress")}
-        onOpenWorkshop={() => goToSection("workshop")}
-        onOpenMaturity={() => setMaturityOpen(true)}
         onlyBookmarks={guidebookView === "bookmarks"}
         onSetMode={(m) => setGuidebookView(m === "saved" ? "bookmarks" : "toc")}
       />
@@ -347,8 +323,8 @@ const Index = () => {
         onOpenBattlePlan={openBattlePlan}
         onOpenCompetitors={() => setCompetitorsOpen(true)}
         onOpenWorkshopHistory={() => setWorkshopHistoryOpen(true)}
-        rankingsHref={rankingsHref}
-        directoryIndexHref={directoryIndexHref}
+        visibilityIndexHref={visibilityIndexHref}
+        recognitionIndexHref={recognitionIndexHref}
       >
         {section === "dashboard" && (
           <Suspense fallback={<DashboardSkeleton />}>
@@ -372,6 +348,26 @@ const Index = () => {
           </Suspense>
         )}
         {section === "workshop" && <Workshop onBack={() => goToSection("dashboard")} />}
+        {section === "progress" && (
+          <Suspense fallback={<ProgressSkeleton />}>
+            <ProgressDashboard
+              readChapters={readChapters}
+              bookmarks={bookmarks}
+              implementationScore={overallImplScore}
+              annotations={allAnnotations}
+              onBack={() => goToSection("dashboard")}
+              onSelectChapter={(id) => {
+                goToSection("guidebook");
+                handleSelectChapter(id);
+              }}
+              getChapterScore={implementationState.getChapterScore}
+              isImplemented={implementationState.isImplemented}
+              onOpenPersonalize={() => setPersonalizeOpen(true)}
+              onOpenMaturity={() => setMaturityOpen(true)}
+              onOpenWorkshop={() => goToSection("workshop")}
+            />
+          </Suspense>
+        )}
         {section === "guidebook" && renderGuidebook()}
         {section === "settings" && (
           <Suspense fallback={<SettingsSkeleton />}>

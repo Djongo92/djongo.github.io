@@ -39,6 +39,25 @@ export const AnalyticsSkeleton = () => (
   </div>
 );
 
+export const ProgressSkeleton = () => (
+  <div className="min-h-screen bg-background pb-16">
+    <header className="max-w-4xl mx-auto px-6 pt-12 pb-8 space-y-3">
+      <Skeleton className="h-9 w-48" />
+      <Skeleton className="h-4 w-64" />
+    </header>
+    <div className="max-w-4xl mx-auto px-6 grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
+      {[0, 1, 2, 3].map((i) => (
+        <Skeleton key={i} className="h-24 rounded-sm" />
+      ))}
+    </div>
+    <div className="max-w-4xl mx-auto px-6 grid grid-cols-1 md:grid-cols-2 gap-4">
+      {[0, 1, 2, 3].map((i) => (
+        <Skeleton key={i} className="h-28 rounded-sm" />
+      ))}
+    </div>
+  </div>
+);
+
 export const SettingsSkeleton = () => (
   <div className="min-h-screen bg-background pb-16">
     <header className="max-w-3xl mx-auto px-6 pt-12 pb-8 space-y-3">

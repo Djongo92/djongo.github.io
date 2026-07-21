@@ -1,6 +1,6 @@
 import { motion } from "framer-motion";
 import { chapters } from "@/data/chapters";
-import { BookOpen, Bookmark, Clock, CheckCircle2, ArrowRight, BarChart3 } from "lucide-react";
+import { BookOpen, Bookmark, Clock, CheckCircle2, ArrowRight } from "lucide-react";
 import SearchPalette from "./SearchPalette";
 import ReadingControls from "./ReadingControls";
 import ChapterIcon from "./ChapterIcon";
@@ -14,21 +14,16 @@ interface TableOfContentsProps {
   readChapters?: string[];
   lastReadChapterId?: string | null;
   implementationScore?: number;
-  onOpenDashboard?: () => void;
   onlyBookmarks?: boolean;
   onSetMode?: (mode: "all" | "saved") => void;
-  onOpenWorkshop?: () => void;
-  onOpenMaturity?: () => void;
 }
 
 const TableOfContents = ({
   onSelectChapter, bookmarks = [], onToggleBookmark,
   readChapters = [], lastReadChapterId,
-  implementationScore = 0, onOpenDashboard,
+  implementationScore = 0,
   onlyBookmarks = false,
   onSetMode,
-  onOpenWorkshop,
-  onOpenMaturity,
 }: TableOfContentsProps) => {
   const totalRead = readChapters.length;
   const totalChapters = chapters.length;
@@ -61,11 +56,6 @@ const TableOfContents = ({
             Guidebook
           </span>
           <div className="flex items-center gap-2">
-            {onOpenDashboard && (
-              <button onClick={onOpenDashboard} className="p-2 text-muted-foreground hover:text-primary transition-colors" aria-label="My Progress">
-                <BarChart3 className="w-4 h-4" />
-              </button>
-            )}
             <SearchPalette onSelectChapter={onSelectChapter} />
             <ReadingControls />
           </div>
@@ -316,24 +306,6 @@ const TableOfContents = ({
 
       {/* Footer */}
       <footer className="border-t border-border py-10 px-6 text-center">
-        <div className="flex items-center justify-center gap-3 mb-5">
-          {onOpenMaturity && (
-            <button
-              onClick={onOpenMaturity}
-              className="text-[11px] tracking-wider uppercase text-muted-foreground hover:text-primary border border-border hover:border-primary/40 px-4 py-2 rounded-sm font-body transition-colors"
-            >
-              Firm Maturity Score
-            </button>
-          )}
-          {onOpenWorkshop && (
-            <button
-              onClick={onOpenWorkshop}
-              className="text-[11px] tracking-wider uppercase text-primary border border-primary/40 hover:bg-primary/10 px-4 py-2 rounded-sm font-body transition-colors"
-            >
-              Workshop
-            </button>
-          )}
-        </div>
         <p className="text-[10px] tracking-[0.3em] uppercase text-muted-foreground font-body">
           For Authorized Use Only
         </p>
