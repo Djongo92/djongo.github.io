@@ -88,7 +88,7 @@ const AppShell = ({
   return (
     <div className="min-h-screen bg-background md:flex">
       {/* Desktop sidebar — sticky so it stays put while content scrolls */}
-      <aside className="hidden md:flex md:flex-col md:w-56 md:shrink-0 md:sticky md:top-0 md:h-screen md:overflow-y-auto md:border-r md:border-border/50 md:bg-card/40">
+      <aside className="hidden md:flex md:flex-col md:w-56 md:shrink-0 md:sticky md:top-0 md:h-screen md:overflow-y-auto md:border-r hairline material-thin">
         <div className="px-6 pt-8 pb-2">
           <div className="flex items-center justify-between gap-2">
             <span className="font-display text-xl font-semibold text-foreground tracking-tight">LegalOS</span>
@@ -161,16 +161,21 @@ const AppShell = ({
                 <button
                   key={id}
                   onClick={() => onNavigate(id)}
-                  className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-sm text-sm font-body transition-colors relative ${
-                    isActive
-                      ? "bg-primary/10 text-primary"
-                      : "text-muted-foreground hover:text-foreground hover:bg-secondary/50"
+                  className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-body transition-colors relative tap-scale ${
+                    isActive ? "text-primary" : "text-muted-foreground hover:text-foreground hover:bg-secondary/50"
                   }`}
                 >
-                  <Icon className="w-4 h-4" />
-                  {label}
+                  {isActive && (
+                    <motion.div
+                      layoutId="desktop-nav-pill"
+                      className="absolute inset-0 bg-primary/10 rounded-xl"
+                      transition={{ type: "spring", stiffness: 380, damping: 32 }}
+                    />
+                  )}
+                  <Icon className="w-4 h-4 relative z-10" />
+                  <span className="relative z-10">{label}</span>
                   {showAlertDot && (
-                    <Circle className="w-2 h-2 fill-amber-500 text-amber-500 absolute right-3" />
+                    <Circle className="w-2 h-2 fill-amber-500 text-amber-500 absolute right-3 z-10" />
                   )}
                 </button>
               );
@@ -184,7 +189,7 @@ const AppShell = ({
                 {onOpenMaturity && (
                   <button
                     onClick={onOpenMaturity}
-                    className="w-full flex items-center gap-3 px-3 py-2.5 rounded-sm text-sm font-body text-muted-foreground hover:text-foreground hover:bg-secondary/50 transition-colors"
+                    className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-body text-muted-foreground hover:text-foreground hover:bg-secondary/50 transition-colors tap-scale"
                   >
                     <Gauge className="w-4 h-4" />
                     Firm Maturity Score
@@ -193,7 +198,7 @@ const AppShell = ({
                 {onOpenBattlePlan && (
                   <button
                     onClick={onOpenBattlePlan}
-                    className="w-full flex items-center gap-3 px-3 py-2.5 rounded-sm text-sm font-body text-muted-foreground hover:text-foreground hover:bg-secondary/50 transition-colors"
+                    className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-body text-muted-foreground hover:text-foreground hover:bg-secondary/50 transition-colors tap-scale"
                   >
                     <FileText className="w-4 h-4" />
                     Battle Plan
@@ -202,7 +207,7 @@ const AppShell = ({
                 {onOpenCompetitors && (
                   <button
                     onClick={onOpenCompetitors}
-                    className="w-full flex items-center gap-3 px-3 py-2.5 rounded-sm text-sm font-body text-muted-foreground hover:text-foreground hover:bg-secondary/50 transition-colors"
+                    className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-body text-muted-foreground hover:text-foreground hover:bg-secondary/50 transition-colors tap-scale"
                   >
                     <Users className="w-4 h-4" />
                     Competitors
@@ -211,7 +216,7 @@ const AppShell = ({
                 {onOpenWorkshopHistory && (
                   <button
                     onClick={onOpenWorkshopHistory}
-                    className="w-full flex items-center gap-3 px-3 py-2.5 rounded-sm text-sm font-body text-muted-foreground hover:text-foreground hover:bg-secondary/50 transition-colors"
+                    className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-body text-muted-foreground hover:text-foreground hover:bg-secondary/50 transition-colors tap-scale"
                   >
                     <History className="w-4 h-4" />
                     Workshop History
@@ -222,7 +227,7 @@ const AppShell = ({
                     href={visibilityIndexHref}
                     target="_blank"
                     rel="noreferrer"
-                    className="w-full flex items-center gap-3 px-3 py-2.5 rounded-sm text-sm font-body text-muted-foreground hover:text-foreground hover:bg-secondary/50 transition-colors"
+                    className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-body text-muted-foreground hover:text-foreground hover:bg-secondary/50 transition-colors tap-scale"
                   >
                     <Eye className="w-4 h-4" />
                     Visibility Index
@@ -233,7 +238,7 @@ const AppShell = ({
                     href={recognitionIndexHref}
                     target="_blank"
                     rel="noreferrer"
-                    className="w-full flex items-center gap-3 px-3 py-2.5 rounded-sm text-sm font-body text-muted-foreground hover:text-foreground hover:bg-secondary/50 transition-colors"
+                    className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-body text-muted-foreground hover:text-foreground hover:bg-secondary/50 transition-colors tap-scale"
                   >
                     <Landmark className="w-4 h-4" />
                     Recognition Index
@@ -252,12 +257,19 @@ const AppShell = ({
             <div className="px-3 pb-3">
               <button
                 onClick={onOpenSettings}
-                className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-sm text-sm font-body transition-colors ${
-                  active === "settings" ? "bg-primary/10 text-primary" : "text-muted-foreground hover:text-foreground hover:bg-secondary/50"
+                className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-body transition-colors relative tap-scale ${
+                  active === "settings" ? "text-primary" : "text-muted-foreground hover:text-foreground hover:bg-secondary/50"
                 }`}
               >
-                <Settings className="w-4 h-4" />
-                Settings
+                {active === "settings" && (
+                  <motion.div
+                    layoutId="desktop-nav-pill"
+                    className="absolute inset-0 bg-primary/10 rounded-xl"
+                    transition={{ type: "spring", stiffness: 380, damping: 32 }}
+                  />
+                )}
+                <Settings className="w-4 h-4 relative z-10" />
+                <span className="relative z-10">Settings</span>
               </button>
             </div>
           )}
@@ -279,7 +291,7 @@ const AppShell = ({
             <div className="px-3 pb-6">
               <button
                 onClick={onSignOut}
-                className="w-full flex items-center gap-3 px-3 py-2.5 rounded-sm text-sm font-body text-muted-foreground hover:text-foreground hover:bg-secondary/50 transition-colors"
+                className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-body text-muted-foreground hover:text-foreground hover:bg-secondary/50 transition-colors tap-scale"
               >
                 <LogOut className="w-4 h-4" />
                 Sign out
@@ -306,7 +318,7 @@ const AppShell = ({
 
       {/* Mobile bottom nav — four primary sections + a "More" sheet holding
           everything the desktop Tools/Account groups have. */}
-      <nav className="fixed bottom-0 left-0 right-0 z-40 md:hidden bg-card/95 backdrop-blur-md border-t border-border/50 safe-area-pb">
+      <nav className="fixed bottom-0 left-0 right-0 z-40 md:hidden material-thick border-t hairline safe-area-pb">
         <div className="flex items-center justify-around py-2 px-1">
           {NAV_ITEMS.map(({ id, label, icon: Icon }) => {
             const isActive = active === id;
@@ -315,27 +327,41 @@ const AppShell = ({
               <button
                 key={id}
                 onClick={() => onNavigate(id)}
-                className={`flex flex-col items-center gap-0.5 px-3 py-1.5 rounded-sm transition-colors relative ${
+                className={`flex flex-col items-center gap-0.5 px-3 py-1.5 rounded-xl transition-colors relative tap-scale ${
                   isActive ? "text-primary" : "text-muted-foreground"
                 }`}
               >
-                <Icon className="w-5 h-5" />
-                <span className="text-[9px] font-body tracking-wide">{label}</span>
+                {isActive && (
+                  <motion.div
+                    layoutId="mobile-nav-pill"
+                    className="absolute inset-0 bg-primary/10 rounded-xl"
+                    transition={{ type: "spring", stiffness: 380, damping: 32 }}
+                  />
+                )}
+                <Icon className="w-5 h-5 relative z-10" />
+                <span className="text-[9px] font-body tracking-wide relative z-10">{label}</span>
                 {showAlertDot && (
-                  <Circle className="w-1.5 h-1.5 fill-amber-500 text-amber-500 absolute top-1 right-2" />
+                  <Circle className="w-1.5 h-1.5 fill-amber-500 text-amber-500 absolute top-1 right-2 z-10" />
                 )}
               </button>
             );
           })}
           <button
             onClick={() => setMoreOpen(true)}
-            className={`flex flex-col items-center gap-0.5 px-3 py-1.5 rounded-sm transition-colors relative ${
+            className={`flex flex-col items-center gap-0.5 px-3 py-1.5 rounded-xl transition-colors relative tap-scale ${
               moreOpen || active === "settings" ? "text-primary" : "text-muted-foreground"
             }`}
           >
-            <MoreHorizontal className="w-5 h-5" />
-            <span className="text-[9px] font-body tracking-wide">More</span>
-            {hasUnread && <Circle className="w-1.5 h-1.5 fill-amber-500 text-amber-500 absolute top-1 right-2" />}
+            {(moreOpen || active === "settings") && (
+              <motion.div
+                layoutId="mobile-nav-pill"
+                className="absolute inset-0 bg-primary/10 rounded-xl"
+                transition={{ type: "spring", stiffness: 380, damping: 32 }}
+              />
+            )}
+            <MoreHorizontal className="w-5 h-5 relative z-10" />
+            <span className="text-[9px] font-body tracking-wide relative z-10">More</span>
+            {hasUnread && <Circle className="w-1.5 h-1.5 fill-amber-500 text-amber-500 absolute top-1 right-2 z-10" />}
           </button>
         </div>
       </nav>
@@ -357,7 +383,7 @@ const AppShell = ({
               exit={{ y: "100%" }}
               transition={{ type: "spring", damping: 28, stiffness: 300 }}
               onClick={(e) => e.stopPropagation()}
-              className="absolute bottom-0 left-0 right-0 bg-card border-t border-border rounded-t-lg max-h-[80vh] overflow-y-auto safe-area-pb"
+              className="absolute bottom-0 left-0 right-0 bg-card hairline border-t rounded-t-2xl shadow-apple-lg max-h-[80vh] overflow-y-auto safe-area-pb"
             >
               <div className="flex items-center justify-between px-5 pt-5 pb-3">
                 <span className="font-display text-lg text-foreground">More</span>
@@ -385,32 +411,32 @@ const AppShell = ({
                   <p className="px-5 pt-2 pb-1.5 text-[10px] tracking-[0.15em] uppercase text-muted-foreground font-body">Tools</p>
                   <div className="px-3 pb-2">
                     {onOpenMaturity && (
-                      <button onClick={() => { onOpenMaturity(); closeMore(); }} className="w-full flex items-center gap-3 px-3 py-3 rounded-sm text-sm font-body text-foreground hover:bg-secondary/50 transition-colors">
+                      <button onClick={() => { onOpenMaturity(); closeMore(); }} className="w-full flex items-center gap-3 px-3 py-3 rounded-xl text-sm font-body text-foreground hover:bg-secondary/50 transition-colors tap-scale">
                         <Gauge className="w-4 h-4 text-primary" /> Firm Maturity Score
                       </button>
                     )}
                     {onOpenBattlePlan && (
-                      <button onClick={() => { onOpenBattlePlan(); closeMore(); }} className="w-full flex items-center gap-3 px-3 py-3 rounded-sm text-sm font-body text-foreground hover:bg-secondary/50 transition-colors">
+                      <button onClick={() => { onOpenBattlePlan(); closeMore(); }} className="w-full flex items-center gap-3 px-3 py-3 rounded-xl text-sm font-body text-foreground hover:bg-secondary/50 transition-colors tap-scale">
                         <FileText className="w-4 h-4 text-primary" /> Battle Plan
                       </button>
                     )}
                     {onOpenCompetitors && (
-                      <button onClick={() => { onOpenCompetitors(); closeMore(); }} className="w-full flex items-center gap-3 px-3 py-3 rounded-sm text-sm font-body text-foreground hover:bg-secondary/50 transition-colors">
+                      <button onClick={() => { onOpenCompetitors(); closeMore(); }} className="w-full flex items-center gap-3 px-3 py-3 rounded-xl text-sm font-body text-foreground hover:bg-secondary/50 transition-colors tap-scale">
                         <Users className="w-4 h-4 text-primary" /> Competitors
                       </button>
                     )}
                     {onOpenWorkshopHistory && (
-                      <button onClick={() => { onOpenWorkshopHistory(); closeMore(); }} className="w-full flex items-center gap-3 px-3 py-3 rounded-sm text-sm font-body text-foreground hover:bg-secondary/50 transition-colors">
+                      <button onClick={() => { onOpenWorkshopHistory(); closeMore(); }} className="w-full flex items-center gap-3 px-3 py-3 rounded-xl text-sm font-body text-foreground hover:bg-secondary/50 transition-colors tap-scale">
                         <History className="w-4 h-4 text-primary" /> Workshop History
                       </button>
                     )}
                     {visibilityIndexHref && (
-                      <a href={visibilityIndexHref} target="_blank" rel="noreferrer" className="w-full flex items-center gap-3 px-3 py-3 rounded-sm text-sm font-body text-foreground hover:bg-secondary/50 transition-colors">
+                      <a href={visibilityIndexHref} target="_blank" rel="noreferrer" className="w-full flex items-center gap-3 px-3 py-3 rounded-xl text-sm font-body text-foreground hover:bg-secondary/50 transition-colors tap-scale">
                         <Eye className="w-4 h-4 text-primary" /> Visibility Index
                       </a>
                     )}
                     {recognitionIndexHref && (
-                      <a href={recognitionIndexHref} target="_blank" rel="noreferrer" className="w-full flex items-center gap-3 px-3 py-3 rounded-sm text-sm font-body text-foreground hover:bg-secondary/50 transition-colors">
+                      <a href={recognitionIndexHref} target="_blank" rel="noreferrer" className="w-full flex items-center gap-3 px-3 py-3 rounded-xl text-sm font-body text-foreground hover:bg-secondary/50 transition-colors tap-scale">
                         <Landmark className="w-4 h-4 text-primary" /> Recognition Index
                       </a>
                     )}
@@ -421,7 +447,7 @@ const AppShell = ({
               <p className="px-5 pt-2 pb-1.5 text-[10px] tracking-[0.15em] uppercase text-muted-foreground font-body">Account</p>
               <div className="px-3 pb-6">
                 {onOpenSettings && (
-                  <button onClick={() => { onOpenSettings(); closeMore(); }} className="w-full flex items-center gap-3 px-3 py-3 rounded-sm text-sm font-body text-foreground hover:bg-secondary/50 transition-colors">
+                  <button onClick={() => { onOpenSettings(); closeMore(); }} className="w-full flex items-center gap-3 px-3 py-3 rounded-xl text-sm font-body text-foreground hover:bg-secondary/50 transition-colors tap-scale">
                     <Settings className="w-4 h-4 text-primary" /> Settings
                   </button>
                 )}
@@ -433,7 +459,7 @@ const AppShell = ({
                   )
                 ) : (
                   onSignOut && (
-                    <button onClick={() => { onSignOut(); closeMore(); }} className="w-full flex items-center gap-3 px-3 py-3 rounded-sm text-sm font-body text-foreground hover:bg-secondary/50 transition-colors">
+                    <button onClick={() => { onSignOut(); closeMore(); }} className="w-full flex items-center gap-3 px-3 py-3 rounded-xl text-sm font-body text-foreground hover:bg-secondary/50 transition-colors tap-scale">
                       <LogOut className="w-4 h-4 text-primary" /> Sign out
                     </button>
                   )

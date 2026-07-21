@@ -1,8 +1,8 @@
 import { useState } from "react";
-import { motion, AnimatePresence } from "framer-motion";
 import { Send, X, Mail, Copy, Check } from "lucide-react";
 import { Chapter } from "@/data/chapters";
 import { toast } from "sonner";
+import ModalShell from "@/components/ui/modal-shell";
 
 const ShareToTeam = ({ chapter }: { chapter: Chapter }) => {
   const [open, setOpen] = useState(false);
@@ -52,22 +52,7 @@ ${actions}
         <Send className="w-4 h-4" />
       </button>
 
-      <AnimatePresence>
-        {open && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            className="fixed inset-0 z-50 bg-background/80 backdrop-blur-sm flex items-center justify-center p-4"
-            onClick={() => setOpen(false)}
-          >
-            <motion.div
-              initial={{ scale: 0.95, opacity: 0 }}
-              animate={{ scale: 1, opacity: 1 }}
-              exit={{ scale: 0.95, opacity: 0 }}
-              onClick={(e) => e.stopPropagation()}
-              className="w-full max-w-md bg-card border border-border rounded-lg shadow-2xl overflow-hidden"
-            >
+      <ModalShell open={open} onClose={() => setOpen(false)} maxWidthClass="max-w-md">
               <div className="px-5 py-4 border-b border-border/50 flex items-center justify-between">
                 <h3 className="font-display text-base text-foreground flex items-center gap-2">
                   <Send className="w-4 h-4 text-primary" /> Send to your team
@@ -99,10 +84,7 @@ ${actions}
                   </button>
                 </div>
               </div>
-            </motion.div>
-          </motion.div>
-        )}
-      </AnimatePresence>
+      </ModalShell>
     </>
   );
 };

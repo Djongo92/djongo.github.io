@@ -1,7 +1,8 @@
 import { useState } from "react";
 import { Type, X, Settings as SettingsIcon } from "lucide-react";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion } from "framer-motion";
 import { useReadingTheme, FontScale } from "@/hooks/useReadingTheme";
+import ModalShell from "@/components/ui/modal-shell";
 
 const fontSizes: { id: FontScale; label: string }[] = [
   { id: "sm", label: "S" },
@@ -24,22 +25,7 @@ const ReadingControls = () => {
         <SettingsIcon className="w-4 h-4" />
       </button>
 
-      <AnimatePresence>
-        {open && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            className="fixed inset-0 z-50 bg-background/70 backdrop-blur-sm flex items-center justify-center p-4 print:hidden"
-            onClick={() => setOpen(false)}
-          >
-            <motion.div
-              initial={{ scale: 0.95, opacity: 0 }}
-              animate={{ scale: 1, opacity: 1 }}
-              exit={{ scale: 0.95, opacity: 0 }}
-              onClick={(e) => e.stopPropagation()}
-              className="w-full max-w-sm bg-card border border-border rounded-lg shadow-2xl overflow-hidden"
-            >
+      <ModalShell open={open} onClose={() => setOpen(false)} maxWidthClass="max-w-sm">
               <div className="px-5 py-3 border-b border-border/50 flex items-center justify-between">
                 <h3 className="font-display text-base text-foreground">Reading preferences</h3>
                 <button onClick={() => setOpen(false)} className="p-1.5 text-muted-foreground hover:text-foreground">
@@ -87,10 +73,7 @@ const ReadingControls = () => {
                   </button>
                 </div>
               </div>
-            </motion.div>
-          </motion.div>
-        )}
-      </AnimatePresence>
+      </ModalShell>
     </>
   );
 };

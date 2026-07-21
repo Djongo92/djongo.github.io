@@ -1,8 +1,8 @@
 import { useMemo, useState } from "react";
-import { motion, AnimatePresence } from "framer-motion";
 import { X, History, Search, Trash2 } from "lucide-react";
 import { useWorkshopHistory } from "@/hooks/useWorkshopHistory";
 import type { WorkshopToolId } from "@/lib/handoff";
+import ModalShell from "@/components/ui/modal-shell";
 
 interface Props {
   open: boolean;
@@ -45,24 +45,8 @@ const WorkshopHistoryModal = ({ open, onClose, onOpenWorkshopTool }: Props) => {
   };
 
   return (
-    <AnimatePresence>
-      {open && (
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          exit={{ opacity: 0 }}
-          className="fixed inset-0 z-50 bg-background/85 backdrop-blur-md flex items-center justify-center p-4"
-          onClick={onClose}
-        >
-          <motion.div
-            initial={{ y: 20, opacity: 0, scale: 0.97 }}
-            animate={{ y: 0, opacity: 1, scale: 1 }}
-            exit={{ y: 20, opacity: 0, scale: 0.97 }}
-            transition={{ duration: 0.25 }}
-            onClick={(e) => e.stopPropagation()}
-            className="w-full max-w-xl max-h-[85vh] bg-card border border-border rounded-lg shadow-2xl overflow-hidden flex flex-col"
-          >
-            <div className="px-6 py-5 border-b border-border/50 flex items-center justify-between">
+    <ModalShell open={open} onClose={onClose} maxWidthClass="max-w-xl">
+      <div className="px-6 py-5 border-b border-border/50 flex items-center justify-between">
               <div className="flex items-center gap-2">
                 <History className="w-4 h-4 text-primary" />
                 <h3 className="font-display text-lg text-foreground">Workshop History</h3>
@@ -142,10 +126,7 @@ const WorkshopHistoryModal = ({ open, onClose, onOpenWorkshopTool }: Props) => {
                 )}
               </div>
             )}
-          </motion.div>
-        </motion.div>
-      )}
-    </AnimatePresence>
+    </ModalShell>
   );
 };
 

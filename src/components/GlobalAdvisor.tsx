@@ -118,7 +118,7 @@ const GlobalAdvisor = ({ readChapters, bookmarks, implementedCount, totalActions
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
             onClick={() => setOpen(true)}
-            className="fixed bottom-20 md:bottom-6 right-4 md:right-6 z-40 flex items-center justify-center w-12 h-12 rounded-full bg-gradient-to-br from-primary to-gold-light text-primary-foreground shadow-2xl shadow-primary/30 hover:shadow-primary/50 transition-shadow print:hidden"
+            className="fixed bottom-20 md:bottom-6 right-4 md:right-6 z-40 flex items-center justify-center w-12 h-12 rounded-full bg-gradient-to-br from-primary to-gold-light text-primary-foreground shadow-apple-lg shadow-primary/30 hover:shadow-primary/50 transition-shadow print:hidden"
             aria-label="Open AI Strategy Advisor"
           >
             <div className="relative">
@@ -145,7 +145,7 @@ const GlobalAdvisor = ({ readChapters, bookmarks, implementedCount, totalActions
               exit={{ y: 40, opacity: 0 }}
               transition={{ duration: 0.2 }}
               onClick={(e) => e.stopPropagation()}
-              className="w-full sm:max-w-md h-[85vh] sm:h-[640px] bg-card border border-border rounded-t-lg sm:rounded-lg shadow-2xl flex flex-col overflow-hidden"
+              className="w-full sm:max-w-md h-[85vh] sm:h-[640px] bg-card hairline border rounded-t-2xl sm:rounded-2xl shadow-apple-lg flex flex-col overflow-hidden"
             >
               <div className="px-5 py-4 border-b border-border/50 flex items-center justify-between bg-gradient-to-r from-primary/10 to-transparent">
                 <div className="flex items-center gap-2">
