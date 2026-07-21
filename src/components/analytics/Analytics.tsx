@@ -306,7 +306,7 @@ const SocialBreakdown = ({ raw }: { raw?: SocialRaw }) => {
             {present ? (
               <CheckCircle2 className="w-3.5 h-3.5 text-emerald-500" />
             ) : (
-              <XCircle className="w-3.5 h-3.5 text-muted-foreground/40" />
+              <XCircle className="w-3.5 h-3.5 text-muted-foreground" />
             )}
             <span className={present ? "text-foreground" : "text-muted-foreground"}>{platform}</span>
           </div>

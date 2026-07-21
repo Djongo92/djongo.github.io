@@ -130,7 +130,7 @@ const MarketingCalendar = () => {
                 </div>
                 <div className="mb-3">
                   <div className="text-[9px] uppercase tracking-wider text-muted-foreground font-body mb-1">Supporting</div>
-                  <ul className="space-y-1">{m.supportingContent.map((s, j) => <li key={j} className="text-[11px] font-body text-muted-foreground flex gap-2"><span className="text-primary/60">·</span>{s}</li>)}</ul>
+                  <ul className="space-y-1">{m.supportingContent.map((s, j) => <li key={j} className="text-[11px] font-body text-muted-foreground flex gap-2"><span className="text-primary">·</span>{s}</li>)}</ul>
                 </div>
                 <div className="mb-2">
                   <div className="text-[9px] uppercase tracking-wider text-muted-foreground font-body mb-1">Channels</div>

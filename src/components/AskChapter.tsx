@@ -117,7 +117,7 @@ const AskChapter = ({ chapter }: { chapter: Chapter }) => {
               Get tailored advice on applying these ideas to your firm — powered by AI.
             </p>
           </div>
-          <div className="text-[10px] tracking-wider uppercase text-primary/60 font-body self-center">
+          <div className="text-[10px] tracking-wider uppercase text-primary font-body self-center">
             Open →
           </div>
         </div>

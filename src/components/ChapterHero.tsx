@@ -91,7 +91,7 @@ const ChapterHero = ({ chapter }: ChapterHeroProps) => {
             <div className="p-3 rounded-sm bg-primary/10 text-primary backdrop-blur-sm">
               <ChapterIcon chapterId={chapter.id} className="w-7 h-7" />
             </div>
-            <span className="text-[10px] tracking-[0.3em] uppercase text-primary/60 font-body">
+            <span className="text-[10px] tracking-[0.3em] uppercase text-primary font-body">
               Chapter {String(chapter.number).padStart(2, "0")}
             </span>
           </div>

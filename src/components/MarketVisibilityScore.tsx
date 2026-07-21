@@ -82,7 +82,7 @@ const MarketVisibilityScore = () => {
     setConfirmingPublish(false);
     const { ok, code } = await publish(result.id, true);
     if (ok) {
-      toast.success("Published to the public ranking");
+      toast.success("Published to the Visibility Index");
       return;
     }
     if (code === "unverified") {
@@ -108,7 +108,7 @@ const MarketVisibilityScore = () => {
         setVerifyRecord(null);
         toast.success("Domain verified — publishing…");
         const { ok } = await publish(result.id, true);
-        if (ok) toast.success("Published to the public ranking");
+        if (ok) toast.success("Published to the Visibility Index");
         else toast.error("Couldn't publish");
       } else {
         setVerifyError("That TXT record isn't showing up yet — DNS changes can take a few minutes to propagate.");
@@ -124,7 +124,7 @@ const MarketVisibilityScore = () => {
     if (!result) return;
     setConfirmingUnpublish(false);
     const { ok } = await publish(result.id, false);
-    if (ok) toast.success("Removed from the public ranking");
+    if (ok) toast.success("Removed from the Visibility Index");
     else toast.error("Couldn't unpublish");
   };
 
@@ -486,7 +486,7 @@ const MarketVisibilityScore = () => {
                     ) : result.isPublic ? (
                       <div className="space-y-2">
                         <div className="flex items-center justify-center gap-2 text-emerald-500 text-sm font-body py-2">
-                          <CheckCircle2 className="w-4 h-4" /> Published to the public ranking
+                          <CheckCircle2 className="w-4 h-4" /> Published to the Visibility Index
                         </div>
                         {confirmingUnpublish ? (
                           <div className="border border-destructive/30 bg-destructive/5 rounded-sm p-3 space-y-2">
@@ -514,7 +514,7 @@ const MarketVisibilityScore = () => {
                             onClick={() => setConfirmingUnpublish(true)}
                             className="w-full text-xs text-muted-foreground hover:text-destructive font-body py-1.5 transition-colors"
                           >
-                            Remove from public ranking
+                            Remove from Visibility Index
                           </button>
                         )}
                       </div>
@@ -544,7 +544,7 @@ const MarketVisibilityScore = () => {
                         onClick={() => setConfirmingPublish(true)}
                         className="w-full bg-emerald-600 text-white py-3 rounded-sm font-body text-sm hover:bg-emerald-500 transition-colors flex items-center justify-center gap-2"
                       >
-                        <Share2 className="w-4 h-4" /> Publish to the public ranking
+                        <Share2 className="w-4 h-4" /> Publish to the Visibility Index
                       </button>
                     )}
 

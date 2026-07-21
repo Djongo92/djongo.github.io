@@ -150,7 +150,7 @@ const ChapterView = ({
         <span className="text-xs font-body">{readingTime} min read</span>
         {actionItems.length > 0 && (
           <>
-            <span className="text-muted-foreground/30">·</span>
+            <span className="text-muted-foreground/60">·</span>
             <span className="text-xs font-body">{actionItems.length} action items</span>
           </>
         )}
@@ -214,7 +214,7 @@ const ChapterView = ({
                 <ol className="space-y-4 mb-5">
                   {section.numbered.map((item, nIndex) => (
                     <li key={nIndex} className="flex items-start gap-4 text-secondary-foreground/80 font-body text-[15px] leading-[1.75]">
-                      <span className="font-display text-lg text-primary/60 min-w-[1.5rem] text-right mt-0.5">
+                      <span className="font-display text-lg text-primary min-w-[1.5rem] text-right mt-0.5">
                         {nIndex + 1}.
                       </span>
                       <span><GlossaryText text={item} /></span>
@@ -231,7 +231,7 @@ const ChapterView = ({
                   transition={{ duration: 0.6, ease: "easeOut" }}
                   className="border-l-2 border-primary/40 pl-6 py-2 my-8 group relative"
                 >
-                  <p className="font-display text-lg md:text-xl text-primary/90 italic leading-relaxed">
+                  <p className="font-display text-lg md:text-xl text-primary italic leading-relaxed">
                     {section.pullQuote}
                   </p>
                   <button
@@ -310,7 +310,7 @@ const ChapterView = ({
 
       {/* Keyboard hint */}
       <div className="max-w-3xl mx-auto px-6 pb-4 text-center print:hidden">
-        <p className="text-[10px] text-muted-foreground/50 font-body">
+        <p className="text-[10px] text-muted-foreground font-body">
           ← → to navigate chapters · Esc to go back · Swipe on mobile
         </p>
       </div>

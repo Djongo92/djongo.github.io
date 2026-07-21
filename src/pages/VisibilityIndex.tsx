@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { Link, useParams } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
-import { Loader2, ArrowRight, Trophy, Download, ShieldCheck } from "lucide-react";
+import { Loader2, ArrowRight, Eye, Download, ShieldCheck } from "lucide-react";
 import { PEER_GROUPS } from "@/lib/marketVisibilityConfig";
 import { toCsv, downloadCsv } from "@/lib/csv";
 import { setPageMeta } from "@/lib/pageMeta";
@@ -18,7 +18,7 @@ interface AuditRow {
 const PEER_GROUP_LABEL: Record<string, string> = Object.fromEntries(PEER_GROUPS.map((p) => [p.value, p.label]));
 const PEER_GROUP_ORDER = PEER_GROUPS.map((p) => p.value);
 
-const Rankings = () => {
+const VisibilityIndex = () => {
   const { market } = useParams();
   const [rows, setRows] = useState<AuditRow[] | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -34,7 +34,7 @@ const Rankings = () => {
         .eq("is_public", true)
         .order("total_score", { ascending: false });
 
-      if (error) setError("Couldn't load the ranking.");
+      if (error) setError("Couldn't load the index.");
       else setRows((data ?? []) as AuditRow[]);
       setLoading(false);
     })();
@@ -43,7 +43,7 @@ const Rankings = () => {
   useEffect(() => {
     const marketLabel = market ? market[0].toUpperCase() + market.slice(1) : "Market";
     setPageMeta({
-      title: market ? `${marketLabel} Market Visibility Ranking · LegalOS` : "Rankings · LegalOS",
+      title: market ? `${marketLabel} Visibility Index · LegalOS` : "Visibility Index · LegalOS",
       description: `Externally-sourced, peer-group-normalized Market Visibility Scores for law firms in ${marketLabel} — PageSpeed, legal-directory presence, thought-leadership cadence, benchmarked against peers.`,
     });
   }, [market]);
@@ -66,7 +66,7 @@ const Rankings = () => {
         { key: "published_at", header: "Published at" },
       ],
     );
-    downloadCsv(`legalos-rankings-${market}.csv`, csv);
+    downloadCsv(`legalos-visibility-index-${market}.csv`, csv);
   };
 
   return (
@@ -75,18 +75,23 @@ const Rankings = () => {
         <div className="max-w-3xl mx-auto px-6 py-5 flex items-center justify-between">
           <Link to="/" className="text-[10px] tracking-[0.3em] uppercase text-primary font-body">LegalOS</Link>
           <span className="text-[10px] tracking-[0.2em] uppercase text-emerald-500 font-body flex items-center gap-1">
-            <Trophy className="w-3 h-3" /> Public ranking
+            <Eye className="w-3 h-3" /> Audited &amp; published
           </span>
         </div>
       </header>
 
       <main className="max-w-3xl mx-auto px-6 py-12">
-        <h1 className="font-display text-4xl text-foreground mb-2 leading-tight capitalize">{market} Market Visibility Ranking</h1>
-        <p className="text-xs text-muted-foreground font-body mb-4">
-          Externally-sourced, peer-group-normalized Market Visibility Scores — firms that opted to publish their audit.
+        <h1 className="font-display text-4xl text-foreground mb-2 leading-tight capitalize">{market} Visibility Index</h1>
+        <p className="text-xs text-muted-foreground font-body mb-1">
+          Externally-sourced, peer-group-normalized Market Visibility Scores — firms that opted to run a full audit
+          and publish it.
           <span className="inline-flex items-center gap-1 ml-1.5">
             <ShieldCheck className="w-3 h-3 text-emerald-500" /> = domain ownership verified.
           </span>
+        </p>
+        <p className="text-xs text-muted-foreground font-body mb-4">
+          This is a firm's complete 200-point score. A lighter, directory-only slice that needs no audit to appear —
+          the Recognition Index — covers every firm tracked by Chambers or Legal 500, whether or not they've run one.
         </p>
 
         {!loading && !error && peerGroupsWithData.length > 0 && (
@@ -137,12 +142,12 @@ const Rankings = () => {
 
         <footer className="mt-10 pt-6 border-t border-border/40 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
           <p className="text-[10px] tracking-[0.2em] uppercase text-muted-foreground font-body">
-            Live ranking · updates as firms publish
+            Live index · updates as firms publish
           </p>
           <div className="flex items-center gap-4">
             {market && (
-              <Link to={`/directory/${market}`} className="text-xs text-muted-foreground hover:text-foreground font-body inline-flex items-center gap-1">
-                Directory Standing Index <ArrowRight className="w-3 h-3" />
+              <Link to={`/recognition-index/${market}`} className="text-xs text-muted-foreground hover:text-foreground font-body inline-flex items-center gap-1">
+                Recognition Index <ArrowRight className="w-3 h-3" />
               </Link>
             )}
             <Link to="/" className="text-xs text-primary hover:text-gold-light font-body inline-flex items-center gap-1">
@@ -150,7 +155,7 @@ const Rankings = () => {
             </Link>
           </div>
         </footer>
-        <p className="mt-6 text-[10px] tracking-[0.2em] uppercase text-muted-foreground/60 font-body text-center">
+        <p className="mt-6 text-[10px] tracking-[0.2em] uppercase text-muted-foreground font-body text-center">
           For Authorized Use Only
         </p>
       </main>
@@ -158,4 +163,4 @@ const Rankings = () => {
   );
 };
 
-export default Rankings;
+export default VisibilityIndex;

@@ -1,13 +1,7 @@
 import { useState } from "react";
-import { Sun, Moon, Coffee, Type, X, Settings as SettingsIcon } from "lucide-react";
+import { Type, X, Settings as SettingsIcon } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
-import { useReadingTheme, ReadingTheme, FontScale } from "@/hooks/useReadingTheme";
-
-const themes: { id: ReadingTheme; label: string; icon: typeof Sun }[] = [
-  { id: "dark", label: "Dark", icon: Moon },
-  { id: "light", label: "Light", icon: Sun },
-  { id: "sepia", label: "Sepia", icon: Coffee },
-];
+import { useReadingTheme, FontScale } from "@/hooks/useReadingTheme";
 
 const fontSizes: { id: FontScale; label: string }[] = [
   { id: "sm", label: "S" },
@@ -18,14 +12,14 @@ const fontSizes: { id: FontScale; label: string }[] = [
 
 const ReadingControls = () => {
   const [open, setOpen] = useState(false);
-  const { theme, setTheme, fontScale, setFontScale, pageTransitions, setPageTransitions } = useReadingTheme();
+  const { fontScale, setFontScale, pageTransitions, setPageTransitions } = useReadingTheme();
 
   return (
     <>
       <button
         onClick={() => setOpen(true)}
         className="p-2 text-muted-foreground hover:text-primary transition-colors"
-        aria-label="Reading settings"
+        aria-label="Reading preferences"
       >
         <SettingsIcon className="w-4 h-4" />
       </button>
@@ -47,32 +41,12 @@ const ReadingControls = () => {
               className="w-full max-w-sm bg-card border border-border rounded-lg shadow-2xl overflow-hidden"
             >
               <div className="px-5 py-3 border-b border-border/50 flex items-center justify-between">
-                <h3 className="font-display text-base text-foreground">Reading settings</h3>
+                <h3 className="font-display text-base text-foreground">Reading preferences</h3>
                 <button onClick={() => setOpen(false)} className="p-1.5 text-muted-foreground hover:text-foreground">
                   <X className="w-4 h-4" />
                 </button>
               </div>
               <div className="p-5 space-y-5">
-                <div>
-                  <p className="text-[10px] tracking-wider uppercase text-muted-foreground font-body mb-2">Theme</p>
-                  <div className="grid grid-cols-3 gap-2">
-                    {themes.map(({ id, label, icon: Icon }) => (
-                      <button
-                        key={id}
-                        onClick={() => setTheme(id)}
-                        className={`flex flex-col items-center gap-1.5 py-3 rounded-sm border text-xs font-body transition-colors ${
-                          theme === id
-                            ? "border-primary bg-primary/10 text-foreground"
-                            : "border-border/50 text-muted-foreground hover:border-primary/40 hover:text-foreground"
-                        }`}
-                      >
-                        <Icon className="w-4 h-4" />
-                        {label}
-                      </button>
-                    ))}
-                  </div>
-                </div>
-
                 <div>
                   <p className="text-[10px] tracking-wider uppercase text-muted-foreground font-body mb-2">
                     <Type className="inline w-3 h-3 mr-1" /> Text size

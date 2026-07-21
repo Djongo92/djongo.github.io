@@ -6,9 +6,9 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import Index from "./pages/Index.tsx";
 import NotFound from "./pages/NotFound.tsx";
 import Share from "./pages/Share.tsx";
-import Rankings from "./pages/Rankings.tsx";
+import VisibilityIndex from "./pages/VisibilityIndex.tsx";
 import Teaser from "./pages/Teaser.tsx";
-import DirectoryIndex from "./pages/DirectoryIndex.tsx";
+import RecognitionIndex from "./pages/RecognitionIndex.tsx";
 import OpsDirectoryQueue from "./pages/OpsDirectoryQueue.tsx";
 import OpsRateLimits from "./pages/OpsRateLimits.tsx";
 import JoinFirm from "./pages/JoinFirm.tsx";
@@ -24,8 +24,8 @@ const App = () => (
         <Routes>
           <Route path="/" element={<Index />} />
           <Route path="/share/:id" element={<Share />} />
-          <Route path="/rankings/:market" element={<Rankings />} />
-          <Route path="/directory/:market" element={<DirectoryIndex />} />
+          <Route path="/visibility-index/:market" element={<VisibilityIndex />} />
+          <Route path="/recognition-index/:market" element={<RecognitionIndex />} />
           <Route path="/teaser" element={<Teaser />} />
           <Route path="/join/:token" element={<JoinFirm />} />
           <Route path="/ops/directory-queue" element={<OpsDirectoryQueue />} />

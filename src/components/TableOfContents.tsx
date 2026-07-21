@@ -1,6 +1,6 @@
 import { motion } from "framer-motion";
 import { chapters } from "@/data/chapters";
-import { BookOpen, Bookmark, Clock, CheckCircle2, ArrowRight, BarChart3 } from "lucide-react";
+import { BookOpen, Bookmark, Clock, CheckCircle2, ArrowRight } from "lucide-react";
 import SearchPalette from "./SearchPalette";
 import ReadingControls from "./ReadingControls";
 import ChapterIcon from "./ChapterIcon";
@@ -14,21 +14,16 @@ interface TableOfContentsProps {
   readChapters?: string[];
   lastReadChapterId?: string | null;
   implementationScore?: number;
-  onOpenDashboard?: () => void;
   onlyBookmarks?: boolean;
   onSetMode?: (mode: "all" | "saved") => void;
-  onOpenWorkshop?: () => void;
-  onOpenMaturity?: () => void;
 }
 
 const TableOfContents = ({
   onSelectChapter, bookmarks = [], onToggleBookmark,
   readChapters = [], lastReadChapterId,
-  implementationScore = 0, onOpenDashboard,
+  implementationScore = 0,
   onlyBookmarks = false,
   onSetMode,
-  onOpenWorkshop,
-  onOpenMaturity,
 }: TableOfContentsProps) => {
   const totalRead = readChapters.length;
   const totalChapters = chapters.length;
@@ -61,11 +56,6 @@ const TableOfContents = ({
             Guidebook
           </span>
           <div className="flex items-center gap-2">
-            {onOpenDashboard && (
-              <button onClick={onOpenDashboard} className="p-2 text-muted-foreground hover:text-primary transition-colors" aria-label="My Progress">
-                <BarChart3 className="w-4 h-4" />
-              </button>
-            )}
             <SearchPalette onSelectChapter={onSelectChapter} />
             <ReadingControls />
           </div>
@@ -216,7 +206,7 @@ const TableOfContents = ({
                   className="group p-5 bg-card border border-border/50 rounded-sm hover:border-primary/30 hover:shadow-lg hover:shadow-primary/5 hover:-translate-y-0.5 transition-all text-left"
                 >
                   <div className="flex items-center gap-3 mb-3">
-                    <div className="p-2 rounded-sm bg-primary/5 text-primary/60 group-hover:bg-primary/10 group-hover:text-primary transition-colors">
+                    <div className="p-2 rounded-sm bg-primary/5 text-primary group-hover:bg-primary/10 transition-colors">
                       <ChapterIcon chapterId={ch.id} className="w-4 h-4" />
                     </div>
                     <span className="text-[10px] text-muted-foreground font-body">Ch. {String(ch.number).padStart(2, "0")}</span>
@@ -227,7 +217,7 @@ const TableOfContents = ({
                   <p className="text-xs text-muted-foreground font-body line-clamp-2">
                     {ch.hook || ch.subtitle}
                   </p>
-                  <div className="flex items-center gap-1.5 mt-3 text-muted-foreground/50">
+                  <div className="flex items-center gap-1.5 mt-3 text-muted-foreground">
                     <Clock className="w-3 h-3" />
                     <span className="text-[10px] font-body">{getReadingTime(ch)} min</span>
                   </div>
@@ -266,12 +256,12 @@ const TableOfContents = ({
                   className="w-full p-5 bg-card border border-border/50 rounded-sm hover:border-primary/30 hover:shadow-lg hover:shadow-primary/5 hover:-translate-y-0.5 transition-all text-left"
                 >
                   <div className="flex items-start gap-4">
-                    <div className="p-2.5 rounded-sm bg-primary/5 text-primary/60 group-hover:bg-primary/10 group-hover:text-primary transition-colors shrink-0">
+                    <div className="p-2.5 rounded-sm bg-primary/5 text-primary group-hover:bg-primary/10 transition-colors shrink-0">
                       <ChapterIcon chapterId={chapter.id} className="w-5 h-5" />
                     </div>
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-2 mb-1">
-                        <span className="text-[10px] text-primary/50 font-body">{String(chapter.number).padStart(2, "0")}</span>
+                        <span className="text-[10px] text-primary font-body">{String(chapter.number).padStart(2, "0")}</span>
                         {isRead && <CheckCircle2 className="w-3.5 h-3.5 text-primary" />}
                         {isBookmarked && <Bookmark className="w-3 h-3 fill-primary text-primary" />}
                       </div>
@@ -281,12 +271,12 @@ const TableOfContents = ({
                       <p className="text-xs text-muted-foreground font-body line-clamp-1">
                         {chapter.hook || chapter.subtitle}
                       </p>
-                      <div className="flex items-center gap-2 mt-2 text-muted-foreground/50">
+                      <div className="flex items-center gap-2 mt-2 text-muted-foreground">
                         <Clock className="w-3 h-3" />
                         <span className="text-[10px] font-body">{getReadingTime(chapter)} min</span>
                         {chapter.actionItems && chapter.actionItems.length > 0 && (
                           <>
-                            <span className="text-muted-foreground/30">·</span>
+                            <span className="text-muted-foreground/60">·</span>
                             <span className="text-[10px] font-body">{chapter.actionItems.length} actions</span>
                           </>
                         )}
@@ -316,24 +306,6 @@ const TableOfContents = ({
 
       {/* Footer */}
       <footer className="border-t border-border py-10 px-6 text-center">
-        <div className="flex items-center justify-center gap-3 mb-5">
-          {onOpenMaturity && (
-            <button
-              onClick={onOpenMaturity}
-              className="text-[11px] tracking-wider uppercase text-muted-foreground hover:text-primary border border-border hover:border-primary/40 px-4 py-2 rounded-sm font-body transition-colors"
-            >
-              Firm Maturity Score
-            </button>
-          )}
-          {onOpenWorkshop && (
-            <button
-              onClick={onOpenWorkshop}
-              className="text-[11px] tracking-wider uppercase text-primary border border-primary/40 hover:bg-primary/10 px-4 py-2 rounded-sm font-body transition-colors"
-            >
-              Workshop
-            </button>
-          )}
-        </div>
         <p className="text-[10px] tracking-[0.3em] uppercase text-muted-foreground font-body">
           For Authorized Use Only
         </p>

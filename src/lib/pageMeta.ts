@@ -1,5 +1,5 @@
-// Tiny document-head helper for the public, shareable pages (Rankings,
-// Directory Standing Index) — no react-helmet in this project, and these
+// Tiny document-head helper for the public, shareable pages (Visibility
+// Index, Recognition Index) — no react-helmet in this project, and these
 // pages don't need more than title/description/OG tags to be link-preview
 // friendly, so a small upsert-by-selector helper is enough.
 function upsertMeta(selector: string, build: () => HTMLMetaElement) {

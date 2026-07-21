@@ -22,7 +22,9 @@
     --secondary-foreground: 40 15% 80%;
 
     --muted: 220 20% 13%;
-    --muted-foreground: 220 10% 50%;
+    /* 52%, not 50% — measured 4.22:1 on --card at 50%, just under WCAG AA's
+       4.5:1 for text. 52% clears it with no visible difference. */
+    --muted-foreground: 220 10% 52%;
 
     --accent: 38 45% 60%;
     --accent-foreground: 220 30% 7%;
@@ -67,7 +69,11 @@
     --popover: 0 0% 100%;
     --popover-foreground: 220 30% 12%;
 
-    --primary: 38 50% 42%;
+    /* 38%, not 42% — at 42% white button text measured 3.95:1 (fails AA's
+       4.5:1 for normal-size text) and primary-as-text measured only
+       3.64:1 on --background. 38% clears both with a barely-perceptible
+       darkening. */
+    --primary: 38 50% 38%;
     --primary-foreground: 0 0% 100%;
 
     --secondary: 40 15% 90%;
@@ -76,7 +82,7 @@
     --muted: 40 10% 92%;
     --muted-foreground: 220 10% 45%;
 
-    --accent: 38 50% 42%;
+    --accent: 38 50% 38%;
     --accent-foreground: 0 0% 100%;
 
     --destructive: 0 84.2% 50%;
@@ -84,9 +90,9 @@
 
     --border: 40 10% 85%;
     --input: 40 10% 85%;
-    --ring: 38 50% 42%;
+    --ring: 38 50% 38%;
 
-    --gold: 38 50% 42%;
+    --gold: 38 50% 38%;
     --gold-light: 38 45% 55%;
     --gold-dark: 38 45% 32%;
     --navy: 220 30% 12%;
@@ -303,25 +309,4 @@
   @page {
     margin: 2cm;
   }
-}
-
-/* ============================================================
-   Ambient reading mode — warmer tint after 21:00 local time.
-   Nudges background/card hue toward gold and softens contrast.
-   ============================================================ */
-html.ambient {
-  --background: 28 22% 8%;
-  --card: 28 20% 11%;
-  --secondary: 28 18% 16%;
-  --muted: 28 18% 14%;
-  --border: 30 18% 19%;
-  --foreground: 38 25% 88%;
-  transition: background-color 1.2s ease, color 1.2s ease;
-}
-html.ambient body {
-  filter: saturate(0.96);
-}
-html.ambient.light {
-  --background: 34 30% 94%;
-  --card: 36 32% 97%;
 }
