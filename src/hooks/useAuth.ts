@@ -5,6 +5,7 @@
 import { useEffect, useRef, useState } from "react";
 import type { Session } from "@supabase/supabase-js";
 import { supabase } from "@/integrations/supabase/client";
+import { setCurrentUser } from "@/lib/currentUser";
 
 export const useAuth = () => {
   const [session, setSession] = useState<Session | null>(null);
@@ -19,6 +20,7 @@ export const useAuth = () => {
   useEffect(() => {
     supabase.auth.getSession().then(({ data }) => {
       hadSessionRef.current = !!data.session;
+      setCurrentUser(data.session?.user?.id ?? null, data.session?.access_token ?? null);
       setSession(data.session);
       setLoading(false);
     });
@@ -29,6 +31,7 @@ export const useAuth = () => {
       if (newSession) setSessionExpired(false);
       hadSessionRef.current = !!newSession;
       explicitSignOutRef.current = false;
+      setCurrentUser(newSession?.user?.id ?? null, newSession?.access_token ?? null);
       setSession(newSession);
     });
     return () => listener.subscription.unsubscribe();
