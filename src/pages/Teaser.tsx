@@ -3,19 +3,22 @@ import { Link } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { ShieldCheck, Loader2, ArrowRight } from "lucide-react";
 import { edgeHeaders } from "@/lib/edgeAuth";
+import { DMV_MARKETS } from "@/lib/marketVisibilityConfig";
 
 const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL;
 
 interface TeaserResult {
   url: string;
   performance: { score: number; provenance: string };
-  gbp: { score: number };
+  reputation: { score: number; provenance: string; directory: string; matchedFirmName?: string };
   teaserTotal: number;
   teaserMax: number;
 }
 
 const Teaser = () => {
   const [url, setUrl] = useState("");
+  const [firmName, setFirmName] = useState("");
+  const [market, setMarket] = useState("serbia");
   const [gbpListed, setGbpListed] = useState(false);
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState<TeaserResult | null>(null);
@@ -31,7 +34,7 @@ const Teaser = () => {
       const resp = await fetch(`${SUPABASE_URL}/functions/v1/visibility-teaser`, {
         method: "POST",
         headers: edgeHeaders(),
-        body: JSON.stringify({ url: url.trim(), gbpListed }),
+        body: JSON.stringify({ url: url.trim(), firmName: firmName.trim() || undefined, market, gbpListed }),
       });
       const data = await resp.json();
       if (!resp.ok) {
@@ -60,8 +63,9 @@ const Teaser = () => {
       <main className="max-w-2xl mx-auto px-6 py-16">
         <h1 className="font-display text-4xl text-foreground mb-3 leading-tight">Market Visibility Score — free teaser</h1>
         <p className="text-sm text-muted-foreground font-body mb-10">
-          A quick, real look at two of the five categories in the full Market Visibility Score: your site's actual PageSpeed
-          performance, plus whether you have a claimed Google Business Profile. No password, no account — just real data.
+          A quick, real look at two of the five categories in the full Market Visibility Score: your site's actual
+          PageSpeed performance, plus your real Reputation standing (Chambers, Legal 500, IFLR1000, and Google
+          Business Profile). No password, no account — just real data.
         </p>
 
         <form onSubmit={submit} className="space-y-4 mb-10">
@@ -75,6 +79,32 @@ const Teaser = () => {
               className="w-full bg-card border border-border rounded-sm px-3 py-2.5 text-sm font-body focus:outline-none focus:border-emerald-500/50"
               disabled={loading}
             />
+          </div>
+          <div className="grid grid-cols-2 gap-3">
+            <div>
+              <label className="block text-xs text-muted-foreground font-body mb-1.5">Firm name (optional)</label>
+              <input
+                type="text"
+                value={firmName}
+                onChange={(e) => setFirmName(e.target.value)}
+                placeholder="Helps match your directory listing"
+                className="w-full bg-card border border-border rounded-sm px-3 py-2.5 text-sm font-body focus:outline-none focus:border-emerald-500/50"
+                disabled={loading}
+              />
+            </div>
+            <div>
+              <label className="block text-xs text-muted-foreground font-body mb-1.5">Market</label>
+              <select
+                value={market}
+                onChange={(e) => setMarket(e.target.value)}
+                className="w-full bg-card border border-border rounded-sm px-3 py-2.5 text-sm font-body focus:outline-none focus:border-emerald-500/50"
+                disabled={loading}
+              >
+                {Object.keys(DMV_MARKETS).map((m) => (
+                  <option key={m} value={m}>{m[0].toUpperCase() + m.slice(1)}</option>
+                ))}
+              </select>
+            </div>
           </div>
           <label className="flex items-center gap-2 text-sm font-body text-secondary-foreground/80 cursor-pointer">
             <input
@@ -117,14 +147,26 @@ const Teaser = () => {
                   </span>
                 </div>
                 <div className="flex items-center justify-between">
-                  <span className="text-foreground">Google Business Profile</span>
-                  <span className="text-muted-foreground">{result.gbp.score} / 10</span>
+                  <span className="text-foreground">Reputation</span>
+                  <span className="text-muted-foreground">
+                    {Math.round(result.reputation.score * 10) / 10} / {result.reputation.directory === "matched" ? 55 : 10}
+                  </span>
                 </div>
+                {result.reputation.directory === "matched" && result.reputation.matchedFirmName && (
+                  <p className="text-[11px] text-muted-foreground font-body">
+                    Matched to "{result.reputation.matchedFirmName}" in the directory.
+                  </p>
+                )}
+                {result.reputation.directory === "pending" && (
+                  <p className="text-[11px] text-muted-foreground font-body">
+                    No directory match found yet — try adding your firm name, or this market isn't tracked yet.
+                  </p>
+                )}
               </div>
               <div className="mt-6 pt-6 border-t border-border/40 text-center">
                 <p className="text-xs text-muted-foreground font-body mb-3">
-                  This is 2 of 5 categories (30 of 200 points). The full Market Visibility Score adds Social Media, SEO &
-                  Authority, Thought Leadership, and Reputation — peer-group-normalized against other firms in your market.
+                  This is 2 of 5 categories. The full Market Visibility Score adds Social Media, SEO & Authority, and
+                  Thought Leadership, peer-group-normalized against other firms in your market.
                 </p>
                 <Link to="/" className="inline-flex items-center gap-1 text-xs text-emerald-600 hover:text-emerald-500 font-body">
                   Explore the full guidebook <ArrowRight className="w-3 h-3" />

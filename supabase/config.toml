@@ -95,3 +95,6 @@ verify_jwt = false
 
 [functions.visibility-teaser]
 verify_jwt = false
+
+[functions.directory-standing-index]
+verify_jwt = false

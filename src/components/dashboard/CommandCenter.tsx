@@ -93,6 +93,9 @@ export interface ReputationRaw {
   chambers?: DirectorySubScore;
   legal500?: DirectorySubScore;
   iflr1000?: DirectorySubScore;
+  chambersRankedTables?: Record<string, number> | null;
+  legal500RankedTables?: Record<string, number> | null;
+  iflr1000RankedTables?: Record<string, number> | null;
 }
 
 export interface AuditRow {
