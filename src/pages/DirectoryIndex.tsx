@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { Link, useParams } from "react-router-dom";
-import { Loader2, ShieldCheck, ArrowRight } from "lucide-react";
+import { Loader2, ShieldCheck, ArrowRight, Flag } from "lucide-react";
 import { PEER_GROUPS, FIRM_TYPE_TO_PEER_GROUP } from "@/lib/marketVisibilityConfig";
 
 const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL;
@@ -24,6 +24,29 @@ const DirectoryIndex = () => {
   const [max, setMax] = useState(45);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
+  const [removalOpen, setRemovalOpen] = useState(false);
+  const [removalFirmName, setRemovalFirmName] = useState("");
+  const [removalNote, setRemovalNote] = useState("");
+  const [removalSubmitting, setRemovalSubmitting] = useState(false);
+  const [removalDone, setRemovalDone] = useState(false);
+
+  const submitRemovalRequest = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!removalFirmName.trim() || removalSubmitting) return;
+    setRemovalSubmitting(true);
+    try {
+      const resp = await fetch(`${SUPABASE_URL}/functions/v1/directory-removal-request`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json", Authorization: `Bearer ${SUPABASE_KEY}`, apikey: SUPABASE_KEY },
+        body: JSON.stringify({ market, firmName: removalFirmName.trim(), note: removalNote.trim() || undefined }),
+      });
+      if (resp.ok) setRemovalDone(true);
+    } catch {
+      // Silent — this is a low-stakes courtesy request, not core functionality.
+    } finally {
+      setRemovalSubmitting(false);
+    }
+  };
 
   useEffect(() => {
     if (!market) return;
@@ -118,6 +141,59 @@ const DirectoryIndex = () => {
             </div>
           </div>
         ))}
+
+        {!loading && !error && groupsWithData.length > 0 && (
+          <div className="mb-6">
+            {!removalOpen ? (
+              <button
+                onClick={() => setRemovalOpen(true)}
+                className="text-xs text-muted-foreground hover:text-foreground font-body inline-flex items-center gap-1.5"
+              >
+                <Flag className="w-3 h-3" /> Is this your firm, and you'd like it reviewed for removal?
+              </button>
+            ) : removalDone ? (
+              <p className="text-xs text-emerald-500 font-body">
+                Thanks — logged for manual review. This isn't instant since we verify requests before removing anything.
+              </p>
+            ) : (
+              <form onSubmit={submitRemovalRequest} className="bg-card border border-border/50 rounded-sm p-4 space-y-2 max-w-sm">
+                <p className="text-xs text-muted-foreground font-body mb-2">
+                  This data comes from Chambers/Legal 500's own public rankings — we're not able to remove a firm from
+                  those directories, but we can review whether it should appear in this index.
+                </p>
+                <input
+                  value={removalFirmName}
+                  onChange={(e) => setRemovalFirmName(e.target.value)}
+                  placeholder="Your firm's name"
+                  className="w-full bg-secondary/80 border border-border text-foreground placeholder:text-muted-foreground text-sm font-body px-3 py-2 rounded-sm focus:outline-none focus:border-primary"
+                />
+                <textarea
+                  value={removalNote}
+                  onChange={(e) => setRemovalNote(e.target.value)}
+                  placeholder="Optional note"
+                  rows={2}
+                  className="w-full bg-secondary/80 border border-border text-foreground placeholder:text-muted-foreground text-sm font-body px-3 py-2 rounded-sm focus:outline-none focus:border-primary resize-none"
+                />
+                <div className="flex gap-2">
+                  <button
+                    type="submit"
+                    disabled={!removalFirmName.trim() || removalSubmitting}
+                    className="px-3 py-1.5 rounded-sm text-xs font-body bg-primary text-primary-foreground hover:bg-primary/90 transition-colors disabled:opacity-40"
+                  >
+                    {removalSubmitting ? "Sending…" : "Send request"}
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setRemovalOpen(false)}
+                    className="px-3 py-1.5 rounded-sm text-xs font-body border border-border/50 text-muted-foreground hover:text-foreground"
+                  >
+                    Cancel
+                  </button>
+                </div>
+              </form>
+            )}
+          </div>
+        )}
 
         <footer className="mt-10 pt-6 border-t border-border/40 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
           <p className="text-[10px] tracking-[0.2em] uppercase text-muted-foreground font-body">

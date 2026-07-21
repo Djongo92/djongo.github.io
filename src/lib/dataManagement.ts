@@ -65,3 +65,31 @@ export function clearAllLocalData() {
   window.dispatchEvent(new Event("score-goals:update"));
   window.dispatchEvent(new Event("competitors:update"));
 }
+
+/**
+ * The stopgap for "no accounts yet": lets a firm manually carry their local
+ * data to a different browser or device by exporting there and importing
+ * here. Only writes keys this app actually recognizes — an export bundle
+ * from a future version with new keys just skips the ones this version
+ * doesn't know about, rather than failing the whole import.
+ */
+export function importDataBundle(bundle: Record<string, unknown>): { imported: number; skipped: number } {
+  let imported = 0;
+  let skipped = 0;
+  for (const key of LOCAL_DATA_KEYS) {
+    if (!(key in bundle)) continue;
+    const value = bundle[key];
+    if (value === undefined) continue;
+    try {
+      localStorage.setItem(key, typeof value === "string" ? value : JSON.stringify(value));
+      imported++;
+    } catch {
+      skipped++;
+    }
+  }
+  window.dispatchEvent(new Event("battleplan:update"));
+  window.dispatchEvent(new Event("workshop:history-update"));
+  window.dispatchEvent(new Event("score-goals:update"));
+  window.dispatchEvent(new Event("competitors:update"));
+  return { imported, skipped };
+}

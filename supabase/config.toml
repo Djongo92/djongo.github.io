@@ -98,3 +98,9 @@ verify_jwt = false
 
 [functions.directory-standing-index]
 verify_jwt = false
+
+[functions.directory-removal-request]
+verify_jwt = false
+
+[functions.ops-directory-queue]
+verify_jwt = false

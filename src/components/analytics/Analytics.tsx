@@ -7,6 +7,7 @@ import type {
 } from "@/components/dashboard/CommandCenter";
 import { CATEGORY_META, CATEGORY_ORDER, type CategoryKey } from "@/lib/visibilityCategories";
 import { CategoryExplainer, ProvenanceBadge } from "@/components/visibility/Explainers";
+import ScoreRing from "@/components/visibility/ScoreRing";
 import { useScoreGoals } from "@/hooks/useScoreGoals";
 import { exportCategoryPdf } from "@/lib/categoryPdf";
 import { practiceAreaLabel } from "@/lib/practiceAreas";
@@ -146,9 +147,11 @@ const Analytics = ({ audits, history }: AnalyticsProps) => {
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           <div className="lg:col-span-2 space-y-6">
-            {/* Header card */}
+            {/* Header card — the ring gives the selected category's score
+                real hero weight; the right-column list below uses bars
+                since those are for comparing all five at a glance. */}
             <div className="bg-card border border-border/50 rounded-sm p-5">
-              <div className="flex items-start justify-between gap-4 mb-3">
+              <div className="flex items-start justify-between gap-4 mb-4">
                 <div className="flex items-center gap-2">
                   <h2 className="font-display text-lg text-foreground">{meta.label}</h2>
                   <CategoryExplainer categoryKey={selected} />
@@ -170,26 +173,21 @@ const Analytics = ({ audits, history }: AnalyticsProps) => {
                   </button>
                 </div>
               </div>
-              <div className="font-display text-3xl text-foreground font-semibold mb-2">
-                {Math.round(cat.score * 10) / 10}
-                <span className="text-base text-muted-foreground"> / {meta.max}</span>
-                {goals[selected] !== undefined && (
-                  <span className="text-sm text-primary font-body ml-2">Target: {goals[selected]}</span>
-                )}
-              </div>
-              <div className="relative w-full h-1.5 bg-muted rounded-full overflow-hidden mb-4">
-                <div
-                  className={`h-full rounded-full ${cat.provenance === "missing" ? "bg-muted-foreground/30" : "bg-emerald-500"}`}
-                  style={{ width: `${Math.min(100, (cat.score / meta.max) * 100)}%` }}
+              <div className="flex items-center gap-5 mb-4">
+                <ScoreRing
+                  score={cat.score}
+                  max={meta.max}
+                  size={96}
+                  strokeWidth={7}
+                  colorClass={cat.provenance === "missing" ? "stroke-muted-foreground/30" : "stroke-emerald-500"}
                 />
-                {goals[selected] !== undefined && (
-                  <div
-                    className="absolute top-0 h-full w-0.5 bg-primary"
-                    style={{ left: `${Math.min(100, (goals[selected]! / meta.max) * 100)}%` }}
-                  />
-                )}
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm text-secondary-foreground/80 font-body mb-1">{meta.what}</p>
+                  {goals[selected] !== undefined && (
+                    <p className="text-xs text-primary font-body">Target: {goals[selected]} / {meta.max}</p>
+                  )}
+                </div>
               </div>
-              <p className="text-sm text-secondary-foreground/80 font-body mb-1">{meta.what}</p>
               <p className="text-xs text-muted-foreground font-body">{meta.why}</p>
             </div>
 

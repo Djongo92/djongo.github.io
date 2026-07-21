@@ -1,11 +1,11 @@
-import { useState } from "react";
-import { Settings as SettingsIcon, Target, Download, Trash2, Briefcase, ShieldAlert } from "lucide-react";
+import { useRef, useState } from "react";
+import { Settings as SettingsIcon, Target, Download, Upload, Trash2, Briefcase, ShieldAlert } from "lucide-react";
 import { toast } from "sonner";
 import { useFirmContext } from "@/hooks/useFirmContext";
 import { useScoreGoals } from "@/hooks/useScoreGoals";
 import { PRACTICE_AREAS, FIRM_SIZES, GOALS } from "@/components/PersonalizeOnboarding";
 import { CATEGORY_META, CATEGORY_ORDER } from "@/lib/visibilityCategories";
-import { downloadExportBundle, clearAllLocalData } from "@/lib/dataManagement";
+import { downloadExportBundle, clearAllLocalData, importDataBundle } from "@/lib/dataManagement";
 import type { AuditRow } from "@/components/dashboard/CommandCenter";
 
 interface SettingsPageProps {
@@ -27,6 +27,7 @@ const SettingsPage = ({ primaryAudit }: SettingsPageProps) => {
   const [firmSize, setFirmSize] = useState(context?.firmSize ?? "");
   const [primaryGoal, setPrimaryGoal] = useState(context?.primaryGoal ?? "");
   const [confirmingClear, setConfirmingClear] = useState(false);
+  const importInputRef = useRef<HTMLInputElement>(null);
 
   const saveContext = () => {
     save({ practiceArea, firmSize, primaryGoal });
@@ -38,6 +39,26 @@ const SettingsPage = ({ primaryAudit }: SettingsPageProps) => {
     setConfirmingClear(false);
     toast.success("Local data cleared. Reloading…");
     setTimeout(() => window.location.reload(), 800);
+  };
+
+  const handleImportFile = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    e.target.value = ""; // allow re-selecting the same file next time
+    if (!file) return;
+    try {
+      const text = await file.text();
+      const bundle = JSON.parse(text);
+      if (typeof bundle !== "object" || bundle === null) throw new Error("not an object");
+      const { imported, skipped } = importDataBundle(bundle);
+      if (imported === 0) {
+        toast.error("That file didn't have any data this app recognizes.");
+        return;
+      }
+      toast.success(`Imported ${imported} item${imported === 1 ? "" : "s"}${skipped ? `, skipped ${skipped}` : ""}. Reloading…`);
+      setTimeout(() => window.location.reload(), 800);
+    } catch {
+      toast.error("Couldn't read that file — make sure it's an export from this app.");
+    }
   };
 
   return (
@@ -186,7 +207,9 @@ const SettingsPage = ({ primaryAudit }: SettingsPageProps) => {
           </div>
           <p className="text-xs text-muted-foreground font-body mb-4">
             Guidebook progress, Workshop history, Battle Plan pieces, goals, and tracked competitors — all stored in
-            this browser only. Exporting or clearing here doesn't affect a previously published audit on the server.
+            this browser only. There are no accounts yet, so switching browsers or devices normally means starting
+            over — export here, then import that same file on the new one to carry everything across. Exporting or
+            clearing here doesn't affect a previously published audit on the server.
           </p>
 
           <div className="flex flex-wrap gap-3">
@@ -195,6 +218,14 @@ const SettingsPage = ({ primaryAudit }: SettingsPageProps) => {
               className="inline-flex items-center gap-2 px-4 py-2 rounded-sm text-sm font-body border border-border/50 text-foreground hover:border-primary/40 transition-colors"
             >
               <Download className="w-3.5 h-3.5" /> Export my data
+            </button>
+
+            <input ref={importInputRef} type="file" accept="application/json" onChange={handleImportFile} className="hidden" />
+            <button
+              onClick={() => importInputRef.current?.click()}
+              className="inline-flex items-center gap-2 px-4 py-2 rounded-sm text-sm font-body border border-border/50 text-foreground hover:border-primary/40 transition-colors"
+            >
+              <Upload className="w-3.5 h-3.5" /> Import data
             </button>
 
             {!confirmingClear ? (
