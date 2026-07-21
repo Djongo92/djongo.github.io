@@ -131,3 +131,9 @@ verify_jwt = false
 
 [functions.visibility-audit-share-with-firm]
 verify_jwt = false
+
+[functions.notifications-get]
+verify_jwt = false
+
+[functions.notifications-mark-read]
+verify_jwt = false

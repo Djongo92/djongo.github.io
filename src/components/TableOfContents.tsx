@@ -48,7 +48,7 @@ const TableOfContents = ({
     : chapters;
 
   return (
-    <div className="min-h-screen bg-background pb-20 md:pb-0">
+    <div className="min-h-screen bg-background reading-surface pb-20 md:pb-0">
       {/* Top bar */}
       <div className="sticky top-0 z-10 bg-background/90 backdrop-blur-sm border-b border-border/50 print:hidden">
         <div className="max-w-5xl mx-auto px-6 py-3 flex items-center justify-between">

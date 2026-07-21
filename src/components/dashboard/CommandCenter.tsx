@@ -15,9 +15,12 @@ import { useBattlePlanCache } from "@/hooks/useBattlePlanCache";
 import { useStrategyBrief } from "@/hooks/useStrategyBrief";
 import { useScoreGoals } from "@/hooks/useScoreGoals";
 import { PEER_GROUPS } from "@/lib/marketVisibilityConfig";
-import { CATEGORY_META, CATEGORY_ORDER, type CategoryKey } from "@/lib/visibilityCategories";
+import { CATEGORY_META, CATEGORY_ORDER, CATEGORY_COLOR_CLASSES, type CategoryKey } from "@/lib/visibilityCategories";
 import { CategoryExplainer, ProvenanceBadge } from "@/components/visibility/Explainers";
 import ScoreRing from "@/components/visibility/ScoreRing";
+import Sparkline from "@/components/visibility/Sparkline";
+import ScoreBurst from "@/components/visibility/ScoreBurst";
+import PeerPositionBar from "@/components/visibility/PeerPositionBar";
 import MarketVisibilityScore from "@/components/MarketVisibilityScore";
 import type { WorkshopToolId } from "@/lib/handoff";
 import { enableDemoMode } from "@/lib/demoMode";
@@ -129,6 +132,8 @@ export interface AuditRow {
     reputation?: ReputationRaw;
   };
   updated_at: string;
+  percentile?: number | null;
+  peer_count?: number;
 }
 
 export interface HistoryRow {
@@ -221,6 +226,33 @@ const CommandCenter = ({
   }, [history, primary]);
 
   const scoreDelta = trend.length > 1 ? trend[trend.length - 1].score - trend[0].score : 0;
+
+  // A new personal best (strictly higher than every prior recorded score,
+  // never just a plateau) gets a one-shot celebration on the ring — not on
+  // every visit, only the first render after it actually happened.
+  const isPersonalBest = useMemo(() => {
+    if (trend.length < 2) return false;
+    const priorMax = Math.max(...trend.slice(0, -1).map((t) => t.score));
+    return trend[trend.length - 1].score > priorMax;
+  }, [trend]);
+
+  // Per-category trend for the tiny sparkline in each score card — same
+  // filtered/sorted history as categoryDeltas below, just kept as a value
+  // series instead of a before/after pair.
+  const categoryTrend = useMemo(() => {
+    if (!primary) return null;
+    const ownHistory = history
+      .filter((h) => h.audited_domain === primary.audited_domain && h.market === primary.market)
+      .sort((a, b) => new Date(a.recorded_at).getTime() - new Date(b.recorded_at).getTime());
+    const result: Partial<Record<CategoryKey, number[]>> = {};
+    for (const key of CATEGORY_ORDER) {
+      const field = HISTORY_FIELD_FOR[key];
+      result[key] = ownHistory
+        .map((h) => h[field])
+        .filter((v): v is number => typeof v === "number");
+    }
+    return result;
+  }, [history, primary]);
 
   const categoryDeltas = useMemo(() => {
     if (!primary) return null;
@@ -370,8 +402,16 @@ const CommandCenter = ({
               )}
               <span>{peerGroupLabel} · {primary.market[0].toUpperCase() + primary.market.slice(1)}</span>
             </div>
+            {typeof primary.percentile === "number" && primary.peer_count! > 0 && (
+              <div className="mt-4 max-w-sm">
+                <PeerPositionBar percentile={primary.percentile} peerCount={primary.peer_count!} />
+              </div>
+            )}
           </div>
-          <ScoreRing score={primary.total_score} max={200} size={132} sublabel="Visibility Score" />
+          <div className="relative">
+            <ScoreRing score={primary.total_score} max={200} size={132} sublabel="Visibility Score" />
+            {isPersonalBest && <ScoreBurst />}
+          </div>
         </div>
       </header>
 
@@ -431,6 +471,8 @@ const CommandCenter = ({
               const cat = categories[key];
               const meta = CATEGORY_LABELS[key];
               const pct = meta ? Math.min(100, (cat.score / meta.max) * 100) : 0;
+              const colors = CATEGORY_COLOR_CLASSES[meta.color];
+              const series = categoryTrend?.[key];
               return (
                 <motion.div
                   key={key}
@@ -443,13 +485,18 @@ const CommandCenter = ({
                     <p className="text-xs font-body text-foreground">{meta?.label ?? key}</p>
                     <CategoryExplainer categoryKey={key} />
                   </div>
-                  <div className="font-display text-2xl text-foreground font-semibold mb-2">
-                    {Math.round(cat.score * 10) / 10}
-                    <span className="text-sm text-muted-foreground"> / {meta?.max ?? "—"}</span>
+                  <div className="flex items-end justify-between gap-2 mb-2">
+                    <div className="font-display text-2xl text-foreground font-semibold">
+                      {Math.round(cat.score * 10) / 10}
+                      <span className="text-sm text-muted-foreground"> / {meta?.max ?? "—"}</span>
+                    </div>
+                    {series && series.length > 1 && (
+                      <Sparkline values={series} colorClass={colors.stroke} />
+                    )}
                   </div>
                   <div className="relative w-full h-1.5 bg-muted rounded-full overflow-hidden mb-2">
                     <div
-                      className={`h-full rounded-full ${cat.provenance === "missing" ? "bg-muted-foreground/30" : "bg-emerald-500"}`}
+                      className={`h-full rounded-full ${cat.provenance === "missing" ? "bg-muted-foreground/30" : colors.bg}`}
                       style={{ width: `${pct}%` }}
                     />
                     {goals[key] !== undefined && meta && (

@@ -1,11 +1,11 @@
 import { useMemo, useState } from "react";
 import { ResponsiveContainer, LineChart, Line, XAxis, YAxis, Tooltip } from "recharts";
-import { BarChart3, CheckCircle2, XCircle, Newspaper, FileText as FileTextIcon, Download } from "lucide-react";
+import { BarChart3, CheckCircle2, XCircle, Newspaper, FileText as FileTextIcon, Download, Gauge, TrendingUp, ArrowRight } from "lucide-react";
 import type {
   AuditRow, HistoryRow, ThoughtLeadershipItem,
   PerformanceRaw, SocialRaw, ThoughtLeadershipRaw, ReputationRaw,
 } from "@/components/dashboard/CommandCenter";
-import { CATEGORY_META, CATEGORY_ORDER, type CategoryKey } from "@/lib/visibilityCategories";
+import { CATEGORY_META, CATEGORY_ORDER, CATEGORY_COLOR_CLASSES, type CategoryKey } from "@/lib/visibilityCategories";
 import { CategoryExplainer, ProvenanceBadge } from "@/components/visibility/Explainers";
 import ScoreRing from "@/components/visibility/ScoreRing";
 import { useScoreGoals } from "@/hooks/useScoreGoals";
@@ -15,6 +15,7 @@ import { practiceAreaLabel } from "@/lib/practiceAreas";
 interface AnalyticsProps {
   audits: AuditRow[];
   history: HistoryRow[];
+  onOpenDashboard?: () => void;
 }
 
 const HISTORY_KEY_FOR: Record<CategoryKey, keyof HistoryRow> = {
@@ -35,7 +36,7 @@ const SCORE_FIELD_FOR: Record<CategoryKey, keyof AuditRow> = {
 
 const formatPct = (n: number) => `${Math.round(n * 100)}%`;
 
-const Analytics = ({ audits, history }: AnalyticsProps) => {
+const Analytics = ({ audits, history, onOpenDashboard }: AnalyticsProps) => {
   const primary = audits[0];
   const { goals } = useScoreGoals();
 
@@ -99,6 +100,33 @@ const Analytics = ({ audits, history }: AnalyticsProps) => {
             Run your Market Visibility audit from the Dashboard first — Analytics unpacks every category's raw
             inputs, trend, and peer comparison once there's a score to work from.
           </p>
+
+          <div className="flex flex-col sm:flex-row gap-4 mt-8 max-w-2xl">
+            {[
+              { n: 1, label: "Run the audit from the Dashboard", icon: Gauge },
+              { n: 2, label: "Come back here once it's scored", icon: BarChart3 },
+              { n: 3, label: "Drill into any category's raw inputs and trend", icon: TrendingUp },
+            ].map(({ n, label, icon: StepIcon }) => (
+              <div key={n} className="flex-1 flex items-start gap-3">
+                <div className="shrink-0 w-7 h-7 rounded-full border border-primary/40 flex items-center justify-center text-xs font-body text-primary">
+                  {n}
+                </div>
+                <div className="min-w-0">
+                  <StepIcon className="w-3.5 h-3.5 text-muted-foreground mb-1" />
+                  <p className="text-xs text-muted-foreground font-body leading-snug">{label}</p>
+                </div>
+              </div>
+            ))}
+          </div>
+
+          {onOpenDashboard && (
+            <button
+              onClick={onOpenDashboard}
+              className="inline-flex items-center gap-1.5 mt-8 text-sm text-primary hover:text-gold-light font-body"
+            >
+              Go to Dashboard <ArrowRight className="w-3.5 h-3.5" />
+            </button>
+          )}
         </header>
       </div>
     );
@@ -179,7 +207,7 @@ const Analytics = ({ audits, history }: AnalyticsProps) => {
                   max={meta.max}
                   size={96}
                   strokeWidth={7}
-                  colorClass={cat.provenance === "missing" ? "stroke-muted-foreground/30" : "stroke-emerald-500"}
+                  colorClass={cat.provenance === "missing" ? "stroke-muted-foreground/30" : CATEGORY_COLOR_CLASSES[meta.color].stroke}
                 />
                 <div className="flex-1 min-w-0">
                   <p className="text-sm text-secondary-foreground/80 font-body mb-1">{meta.what}</p>
@@ -250,7 +278,7 @@ const Analytics = ({ audits, history }: AnalyticsProps) => {
                   </div>
                   <div className="w-full h-1 bg-muted rounded-full overflow-hidden">
                     <div
-                      className={`h-full rounded-full ${c.provenance === "missing" ? "bg-muted-foreground/30" : "bg-emerald-500"}`}
+                      className={`h-full rounded-full ${c.provenance === "missing" ? "bg-muted-foreground/30" : CATEGORY_COLOR_CLASSES[m.color].bg}`}
                       style={{ width: `${Math.min(100, pct * 100)}%` }}
                     />
                   </div>

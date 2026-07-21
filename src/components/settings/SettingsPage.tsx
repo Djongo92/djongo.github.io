@@ -1,10 +1,12 @@
 import { useRef, useState } from "react";
-import { Settings as SettingsIcon, Target, Download, Upload, Trash2, Briefcase, ShieldAlert, ImageIcon, X, Sun, Moon, Coffee, Palette, Users, UserPlus, Copy, Share2, Check } from "lucide-react";
+import { Settings as SettingsIcon, Target, Download, Upload, Trash2, Briefcase, ShieldAlert, ImageIcon, X, Sun, Moon, Coffee, Palette, Users, UserPlus, Copy, Share2, Check, Bell } from "lucide-react";
 import { toast } from "sonner";
+import FirmCrest from "@/components/FirmCrest";
 import { useFirmContext } from "@/hooks/useFirmContext";
 import { useFirmLogo } from "@/hooks/useFirmLogo";
 import { useFirmTeam } from "@/hooks/useFirmTeam";
 import { useAuth } from "@/hooks/useAuth";
+import { isDesktopNotificationsEnabled, enableDesktopNotifications, disableDesktopNotifications } from "@/hooks/useNotifications";
 import { useReadingTheme, type ReadingTheme } from "@/hooks/useReadingTheme";
 import { useScoreGoals } from "@/hooks/useScoreGoals";
 import { PRACTICE_AREAS, FIRM_SIZES, GOALS } from "@/components/PersonalizeOnboarding";
@@ -15,6 +17,15 @@ import type { AuditRow } from "@/components/dashboard/CommandCenter";
 interface SettingsPageProps {
   primaryAudit?: AuditRow;
 }
+
+// Mirrors the exact HSL values in index.css's :root/.light/.sepia blocks —
+// a tiny live-looking swatch beats a plain labeled button for picking a
+// theme, since you can see the palette before committing to it.
+const THEME_SWATCHES: Record<ReadingTheme, { background: string; card: string; primary: string }> = {
+  dark: { background: "hsl(220 30% 7%)", card: "hsl(220 25% 10%)", primary: "hsl(38 45% 60%)" },
+  light: { background: "hsl(40 20% 96%)", card: "hsl(0 0% 100%)", primary: "hsl(38 50% 38%)" },
+  sepia: { background: "hsl(36 32% 91%)", card: "hsl(38 38% 95%)", primary: "hsl(28 55% 35%)" },
+};
 
 const THEME_OPTIONS: { id: ReadingTheme; label: string; icon: typeof Sun }[] = [
   { id: "dark", label: "Dark", icon: Moon },
@@ -73,6 +84,7 @@ const SettingsPage = ({ primaryAudit }: SettingsPageProps) => {
   const [confirmingClear, setConfirmingClear] = useState(false);
   const [inviteLink, setInviteLink] = useState<string | null>(null);
   const [linkCopied, setLinkCopied] = useState(false);
+  const [desktopNotifs, setDesktopNotifs] = useState(isDesktopNotificationsEnabled());
   const importInputRef = useRef<HTMLInputElement>(null);
   const logoInputRef = useRef<HTMLInputElement>(null);
 
@@ -96,6 +108,19 @@ const SettingsPage = ({ primaryAudit }: SettingsPageProps) => {
   const saveContext = () => {
     save({ practiceArea, firmSize, primaryGoal });
     toast.success("Firm profile saved.");
+  };
+
+  const handleToggleDesktopNotifs = async () => {
+    if (desktopNotifs) {
+      disableDesktopNotifications();
+      setDesktopNotifs(false);
+      return;
+    }
+    const granted = await enableDesktopNotifications();
+    setDesktopNotifs(granted);
+    if (!granted) {
+      toast.error("Desktop notifications need to be allowed in your browser first.");
+    }
   };
 
   const handleCreateInvite = async () => {
@@ -170,7 +195,7 @@ const SettingsPage = ({ primaryAudit }: SettingsPageProps) => {
         </div>
         <h1 className="font-display text-4xl font-semibold text-foreground tracking-tight mb-2">Firm Profile & Data</h1>
         <p className="text-sm text-muted-foreground font-body max-w-lg">
-          Everything here lives in this browser only — there are no accounts yet, so nothing is shared across devices.
+          Signed in, this syncs across your devices. Without an account, it stays in this browser only.
         </p>
       </header>
 
@@ -186,22 +211,64 @@ const SettingsPage = ({ primaryAudit }: SettingsPageProps) => {
             from the reading controls while inside a chapter.
           </p>
           <div className="grid grid-cols-3 gap-2 max-w-sm">
-            {THEME_OPTIONS.map(({ id, label, icon: Icon }) => (
-              <button
-                key={id}
-                onClick={() => setTheme(id)}
-                className={`flex flex-col items-center gap-1.5 py-3 rounded-sm border text-xs font-body transition-colors ${
-                  theme === id
-                    ? "border-primary bg-primary/10 text-foreground"
-                    : "border-border/50 text-muted-foreground hover:border-primary/40 hover:text-foreground"
-                }`}
-              >
-                <Icon className="w-4 h-4" />
-                {label}
-              </button>
-            ))}
+            {THEME_OPTIONS.map(({ id, label, icon: Icon }) => {
+              const swatch = THEME_SWATCHES[id];
+              return (
+                <button
+                  key={id}
+                  onClick={() => setTheme(id)}
+                  className={`flex flex-col items-center gap-1.5 p-2 rounded-sm border text-xs font-body transition-colors ${
+                    theme === id
+                      ? "border-primary bg-primary/10 text-foreground"
+                      : "border-border/50 text-muted-foreground hover:border-primary/40 hover:text-foreground"
+                  }`}
+                >
+                  <div
+                    className="w-full h-9 rounded-sm border border-black/10 overflow-hidden flex items-end p-1"
+                    style={{ background: swatch.background }}
+                  >
+                    <div className="w-full h-3.5 rounded-[2px] flex items-center px-1 gap-1" style={{ background: swatch.card }}>
+                      <span className="w-1.5 h-1.5 rounded-full shrink-0" style={{ background: swatch.primary }} />
+                    </div>
+                  </div>
+                  <span className="flex items-center gap-1">
+                    <Icon className="w-3 h-3" />
+                    {label}
+                  </span>
+                </button>
+              );
+            })}
           </div>
         </div>
+
+        {/* Notifications */}
+        {user && (
+          <div className="bg-card border border-border/50 rounded-sm p-5">
+            <div className="flex items-center gap-2 mb-4">
+              <Bell className="w-4 h-4 text-primary" />
+              <h2 className="font-display text-lg text-foreground">Notifications</h2>
+            </div>
+            <p className="text-xs text-muted-foreground font-body mb-4">
+              You'll always see updates in the Bell in the sidebar — score changes from an automatic re-run, mostly.
+              Turn this on to also get a desktop notification the moment one lands.
+            </p>
+            <div className="flex items-center justify-between max-w-sm">
+              <div>
+                <p className="font-body text-sm text-foreground">Desktop notifications</p>
+                <p className="text-[10px] text-muted-foreground font-body">Requires browser permission</p>
+              </div>
+              <button
+                onClick={handleToggleDesktopNotifs}
+                className={`relative w-10 h-5 rounded-full transition-colors ${desktopNotifs ? "bg-primary" : "bg-muted"}`}
+                aria-label="Toggle desktop notifications"
+              >
+                <span
+                  className={`absolute top-0.5 left-0.5 w-4 h-4 rounded-full bg-card transition-transform ${desktopNotifs ? "translate-x-5" : ""}`}
+                />
+              </button>
+            </div>
+          </div>
+        )}
 
         {/* Firm context */}
         <div className="bg-card border border-border/50 rounded-sm p-5">
@@ -304,8 +371,8 @@ const SettingsPage = ({ primaryAudit }: SettingsPageProps) => {
                 </button>
               </div>
             ) : (
-              <div className="w-14 h-14 rounded-sm border border-dashed border-border/50 flex items-center justify-center shrink-0">
-                <ImageIcon className="w-5 h-5 text-muted-foreground" />
+              <div className="shrink-0">
+                <FirmCrest name={primaryAudit?.display_name || primaryAudit?.audited_domain || "Your Firm"} size={56} />
               </div>
             )}
             <input ref={logoInputRef} type="file" accept="image/*" onChange={handleLogoFile} className="hidden" />
@@ -447,10 +514,10 @@ const SettingsPage = ({ primaryAudit }: SettingsPageProps) => {
             <h2 className="font-display text-lg text-foreground">Your Data</h2>
           </div>
           <p className="text-xs text-muted-foreground font-body mb-4">
-            Guidebook progress, Workshop history, Battle Plan pieces, goals, and tracked competitors — all stored in
-            this browser only. There are no accounts yet, so switching browsers or devices normally means starting
-            over — export here, then import that same file on the new one to carry everything across. Exporting or
-            clearing here doesn't affect a previously published audit on the server.
+            Guidebook progress, Workshop history, Battle Plan pieces, goals, and tracked competitors — synced to your
+            account if you're signed in. Without an account, they stay in this browser only, so switching browsers or
+            devices means starting over — export here, then import that same file on the new one to carry everything
+            across. Exporting or clearing here doesn't affect a previously published audit on the server.
           </p>
 
           <div className="flex flex-wrap gap-3">

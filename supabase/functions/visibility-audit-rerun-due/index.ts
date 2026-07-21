@@ -49,6 +49,7 @@ Deno.serve(async (req) => {
     let failed = 0;
     for (const row of dueRows ?? []) {
       const lastIntake = (row.last_intake ?? {}) as { gbpListed?: boolean; social?: unknown };
+      const scoreBefore = row.total_score as number;
       const result = await runVisibilityAudit(serviceClient, {
         clientId: row.client_id,
         auditedDomain: row.audited_domain,
@@ -58,8 +59,26 @@ Deno.serve(async (req) => {
         gbpListed: lastIntake.gbpListed === true,
         social: lastIntake.social,
       });
-      if (result.ok) reran++;
-      else {
+      if (result.ok) {
+        reran++;
+        // A scheduled re-run is the one place a score changes without the
+        // user watching it happen — the only case that actually needs a
+        // notification. A manual re-run (visibility-audit-run) never goes
+        // through this path, so it never generates one; the user is
+        // already looking at the result live.
+        const scoreAfter = result.payload!.totalScore;
+        const delta = Math.round((scoreAfter - scoreBefore) * 10) / 10;
+        if (delta !== 0) {
+          const direction = delta > 0 ? "+" : "";
+          const { error: notifyError } = await serviceClient.from("notifications").insert({
+            client_id: row.client_id,
+            type: "score_rerun",
+            title: "Visibility Score updated",
+            body: `${direction}${delta} points since your last check — now ${Math.round(scoreAfter * 10) / 10}/200 for ${row.audited_domain}.`,
+          });
+          if (notifyError) console.error("visibility-audit-rerun-due: notification insert failed:", notifyError);
+        }
+      } else {
         failed++;
         console.error(`visibility-audit-rerun-due: failed to rerun ${row.id} (${row.audited_domain}):`, result.error);
       }

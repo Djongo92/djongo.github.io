@@ -2,6 +2,20 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 
 const SESSIONS_KEY = "guidebook_sessions"; // array of ISO date strings (one per day visited)
 const TIME_KEY = "guidebook_time_seconds"; // total seconds spent
+const SEEN_BADGES_KEY = "guidebook_badges_seen"; // badge ids already celebrated, so a badge only unlocks once
+
+// null means "never initialized" (distinct from an empty set) — lets the
+// hook seed it with whatever's already earned on first load instead of
+// celebrating pre-existing progress as brand new the moment this ships.
+const readSeenBadges = (): Set<string> | null => {
+  const raw = localStorage.getItem(SEEN_BADGES_KEY);
+  if (raw === null) return null;
+  try {
+    return new Set(JSON.parse(raw));
+  } catch {
+    return new Set();
+  }
+};
 
 const todayISO = () => new Date().toISOString().slice(0, 10);
 
@@ -38,6 +52,7 @@ export const useAchievements = (opts: {
   const [totalSeconds, setTotalSeconds] = useState<number>(() => {
     return Number(localStorage.getItem(TIME_KEY) || "0");
   });
+  const [seenBadges, setSeenBadges] = useState<Set<string> | null>(readSeenBadges);
 
   // Mark today as a session on mount
   useEffect(() => {
@@ -113,5 +128,35 @@ export const useAchievements = (opts: {
     return list;
   }, [opts.readChaptersCount, opts.implementedCount, streak]);
 
-  return { streak, totalMinutes, thisWeekMinutes, badges, sessionCount: sessions.length };
+  // First load ever (seenBadges still null): seed it with whatever's
+  // already earned, silently — otherwise a returning user with 8 chapters
+  // already read would see every one of those badges "unlock" the moment
+  // this feature ships, which isn't what actually happened.
+  useEffect(() => {
+    if (seenBadges !== null) return;
+    const initial = new Set(badges.filter((b) => b.earned).map((b) => b.id));
+    localStorage.setItem(SEEN_BADGES_KEY, JSON.stringify([...initial]));
+    setSeenBadges(initial);
+  }, [seenBadges, badges]);
+
+  // Badges are recomputed live every render, so "earned" alone can't tell
+  // you whether this is the moment it happened or the hundredth time
+  // you've revisited a page showing an already-old badge — seenBadges is
+  // what distinguishes "just unlocked" from "already knew about this."
+  const newlyUnlocked = useMemo(
+    () => (seenBadges === null ? [] : badges.filter((b) => b.earned && !seenBadges.has(b.id))),
+    [badges, seenBadges],
+  );
+
+  const acknowledge = useCallback((id: string) => {
+    setSeenBadges((prev) => {
+      const base = prev ?? new Set<string>();
+      if (base.has(id)) return prev;
+      const next = new Set(base).add(id);
+      localStorage.setItem(SEEN_BADGES_KEY, JSON.stringify([...next]));
+      return next;
+    });
+  }, []);
+
+  return { streak, totalMinutes, thisWeekMinutes, badges, sessionCount: sessions.length, newlyUnlocked, acknowledge };
 };
