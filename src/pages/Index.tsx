@@ -9,6 +9,8 @@ import Workshop from "@/components/Workshop";
 import FirmMaturityScore from "@/components/FirmMaturityScore";
 import CompetitorTracker from "@/components/CompetitorTracker";
 import WorkshopHistoryModal from "@/components/WorkshopHistoryModal";
+import DemoOnboardingWizard from "@/components/DemoOnboardingWizard";
+import CoachMarks from "@/components/CoachMarks";
 import { chapters } from "@/data/chapters";
 import { useBookmarks } from "@/hooks/useBookmarks";
 import { useReadingProgress } from "@/hooks/useReadingProgress";
@@ -20,11 +22,13 @@ import { useFirmLogo } from "@/hooks/useFirmLogo";
 import { useScrollVelocity } from "@/hooks/useAmbientMode";
 import { useAuth } from "@/hooks/useAuth";
 import { useNotifications } from "@/hooks/useNotifications";
+import { useCoachMarks } from "@/hooks/useCoachMarks";
+import type { CoachMarkStep } from "@/components/CoachMarks";
 import { AnimatePresence, motion } from "framer-motion";
 import { Loader2 } from "lucide-react";
 import { edgeHeaders } from "@/lib/edgeAuth";
 import { getOrCreateClientId } from "@/lib/clientId";
-import { isDemoMode, disableDemoMode, enableDemoMode } from "@/lib/demoMode";
+import { isDemoMode, disableDemoMode, enableDemoMode, consumeDemoWizardPending } from "@/lib/demoMode";
 import { clearSession } from "@/lib/session";
 import { DEMO_AUDIT, DEMO_HISTORY } from "@/data/demoData";
 import ClaimDataBanner from "@/components/ClaimDataBanner";
@@ -43,6 +47,24 @@ const SettingsPage = lazy(() => import("@/components/settings/SettingsPage"));
 const ProgressDashboard = lazy(() => import("@/components/ProgressDashboard"));
 
 const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL as string;
+
+const COACH_MARK_STEPS: CoachMarkStep[] = [
+  {
+    target: "dashboard-score",
+    title: "Your Visibility Score",
+    body: "A real, externally-verified score out of 200 — performance, reputation, thought leadership, and more — compared against firms in your market.",
+  },
+  {
+    target: "nav-workshop",
+    title: "Ten AI tools live here",
+    body: "Headline testing, competitor teardowns, practice-page audits, and more — each one grounded in your own firm's context.",
+  },
+  {
+    target: "nav-progress",
+    title: "It all rolls into a Battle Plan",
+    body: "My Progress assembles everything you've run into one exportable PDF you can hand to your partners.",
+  },
+];
 
 type GuidebookView = "toc" | "chapter" | "bookmarks";
 
@@ -72,6 +94,8 @@ const Index = () => {
   const [maturityOpen, setMaturityOpen] = useState(false);
   const [competitorsOpen, setCompetitorsOpen] = useState(false);
   const [workshopHistoryOpen, setWorkshopHistoryOpen] = useState(false);
+  const [demoWizardOpen, setDemoWizardOpen] = useState(false);
+  const coachMarks = useCoachMarks();
 
   // A real account's identity key is the same client_id column an
   // anonymous browser has always used (see visibility-audit-claim) — once
@@ -123,9 +147,41 @@ const Index = () => {
     }
   }, [authenticated, hasContext]);
 
+  // Greet a freshly-entered demo session with a short orientation tour —
+  // consumeDemoWizardPending is a one-shot flag set only by enableDemoMode,
+  // so this never re-fires on an ordinary reload of an already-open demo tab.
+  useEffect(() => {
+    if (demoActive && consumeDemoWizardPending()) {
+      const t = setTimeout(() => setDemoWizardOpen(true), 600);
+      return () => clearTimeout(t);
+    }
+  }, [demoActive]);
+
+  // First-open coach marks point at real, live UI (score ring, Workshop
+  // nav, My Progress nav) rather than a mockup, so they only make sense on
+  // the Dashboard. Demo visitors get them right after the wizard closes;
+  // real accounts get them on their first Dashboard view, once, ever.
+  useEffect(() => {
+    if (!authenticated || demoActive || coachMarks.hasSeen() || section !== "dashboard") return;
+    const t = setTimeout(() => coachMarks.start(), 1500);
+    return () => clearTimeout(t);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [authenticated, demoActive, section]);
+
+  const closeDemoWizard = () => {
+    setDemoWizardOpen(false);
+    if (!coachMarks.hasSeen()) {
+      setTimeout(() => coachMarks.start(), 300);
+    }
+  };
+
   const handleDemo = () => {
+    // enableDemoMode always ends in a full page reload, which remounts
+    // Index fresh with demoActive read straight from localStorage — a
+    // setDemoActive(true) here would only force a transient pre-reload
+    // render, and that render's effects (e.g. the demo wizard's one-shot
+    // flag) would fire and be discarded before the real mount ever sees them.
     enableDemoMode();
-    setDemoActive(true);
   };
 
   const handleSignOut = async () => {
@@ -225,6 +281,8 @@ const Index = () => {
       <FirmMaturityScore open={maturityOpen} onClose={() => setMaturityOpen(false)} />
       <CompetitorTracker open={competitorsOpen} onClose={() => setCompetitorsOpen(false)} primaryAudit={primaryAudit} />
       <WorkshopHistoryModal open={workshopHistoryOpen} onClose={() => setWorkshopHistoryOpen(false)} onOpenWorkshopTool={openWorkshopTool} />
+      <DemoOnboardingWizard open={demoWizardOpen} onClose={closeDemoWizard} />
+      <CoachMarks steps={COACH_MARK_STEPS} active={coachMarks.active} onDone={coachMarks.finish} />
     </>
   );
 
