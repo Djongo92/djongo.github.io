@@ -1,8 +1,10 @@
 import { useRef, useState } from "react";
-import { Settings as SettingsIcon, Target, Download, Upload, Trash2, Briefcase, ShieldAlert, ImageIcon, X, Sun, Moon, Coffee, Palette } from "lucide-react";
+import { Settings as SettingsIcon, Target, Download, Upload, Trash2, Briefcase, ShieldAlert, ImageIcon, X, Sun, Moon, Coffee, Palette, Users, UserPlus, Copy, Share2, Check } from "lucide-react";
 import { toast } from "sonner";
 import { useFirmContext } from "@/hooks/useFirmContext";
 import { useFirmLogo } from "@/hooks/useFirmLogo";
+import { useFirmTeam } from "@/hooks/useFirmTeam";
+import { useAuth } from "@/hooks/useAuth";
 import { useReadingTheme, type ReadingTheme } from "@/hooks/useReadingTheme";
 import { useScoreGoals } from "@/hooks/useScoreGoals";
 import { PRACTICE_AREAS, FIRM_SIZES, GOALS } from "@/components/PersonalizeOnboarding";
@@ -63,10 +65,14 @@ const SettingsPage = ({ primaryAudit }: SettingsPageProps) => {
   const { logo, save: saveLogo, clear: clearLogo } = useFirmLogo();
   const { theme, setTheme } = useReadingTheme();
   const { goals, setGoal } = useScoreGoals();
+  const { user } = useAuth();
+  const { team, loading: teamLoading, inviting, sharing, createInvite, shareAuditsWithFirm } = useFirmTeam();
   const [practiceArea, setPracticeArea] = useState(context?.practiceArea ?? "");
   const [firmSize, setFirmSize] = useState(context?.firmSize ?? "");
   const [primaryGoal, setPrimaryGoal] = useState(context?.primaryGoal ?? "");
   const [confirmingClear, setConfirmingClear] = useState(false);
+  const [inviteLink, setInviteLink] = useState<string | null>(null);
+  const [linkCopied, setLinkCopied] = useState(false);
   const importInputRef = useRef<HTMLInputElement>(null);
   const logoInputRef = useRef<HTMLInputElement>(null);
 
@@ -90,6 +96,42 @@ const SettingsPage = ({ primaryAudit }: SettingsPageProps) => {
   const saveContext = () => {
     save({ practiceArea, firmSize, primaryGoal });
     toast.success("Firm profile saved.");
+  };
+
+  const handleCreateInvite = async () => {
+    const result = await createInvite();
+    if ("error" in result) {
+      toast.error(result.error);
+      return;
+    }
+    const link = `${window.location.origin}${import.meta.env.BASE_URL}join/${result.token}`;
+    setInviteLink(link);
+    setLinkCopied(false);
+  };
+
+  const handleCopyInviteLink = async () => {
+    if (!inviteLink) return;
+    try {
+      await navigator.clipboard.writeText(inviteLink);
+      setLinkCopied(true);
+      toast.success("Invite link copied.");
+    } catch {
+      toast.error("Couldn't copy — select and copy the link manually.");
+    }
+  };
+
+  const handleShareAudits = async () => {
+    const result = await shareAuditsWithFirm();
+    if ("error" in result) {
+      toast.error(result.error);
+      return;
+    }
+    const { shared, skipped } = result;
+    toast.success(
+      shared === 0
+        ? "Nothing to share — your firm already has this audit history."
+        : `Shared ${shared} audit${shared === 1 ? "" : "s"} with your firm${skipped ? ` (${skipped} skipped — already shared)` : ""}.`,
+    );
   };
 
   const handleClear = () => {
@@ -275,6 +317,82 @@ const SettingsPage = ({ primaryAudit }: SettingsPageProps) => {
             </button>
           </div>
         </div>
+
+        {/* Team */}
+        {user && (
+          <div className="bg-card border border-border/50 rounded-sm p-5">
+            <div className="flex items-center gap-2 mb-4">
+              <Users className="w-4 h-4 text-primary" />
+              <h2 className="font-display text-lg text-foreground">Team</h2>
+            </div>
+
+            {teamLoading ? (
+              <p className="text-xs text-muted-foreground font-body">Loading…</p>
+            ) : !team ? (
+              <p className="text-xs text-muted-foreground font-body">Couldn't load your firm.</p>
+            ) : (
+              <>
+                <p className="text-xs text-muted-foreground font-body mb-4">
+                  Everyone in <span className="text-foreground">{team.firmName}</span> shares one Market Visibility
+                  audit history — invite a teammate and they'll see the same score you do.
+                </p>
+
+                <ul className="space-y-1.5 mb-4">
+                  {team.members.map((m) => (
+                    <li key={m.user_id} className="flex items-center justify-between text-xs font-body py-1.5 px-3 rounded-sm bg-secondary/50">
+                      <span className="text-foreground">{m.user_id === user.id ? "You" : `Teammate (${m.user_id.slice(0, 8)}…)`}</span>
+                      <span className="text-muted-foreground uppercase tracking-wide text-[10px]">{m.role}</span>
+                    </li>
+                  ))}
+                </ul>
+
+                {team.members.find((m) => m.user_id === user.id)?.role === "owner" && (
+                  <div className="mb-3">
+                    {!inviteLink ? (
+                      <button
+                        onClick={handleCreateInvite}
+                        disabled={inviting}
+                        className="inline-flex items-center gap-2 px-4 py-2 rounded-sm text-sm font-body border border-border/50 text-foreground hover:border-primary/40 transition-colors disabled:opacity-50"
+                      >
+                        <UserPlus className="w-3.5 h-3.5" /> {inviting ? "Creating invite…" : "Invite a teammate"}
+                      </button>
+                    ) : (
+                      <div className="space-y-2">
+                        <p className="text-xs text-muted-foreground font-body">
+                          Share this link — it expires in 7 days and works once:
+                        </p>
+                        <div className="flex items-center gap-2">
+                          <input
+                            readOnly
+                            value={inviteLink}
+                            onFocus={(e) => e.target.select()}
+                            className="flex-1 min-w-0 bg-secondary/80 border border-border text-foreground text-xs font-body px-2.5 py-1.5 rounded-sm focus:outline-none focus:border-primary"
+                          />
+                          <button
+                            onClick={handleCopyInviteLink}
+                            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-sm text-xs font-body border border-border/50 text-foreground hover:border-primary/40 transition-colors shrink-0"
+                          >
+                            {linkCopied ? <Check className="w-3 h-3" /> : <Copy className="w-3 h-3" />} {linkCopied ? "Copied" : "Copy"}
+                          </button>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                )}
+
+                {team.members.length > 1 && (
+                  <button
+                    onClick={handleShareAudits}
+                    disabled={sharing}
+                    className="inline-flex items-center gap-2 px-4 py-2 rounded-sm text-sm font-body border border-border/50 text-foreground hover:border-primary/40 transition-colors disabled:opacity-50"
+                  >
+                    <Share2 className="w-3.5 h-3.5" /> {sharing ? "Sharing…" : "Share my existing audits with the firm"}
+                  </button>
+                )}
+              </>
+            )}
+          </div>
+        )}
 
         {/* Score targets */}
         <div className="bg-card border border-border/50 rounded-sm p-5">
