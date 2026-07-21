@@ -1,9 +1,9 @@
 import { useEffect, useState } from "react";
-import { motion, AnimatePresence } from "framer-motion";
 import { X, Users, Plus, Loader2, TrendingUp, TrendingDown } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useTrackedCompetitors } from "@/hooks/useTrackedCompetitors";
 import type { AuditRow } from "@/components/dashboard/CommandCenter";
+import ModalShell from "@/components/ui/modal-shell";
 
 interface Props {
   open: boolean;
@@ -56,24 +56,8 @@ const CompetitorTracker = ({ open, onClose, primaryAudit }: Props) => {
   };
 
   return (
-    <AnimatePresence>
-      {open && (
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          exit={{ opacity: 0 }}
-          className="fixed inset-0 z-50 bg-background/85 backdrop-blur-md flex items-center justify-center p-4"
-          onClick={onClose}
-        >
-          <motion.div
-            initial={{ y: 20, opacity: 0, scale: 0.97 }}
-            animate={{ y: 0, opacity: 1, scale: 1 }}
-            exit={{ y: 20, opacity: 0, scale: 0.97 }}
-            transition={{ duration: 0.25 }}
-            onClick={(e) => e.stopPropagation()}
-            className="w-full max-w-lg max-h-[85vh] bg-card border border-border rounded-lg shadow-2xl overflow-hidden flex flex-col"
-          >
-            <div className="px-6 py-5 border-b border-border/50 flex items-center justify-between">
+    <ModalShell open={open} onClose={onClose} maxWidthClass="max-w-lg">
+      <div className="px-6 py-5 border-b border-border/50 flex items-center justify-between">
               <div className="flex items-center gap-2">
                 <Users className="w-4 h-4 text-primary" />
                 <h3 className="font-display text-lg text-foreground">Competitor Tracking</h3>
@@ -169,10 +153,7 @@ const CompetitorTracker = ({ open, onClose, primaryAudit }: Props) => {
                 </>
               )}
             </div>
-          </motion.div>
-        </motion.div>
-      )}
-    </AnimatePresence>
+    </ModalShell>
   );
 };
 

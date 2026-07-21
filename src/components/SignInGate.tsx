@@ -157,7 +157,7 @@ const SignInGate = ({ onDemo, sessionExpired, onDismissSessionExpired }: SignInG
 
               <button
                 onClick={onDemo}
-                className="w-full bg-primary text-primary-foreground py-3.5 text-sm font-body font-medium tracking-wide rounded-lg hover:bg-gold-light transition-all relative overflow-hidden group flex items-center justify-center gap-2"
+                className="w-full bg-primary text-primary-foreground py-3.5 text-sm font-body font-medium tracking-wide rounded-xl hover:bg-gold-light transition-all relative overflow-hidden group flex items-center justify-center gap-2 tap-scale"
               >
                 <Sparkles className="w-4 h-4" />
                 <span className="relative z-10">See it with sample data</span>
@@ -198,7 +198,7 @@ const SignInGate = ({ onDemo, sessionExpired, onDismissSessionExpired }: SignInG
                 <button
                   type="submit"
                   disabled={!emailLooksValid || stage === "submitting"}
-                  className="w-full border border-border text-foreground py-3.5 text-sm font-body font-medium tracking-wide rounded-lg hover:border-primary/50 hover:text-primary transition-all disabled:opacity-40 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                  className="w-full border border-border text-foreground py-3.5 text-sm font-body font-medium tracking-wide rounded-xl hover:border-primary/50 hover:text-primary transition-all disabled:opacity-40 disabled:cursor-not-allowed flex items-center justify-center gap-2 tap-scale"
                 >
                   {stage === "submitting" ? (
                     <Loader2 className="w-3.5 h-3.5 animate-spin" />

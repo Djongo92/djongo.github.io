@@ -1,8 +1,9 @@
 import { useState } from "react";
-import { motion, AnimatePresence } from "framer-motion";
+import { AnimatePresence, motion } from "framer-motion";
 import { Briefcase, Users, Target, X, Sparkles } from "lucide-react";
 import { useFirmContext, FirmContext } from "@/hooks/useFirmContext";
 import { toast } from "sonner";
+import ModalShell from "@/components/ui/modal-shell";
 
 export const PRACTICE_AREAS = [
   "Corporate / M&A", "Litigation", "Family Law", "Real Estate", "IP & Tech",
@@ -52,24 +53,8 @@ const PersonalizeOnboarding = ({ open, onClose, onComplete }: Props) => {
   const current = steps[step];
 
   return (
-    <AnimatePresence>
-      {open && (
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          exit={{ opacity: 0 }}
-          className="fixed inset-0 z-[60] bg-background/85 backdrop-blur-md flex items-center justify-center p-4"
-          onClick={close}
-        >
-          <motion.div
-            initial={{ y: 20, opacity: 0, scale: 0.97 }}
-            animate={{ y: 0, opacity: 1, scale: 1 }}
-            exit={{ y: 20, opacity: 0, scale: 0.97 }}
-            transition={{ duration: 0.25 }}
-            onClick={(e) => e.stopPropagation()}
-            className="w-full max-w-lg bg-card border border-border rounded-lg shadow-2xl overflow-hidden"
-          >
-            <div className="px-6 py-5 border-b border-border/50 flex items-center justify-between">
+    <ModalShell open={open} onClose={close} maxWidthClass="max-w-lg" zIndexClass="z-[60]">
+      <div className="px-6 py-5 border-b border-border/50 flex items-center justify-between">
               <div className="flex items-center gap-2">
                 <Sparkles className="w-4 h-4 text-primary" />
                 <h3 className="font-display text-lg text-foreground">Firm Profile</h3>
@@ -141,10 +126,7 @@ const PersonalizeOnboarding = ({ open, onClose, onComplete }: Props) => {
                 {step < 2 ? "Continue" : "Save & personalize"}
               </button>
             </div>
-          </motion.div>
-        </motion.div>
-      )}
-    </AnimatePresence>
+    </ModalShell>
   );
 };
 

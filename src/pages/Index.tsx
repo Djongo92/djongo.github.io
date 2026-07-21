@@ -295,58 +295,68 @@ const Index = () => {
         visibilityIndexHref={visibilityIndexHref}
         recognitionIndexHref={recognitionIndexHref}
       >
-        {section === "dashboard" && (
-          <Suspense fallback={<DashboardSkeleton />}>
-            <CommandCenter
-              audits={visibilityData?.audits ?? []}
-              history={visibilityData?.history ?? []}
-              readChaptersCount={readChapters.length}
-              totalChapters={chapters.length}
-              implementationScore={overallImplScore}
-              onOpenWorkshop={() => goToSection("workshop")}
-              onOpenWorkshopTool={openWorkshopTool}
-              onOpenGuidebook={() => goToSection("guidebook")}
-              onOpenMaturity={() => setMaturityOpen(true)}
-              onOpenAnalytics={() => goToSection("analytics")}
-            />
-          </Suspense>
-        )}
-        {section === "analytics" && (
-          <Suspense fallback={<AnalyticsSkeleton />}>
-            <Analytics
-              audits={visibilityData?.audits ?? []}
-              history={visibilityData?.history ?? []}
-              onOpenDashboard={() => goToSection("dashboard")}
-            />
-          </Suspense>
-        )}
-        {section === "workshop" && <Workshop onBack={() => goToSection("dashboard")} />}
-        {section === "progress" && (
-          <Suspense fallback={<ProgressSkeleton />}>
-            <ProgressDashboard
-              readChapters={readChapters}
-              bookmarks={bookmarks}
-              implementationScore={overallImplScore}
-              annotations={allAnnotations}
-              onBack={() => goToSection("dashboard")}
-              onSelectChapter={(id) => {
-                goToSection("guidebook");
-                handleSelectChapter(id);
-              }}
-              getChapterScore={implementationState.getChapterScore}
-              isImplemented={implementationState.isImplemented}
-              onOpenPersonalize={() => setPersonalizeOpen(true)}
-              onOpenMaturity={() => setMaturityOpen(true)}
-              onOpenWorkshop={() => goToSection("workshop")}
-            />
-          </Suspense>
-        )}
-        {section === "guidebook" && renderGuidebook()}
-        {section === "settings" && (
-          <Suspense fallback={<SettingsSkeleton />}>
-            <SettingsPage primaryAudit={primaryAudit} />
-          </Suspense>
-        )}
+        <AnimatePresence mode="wait">
+          <motion.div
+            key={section}
+            initial={{ opacity: 0, y: 6 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -6 }}
+            transition={{ duration: 0.18, ease: [0.32, 0.72, 0, 1] }}
+          >
+            {section === "dashboard" && (
+              <Suspense fallback={<DashboardSkeleton />}>
+                <CommandCenter
+                  audits={visibilityData?.audits ?? []}
+                  history={visibilityData?.history ?? []}
+                  readChaptersCount={readChapters.length}
+                  totalChapters={chapters.length}
+                  implementationScore={overallImplScore}
+                  onOpenWorkshop={() => goToSection("workshop")}
+                  onOpenWorkshopTool={openWorkshopTool}
+                  onOpenGuidebook={() => goToSection("guidebook")}
+                  onOpenMaturity={() => setMaturityOpen(true)}
+                  onOpenAnalytics={() => goToSection("analytics")}
+                />
+              </Suspense>
+            )}
+            {section === "analytics" && (
+              <Suspense fallback={<AnalyticsSkeleton />}>
+                <Analytics
+                  audits={visibilityData?.audits ?? []}
+                  history={visibilityData?.history ?? []}
+                  onOpenDashboard={() => goToSection("dashboard")}
+                />
+              </Suspense>
+            )}
+            {section === "workshop" && <Workshop onBack={() => goToSection("dashboard")} />}
+            {section === "progress" && (
+              <Suspense fallback={<ProgressSkeleton />}>
+                <ProgressDashboard
+                  readChapters={readChapters}
+                  bookmarks={bookmarks}
+                  implementationScore={overallImplScore}
+                  annotations={allAnnotations}
+                  onBack={() => goToSection("dashboard")}
+                  onSelectChapter={(id) => {
+                    goToSection("guidebook");
+                    handleSelectChapter(id);
+                  }}
+                  getChapterScore={implementationState.getChapterScore}
+                  isImplemented={implementationState.isImplemented}
+                  onOpenPersonalize={() => setPersonalizeOpen(true)}
+                  onOpenMaturity={() => setMaturityOpen(true)}
+                  onOpenWorkshop={() => goToSection("workshop")}
+                />
+              </Suspense>
+            )}
+            {section === "guidebook" && renderGuidebook()}
+            {section === "settings" && (
+              <Suspense fallback={<SettingsSkeleton />}>
+                <SettingsPage primaryAudit={primaryAudit} />
+              </Suspense>
+            )}
+          </motion.div>
+        </AnimatePresence>
       </AppShell>
       {authSession && <ClaimDataBanner session={authSession} onClaimed={fetchVisibility} />}
       {advisorAndOnboarding(section !== "guidebook" || guidebookView !== "chapter")}

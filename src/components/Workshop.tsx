@@ -18,6 +18,7 @@ import CompetitorTeardown from "./workshop/CompetitorTeardown";
 import PitchDeck from "./workshop/PitchDeck";
 import BioRewriter from "./workshop/BioRewriter";
 import MarketingCalendar from "./workshop/MarketingCalendar";
+import ModalShell from "@/components/ui/modal-shell";
 import MyWorkshopDrawer from "./workshop/MyWorkshopDrawer";
 import HandoffButton from "./workshop/HandoffButton";
 import { useHandoffReceive } from "@/lib/handoff";
@@ -254,51 +255,37 @@ const SwipeFileLibrary = () => {
         ))}
       </div>
 
-      <AnimatePresence>
+      <ModalShell open={!!opened} onClose={() => setOpened(null)} maxWidthClass="max-w-2xl">
         {opened && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            className="fixed inset-0 z-50 bg-background/85 backdrop-blur-md flex items-center justify-center p-4"
-            onClick={() => setOpened(null)}
-          >
-            <motion.div
-              initial={{ y: 20, opacity: 0 }}
-              animate={{ y: 0, opacity: 1 }}
-              exit={{ y: 20, opacity: 0 }}
-              onClick={(e) => e.stopPropagation()}
-              className="w-full max-w-2xl max-h-[85vh] bg-card border border-border rounded-lg shadow-2xl flex flex-col"
-            >
-              <div className="px-6 py-4 border-b border-border/50 flex items-center justify-between">
-                <div>
-                  <span className="text-[10px] uppercase tracking-wider text-primary font-body">{opened.category} · {opened.practiceArea}</span>
-                  <h3 className="font-display text-xl text-foreground mt-1">{opened.title}</h3>
-                </div>
-                <button onClick={() => setOpened(null)} className="text-muted-foreground hover:text-foreground text-xl">×</button>
+          <>
+            <div className="px-6 py-4 border-b border-border/50 flex items-center justify-between">
+              <div>
+                <span className="text-[10px] uppercase tracking-wider text-primary font-body">{opened.category} · {opened.practiceArea}</span>
+                <h3 className="font-display text-xl text-foreground mt-1">{opened.title}</h3>
               </div>
-              <div className="overflow-y-auto p-6 space-y-5">
-                <div>
-                  <span className="text-[10px] uppercase tracking-[0.3em] text-muted-foreground font-body">Why it works</span>
-                  <p className="text-sm text-foreground/90 font-body mt-2 leading-relaxed">{opened.why}</p>
-                </div>
-                <div>
-                  <div className="flex items-center justify-between mb-2">
-                    <span className="text-[10px] uppercase tracking-[0.3em] text-muted-foreground font-body">Steal this</span>
-                    <button
-                      onClick={() => copy(opened.copy)}
-                      className="flex items-center gap-1 text-xs text-primary hover:text-gold-light font-body"
-                    >
-                      <Copy className="w-3 h-3" /> Copy
-                    </button>
-                  </div>
-                  <pre className="text-xs font-body whitespace-pre-wrap bg-muted/40 border border-border/50 rounded-sm p-4 text-foreground/90 leading-relaxed">{opened.copy}</pre>
-                </div>
+              <button onClick={() => setOpened(null)} className="text-muted-foreground hover:text-foreground text-xl">×</button>
+            </div>
+            <div className="overflow-y-auto p-6 space-y-5">
+              <div>
+                <span className="text-[10px] uppercase tracking-[0.3em] text-muted-foreground font-body">Why it works</span>
+                <p className="text-sm text-foreground/90 font-body mt-2 leading-relaxed">{opened.why}</p>
               </div>
-            </motion.div>
-          </motion.div>
+              <div>
+                <div className="flex items-center justify-between mb-2">
+                  <span className="text-[10px] uppercase tracking-[0.3em] text-muted-foreground font-body">Steal this</span>
+                  <button
+                    onClick={() => copy(opened.copy)}
+                    className="flex items-center gap-1 text-xs text-primary hover:text-gold-light font-body"
+                  >
+                    <Copy className="w-3 h-3" /> Copy
+                  </button>
+                </div>
+                <pre className="text-xs font-body whitespace-pre-wrap bg-muted/40 border border-border/50 rounded-sm p-4 text-foreground/90 leading-relaxed">{opened.copy}</pre>
+              </div>
+            </div>
+          </>
         )}
-      </AnimatePresence>
+      </ModalShell>
     </div>
   );
 };

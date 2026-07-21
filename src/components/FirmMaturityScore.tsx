@@ -7,6 +7,7 @@ import { useFirmContext } from "@/hooks/useFirmContext";
 import { streamSSE } from "@/lib/streamSSE";
 import { toast } from "sonner";
 import { saveMaturity } from "@/hooks/useBattlePlanCache";
+import ModalShell from "@/components/ui/modal-shell";
 
 const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL;
 const SUPABASE_KEY = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY;
@@ -97,8 +98,6 @@ const FirmMaturityScore = ({ open, onClose }: Props) => {
     }
   };
 
-  if (!open) return null;
-
   // Compute weakest dimensions for radar-ish bar viz
   const radarData = DIMENSIONS.map((d) => ({
     label: d.label,
@@ -109,21 +108,7 @@ const FirmMaturityScore = ({ open, onClose }: Props) => {
   const current = DIMENSIONS[step];
 
   return (
-    <AnimatePresence>
-      <motion.div
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        exit={{ opacity: 0 }}
-        className="fixed inset-0 z-50 bg-background/85 backdrop-blur-md flex items-center justify-center p-4 print:hidden"
-        onClick={onClose}
-      >
-        <motion.div
-          initial={{ y: 20, opacity: 0, scale: 0.98 }}
-          animate={{ y: 0, opacity: 1, scale: 1 }}
-          exit={{ y: 20, opacity: 0 }}
-          onClick={(e) => e.stopPropagation()}
-          className="w-full max-w-2xl max-h-[90vh] bg-card border border-border rounded-lg shadow-2xl overflow-hidden flex flex-col"
-        >
+    <ModalShell open={open} onClose={onClose} maxWidthClass="max-w-2xl">
           <div className="px-6 py-4 border-b border-border/50 flex items-center justify-between bg-gradient-to-r from-primary/10 to-transparent">
             <div className="flex items-center gap-2">
               <div className="p-1.5 bg-primary/20 rounded-sm">
@@ -252,9 +237,7 @@ const FirmMaturityScore = ({ open, onClose }: Props) => {
               </div>
             )}
           </div>
-        </motion.div>
-      </motion.div>
-    </AnimatePresence>
+    </ModalShell>
   );
 };
 

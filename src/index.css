@@ -269,6 +269,16 @@
   .ease-apple-bounce {
     transition-timing-function: cubic-bezier(0.34, 1.56, 0.64, 1);
   }
+
+  /* The press-feedback every native iOS/macOS control gives for free —
+     apply to anything tappable (nav rows, cards, buttons) for that
+     "this responded to me" feel a plain hover state doesn't provide. */
+  .tap-scale {
+    transition: transform 0.15s cubic-bezier(0.32, 0.72, 0, 1);
+  }
+  .tap-scale:active {
+    transform: scale(0.96);
+  }
 }
 
 /* Reading font-scale — applied to chapter article body copy */
