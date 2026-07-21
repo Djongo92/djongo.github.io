@@ -1,7 +1,8 @@
 import { useRef, useState } from "react";
-import { Settings as SettingsIcon, Target, Download, Upload, Trash2, Briefcase, ShieldAlert } from "lucide-react";
+import { Settings as SettingsIcon, Target, Download, Upload, Trash2, Briefcase, ShieldAlert, ImageIcon, X } from "lucide-react";
 import { toast } from "sonner";
 import { useFirmContext } from "@/hooks/useFirmContext";
+import { useFirmLogo } from "@/hooks/useFirmLogo";
 import { useScoreGoals } from "@/hooks/useScoreGoals";
 import { PRACTICE_AREAS, FIRM_SIZES, GOALS } from "@/components/PersonalizeOnboarding";
 import { CATEGORY_META, CATEGORY_ORDER } from "@/lib/visibilityCategories";
@@ -20,14 +21,63 @@ const SCORE_FIELD_FOR: Record<string, keyof AuditRow> = {
   reputation: "reputation_score",
 };
 
+/** Downscales a logo to a small square so it stays cheap to store as a localStorage data URL. */
+function resizeImageFile(file: File, maxDim = 160): Promise<string> {
+  return new Promise((resolve, reject) => {
+    const img = new Image();
+    const url = URL.createObjectURL(file);
+    img.onload = () => {
+      const scale = Math.min(1, maxDim / Math.max(img.width, img.height));
+      const w = Math.round(img.width * scale);
+      const h = Math.round(img.height * scale);
+      const canvas = document.createElement("canvas");
+      canvas.width = w;
+      canvas.height = h;
+      const ctx = canvas.getContext("2d");
+      if (!ctx) {
+        URL.revokeObjectURL(url);
+        reject(new Error("no canvas context"));
+        return;
+      }
+      ctx.drawImage(img, 0, 0, w, h);
+      URL.revokeObjectURL(url);
+      resolve(canvas.toDataURL("image/png"));
+    };
+    img.onerror = () => {
+      URL.revokeObjectURL(url);
+      reject(new Error("couldn't load image"));
+    };
+    img.src = url;
+  });
+}
+
 const SettingsPage = ({ primaryAudit }: SettingsPageProps) => {
   const { context, save } = useFirmContext();
+  const { logo, save: saveLogo, clear: clearLogo } = useFirmLogo();
   const { goals, setGoal } = useScoreGoals();
   const [practiceArea, setPracticeArea] = useState(context?.practiceArea ?? "");
   const [firmSize, setFirmSize] = useState(context?.firmSize ?? "");
   const [primaryGoal, setPrimaryGoal] = useState(context?.primaryGoal ?? "");
   const [confirmingClear, setConfirmingClear] = useState(false);
   const importInputRef = useRef<HTMLInputElement>(null);
+  const logoInputRef = useRef<HTMLInputElement>(null);
+
+  const handleLogoFile = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    e.target.value = "";
+    if (!file) return;
+    if (!file.type.startsWith("image/")) {
+      toast.error("Please choose an image file.");
+      return;
+    }
+    try {
+      const dataUrl = await resizeImageFile(file);
+      saveLogo(dataUrl);
+      toast.success("Logo saved.");
+    } catch {
+      toast.error("Couldn't read that image.");
+    }
+  };
 
   const saveContext = () => {
     save({ practiceArea, firmSize, primaryGoal });
@@ -149,6 +199,43 @@ const SettingsPage = ({ primaryAudit }: SettingsPageProps) => {
               className="bg-primary text-primary-foreground px-5 py-2 rounded-sm font-body text-sm hover:bg-primary/90 transition-colors"
             >
               Save firm profile
+            </button>
+          </div>
+        </div>
+
+        {/* Firm logo */}
+        <div className="bg-card border border-border/50 rounded-sm p-5">
+          <div className="flex items-center gap-2 mb-4">
+            <ImageIcon className="w-4 h-4 text-primary" />
+            <h2 className="font-display text-lg text-foreground">Firm Logo</h2>
+          </div>
+          <p className="text-xs text-muted-foreground font-body mb-4">
+            Shown in the sidebar and on your Battle Plan PDF cover. Stored in this browser, same as the rest of your
+            firm profile.
+          </p>
+          <div className="flex items-center gap-4">
+            {logo ? (
+              <div className="relative shrink-0">
+                <img src={logo} alt="Firm logo" className="w-14 h-14 rounded-sm object-cover border border-border/50" />
+                <button
+                  onClick={clearLogo}
+                  className="absolute -top-1.5 -right-1.5 w-5 h-5 rounded-full bg-destructive text-destructive-foreground flex items-center justify-center hover:bg-destructive/90"
+                  aria-label="Remove logo"
+                >
+                  <X className="w-3 h-3" />
+                </button>
+              </div>
+            ) : (
+              <div className="w-14 h-14 rounded-sm border border-dashed border-border/50 flex items-center justify-center shrink-0">
+                <ImageIcon className="w-5 h-5 text-muted-foreground" />
+              </div>
+            )}
+            <input ref={logoInputRef} type="file" accept="image/*" onChange={handleLogoFile} className="hidden" />
+            <button
+              onClick={() => logoInputRef.current?.click()}
+              className="inline-flex items-center gap-2 px-4 py-2 rounded-sm text-sm font-body border border-border/50 text-foreground hover:border-primary/40 transition-colors"
+            >
+              <Upload className="w-3.5 h-3.5" /> {logo ? "Replace logo" : "Upload logo"}
             </button>
           </div>
         </div>

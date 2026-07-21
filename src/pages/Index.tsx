@@ -18,6 +18,7 @@ import { useChecklists } from "@/hooks/useChecklists";
 import { useAnnotations } from "@/hooks/useAnnotations";
 import { useImplementation } from "@/hooks/useImplementation";
 import { useFirmContext } from "@/hooks/useFirmContext";
+import { useFirmLogo } from "@/hooks/useFirmLogo";
 import { useAmbientMode, useScrollVelocity } from "@/hooks/useAmbientMode";
 import { useAuth } from "@/hooks/useAuth";
 import { AnimatePresence, motion } from "framer-motion";
@@ -28,6 +29,7 @@ import { isDemoMode, disableDemoMode, enableDemoMode } from "@/lib/demoMode";
 import { clearSession } from "@/lib/session";
 import { DEMO_AUDIT, DEMO_HISTORY } from "@/data/demoData";
 import ClaimDataBanner from "@/components/ClaimDataBanner";
+import { DashboardSkeleton, AnalyticsSkeleton, SettingsSkeleton } from "@/components/SectionSkeletons";
 import type { WorkshopToolId } from "@/lib/handoff";
 import type { AuditRow, HistoryRow } from "@/components/dashboard/CommandCenter";
 
@@ -63,6 +65,7 @@ const Index = () => {
   const annotationState = useAnnotations();
   const implementationState = useImplementation();
   const { hasContext } = useFirmContext();
+  const { logo: firmLogo } = useFirmLogo();
   const [personalizeOpen, setPersonalizeOpen] = useState(false);
   const [maturityOpen, setMaturityOpen] = useState(false);
   const [competitorsOpen, setCompetitorsOpen] = useState(false);
@@ -336,6 +339,7 @@ const Index = () => {
         onExitDemo={disableDemoMode}
         onSignOut={handleSignOut}
         firmName={firmName}
+        firmLogo={firmLogo}
         scoreLabel={scoreLabel}
         alerts={sidebarAlerts}
         onOpenSettings={() => goToSection("settings")}
@@ -347,7 +351,7 @@ const Index = () => {
         directoryIndexHref={directoryIndexHref}
       >
         {section === "dashboard" && (
-          <Suspense fallback={<div className="min-h-screen bg-background" />}>
+          <Suspense fallback={<DashboardSkeleton />}>
             <CommandCenter
               audits={visibilityData?.audits ?? []}
               history={visibilityData?.history ?? []}
@@ -363,14 +367,14 @@ const Index = () => {
           </Suspense>
         )}
         {section === "analytics" && (
-          <Suspense fallback={<div className="min-h-screen bg-background" />}>
+          <Suspense fallback={<AnalyticsSkeleton />}>
             <Analytics audits={visibilityData?.audits ?? []} history={visibilityData?.history ?? []} />
           </Suspense>
         )}
         {section === "workshop" && <Workshop onBack={() => goToSection("dashboard")} />}
         {section === "guidebook" && renderGuidebook()}
         {section === "settings" && (
-          <Suspense fallback={<div className="min-h-screen bg-background" />}>
+          <Suspense fallback={<SettingsSkeleton />}>
             <SettingsPage primaryAudit={primaryAudit} />
           </Suspense>
         )}

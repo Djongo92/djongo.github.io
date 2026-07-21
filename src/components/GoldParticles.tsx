@@ -10,6 +10,7 @@ const GoldParticles = () => {
     if (!ctx) return;
 
     let animationId: number;
+    let paused = document.visibilityState === "hidden";
     const particles: { x: number; y: number; vx: number; vy: number; size: number; opacity: number; life: number }[] = [];
 
     const resize = () => {
@@ -18,6 +19,18 @@ const GoldParticles = () => {
     };
     resize();
     window.addEventListener("resize", resize);
+
+    // Respect prefers-reduced-motion — draw the particles once, statically,
+    // instead of running an indefinite requestAnimationFrame loop.
+    const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+    // Also pause the loop while the tab is hidden — no reason to keep a
+    // canvas animation running (and burning battery) in a background tab.
+    const handleVisibility = () => {
+      paused = document.visibilityState === "hidden";
+      if (!paused && !reduceMotion) draw();
+    };
+    document.addEventListener("visibilitychange", handleVisibility);
 
     // Initialize particles
     for (let i = 0; i < 60; i++) {
@@ -78,13 +91,14 @@ const GoldParticles = () => {
         }
       }
 
-      animationId = requestAnimationFrame(draw);
+      if (!reduceMotion && !paused) animationId = requestAnimationFrame(draw);
     };
     draw();
 
     return () => {
       cancelAnimationFrame(animationId);
       window.removeEventListener("resize", resize);
+      document.removeEventListener("visibilitychange", handleVisibility);
     };
   }, []);
 

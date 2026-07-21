@@ -267,6 +267,24 @@ const CommandCenter = ({
             presence, thought-leadership cadence — benchmarked against your peer group. This becomes your home
             once it's run.
           </p>
+
+          <div className="flex flex-col sm:flex-row gap-4 mt-8 max-w-2xl">
+            {[
+              { n: 1, label: "Enter your domain, market, and peer group", icon: FileText },
+              { n: 2, label: "Get a real score across five categories", icon: Gauge },
+              { n: 3, label: "See where you stand against your peers", icon: TrendingUp },
+            ].map(({ n, label, icon: StepIcon }) => (
+              <div key={n} className="flex-1 flex items-start gap-3">
+                <div className="shrink-0 w-7 h-7 rounded-full border border-primary/40 flex items-center justify-center text-xs font-body text-primary">
+                  {n}
+                </div>
+                <div className="min-w-0">
+                  <StepIcon className="w-3.5 h-3.5 text-muted-foreground mb-1" />
+                  <p className="text-xs text-muted-foreground font-body leading-snug">{label}</p>
+                </div>
+              </div>
+            ))}
+          </div>
         </header>
 
         <div className="max-w-4xl mx-auto px-6 mb-10">

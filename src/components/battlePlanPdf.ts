@@ -29,9 +29,10 @@ export interface BuildArgs {
   readChaptersCount: number;
   totalChapters: number;
   implementationScore: number;
+  logoDataUrl?: string | null;
 }
 
-export function buildPdf({ roast, competitor, roadmap, maturity, headline, bio, visibilityScore, context, readChaptersCount, totalChapters, implementationScore }: BuildArgs) {
+export function buildPdf({ roast, competitor, roadmap, maturity, headline, bio, visibilityScore, context, readChaptersCount, totalChapters, implementationScore, logoDataUrl }: BuildArgs) {
   const doc = new jsPDF({ unit: "pt", format: "letter" });
   const pageW = doc.internal.pageSize.getWidth();
   const pageH = doc.internal.pageSize.getHeight();
@@ -45,6 +46,15 @@ export function buildPdf({ roast, competitor, roadmap, maturity, headline, bio, 
   // gold rule top
   doc.setFillColor(...GOLD);
   doc.rect(margin, margin, 80, 3, "F");
+
+  if (logoDataUrl) {
+    try {
+      const logoSize = 36;
+      doc.addImage(logoDataUrl, "PNG", pageW - margin - logoSize, margin, logoSize, logoSize);
+    } catch {
+      // A corrupt/unsupported data URL shouldn't sink the whole PDF — the cover just renders without it.
+    }
+  }
 
   doc.setTextColor(...GOLD_LIGHT);
   doc.setFont("helvetica", "normal");

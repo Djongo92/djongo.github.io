@@ -22,6 +22,7 @@ interface AppShellProps {
   onExitDemo?: () => void;
   onSignOut?: () => void;
   firmName?: string;
+  firmLogo?: string | null;
   scoreLabel?: string;
   alerts?: SidebarAlert[];
   onOpenSettings?: () => void;
@@ -56,7 +57,7 @@ const NavGroupLabel = ({ children }: { children: ReactNode }) => (
  * previously desktop-only and unreachable from a phone.
  */
 const AppShell = ({
-  active, onNavigate, children, demoMode, onExitDemo, onSignOut, firmName, scoreLabel, alerts,
+  active, onNavigate, children, demoMode, onExitDemo, onSignOut, firmName, firmLogo, scoreLabel, alerts,
   onOpenSettings, onOpenMaturity, onOpenBattlePlan, onOpenCompetitors, onOpenWorkshopHistory, rankingsHref, directoryIndexHref,
 }: AppShellProps) => {
   const [moreOpen, setMoreOpen] = useState(false);
@@ -104,9 +105,14 @@ const AppShell = ({
             )}
           </div>
           {firmName && (
-            <p className="text-xs text-muted-foreground font-body mt-1 truncate" title={firmName}>
-              {firmName}
-            </p>
+            <div className="flex items-center gap-1.5 mt-1 min-w-0">
+              {firmLogo && (
+                <img src={firmLogo} alt="" className="w-4 h-4 rounded-sm object-cover shrink-0" />
+              )}
+              <p className="text-xs text-muted-foreground font-body truncate" title={firmName}>
+                {firmName}
+              </p>
+            </div>
           )}
           {scoreLabel && (
             <p className="text-[11px] font-body mt-1.5 inline-flex items-center gap-1 text-emerald-500">
