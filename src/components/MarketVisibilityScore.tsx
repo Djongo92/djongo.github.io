@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { ShieldCheck, X, Loader2, TrendingUp, Share2, CheckCircle2 } from "lucide-react";
+import { ShieldCheck, X, Loader2, TrendingUp, Share2, CheckCircle2, Globe } from "lucide-react";
 import { toast } from "sonner";
 import { useMarketVisibility } from "@/hooks/useMarketVisibility";
 import { saveVisibilityScore } from "@/hooks/useBattlePlanCache";
@@ -32,7 +32,16 @@ const MarketVisibilityScore = () => {
   const [posts30d, setPosts30d] = useState("");
   const [engagementRate, setEngagementRate] = useState("");
   const [platforms, setPlatforms] = useState({ linkedin: false, instagram: false, twitter: false, facebook: false });
-  const { loading, publishing, result, error, run, publish, reset } = useMarketVisibility();
+  const { loading, publishing, result, error, run, publish, verifyDomain, scheduleRerun, reset } = useMarketVisibility();
+  const [confirmingPublish, setConfirmingPublish] = useState(false);
+  const [confirmingUnpublish, setConfirmingUnpublish] = useState(false);
+  const [step, setStep] = useState<1 | 2 | 3>(1);
+  const [verifyRecord, setVerifyRecord] = useState<{ recordHost: string; recordValue: string } | null>(null);
+  const [checkingVerification, setCheckingVerification] = useState(false);
+  const [verifyError, setVerifyError] = useState<string | null>(null);
+  const [autoRerun, setAutoRerun] = useState(false);
+  const [rerunFrequencyDays, setRerunFrequencyDays] = useState(30);
+  const [savingSchedule, setSavingSchedule] = useState(false);
 
   const submit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -70,15 +79,79 @@ const MarketVisibilityScore = () => {
 
   const handlePublish = async () => {
     if (!result) return;
-    const ok = await publish(result.id, true);
-    if (ok) toast.success("Published to the public ranking");
-    else toast.error("Couldn't publish");
+    setConfirmingPublish(false);
+    const { ok, code } = await publish(result.id, true);
+    if (ok) {
+      toast.success("Published to the public ranking");
+      return;
+    }
+    if (code === "unverified") {
+      // Not an error — kick off the verification flow instead of a toast.
+      try {
+        const data = await verifyDomain(result.id, "start");
+        if (data.recordHost && data.recordValue) setVerifyRecord({ recordHost: data.recordHost, recordValue: data.recordValue });
+      } catch {
+        toast.error("Couldn't start domain verification");
+      }
+      return;
+    }
+    toast.error("Couldn't publish");
+  };
+
+  const handleCheckVerification = async () => {
+    if (!result) return;
+    setCheckingVerification(true);
+    setVerifyError(null);
+    try {
+      const data = await verifyDomain(result.id, "check");
+      if (data.verified) {
+        setVerifyRecord(null);
+        toast.success("Domain verified — publishing…");
+        const { ok } = await publish(result.id, true);
+        if (ok) toast.success("Published to the public ranking");
+        else toast.error("Couldn't publish");
+      } else {
+        setVerifyError("That TXT record isn't showing up yet — DNS changes can take a few minutes to propagate.");
+      }
+    } catch {
+      setVerifyError("Couldn't check verification right now.");
+    } finally {
+      setCheckingVerification(false);
+    }
+  };
+
+  const handleUnpublish = async () => {
+    if (!result) return;
+    setConfirmingUnpublish(false);
+    const { ok } = await publish(result.id, false);
+    if (ok) toast.success("Removed from the public ranking");
+    else toast.error("Couldn't unpublish");
+  };
+
+  const handleToggleAutoRerun = async (next: boolean) => {
+    if (!result) return;
+    setSavingSchedule(true);
+    try {
+      await scheduleRerun(result.id, next, next ? rerunFrequencyDays : undefined);
+      setAutoRerun(next);
+      toast.success(next ? `Will re-run automatically every ${rerunFrequencyDays} days` : "Automatic re-run turned off");
+    } catch {
+      toast.error("Couldn't update the re-run schedule");
+    } finally {
+      setSavingSchedule(false);
+    }
   };
 
   const startOver = () => {
     reset();
     setAuditedDomain("");
     setDisplayName("");
+    setConfirmingPublish(false);
+    setConfirmingUnpublish(false);
+    setStep(1);
+    setVerifyRecord(null);
+    setVerifyError(null);
+    setAutoRerun(false);
   };
 
   return (
@@ -132,147 +205,206 @@ const MarketVisibilityScore = () => {
               <div className="flex-1 overflow-y-auto p-6">
                 {!result && (
                   <form onSubmit={submit} className="space-y-4">
-                    <p className="text-sm text-muted-foreground font-body">
-                      Runs a real, externally-sourced audit — PageSpeed, legal-directory presence, thought-leadership cadence — and
-                      benchmarks it against your peer group. Persisted centrally, so it gets more meaningful as more firms run it.
-                    </p>
-
-                    <div>
-                      <label className="block text-xs text-muted-foreground font-body mb-1.5">Firm domain</label>
-                      <input
-                        type="text"
-                        value={auditedDomain}
-                        onChange={(e) => setAuditedDomain(e.target.value)}
-                        placeholder="yourlawfirm.com"
-                        className="w-full bg-background border border-border rounded-sm px-3 py-2.5 text-sm font-body focus:outline-none focus:border-emerald-500/50"
-                        disabled={loading}
-                      />
+                    <div className="flex items-center gap-2 mb-2">
+                      {[1, 2, 3].map((n) => (
+                        <div key={n} className="flex items-center gap-2 flex-1">
+                          <div
+                            className={`w-6 h-6 rounded-full flex items-center justify-center text-[11px] font-body shrink-0 ${
+                              n <= step ? "bg-emerald-600 text-white" : "border border-border text-muted-foreground"
+                            }`}
+                          >
+                            {n}
+                          </div>
+                          {n < 3 && <div className={`h-px flex-1 ${n < step ? "bg-emerald-600" : "bg-border"}`} />}
+                        </div>
+                      ))}
                     </div>
 
-                    <div>
-                      <label className="block text-xs text-muted-foreground font-body mb-1.5">Firm name (optional)</label>
-                      <input
-                        type="text"
-                        value={displayName}
-                        onChange={(e) => setDisplayName(e.target.value)}
-                        placeholder="Your Firm LLP"
-                        className="w-full bg-background border border-border rounded-sm px-3 py-2.5 text-sm font-body focus:outline-none focus:border-emerald-500/50"
-                        disabled={loading}
-                      />
-                    </div>
+                    {step === 1 && (
+                      <>
+                        <p className="text-sm text-muted-foreground font-body">
+                          Runs a real, externally-sourced audit — PageSpeed, legal-directory presence, thought-leadership cadence — and
+                          benchmarks it against your peer group. Persisted centrally, so it gets more meaningful as more firms run it.
+                        </p>
 
-                    <div className="grid grid-cols-2 gap-3">
-                      <div>
-                        <label className="block text-xs text-muted-foreground font-body mb-1.5">Market</label>
-                        <select
-                          value={market}
-                          onChange={(e) => setMarket(e.target.value)}
-                          className="w-full bg-background border border-border rounded-sm px-3 py-2.5 text-sm font-body focus:outline-none focus:border-emerald-500/50"
-                          disabled={loading}
-                        >
-                          {Object.keys(DMV_MARKETS).map((m) => (
-                            <option key={m} value={m}>{m[0].toUpperCase() + m.slice(1)}</option>
-                          ))}
-                        </select>
-                      </div>
-                      <div>
-                        <label className="block text-xs text-muted-foreground font-body mb-1.5">Peer group</label>
-                        <select
-                          value={peerGroup}
-                          onChange={(e) => setPeerGroup(e.target.value)}
-                          className="w-full bg-background border border-border rounded-sm px-3 py-2.5 text-sm font-body focus:outline-none focus:border-emerald-500/50"
-                          disabled={loading}
-                        >
-                          {PEER_GROUPS.map((p) => (
-                            <option key={p.value} value={p.value}>{p.label}</option>
-                          ))}
-                        </select>
-                      </div>
-                    </div>
-
-                    <label className="flex items-center gap-2 text-sm font-body text-secondary-foreground/80 cursor-pointer">
-                      <input
-                        type="checkbox"
-                        checked={gbpListed}
-                        onChange={(e) => setGbpListed(e.target.checked)}
-                        disabled={loading}
-                        className="accent-emerald-600"
-                      />
-                      We have a claimed, active Google Business Profile
-                    </label>
-
-                    <div className="border-t border-border/40 pt-4">
-                      <p className="text-[10px] tracking-[0.2em] uppercase text-muted-foreground font-body mb-3">
-                        Social presence (optional, self-reported — no clean LinkedIn API exists)
-                      </p>
-                      <div className="grid grid-cols-2 gap-3 mb-3">
                         <div>
-                          <label className="block text-xs text-muted-foreground font-body mb-1.5">LinkedIn followers</label>
+                          <label className="block text-xs text-muted-foreground font-body mb-1.5">Firm domain</label>
                           <input
-                            type="number"
-                            min={0}
-                            value={followers}
-                            onChange={(e) => setFollowers(e.target.value)}
-                            placeholder="0"
+                            type="text"
+                            value={auditedDomain}
+                            onChange={(e) => setAuditedDomain(e.target.value)}
+                            placeholder="yourlawfirm.com"
+                            autoFocus
                             className="w-full bg-background border border-border rounded-sm px-3 py-2.5 text-sm font-body focus:outline-none focus:border-emerald-500/50"
-                            disabled={loading}
                           />
                         </div>
+
                         <div>
-                          <label className="block text-xs text-muted-foreground font-body mb-1.5">Posts in last 30 days</label>
+                          <label className="block text-xs text-muted-foreground font-body mb-1.5">Firm name (optional)</label>
                           <input
-                            type="number"
-                            min={0}
-                            value={posts30d}
-                            onChange={(e) => setPosts30d(e.target.value)}
-                            placeholder="0"
+                            type="text"
+                            value={displayName}
+                            onChange={(e) => setDisplayName(e.target.value)}
+                            placeholder="Your Firm LLP"
                             className="w-full bg-background border border-border rounded-sm px-3 py-2.5 text-sm font-body focus:outline-none focus:border-emerald-500/50"
-                            disabled={loading}
                           />
                         </div>
-                      </div>
-                      <div className="mb-3">
-                        <label className="block text-xs text-muted-foreground font-body mb-1.5">
-                          Engagement rate % (optional — only if you have your own LinkedIn analytics)
+
+                        <button
+                          type="button"
+                          onClick={() => setStep(2)}
+                          disabled={!auditedDomain.trim()}
+                          className="w-full bg-emerald-600 text-white py-3 rounded-sm font-body text-sm disabled:opacity-30 hover:bg-emerald-500 transition-colors"
+                        >
+                          Next
+                        </button>
+                      </>
+                    )}
+
+                    {step === 2 && (
+                      <>
+                        <div className="grid grid-cols-2 gap-3">
+                          <div>
+                            <label className="block text-xs text-muted-foreground font-body mb-1.5">Market</label>
+                            <select
+                              value={market}
+                              onChange={(e) => setMarket(e.target.value)}
+                              className="w-full bg-background border border-border rounded-sm px-3 py-2.5 text-sm font-body focus:outline-none focus:border-emerald-500/50"
+                            >
+                              {Object.keys(DMV_MARKETS).map((m) => (
+                                <option key={m} value={m}>{m[0].toUpperCase() + m.slice(1)}</option>
+                              ))}
+                            </select>
+                          </div>
+                          <div>
+                            <label className="block text-xs text-muted-foreground font-body mb-1.5">Peer group</label>
+                            <select
+                              value={peerGroup}
+                              onChange={(e) => setPeerGroup(e.target.value)}
+                              className="w-full bg-background border border-border rounded-sm px-3 py-2.5 text-sm font-body focus:outline-none focus:border-emerald-500/50"
+                            >
+                              {PEER_GROUPS.map((p) => (
+                                <option key={p.value} value={p.value}>{p.label}</option>
+                              ))}
+                            </select>
+                          </div>
+                        </div>
+
+                        <label className="flex items-center gap-2 text-sm font-body text-secondary-foreground/80 cursor-pointer">
+                          <input
+                            type="checkbox"
+                            checked={gbpListed}
+                            onChange={(e) => setGbpListed(e.target.checked)}
+                            className="accent-emerald-600"
+                          />
+                          We have a claimed, active Google Business Profile
                         </label>
-                        <input
-                          type="number"
-                          min={0}
-                          step="0.1"
-                          value={engagementRate}
-                          onChange={(e) => setEngagementRate(e.target.value)}
-                          placeholder="e.g. 3.5"
-                          className="w-full bg-background border border-border rounded-sm px-3 py-2.5 text-sm font-body focus:outline-none focus:border-emerald-500/50"
-                          disabled={loading}
-                        />
-                      </div>
-                      <div className="grid grid-cols-2 gap-2">
-                        {(["linkedin", "instagram", "twitter", "facebook"] as const).map((p) => (
-                          <label key={p} className="flex items-center gap-2 text-xs font-body text-secondary-foreground/80 cursor-pointer capitalize">
-                            <input
-                              type="checkbox"
-                              checked={platforms[p]}
-                              onChange={(e) => setPlatforms((prev) => ({ ...prev, [p]: e.target.checked }))}
-                              disabled={loading}
-                              className="accent-emerald-600"
-                            />
-                            {p === "twitter" ? "X / Twitter" : p}
-                          </label>
-                        ))}
-                      </div>
-                    </div>
 
-                    <button
-                      type="submit"
-                      disabled={!auditedDomain.trim() || loading}
-                      className="w-full bg-emerald-600 text-white py-3 rounded-sm font-body text-sm disabled:opacity-30 hover:bg-emerald-500 transition-colors flex items-center justify-center gap-2"
-                    >
-                      {loading ? (<><Loader2 className="w-4 h-4 animate-spin" /> Running audit…</>) : "Run Market Visibility Score"}
-                    </button>
-                    {loading && (
-                      <p className="text-xs text-muted-foreground font-body italic text-center">
-                        Fetching PageSpeed data, matching directory rankings, scanning for thought leadership… (15-30s)
-                      </p>
+                        <div className="flex gap-2">
+                          <button
+                            type="button"
+                            onClick={() => setStep(1)}
+                            className="px-4 py-3 rounded-sm font-body text-sm border border-border/50 text-muted-foreground hover:text-foreground transition-colors"
+                          >
+                            Back
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => setStep(3)}
+                            className="flex-1 bg-emerald-600 text-white py-3 rounded-sm font-body text-sm hover:bg-emerald-500 transition-colors"
+                          >
+                            Next
+                          </button>
+                        </div>
+                      </>
+                    )}
+
+                    {step === 3 && (
+                      <>
+                        <div>
+                          <p className="text-[10px] tracking-[0.2em] uppercase text-muted-foreground font-body mb-3">
+                            Social presence (optional, self-reported — no clean LinkedIn API exists)
+                          </p>
+                          <div className="grid grid-cols-2 gap-3 mb-3">
+                            <div>
+                              <label className="block text-xs text-muted-foreground font-body mb-1.5">LinkedIn followers</label>
+                              <input
+                                type="number"
+                                min={0}
+                                value={followers}
+                                onChange={(e) => setFollowers(e.target.value)}
+                                placeholder="0"
+                                className="w-full bg-background border border-border rounded-sm px-3 py-2.5 text-sm font-body focus:outline-none focus:border-emerald-500/50"
+                                disabled={loading}
+                              />
+                            </div>
+                            <div>
+                              <label className="block text-xs text-muted-foreground font-body mb-1.5">Posts in last 30 days</label>
+                              <input
+                                type="number"
+                                min={0}
+                                value={posts30d}
+                                onChange={(e) => setPosts30d(e.target.value)}
+                                placeholder="0"
+                                className="w-full bg-background border border-border rounded-sm px-3 py-2.5 text-sm font-body focus:outline-none focus:border-emerald-500/50"
+                                disabled={loading}
+                              />
+                            </div>
+                          </div>
+                          <div className="mb-3">
+                            <label className="block text-xs text-muted-foreground font-body mb-1.5">
+                              Engagement rate % (optional — only if you have your own LinkedIn analytics)
+                            </label>
+                            <input
+                              type="number"
+                              min={0}
+                              step="0.1"
+                              value={engagementRate}
+                              onChange={(e) => setEngagementRate(e.target.value)}
+                              placeholder="e.g. 3.5"
+                              className="w-full bg-background border border-border rounded-sm px-3 py-2.5 text-sm font-body focus:outline-none focus:border-emerald-500/50"
+                              disabled={loading}
+                            />
+                          </div>
+                          <div className="grid grid-cols-2 gap-2">
+                            {(["linkedin", "instagram", "twitter", "facebook"] as const).map((p) => (
+                              <label key={p} className="flex items-center gap-2 text-xs font-body text-secondary-foreground/80 cursor-pointer capitalize">
+                                <input
+                                  type="checkbox"
+                                  checked={platforms[p]}
+                                  onChange={(e) => setPlatforms((prev) => ({ ...prev, [p]: e.target.checked }))}
+                                  disabled={loading}
+                                  className="accent-emerald-600"
+                                />
+                                {p === "twitter" ? "X / Twitter" : p}
+                              </label>
+                            ))}
+                          </div>
+                        </div>
+
+                        <div className="flex gap-2">
+                          <button
+                            type="button"
+                            onClick={() => setStep(2)}
+                            disabled={loading}
+                            className="px-4 py-3 rounded-sm font-body text-sm border border-border/50 text-muted-foreground hover:text-foreground transition-colors disabled:opacity-30"
+                          >
+                            Back
+                          </button>
+                          <button
+                            type="submit"
+                            disabled={!auditedDomain.trim() || loading}
+                            className="flex-1 bg-emerald-600 text-white py-3 rounded-sm font-body text-sm disabled:opacity-30 hover:bg-emerald-500 transition-colors flex items-center justify-center gap-2"
+                          >
+                            {loading ? (<><Loader2 className="w-4 h-4 animate-spin" /> Running audit…</>) : "Run Market Visibility Score"}
+                          </button>
+                        </div>
+                        {loading && (
+                          <p className="text-xs text-muted-foreground font-body italic text-center">
+                            Fetching PageSpeed data, matching directory rankings, scanning for thought leadership… (15-30s)
+                          </p>
+                        )}
+                      </>
                     )}
                   </form>
                 )}
@@ -323,19 +455,128 @@ const MarketVisibilityScore = () => {
                       })}
                     </div>
 
-                    {result.isPublic ? (
-                      <div className="flex items-center justify-center gap-2 text-emerald-500 text-sm font-body py-3">
-                        <CheckCircle2 className="w-4 h-4" /> Published to the public ranking
+                    {verifyRecord ? (
+                      <div className="border border-primary/30 bg-primary/5 rounded-sm p-3 space-y-2">
+                        <p className="text-xs text-foreground font-body flex items-center gap-1.5">
+                          <Globe className="w-3.5 h-3.5 text-primary shrink-0" /> Verify you control {auditedDomain} before publishing
+                        </p>
+                        <p className="text-[11px] text-muted-foreground font-body">
+                          Add a TXT record on <span className="font-mono text-foreground">{verifyRecord.recordHost}</span> with this value:
+                        </p>
+                        <code className="block text-[11px] font-mono bg-background border border-border/50 rounded-sm px-2 py-1.5 break-all text-foreground">
+                          {verifyRecord.recordValue}
+                        </code>
+                        {verifyError && <p className="text-[11px] text-amber-500 font-body">{verifyError}</p>}
+                        <div className="flex gap-2">
+                          <button
+                            onClick={handleCheckVerification}
+                            disabled={checkingVerification}
+                            className="flex-1 bg-primary text-primary-foreground py-2 rounded-sm font-body text-xs disabled:opacity-30 hover:bg-gold-light transition-colors flex items-center justify-center gap-1.5"
+                          >
+                            {checkingVerification ? (<><Loader2 className="w-3.5 h-3.5 animate-spin" /> Checking…</>) : "I've added it — check now"}
+                          </button>
+                          <button
+                            onClick={() => { setVerifyRecord(null); setVerifyError(null); }}
+                            className="px-3 py-2 rounded-sm font-body text-xs border border-border/50 text-muted-foreground hover:text-foreground transition-colors"
+                          >
+                            Cancel
+                          </button>
+                        </div>
+                      </div>
+                    ) : result.isPublic ? (
+                      <div className="space-y-2">
+                        <div className="flex items-center justify-center gap-2 text-emerald-500 text-sm font-body py-2">
+                          <CheckCircle2 className="w-4 h-4" /> Published to the public ranking
+                        </div>
+                        {confirmingUnpublish ? (
+                          <div className="border border-destructive/30 bg-destructive/5 rounded-sm p-3 space-y-2">
+                            <p className="text-xs text-foreground font-body">
+                              This removes your score from the public {market} ranking. You can publish again later.
+                            </p>
+                            <div className="flex gap-2">
+                              <button
+                                onClick={handleUnpublish}
+                                disabled={publishing}
+                                className="flex-1 bg-destructive text-destructive-foreground py-2 rounded-sm font-body text-xs disabled:opacity-30 hover:bg-destructive/90 transition-colors"
+                              >
+                                {publishing ? "Removing…" : "Yes, remove it"}
+                              </button>
+                              <button
+                                onClick={() => setConfirmingUnpublish(false)}
+                                className="px-3 py-2 rounded-sm font-body text-xs border border-border/50 text-muted-foreground hover:text-foreground transition-colors"
+                              >
+                                Cancel
+                              </button>
+                            </div>
+                          </div>
+                        ) : (
+                          <button
+                            onClick={() => setConfirmingUnpublish(true)}
+                            className="w-full text-xs text-muted-foreground hover:text-destructive font-body py-1.5 transition-colors"
+                          >
+                            Remove from public ranking
+                          </button>
+                        )}
+                      </div>
+                    ) : confirmingPublish ? (
+                      <div className="border border-emerald-500/30 bg-emerald-500/5 rounded-sm p-3 space-y-2">
+                        <p className="text-xs text-foreground font-body">
+                          This makes your score visible on the public {market} ranking, alongside your peer group. Anyone can see it.
+                        </p>
+                        <div className="flex gap-2">
+                          <button
+                            onClick={handlePublish}
+                            disabled={publishing}
+                            className="flex-1 bg-emerald-600 text-white py-2 rounded-sm font-body text-xs disabled:opacity-30 hover:bg-emerald-500 transition-colors flex items-center justify-center gap-1.5"
+                          >
+                            {publishing ? (<><Loader2 className="w-3.5 h-3.5 animate-spin" /> Publishing…</>) : "Yes, publish it"}
+                          </button>
+                          <button
+                            onClick={() => setConfirmingPublish(false)}
+                            className="px-3 py-2 rounded-sm font-body text-xs border border-border/50 text-muted-foreground hover:text-foreground transition-colors"
+                          >
+                            Cancel
+                          </button>
+                        </div>
                       </div>
                     ) : (
                       <button
-                        onClick={handlePublish}
-                        disabled={publishing}
-                        className="w-full bg-emerald-600 text-white py-3 rounded-sm font-body text-sm disabled:opacity-30 hover:bg-emerald-500 transition-colors flex items-center justify-center gap-2"
+                        onClick={() => setConfirmingPublish(true)}
+                        className="w-full bg-emerald-600 text-white py-3 rounded-sm font-body text-sm hover:bg-emerald-500 transition-colors flex items-center justify-center gap-2"
                       >
-                        {publishing ? (<><Loader2 className="w-4 h-4 animate-spin" /> Publishing…</>) : (<><Share2 className="w-4 h-4" /> Publish to the public ranking</>)}
+                        <Share2 className="w-4 h-4" /> Publish to the public ranking
                       </button>
                     )}
+
+                    <div className="mt-4 pt-4 border-t border-border/40 flex items-center justify-between gap-3">
+                      <label className="flex items-center gap-2 text-xs font-body text-muted-foreground cursor-pointer">
+                        <input
+                          type="checkbox"
+                          checked={autoRerun}
+                          onChange={(e) => handleToggleAutoRerun(e.target.checked)}
+                          disabled={savingSchedule}
+                          className="accent-emerald-600"
+                        />
+                        Re-run automatically
+                      </label>
+                      {autoRerun && (
+                        <select
+                          value={rerunFrequencyDays}
+                          onChange={(e) => {
+                            const days = Number(e.target.value);
+                            setRerunFrequencyDays(days);
+                            if (result) scheduleRerun(result.id, true, days).catch(() => toast.error("Couldn't update the re-run schedule"));
+                          }}
+                          disabled={savingSchedule}
+                          className="bg-background border border-border rounded-sm px-2 py-1 text-xs font-body focus:outline-none focus:border-emerald-500/50"
+                        >
+                          <option value={7}>Every 7 days</option>
+                          <option value={14}>Every 14 days</option>
+                          <option value={30}>Every 30 days</option>
+                          <option value={90}>Every 90 days</option>
+                        </select>
+                      )}
+                    </div>
 
                     <button onClick={startOver} className="mt-4 text-xs text-emerald-600 hover:text-emerald-500 font-body block mx-auto">
                       ← Run another audit

@@ -1,7 +1,9 @@
 import { useEffect, useState } from "react";
 import { Link, useParams } from "react-router-dom";
-import { Loader2, ShieldCheck, ArrowRight, Flag } from "lucide-react";
+import { Loader2, ShieldCheck, ArrowRight, Flag, Download } from "lucide-react";
 import { PEER_GROUPS, FIRM_TYPE_TO_PEER_GROUP } from "@/lib/marketVisibilityConfig";
+import { toCsv, downloadCsv } from "@/lib/csv";
+import { setPageMeta } from "@/lib/pageMeta";
 
 const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL;
 const SUPABASE_KEY = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY;
@@ -73,7 +75,11 @@ const DirectoryIndex = () => {
   }, [market]);
 
   useEffect(() => {
-    document.title = market ? `${market[0].toUpperCase() + market.slice(1)} Directory Standing · LegalOS` : "Directory Standing · LegalOS";
+    const marketLabel = market ? market[0].toUpperCase() + market.slice(1) : "Market";
+    setPageMeta({
+      title: market ? `${marketLabel} Directory Standing Index · LegalOS` : "Directory Standing · LegalOS",
+      description: `Chambers Europe and Legal 500 rankings for law firms in ${marketLabel}, aggregated and peer-normalized — directory breadth and depth, computed directly from published rankings.`,
+    });
   }, [market]);
 
   const grouped: Record<string, FirmStanding[]> = {};
@@ -83,6 +89,29 @@ const DirectoryIndex = () => {
   });
   const groupOrder = [...PEER_GROUPS.map((p) => p.value), "other"];
   const groupsWithData = groupOrder.filter((pg) => grouped[pg]?.length > 0);
+
+  const exportCsv = () => {
+    if (!firms || firms.length === 0) return;
+    const flat = firms.map((f) => ({
+      firmName: f.firmName,
+      firmDomain: f.firmDomain ?? "",
+      firmType: f.firmType ?? "",
+      chambersPoints: Math.round(f.chambers.points * 10) / 10,
+      legal500Points: Math.round(f.legal500.points * 10) / 10,
+      iflr1000Points: Math.round(f.iflr1000.points * 10) / 10,
+      directoryPoints: Math.round(f.directoryPoints * 10) / 10,
+    }));
+    const csv = toCsv(flat, [
+      { key: "firmName", header: "Firm" },
+      { key: "firmDomain", header: "Domain" },
+      { key: "firmType", header: "Type" },
+      { key: "chambersPoints", header: "Chambers points" },
+      { key: "legal500Points", header: "Legal 500 points" },
+      { key: "iflr1000Points", header: "IFLR1000 points" },
+      { key: "directoryPoints", header: `Directory points (/${max})` },
+    ]);
+    downloadCsv(`legalos-directory-${market}.csv`, csv);
+  };
 
   return (
     <div className="min-h-screen bg-background">
@@ -114,6 +143,15 @@ const DirectoryIndex = () => {
 
         {!loading && !error && groupsWithData.length === 0 && (
           <p className="text-sm text-muted-foreground font-body italic">No directory data for this market yet.</p>
+        )}
+
+        {!loading && !error && groupsWithData.length > 0 && (
+          <button
+            onClick={exportCsv}
+            className="inline-flex items-center gap-1.5 text-xs text-muted-foreground hover:text-foreground font-body mb-8"
+          >
+            <Download className="w-3 h-3" /> Export as CSV
+          </button>
         )}
 
         {!loading && !error && groupsWithData.map((pg) => (

@@ -3,6 +3,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { Swords, X, Download, CheckCircle2, Circle, Loader2, Flame, Map, Target, Gauge, Trophy, UserSquare, ShieldCheck } from "lucide-react";
 import { useBattlePlanCache } from "@/hooks/useBattlePlanCache";
 import { useFirmContext } from "@/hooks/useFirmContext";
+import { useFirmLogo } from "@/hooks/useFirmLogo";
 import { toast } from "sonner";
 
 interface Props {
@@ -16,12 +17,13 @@ const BattlePlan = ({ readChaptersCount, totalChapters, implementationScore }: P
   const [generating, setGenerating] = useState(false);
   const { roast, competitor, roadmap, maturity, headline, bio, visibilityScore } = useBattlePlanCache();
   const { context } = useFirmContext();
+  const { logo: logoDataUrl } = useFirmLogo();
 
   const hasAny = !!(roast || competitor || roadmap || maturity || headline || bio || visibilityScore);
   const coreSteps = [
-    { key: "roast", label: "Run Roast My Homepage", done: !!roast, icon: "roast" as const },
-    { key: "competitor", label: "Run Competitor Analysis", done: !!competitor, icon: "competitor" as const },
-    { key: "roadmap", label: "Generate 30/60/90 Roadmap", done: !!roadmap, icon: "roadmap" as const },
+    { key: "roast", label: "Run Roast My Homepage", done: !!roast, icon: "roast" as const, preview: roast ? `Grade ${roast.grade} — ${roast.verdict}` : undefined },
+    { key: "competitor", label: "Run Competitor Analysis", done: !!competitor, icon: "competitor" as const, preview: competitor?.executiveSummary },
+    { key: "roadmap", label: "Generate 30/60/90 Roadmap", done: !!roadmap, icon: "roadmap" as const, preview: roadmap?.summary },
   ];
   const optionalSteps = [
     { key: "maturity", label: "Firm Maturity Score", done: !!maturity, icon: "maturity" as const },
@@ -43,7 +45,7 @@ const BattlePlan = ({ readChaptersCount, totalChapters, implementationScore }: P
       // stays a dynamic import rather than a module-level one — keeps them
       // out of the main bundle for every visitor who never opens this modal.
       const { buildPdf } = await import("./battlePlanPdf");
-      buildPdf({ roast, competitor, roadmap, maturity, headline, bio, visibilityScore, context, readChaptersCount, totalChapters, implementationScore });
+      buildPdf({ roast, competitor, roadmap, maturity, headline, bio, visibilityScore, context, readChaptersCount, totalChapters, implementationScore, logoDataUrl });
       toast.success("Battle Plan downloaded");
     } catch (err) {
       console.error(err);
@@ -115,19 +117,24 @@ const BattlePlan = ({ readChaptersCount, totalChapters, implementationScore }: P
                   {coreSteps.map((s) => (
                     <div
                       key={s.key}
-                      className={`flex items-center gap-3 p-3 rounded-sm border ${s.done ? "border-gold/30 bg-gold/5" : "border-border/40 bg-card"}`}
+                      className={`flex items-start gap-3 p-3 rounded-sm border ${s.done ? "border-gold/30 bg-gold/5" : "border-border/40 bg-card"}`}
                     >
                       {s.done ? (
-                        <CheckCircle2 className="w-4 h-4 text-gold-light shrink-0" />
+                        <CheckCircle2 className="w-4 h-4 text-gold-light shrink-0 mt-0.5" />
                       ) : (
-                        <Circle className="w-4 h-4 text-muted-foreground shrink-0" />
+                        <Circle className="w-4 h-4 text-muted-foreground shrink-0 mt-0.5" />
                       )}
-                      <span className={`text-sm font-body ${s.done ? "text-foreground" : "text-muted-foreground"}`}>
-                        {s.label}
-                      </span>
-                      {s.icon === "roast" && <Flame className="w-3 h-3 text-destructive/60 ml-auto" />}
-                      {s.icon === "competitor" && <Target className="w-3 h-3 text-primary/60 ml-auto" />}
-                      {s.icon === "roadmap" && <Map className="w-3 h-3 text-primary/60 ml-auto" />}
+                      <div className="min-w-0 flex-1">
+                        <span className={`text-sm font-body ${s.done ? "text-foreground" : "text-muted-foreground"}`}>
+                          {s.label}
+                        </span>
+                        {s.preview && (
+                          <p className="text-[11px] text-muted-foreground/80 font-body truncate mt-0.5">{s.preview}</p>
+                        )}
+                      </div>
+                      {s.icon === "roast" && <Flame className="w-3 h-3 text-destructive/60 shrink-0 mt-0.5" />}
+                      {s.icon === "competitor" && <Target className="w-3 h-3 text-primary/60 shrink-0 mt-0.5" />}
+                      {s.icon === "roadmap" && <Map className="w-3 h-3 text-primary/60 shrink-0 mt-0.5" />}
                     </div>
                   ))}
                   <p className="text-[10px] tracking-[0.2em] uppercase text-muted-foreground font-body mt-4 mb-1">Bonus inputs (optional)</p>

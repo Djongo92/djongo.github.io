@@ -1,8 +1,10 @@
 import { useEffect, useState } from "react";
 import { Link, useParams } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
-import { Loader2, ArrowRight, Trophy } from "lucide-react";
+import { Loader2, ArrowRight, Trophy, Download, ShieldCheck } from "lucide-react";
 import { PEER_GROUPS } from "@/lib/marketVisibilityConfig";
+import { toCsv, downloadCsv } from "@/lib/csv";
+import { setPageMeta } from "@/lib/pageMeta";
 
 interface AuditRow {
   audited_domain: string;
@@ -10,6 +12,7 @@ interface AuditRow {
   peer_group: string;
   total_score: number;
   published_at: string | null;
+  verified_at: string | null;
 }
 
 const PEER_GROUP_LABEL: Record<string, string> = Object.fromEntries(PEER_GROUPS.map((p) => [p.value, p.label]));
@@ -26,7 +29,7 @@ const Rankings = () => {
       if (!market) return;
       const { data, error } = await supabase
         .from("market_visibility_audits")
-        .select("audited_domain, display_name, peer_group, total_score, published_at")
+        .select("audited_domain, display_name, peer_group, total_score, published_at, verified_at")
         .eq("market", market)
         .eq("is_public", true)
         .order("total_score", { ascending: false });
@@ -38,7 +41,11 @@ const Rankings = () => {
   }, [market]);
 
   useEffect(() => {
-    document.title = market ? `${market[0].toUpperCase() + market.slice(1)} rankings · LegalOS` : "Rankings · LegalOS";
+    const marketLabel = market ? market[0].toUpperCase() + market.slice(1) : "Market";
+    setPageMeta({
+      title: market ? `${marketLabel} Market Visibility Ranking · LegalOS` : "Rankings · LegalOS",
+      description: `Externally-sourced, peer-group-normalized Market Visibility Scores for law firms in ${marketLabel} — PageSpeed, legal-directory presence, thought-leadership cadence, benchmarked against peers.`,
+    });
   }, [market]);
 
   const grouped: Record<string, AuditRow[]> = {};
@@ -46,6 +53,21 @@ const Rankings = () => {
     (grouped[r.peer_group] ??= []).push(r);
   });
   const peerGroupsWithData = PEER_GROUP_ORDER.filter((pg) => grouped[pg]?.length > 0);
+
+  const exportCsv = () => {
+    if (!rows || rows.length === 0) return;
+    const csv = toCsv(
+      [...rows].sort((a, b) => b.total_score - a.total_score),
+      [
+        { key: "display_name", header: "Firm" },
+        { key: "audited_domain", header: "Domain" },
+        { key: "peer_group", header: "Peer group" },
+        { key: "total_score", header: "Total score (/200)" },
+        { key: "published_at", header: "Published at" },
+      ],
+    );
+    downloadCsv(`legalos-rankings-${market}.csv`, csv);
+  };
 
   return (
     <div className="min-h-screen bg-background">
@@ -60,9 +82,21 @@ const Rankings = () => {
 
       <main className="max-w-3xl mx-auto px-6 py-12">
         <h1 className="font-display text-4xl text-foreground mb-2 leading-tight capitalize">{market} Market Visibility Ranking</h1>
-        <p className="text-xs text-muted-foreground font-body mb-10">
+        <p className="text-xs text-muted-foreground font-body mb-4">
           Externally-sourced, peer-group-normalized Market Visibility Scores — firms that opted to publish their audit.
+          <span className="inline-flex items-center gap-1 ml-1.5">
+            <ShieldCheck className="w-3 h-3 text-emerald-500" /> = domain ownership verified.
+          </span>
         </p>
+
+        {!loading && !error && peerGroupsWithData.length > 0 && (
+          <button
+            onClick={exportCsv}
+            className="inline-flex items-center gap-1.5 text-xs text-muted-foreground hover:text-foreground font-body mb-6"
+          >
+            <Download className="w-3 h-3" /> Export as CSV
+          </button>
+        )}
 
         {loading && (
           <div className="flex justify-center py-16"><Loader2 className="w-5 h-5 animate-spin text-primary" /></div>
@@ -85,7 +119,12 @@ const Rankings = () => {
                   <div className="flex items-center gap-3">
                     <span className="font-display text-lg text-muted-foreground w-6 text-right">{i + 1}</span>
                     <div>
-                      <p className="text-sm text-foreground font-body">{r.display_name || r.audited_domain}</p>
+                      <p className="text-sm text-foreground font-body flex items-center gap-1.5">
+                        {r.display_name || r.audited_domain}
+                        {r.verified_at && (
+                          <ShieldCheck className="w-3 h-3 text-emerald-500 shrink-0" aria-label="Domain verified" />
+                        )}
+                      </p>
                       {r.display_name && <p className="text-[10px] text-muted-foreground font-body">{r.audited_domain}</p>}
                     </div>
                   </div>

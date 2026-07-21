@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo, lazy, Suspense } from "react";
+import { useState, useEffect, useCallback, useMemo, lazy, Suspense } from "react";
 import SignInGate from "@/components/SignInGate";
 import TableOfContents from "@/components/TableOfContents";
 import ChapterView from "@/components/ChapterView";
@@ -18,13 +18,18 @@ import { useChecklists } from "@/hooks/useChecklists";
 import { useAnnotations } from "@/hooks/useAnnotations";
 import { useImplementation } from "@/hooks/useImplementation";
 import { useFirmContext } from "@/hooks/useFirmContext";
+import { useFirmLogo } from "@/hooks/useFirmLogo";
 import { useAmbientMode, useScrollVelocity } from "@/hooks/useAmbientMode";
+import { useAuth } from "@/hooks/useAuth";
 import { AnimatePresence, motion } from "framer-motion";
+import { Loader2 } from "lucide-react";
 import { edgeHeaders } from "@/lib/edgeAuth";
 import { getOrCreateClientId } from "@/lib/clientId";
 import { isDemoMode, disableDemoMode, enableDemoMode } from "@/lib/demoMode";
-import { getSessionMode, setSessionMode, clearSession, type SessionMode } from "@/lib/session";
+import { clearSession } from "@/lib/session";
 import { DEMO_AUDIT, DEMO_HISTORY } from "@/data/demoData";
+import ClaimDataBanner from "@/components/ClaimDataBanner";
+import { DashboardSkeleton, AnalyticsSkeleton, SettingsSkeleton } from "@/components/SectionSkeletons";
 import type { WorkshopToolId } from "@/lib/handoff";
 import type { AuditRow, HistoryRow } from "@/components/dashboard/CommandCenter";
 
@@ -39,11 +44,11 @@ const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL as string;
 type GuidebookView = "toc" | "chapter" | "progress" | "bookmarks";
 
 const Index = () => {
-  // Demo mode implies a signed-in session even if the session key predates
-  // this flag (e.g. demo mode enabled before the sign-in gate shipped) —
-  // heals forward instead of showing the gate to someone already inside.
-  const [session, setSession] = useState<SessionMode | null>(() => (isDemoMode() ? "demo" : getSessionMode()));
-  const authenticated = session !== null;
+  // Demo mode (sample data, no real account) and a real Supabase Auth
+  // session are the two independent ways in: either unlocks the app.
+  const [demoActive, setDemoActive] = useState(isDemoMode());
+  const { session: authSession, loading: authLoading, signOut: authSignOut, sessionExpired, clearSessionExpired } = useAuth();
+  const authenticated = demoActive || !!authSession;
   useAmbientMode();
   useScrollVelocity();
 
@@ -60,42 +65,50 @@ const Index = () => {
   const annotationState = useAnnotations();
   const implementationState = useImplementation();
   const { hasContext } = useFirmContext();
+  const { logo: firmLogo } = useFirmLogo();
   const [personalizeOpen, setPersonalizeOpen] = useState(false);
   const [maturityOpen, setMaturityOpen] = useState(false);
   const [competitorsOpen, setCompetitorsOpen] = useState(false);
   const [workshopHistoryOpen, setWorkshopHistoryOpen] = useState(false);
 
-  // Fetch the firm's own visibility data once authenticated — the
-  // Dashboard section renders its own empty state if there isn't any yet,
-  // so nothing here decides what the home view is; Dashboard always is.
-  // Demo mode substitutes a rich sample dataset instead of hitting the
-  // real backend at all — see src/data/demoData.ts.
-  useEffect(() => {
-    if (!authenticated) return;
+  // A real account's identity key is the same client_id column an
+  // anonymous browser has always used (see visibility-audit-claim) — once
+  // signed in, that's auth.uid() instead of the local random id.
+  const realUserId = authSession?.user?.id;
+
+  const fetchVisibility = useCallback(async () => {
     if (isDemoMode()) {
       setVisibilityData({ audits: [DEMO_AUDIT], history: DEMO_HISTORY });
       return;
     }
+    try {
+      const clientId = realUserId ?? getOrCreateClientId();
+      const resp = await fetch(`${SUPABASE_URL}/functions/v1/visibility-audit-get`, {
+        method: "POST",
+        headers: edgeHeaders("benchmark"),
+        body: JSON.stringify({ clientId, accessToken: authSession?.access_token }),
+      });
+      const data = await resp.json();
+      if (!resp.ok) return;
+      setVisibilityData(data);
+    } catch {
+      // No audit yet (or the fetch failed) — Dashboard's empty state covers this.
+    }
+  }, [realUserId, authSession?.access_token]);
+
+  // Fetch the firm's own visibility data once authenticated — the
+  // Dashboard section renders its own empty state if there isn't any yet,
+  // so nothing here decides what the home view is; Dashboard always is.
+  useEffect(() => {
+    if (!authenticated) return;
     let cancelled = false;
     (async () => {
-      try {
-        const clientId = getOrCreateClientId();
-        const resp = await fetch(`${SUPABASE_URL}/functions/v1/visibility-audit-get`, {
-          method: "POST",
-          headers: edgeHeaders("benchmark"),
-          body: JSON.stringify({ clientId }),
-        });
-        const data = await resp.json();
-        if (cancelled || !resp.ok) return;
-        setVisibilityData(data);
-      } catch {
-        // No audit yet (or the fetch failed) — Dashboard's empty state covers this.
-      }
+      if (!cancelled) await fetchVisibility();
     })();
     return () => {
       cancelled = true;
     };
-  }, [authenticated]);
+  }, [authenticated, fetchVisibility]);
 
   // Prompt for personalization once per session, after auth
   useEffect(() => {
@@ -108,20 +121,13 @@ const Index = () => {
     }
   }, [authenticated, hasContext]);
 
-  // "Demo" seeds the sample dataset and reloads (enableDemoMode already
-  // marks the session before reloading, so the gate stays dismissed).
-  // "Live" needs no reload — nothing about data loading depends on it,
-  // so it's a smooth in-app transition straight into the real flow.
-  const handleSignIn = (mode: SessionMode) => {
-    if (mode === "demo") {
-      enableDemoMode();
-      return;
-    }
-    setSessionMode("live");
-    setSession("live");
+  const handleDemo = () => {
+    enableDemoMode();
+    setDemoActive(true);
   };
 
-  const handleSignOut = () => {
+  const handleSignOut = async () => {
+    if (authSession) await authSignOut();
     clearSession();
     window.location.reload();
   };
@@ -225,8 +231,19 @@ const Index = () => {
     if (note) allAnnotations[c.id] = note;
   });
 
+  // Demo mode never needs the real session check; only wait on authLoading
+  // when demo isn't already active, so a demo walkthrough never flashes a
+  // loading screen behind the scenes.
+  if (!demoActive && authLoading) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <Loader2 className="w-5 h-5 animate-spin text-primary" />
+      </div>
+    );
+  }
+
   if (!authenticated) {
-    return <SignInGate onSignIn={handleSignIn} />;
+    return <SignInGate onDemo={handleDemo} sessionExpired={sessionExpired} onDismissSessionExpired={clearSessionExpired} />;
   }
 
   // Hide the floating advisor while actively reading a chapter to reduce clutter.
@@ -322,6 +339,7 @@ const Index = () => {
         onExitDemo={disableDemoMode}
         onSignOut={handleSignOut}
         firmName={firmName}
+        firmLogo={firmLogo}
         scoreLabel={scoreLabel}
         alerts={sidebarAlerts}
         onOpenSettings={() => goToSection("settings")}
@@ -333,7 +351,7 @@ const Index = () => {
         directoryIndexHref={directoryIndexHref}
       >
         {section === "dashboard" && (
-          <Suspense fallback={<div className="min-h-screen bg-background" />}>
+          <Suspense fallback={<DashboardSkeleton />}>
             <CommandCenter
               audits={visibilityData?.audits ?? []}
               history={visibilityData?.history ?? []}
@@ -349,18 +367,19 @@ const Index = () => {
           </Suspense>
         )}
         {section === "analytics" && (
-          <Suspense fallback={<div className="min-h-screen bg-background" />}>
+          <Suspense fallback={<AnalyticsSkeleton />}>
             <Analytics audits={visibilityData?.audits ?? []} history={visibilityData?.history ?? []} />
           </Suspense>
         )}
         {section === "workshop" && <Workshop onBack={() => goToSection("dashboard")} />}
         {section === "guidebook" && renderGuidebook()}
         {section === "settings" && (
-          <Suspense fallback={<div className="min-h-screen bg-background" />}>
+          <Suspense fallback={<SettingsSkeleton />}>
             <SettingsPage primaryAudit={primaryAudit} />
           </Suspense>
         )}
       </AppShell>
+      {authSession && <ClaimDataBanner session={authSession} onClaimed={fetchVisibility} />}
       {advisorAndOnboarding(section !== "guidebook" || guidebookView !== "chapter")}
     </>
   );

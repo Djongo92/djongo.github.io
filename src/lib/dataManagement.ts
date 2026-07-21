@@ -21,6 +21,7 @@ export const LOCAL_DATA_KEYS = [
   "guidebook_battleplan_visibility",
   "legalos_score_goals",
   "legalos_tracked_competitors",
+  "guidebook_firm_logo",
 ];
 
 export function buildExportBundle(): Record<string, unknown> {

@@ -1,6 +1,7 @@
 import { useCallback, useState } from "react";
 import { edgeHeaders } from "@/lib/edgeAuth";
 import { getOrCreateClientId } from "@/lib/clientId";
+import { useAuth } from "@/hooks/useAuth";
 
 const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL;
 
@@ -42,6 +43,7 @@ export interface RunAuditInput {
 }
 
 export const useMarketVisibility = () => {
+  const { user, session } = useAuth();
   const [loading, setLoading] = useState(false);
   const [publishing, setPublishing] = useState(false);
   const [result, setResult] = useState<AuditResult | null>(null);
@@ -51,11 +53,11 @@ export const useMarketVisibility = () => {
     setLoading(true);
     setError(null);
     try {
-      const clientId = getOrCreateClientId();
+      const clientId = user?.id ?? getOrCreateClientId();
       const resp = await fetch(`${SUPABASE_URL}/functions/v1/visibility-audit-run`, {
         method: "POST",
         headers: edgeHeaders("benchmark"),
-        body: JSON.stringify({ clientId, ...input }),
+        body: JSON.stringify({ clientId, accessToken: session?.access_token, ...input }),
       });
       const data = await resp.json();
       if (!resp.ok) {
@@ -70,33 +72,60 @@ export const useMarketVisibility = () => {
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [user?.id, session?.access_token]);
 
-  const publish = useCallback(async (auditId: string, isPublic = true) => {
+  const publish = useCallback(async (auditId: string, isPublic = true): Promise<{ ok: boolean; code?: string }> => {
     setPublishing(true);
     try {
-      const clientId = getOrCreateClientId();
+      const clientId = user?.id ?? getOrCreateClientId();
       const resp = await fetch(`${SUPABASE_URL}/functions/v1/visibility-audit-publish`, {
         method: "POST",
         headers: edgeHeaders("benchmark"),
-        body: JSON.stringify({ clientId, auditId, isPublic }),
+        body: JSON.stringify({ clientId, accessToken: session?.access_token, auditId, isPublic }),
       });
       const data = await resp.json();
-      if (!resp.ok) throw new Error(data.error || "Couldn't publish");
+      if (!resp.ok) {
+        setError(data.error || "Couldn't publish");
+        return { ok: false, code: data.code };
+      }
       setResult((r) => (r ? { ...r, isPublic: data.is_public } : r));
-      return true;
+      return { ok: true };
     } catch {
       setError("Couldn't publish the audit");
-      return false;
+      return { ok: false };
     } finally {
       setPublishing(false);
     }
-  }, []);
+  }, [user?.id, session?.access_token]);
+
+  const verifyDomain = useCallback(async (auditId: string, action: "start" | "check") => {
+    const clientId = user?.id ?? getOrCreateClientId();
+    const resp = await fetch(`${SUPABASE_URL}/functions/v1/visibility-audit-verify-domain`, {
+      method: "POST",
+      headers: edgeHeaders("benchmark"),
+      body: JSON.stringify({ clientId, accessToken: session?.access_token, auditId, action }),
+    });
+    const data = await resp.json();
+    if (!resp.ok) throw new Error(data.error || "Verification failed");
+    return data as { verified: boolean; recordType?: string; recordHost?: string; recordValue?: string };
+  }, [user?.id, session?.access_token]);
+
+  const scheduleRerun = useCallback(async (auditId: string, autoRerun: boolean, rerunFrequencyDays?: number) => {
+    const clientId = user?.id ?? getOrCreateClientId();
+    const resp = await fetch(`${SUPABASE_URL}/functions/v1/visibility-audit-schedule`, {
+      method: "POST",
+      headers: edgeHeaders("benchmark"),
+      body: JSON.stringify({ clientId, accessToken: session?.access_token, auditId, autoRerun, rerunFrequencyDays }),
+    });
+    const data = await resp.json();
+    if (!resp.ok) throw new Error(data.error || "Couldn't update the schedule");
+    return data as { auto_rerun: boolean; rerun_frequency_days: number | null };
+  }, [user?.id, session?.access_token]);
 
   const reset = useCallback(() => {
     setResult(null);
     setError(null);
   }, []);
 
-  return { loading, publishing, result, error, run, publish, reset };
+  return { loading, publishing, result, error, run, publish, verifyDomain, scheduleRerun, reset };
 };
