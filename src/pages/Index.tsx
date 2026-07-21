@@ -83,7 +83,7 @@ const Index = () => {
       const resp = await fetch(`${SUPABASE_URL}/functions/v1/visibility-audit-get`, {
         method: "POST",
         headers: edgeHeaders("benchmark"),
-        body: JSON.stringify({ clientId }),
+        body: JSON.stringify({ clientId, accessToken: authSession?.access_token }),
       });
       const data = await resp.json();
       if (!resp.ok) return;
@@ -91,7 +91,7 @@ const Index = () => {
     } catch {
       // No audit yet (or the fetch failed) — Dashboard's empty state covers this.
     }
-  }, [realUserId]);
+  }, [realUserId, authSession?.access_token]);
 
   // Fetch the firm's own visibility data once authenticated — the
   // Dashboard section renders its own empty state if there isn't any yet,

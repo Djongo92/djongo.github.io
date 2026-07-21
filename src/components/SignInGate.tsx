@@ -163,6 +163,8 @@ const SignInGate = ({ onDemo }: SignInGateProps) => {
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   placeholder="Work email"
+                  aria-label="Work email"
+                  autoComplete="email"
                   autoFocus
                   className="w-full bg-secondary/80 backdrop-blur-sm border border-border text-foreground placeholder:text-muted-foreground px-5 py-3.5 text-sm font-body tracking-wide focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary/30 transition-all rounded-lg"
                 />
@@ -172,6 +174,8 @@ const SignInGate = ({ onDemo }: SignInGateProps) => {
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                     placeholder="Password"
+                    aria-label="Password"
+                    autoComplete={mode === "signup" ? "new-password" : "current-password"}
                     className="w-full bg-secondary/80 backdrop-blur-sm border border-border text-foreground placeholder:text-muted-foreground px-5 py-3.5 text-sm font-body tracking-wide focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary/30 transition-all rounded-lg"
                   />
                 )}

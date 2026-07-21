@@ -9,6 +9,7 @@
 // still completes — nothing fabricates a total for a category that isn't
 // wired up.
 import { requireAccess, ACCESS_CORS_HEADERS } from "../_shared/access.ts";
+import { resolveClientId } from "../_shared/verifiedClientId.ts";
 import { normalizeUrl } from "../_shared/safeFetch.ts";
 import { computePerformanceScore } from "../_shared/performanceScore.ts";
 import { checkSiteHealth } from "../_shared/siteHealth.ts";
@@ -51,9 +52,9 @@ Deno.serve(async (req) => {
   if (unauthorized) return unauthorized;
 
   try {
-    const { clientId, auditedDomain, displayName, market, peerGroup, gbpListed, social: socialRaw } = await req.json();
+    const { clientId: rawClientId, accessToken, auditedDomain, displayName, market, peerGroup, gbpListed, social: socialRaw } = await req.json();
 
-    if (!clientId || typeof clientId !== "string") {
+    if (!rawClientId || typeof rawClientId !== "string") {
       return new Response(JSON.stringify({ error: "clientId is required" }), {
         status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
@@ -79,6 +80,10 @@ Deno.serve(async (req) => {
       Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!,
       { auth: { persistSession: false } },
     );
+
+    // A real access token — never a client-asserted clientId — decides
+    // identity when one is present (see _shared/verifiedClientId.ts).
+    const clientId = await resolveClientId(serviceClient, rawClientId, accessToken);
 
     // Caps how often a single client can trigger the PSI/Gemini-backed
     // audit — the benchmark password alone doesn't rate-limit anything.

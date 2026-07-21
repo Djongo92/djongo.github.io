@@ -3,6 +3,7 @@
 // is_public directly, ownership checked server-side by clientId rather than
 // trusted from the request.
 import { requireAccess, ACCESS_CORS_HEADERS } from "../_shared/access.ts";
+import { resolveClientId } from "../_shared/verifiedClientId.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
 
 const corsHeaders = ACCESS_CORS_HEADERS;
@@ -14,9 +15,9 @@ Deno.serve(async (req) => {
   if (unauthorized) return unauthorized;
 
   try {
-    const { clientId, auditId, isPublic } = await req.json();
+    const { clientId: rawClientId, accessToken, auditId, isPublic } = await req.json();
 
-    if (!clientId || typeof clientId !== "string") {
+    if (!rawClientId || typeof rawClientId !== "string") {
       return new Response(JSON.stringify({ error: "clientId is required" }), {
         status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
@@ -34,6 +35,10 @@ Deno.serve(async (req) => {
       Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!,
       { auth: { persistSession: false } },
     );
+
+    // A real access token — never a client-asserted clientId — decides
+    // identity when one is present (see _shared/verifiedClientId.ts).
+    const clientId = await resolveClientId(serviceClient, rawClientId, accessToken);
 
     const { data, error } = await serviceClient
       .from("market_visibility_audits")

@@ -1,8 +1,6 @@
-// The mocked "signed in" gate — separate from demo mode's own flag (which
-// decides *which dataset* renders). This one decides whether the sign-in
-// screen shows at all. Session persists across reloads until "Sign out" so
-// a pitch demo survives an accidental refresh; explicit sign-out is what
-// resets the front door for the next walkthrough.
+// Demo-mode bookkeeping, kept alongside demoMode.ts's own flag. Real signed-in
+// sessions are tracked by supabase-js itself (see useAuth.ts) — this file no
+// longer gates anything on its own, only demo mode still writes to it.
 const KEY = "legalos_session_mode";
 
 export type SessionMode = "demo" | "live";

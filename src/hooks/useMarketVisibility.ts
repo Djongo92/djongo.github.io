@@ -43,7 +43,7 @@ export interface RunAuditInput {
 }
 
 export const useMarketVisibility = () => {
-  const { user } = useAuth();
+  const { user, session } = useAuth();
   const [loading, setLoading] = useState(false);
   const [publishing, setPublishing] = useState(false);
   const [result, setResult] = useState<AuditResult | null>(null);
@@ -57,7 +57,7 @@ export const useMarketVisibility = () => {
       const resp = await fetch(`${SUPABASE_URL}/functions/v1/visibility-audit-run`, {
         method: "POST",
         headers: edgeHeaders("benchmark"),
-        body: JSON.stringify({ clientId, ...input }),
+        body: JSON.stringify({ clientId, accessToken: session?.access_token, ...input }),
       });
       const data = await resp.json();
       if (!resp.ok) {
@@ -72,7 +72,7 @@ export const useMarketVisibility = () => {
     } finally {
       setLoading(false);
     }
-  }, [user?.id]);
+  }, [user?.id, session?.access_token]);
 
   const publish = useCallback(async (auditId: string, isPublic = true) => {
     setPublishing(true);
@@ -81,7 +81,7 @@ export const useMarketVisibility = () => {
       const resp = await fetch(`${SUPABASE_URL}/functions/v1/visibility-audit-publish`, {
         method: "POST",
         headers: edgeHeaders("benchmark"),
-        body: JSON.stringify({ clientId, auditId, isPublic }),
+        body: JSON.stringify({ clientId, accessToken: session?.access_token, auditId, isPublic }),
       });
       const data = await resp.json();
       if (!resp.ok) throw new Error(data.error || "Couldn't publish");
@@ -93,7 +93,7 @@ export const useMarketVisibility = () => {
     } finally {
       setPublishing(false);
     }
-  }, [user?.id]);
+  }, [user?.id, session?.access_token]);
 
   const reset = useCallback(() => {
     setResult(null);
