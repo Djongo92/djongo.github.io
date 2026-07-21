@@ -110,10 +110,22 @@ export const useMarketVisibility = () => {
     return data as { verified: boolean; recordType?: string; recordHost?: string; recordValue?: string };
   }, [user?.id, session?.access_token]);
 
+  const scheduleRerun = useCallback(async (auditId: string, autoRerun: boolean, rerunFrequencyDays?: number) => {
+    const clientId = user?.id ?? getOrCreateClientId();
+    const resp = await fetch(`${SUPABASE_URL}/functions/v1/visibility-audit-schedule`, {
+      method: "POST",
+      headers: edgeHeaders("benchmark"),
+      body: JSON.stringify({ clientId, accessToken: session?.access_token, auditId, autoRerun, rerunFrequencyDays }),
+    });
+    const data = await resp.json();
+    if (!resp.ok) throw new Error(data.error || "Couldn't update the schedule");
+    return data as { auto_rerun: boolean; rerun_frequency_days: number | null };
+  }, [user?.id, session?.access_token]);
+
   const reset = useCallback(() => {
     setResult(null);
     setError(null);
   }, []);
 
-  return { loading, publishing, result, error, run, publish, verifyDomain, reset };
+  return { loading, publishing, result, error, run, publish, verifyDomain, scheduleRerun, reset };
 };

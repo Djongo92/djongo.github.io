@@ -90,6 +90,12 @@ verify_jwt = false
 [functions.visibility-audit-verify-domain]
 verify_jwt = false
 
+[functions.visibility-audit-schedule]
+verify_jwt = false
+
+[functions.visibility-audit-rerun-due]
+verify_jwt = false
+
 [functions.visibility-audit-narrative]
 verify_jwt = false
 

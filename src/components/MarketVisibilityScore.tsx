@@ -32,12 +32,15 @@ const MarketVisibilityScore = () => {
   const [posts30d, setPosts30d] = useState("");
   const [engagementRate, setEngagementRate] = useState("");
   const [platforms, setPlatforms] = useState({ linkedin: false, instagram: false, twitter: false, facebook: false });
-  const { loading, publishing, result, error, run, publish, verifyDomain, reset } = useMarketVisibility();
+  const { loading, publishing, result, error, run, publish, verifyDomain, scheduleRerun, reset } = useMarketVisibility();
   const [confirmingPublish, setConfirmingPublish] = useState(false);
   const [step, setStep] = useState<1 | 2 | 3>(1);
   const [verifyRecord, setVerifyRecord] = useState<{ recordHost: string; recordValue: string } | null>(null);
   const [checkingVerification, setCheckingVerification] = useState(false);
   const [verifyError, setVerifyError] = useState<string | null>(null);
+  const [autoRerun, setAutoRerun] = useState(false);
+  const [rerunFrequencyDays, setRerunFrequencyDays] = useState(30);
+  const [savingSchedule, setSavingSchedule] = useState(false);
 
   const submit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -123,6 +126,20 @@ const MarketVisibilityScore = () => {
     else toast.error("Couldn't unpublish");
   };
 
+  const handleToggleAutoRerun = async (next: boolean) => {
+    if (!result) return;
+    setSavingSchedule(true);
+    try {
+      await scheduleRerun(result.id, next, next ? rerunFrequencyDays : undefined);
+      setAutoRerun(next);
+      toast.success(next ? `Will re-run automatically every ${rerunFrequencyDays} days` : "Automatic re-run turned off");
+    } catch {
+      toast.error("Couldn't update the re-run schedule");
+    } finally {
+      setSavingSchedule(false);
+    }
+  };
+
   const startOver = () => {
     reset();
     setAuditedDomain("");
@@ -131,6 +148,7 @@ const MarketVisibilityScore = () => {
     setStep(1);
     setVerifyRecord(null);
     setVerifyError(null);
+    setAutoRerun(false);
   };
 
   return (
@@ -504,6 +522,36 @@ const MarketVisibilityScore = () => {
                         <Share2 className="w-4 h-4" /> Publish to the public ranking
                       </button>
                     )}
+
+                    <div className="mt-4 pt-4 border-t border-border/40 flex items-center justify-between gap-3">
+                      <label className="flex items-center gap-2 text-xs font-body text-muted-foreground cursor-pointer">
+                        <input
+                          type="checkbox"
+                          checked={autoRerun}
+                          onChange={(e) => handleToggleAutoRerun(e.target.checked)}
+                          disabled={savingSchedule}
+                          className="accent-emerald-600"
+                        />
+                        Re-run automatically
+                      </label>
+                      {autoRerun && (
+                        <select
+                          value={rerunFrequencyDays}
+                          onChange={(e) => {
+                            const days = Number(e.target.value);
+                            setRerunFrequencyDays(days);
+                            if (result) scheduleRerun(result.id, true, days).catch(() => toast.error("Couldn't update the re-run schedule"));
+                          }}
+                          disabled={savingSchedule}
+                          className="bg-background border border-border rounded-sm px-2 py-1 text-xs font-body focus:outline-none focus:border-emerald-500/50"
+                        >
+                          <option value={7}>Every 7 days</option>
+                          <option value={14}>Every 14 days</option>
+                          <option value={30}>Every 30 days</option>
+                          <option value={90}>Every 90 days</option>
+                        </select>
+                      )}
+                    </div>
 
                     <button onClick={startOver} className="mt-4 text-xs text-emerald-600 hover:text-emerald-500 font-body block mx-auto">
                       ← Run another audit
