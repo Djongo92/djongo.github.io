@@ -18,7 +18,7 @@ import { useAnnotations } from "@/hooks/useAnnotations";
 import { useImplementation } from "@/hooks/useImplementation";
 import { useFirmContext } from "@/hooks/useFirmContext";
 import { useFirmLogo } from "@/hooks/useFirmLogo";
-import { useAmbientMode, useScrollVelocity } from "@/hooks/useAmbientMode";
+import { useScrollVelocity } from "@/hooks/useAmbientMode";
 import { useAuth } from "@/hooks/useAuth";
 import { AnimatePresence, motion } from "framer-motion";
 import { Loader2 } from "lucide-react";
@@ -52,7 +52,6 @@ const Index = () => {
   const [demoActive, setDemoActive] = useState(isDemoMode());
   const { session: authSession, loading: authLoading, signOut: authSignOut, sessionExpired, clearSessionExpired } = useAuth();
   const authenticated = demoActive || !!authSession;
-  useAmbientMode();
   useScrollVelocity();
 
   // Dashboard is the app's home — every section lives inside the same

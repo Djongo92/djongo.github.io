@@ -185,7 +185,7 @@ const Workshop = ({ onBack }: Props) => {
                       {t.icon}
                       <span className="text-[10px] uppercase tracking-[0.3em] font-body">{t.tag}</span>
                     </div>
-                    <ArrowRight className="w-4 h-4 text-muted-foreground/40 group-hover:text-primary group-hover:translate-x-0.5 transition-all" />
+                    <ArrowRight className="w-4 h-4 text-muted-foreground group-hover:text-primary group-hover:translate-x-0.5 transition-all" />
                   </div>
                   <h3 className="font-display text-xl text-foreground mb-1.5">{t.title}</h3>
                   <p className="text-xs text-muted-foreground font-body leading-relaxed">{t.blurb}</p>
@@ -245,7 +245,7 @@ const SwipeFileLibrary = () => {
           >
             <div className="flex items-center gap-2 mb-2">
               <span className="text-[10px] uppercase tracking-wider text-primary font-body">{item.category}</span>
-              <span className="text-muted-foreground/40">·</span>
+              <span className="text-muted-foreground/60">·</span>
               <span className="text-[10px] text-muted-foreground font-body">{item.practiceArea}</span>
             </div>
             <h3 className="font-display text-base text-foreground mb-2">{item.title}</h3>

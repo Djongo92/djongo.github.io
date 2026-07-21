@@ -141,7 +141,7 @@ const SearchPalette = ({ onSelectChapter }: SearchPaletteProps) => {
                           onClick={() => handleSelect(r.chapterId)}
                           className="w-full flex items-start gap-3 px-4 py-3 hover:bg-secondary/50 transition-colors text-left group"
                         >
-                          <span className="text-xs text-primary/60 font-display mt-0.5 min-w-[1.5rem] text-right">
+                          <span className="text-xs text-primary font-display mt-0.5 min-w-[1.5rem] text-right">
                             {String(r.chapterNumber).padStart(2, "0")}
                           </span>
                           <div className="flex-1 min-w-0">

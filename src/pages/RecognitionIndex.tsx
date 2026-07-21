@@ -252,7 +252,7 @@ const RecognitionIndex = () => {
             </Link>
           </div>
         </footer>
-        <p className="mt-6 text-[10px] tracking-[0.2em] uppercase text-muted-foreground/60 font-body text-center">
+        <p className="mt-6 text-[10px] tracking-[0.2em] uppercase text-muted-foreground font-body text-center">
           For Authorized Use Only
         </p>
       </main>

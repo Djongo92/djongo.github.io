@@ -94,7 +94,7 @@ const ChapterQuiz = ({ chapter }: { chapter: Chapter }) => {
               {questions.map((q, qi) => (
                 <div key={qi}>
                   <p className="font-body text-sm text-foreground mb-3">
-                    <span className="text-primary/60 mr-2">{qi + 1}.</span>{q.question}
+                    <span className="text-primary mr-2">{qi + 1}.</span>{q.question}
                   </p>
                   <div className="space-y-1.5">
                     {q.options.map((opt, oi) => {

@@ -69,7 +69,7 @@ const ChapterCover = ({ chapter }: Props) => {
         initial={{ opacity: 0, y: 8 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.7, duration: 0.6, ease: "easeOut" }}
-        className="text-[10px] tracking-[0.5em] uppercase text-primary/80 font-body mb-6"
+        className="text-[10px] tracking-[0.5em] uppercase text-primary font-body mb-6"
       >
         Chapter {String(chapter.number).padStart(2, "0")}
       </motion.div>
@@ -90,7 +90,7 @@ const ChapterCover = ({ chapter }: Props) => {
           initial={{ opacity: 0, y: 12 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 1.5, duration: 0.7 }}
-          className="font-display italic text-primary/80 text-lg md:text-xl text-center mt-5 max-w-2xl px-8"
+          className="font-display italic text-primary text-lg md:text-xl text-center mt-5 max-w-2xl px-8"
         >
           {chapter.subtitle}
         </motion.p>
@@ -100,7 +100,7 @@ const ChapterCover = ({ chapter }: Props) => {
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ delay: 2.0, duration: 0.5 }}
-        className="absolute bottom-10 text-[9px] tracking-[0.4em] uppercase text-muted-foreground/60 font-body"
+        className="absolute bottom-10 text-[9px] tracking-[0.4em] uppercase text-muted-foreground font-body"
       >
         Tap to skip
       </motion.div>

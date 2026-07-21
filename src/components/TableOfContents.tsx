@@ -206,7 +206,7 @@ const TableOfContents = ({
                   className="group p-5 bg-card border border-border/50 rounded-sm hover:border-primary/30 hover:shadow-lg hover:shadow-primary/5 hover:-translate-y-0.5 transition-all text-left"
                 >
                   <div className="flex items-center gap-3 mb-3">
-                    <div className="p-2 rounded-sm bg-primary/5 text-primary/60 group-hover:bg-primary/10 group-hover:text-primary transition-colors">
+                    <div className="p-2 rounded-sm bg-primary/5 text-primary group-hover:bg-primary/10 transition-colors">
                       <ChapterIcon chapterId={ch.id} className="w-4 h-4" />
                     </div>
                     <span className="text-[10px] text-muted-foreground font-body">Ch. {String(ch.number).padStart(2, "0")}</span>
@@ -217,7 +217,7 @@ const TableOfContents = ({
                   <p className="text-xs text-muted-foreground font-body line-clamp-2">
                     {ch.hook || ch.subtitle}
                   </p>
-                  <div className="flex items-center gap-1.5 mt-3 text-muted-foreground/50">
+                  <div className="flex items-center gap-1.5 mt-3 text-muted-foreground">
                     <Clock className="w-3 h-3" />
                     <span className="text-[10px] font-body">{getReadingTime(ch)} min</span>
                   </div>
@@ -256,12 +256,12 @@ const TableOfContents = ({
                   className="w-full p-5 bg-card border border-border/50 rounded-sm hover:border-primary/30 hover:shadow-lg hover:shadow-primary/5 hover:-translate-y-0.5 transition-all text-left"
                 >
                   <div className="flex items-start gap-4">
-                    <div className="p-2.5 rounded-sm bg-primary/5 text-primary/60 group-hover:bg-primary/10 group-hover:text-primary transition-colors shrink-0">
+                    <div className="p-2.5 rounded-sm bg-primary/5 text-primary group-hover:bg-primary/10 transition-colors shrink-0">
                       <ChapterIcon chapterId={chapter.id} className="w-5 h-5" />
                     </div>
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-2 mb-1">
-                        <span className="text-[10px] text-primary/50 font-body">{String(chapter.number).padStart(2, "0")}</span>
+                        <span className="text-[10px] text-primary font-body">{String(chapter.number).padStart(2, "0")}</span>
                         {isRead && <CheckCircle2 className="w-3.5 h-3.5 text-primary" />}
                         {isBookmarked && <Bookmark className="w-3 h-3 fill-primary text-primary" />}
                       </div>
@@ -271,12 +271,12 @@ const TableOfContents = ({
                       <p className="text-xs text-muted-foreground font-body line-clamp-1">
                         {chapter.hook || chapter.subtitle}
                       </p>
-                      <div className="flex items-center gap-2 mt-2 text-muted-foreground/50">
+                      <div className="flex items-center gap-2 mt-2 text-muted-foreground">
                         <Clock className="w-3 h-3" />
                         <span className="text-[10px] font-body">{getReadingTime(chapter)} min</span>
                         {chapter.actionItems && chapter.actionItems.length > 0 && (
                           <>
-                            <span className="text-muted-foreground/30">·</span>
+                            <span className="text-muted-foreground/60">·</span>
                             <span className="text-[10px] font-body">{chapter.actionItems.length} actions</span>
                           </>
                         )}

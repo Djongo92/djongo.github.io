@@ -258,7 +258,7 @@ const CompetitorAnalysis = () => {
                       <div className="space-y-3">
                         {result.competitors.map((c, i) => (
                           <div key={i} className="border border-border/40 rounded-sm p-4">
-                            <p className="text-[11px] text-primary/80 font-body mb-1">{c.url}</p>
+                            <p className="text-[11px] text-primary font-body mb-1">{c.url}</p>
                             <p className="text-sm text-foreground font-display italic mb-3">{c.positioning}</p>
                             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
                               <div>
@@ -308,7 +308,7 @@ const CompetitorAnalysis = () => {
                       <div className="space-y-2">
                         {result.recommendedMoves.map((m, i) => (
                           <div key={i} className="flex items-start gap-3 p-3 border border-border/40 rounded-sm">
-                            <span className="font-display text-lg text-primary/50 min-w-[1.5rem]">{i + 1}</span>
+                            <span className="font-display text-lg text-primary min-w-[1.5rem]">{i + 1}</span>
                             <div className="flex-1">
                               <p className="text-sm font-body text-foreground mb-1.5">{m.move}</p>
                               <div className="flex gap-2">

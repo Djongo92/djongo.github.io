@@ -48,14 +48,9 @@ const GoldParticles = () => {
     const draw = () => {
       ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-      // Ambient + scroll-velocity damping: when scrolling slowly or in ambient
-      // mode, particles drift slower for a calmer feel.
+      // Scroll-velocity damping: particles drift slower while scrolling slowly.
       const v = (window as unknown as { __scrollV?: number }).__scrollV ?? 0;
-      const ambient = document.documentElement.classList.contains("ambient");
-      // damping multiplier in [0.35, 1]
-      const damp = ambient
-        ? Math.min(1, 0.45 + v * 1.5)
-        : Math.min(1, 0.7 + v * 1.5);
+      const damp = Math.min(1, 0.7 + v * 1.5);
 
       particles.forEach((p) => {
         p.x += p.vx * damp;

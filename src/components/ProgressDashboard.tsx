@@ -183,7 +183,7 @@ const ProgressDashboard = ({
                 onClick={() => onSelectChapter(ch.id)}
                 className="w-full flex items-center gap-4 p-4 bg-card border border-border/30 rounded-sm hover:border-primary/30 transition-colors text-left"
               >
-                <span className="font-display text-lg text-primary/40 min-w-[2rem] text-right">
+                <span className="font-display text-lg text-primary min-w-[2rem] text-right">
                   {String(ch.number).padStart(2, "0")}
                 </span>
                 <div className="flex-1 min-w-0">

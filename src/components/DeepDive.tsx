@@ -18,7 +18,7 @@ const DeepDive = ({ title, content }: DeepDiveProps) => {
       >
         <span className="font-display text-base text-foreground flex items-center gap-2">
           <span className="text-[10px] tracking-[0.2em] uppercase text-primary font-body font-medium">Deep Dive</span>
-          <span className="text-muted-foreground/30">·</span>
+          <span className="text-muted-foreground/60">·</span>
           {title}
         </span>
         <motion.div animate={{ rotate: open ? 180 : 0 }} transition={{ duration: 0.2 }}>

@@ -7,6 +7,7 @@ import { chapters } from "@/data/chapters";
 import { guidebookSummary } from "@/lib/chapterToText";
 import { useFirmContext } from "@/hooks/useFirmContext";
 import { toast } from "sonner";
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 
 interface Msg { role: "user" | "assistant"; content: string }
 
@@ -108,22 +109,26 @@ const GlobalAdvisor = ({ readChapters, bookmarks, implementedCount, totalActions
 
   return (
     <>
-      <motion.button
-        initial={{ scale: 0, opacity: 0 }}
-        animate={{ scale: 1, opacity: 1 }}
-        transition={{ delay: 1, type: "spring", stiffness: 200 }}
-        whileHover={{ scale: 1.05 }}
-        whileTap={{ scale: 0.95 }}
-        onClick={() => setOpen(true)}
-        className="fixed bottom-20 md:bottom-6 right-4 md:right-6 z-40 group flex items-center gap-2 bg-gradient-to-br from-primary to-gold-light text-primary-foreground pl-3 pr-4 py-2.5 rounded-full shadow-2xl shadow-primary/30 hover:shadow-primary/50 transition-shadow print:hidden"
-        aria-label="Open AI Strategy Advisor"
-      >
-        <div className="relative">
-          <Sparkles className="w-4 h-4" />
-          <span className="absolute -top-1 -right-1 w-2 h-2 bg-card rounded-full border border-primary animate-pulse" />
-        </div>
-        <span className="font-body text-xs font-medium hidden sm:inline">Strategy Advisor</span>
-      </motion.button>
+      <Tooltip delayDuration={300}>
+        <TooltipTrigger asChild>
+          <motion.button
+            initial={{ scale: 0, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            transition={{ delay: 1, type: "spring", stiffness: 200 }}
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
+            onClick={() => setOpen(true)}
+            className="fixed bottom-20 md:bottom-6 right-4 md:right-6 z-40 flex items-center justify-center w-12 h-12 rounded-full bg-gradient-to-br from-primary to-gold-light text-primary-foreground shadow-2xl shadow-primary/30 hover:shadow-primary/50 transition-shadow print:hidden"
+            aria-label="Open AI Strategy Advisor"
+          >
+            <div className="relative">
+              <Sparkles className="w-5 h-5" />
+              <span className="absolute -top-1 -right-1 w-2 h-2 bg-card rounded-full border border-primary animate-pulse" />
+            </div>
+          </motion.button>
+        </TooltipTrigger>
+        <TooltipContent side="left">Strategy Advisor</TooltipContent>
+      </Tooltip>
 
       <AnimatePresence>
         {open && (

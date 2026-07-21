@@ -43,7 +43,7 @@ const NAV_ITEMS: { id: Section; label: string; icon: typeof LayoutDashboard }[] 
 ];
 
 const NavGroupLabel = ({ children }: { children: ReactNode }) => (
-  <p className="px-3 pt-5 pb-1.5 text-[10px] tracking-[0.15em] uppercase text-muted-foreground/50 font-body">
+  <p className="px-3 pt-5 pb-1.5 text-[10px] tracking-[0.15em] uppercase text-muted-foreground font-body">
     {children}
   </p>
 );
@@ -353,7 +353,7 @@ const AppShell = ({
 
               {hasTools && (
                 <>
-                  <p className="px-5 pt-2 pb-1.5 text-[10px] tracking-[0.15em] uppercase text-muted-foreground/50 font-body">Tools</p>
+                  <p className="px-5 pt-2 pb-1.5 text-[10px] tracking-[0.15em] uppercase text-muted-foreground font-body">Tools</p>
                   <div className="px-3 pb-2">
                     {onOpenMaturity && (
                       <button onClick={() => { onOpenMaturity(); closeMore(); }} className="w-full flex items-center gap-3 px-3 py-3 rounded-sm text-sm font-body text-foreground hover:bg-secondary/50 transition-colors">
@@ -389,7 +389,7 @@ const AppShell = ({
                 </>
               )}
 
-              <p className="px-5 pt-2 pb-1.5 text-[10px] tracking-[0.15em] uppercase text-muted-foreground/50 font-body">Account</p>
+              <p className="px-5 pt-2 pb-1.5 text-[10px] tracking-[0.15em] uppercase text-muted-foreground font-body">Account</p>
               <div className="px-3 pb-6">
                 {onOpenSettings && (
                   <button onClick={() => { onOpenSettings(); closeMore(); }} className="w-full flex items-center gap-3 px-3 py-3 rounded-sm text-sm font-body text-foreground hover:bg-secondary/50 transition-colors">

@@ -193,7 +193,7 @@ const RoadmapGenerator = ({ readChapters, bookmarks, isImplemented, onRequestPer
                           transition={{ delay: i * 0.1 }}
                         >
                           <div className="flex items-baseline gap-3 mb-3">
-                            <span className="font-display text-3xl text-primary/40 font-semibold">
+                            <span className="font-display text-3xl text-primary font-semibold">
                               {String(i + 1).padStart(2, "0")}
                             </span>
                             <div>
@@ -209,7 +209,7 @@ const RoadmapGenerator = ({ readChapters, bookmarks, isImplemented, onRequestPer
                                   <span className="font-display text-sm text-foreground font-medium">{a.title}</span>
                                 </div>
                                 <p className="text-xs text-muted-foreground font-body leading-relaxed pl-5">
-                                  {a.why} <span className="text-primary/60">· {a.chapterRef}</span>
+                                  {a.why} <span className="text-primary">· {a.chapterRef}</span>
                                 </p>
                               </li>
                             ))}

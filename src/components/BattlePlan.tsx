@@ -129,7 +129,7 @@ const BattlePlan = ({ readChaptersCount, totalChapters, implementationScore }: P
                           {s.label}
                         </span>
                         {s.preview && (
-                          <p className="text-[11px] text-muted-foreground/80 font-body truncate mt-0.5">{s.preview}</p>
+                          <p className="text-[11px] text-muted-foreground font-body truncate mt-0.5">{s.preview}</p>
                         )}
                       </div>
                       {s.icon === "roast" && <Flame className="w-3 h-3 text-destructive/60 shrink-0 mt-0.5" />}

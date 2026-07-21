@@ -199,7 +199,7 @@ const AskTheBook = ({ onSelectChapter }: Props) => {
                               onClick={() => { onSelectChapter?.(c.chapterId); setOpen(false); }}
                               className="w-full text-left flex items-start gap-3 p-3 border border-border/40 rounded-sm hover:border-primary/40 hover:bg-primary/5 transition-colors group"
                             >
-                              <span className="font-display text-lg text-primary/40 min-w-[2rem] text-right">
+                              <span className="font-display text-lg text-primary min-w-[2rem] text-right">
                                 {String(c.chapterNumber).padStart(2, "0")}
                               </span>
                               <div className="flex-1 min-w-0">
