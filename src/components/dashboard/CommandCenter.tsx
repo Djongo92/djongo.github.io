@@ -14,17 +14,13 @@ import { useWorkshopHistory } from "@/hooks/useWorkshopHistory";
 import { useBattlePlanCache } from "@/hooks/useBattlePlanCache";
 import { useStrategyBrief } from "@/hooks/useStrategyBrief";
 import { PEER_GROUPS } from "@/lib/marketVisibilityConfig";
+import { CATEGORY_META, CATEGORY_ORDER } from "@/lib/visibilityCategories";
+import { CategoryExplainer, ProvenanceBadge } from "@/components/visibility/Explainers";
 import MarketVisibilityScore from "@/components/MarketVisibilityScore";
 import type { WorkshopToolId } from "@/lib/handoff";
 import { enableDemoMode } from "@/lib/demoMode";
 
-const CATEGORY_LABELS: Record<string, { label: string; max: number }> = {
-  performance: { label: "Performance", max: 20 },
-  social: { label: "Social Media", max: 20 },
-  seoAuthority: { label: "SEO & Authority", max: 60 },
-  thoughtLeadership: { label: "Thought Leadership", max: 45 },
-  reputation: { label: "Reputation", max: 55 },
-};
+const CATEGORY_LABELS = CATEGORY_META;
 
 const TONE_STYLES: Record<string, { border: string; text: string; icon: typeof TrendingUp }> = {
   warning: { border: "border-amber-500/30", text: "text-amber-500", icon: AlertTriangle },
@@ -45,6 +41,59 @@ const QUICK_ACTIONS: { toolId: WorkshopToolId; label: string; icon: (p: { size?:
   { toolId: "calendar", label: "Plan the calendar", icon: CalendarIcon },
 ];
 
+export interface ThoughtLeadershipItem {
+  title: string;
+  date: string;
+  type: "blog" | "news" | "other";
+  hasNamedByline: boolean;
+}
+
+export interface DirectorySubScore {
+  points: number;
+  count: number;
+  avgRank: number | null;
+}
+
+export interface SiteHealthRaw {
+  hasContactForm: boolean;
+  copyrightYear: number | null;
+  copyrightStale: boolean;
+  brokenLinks: string[];
+  checkedLinks: number;
+}
+
+export interface PerformanceRaw {
+  desktop?: { performance: number; accessibility: number; seo: number };
+  mobile?: { performance: number; accessibility: number; seo: number };
+  perfAvg?: number;
+  accessAvg?: number;
+  seoAvg?: number;
+}
+
+export interface SocialRaw {
+  followers?: number;
+  posts30d?: number;
+  engagementRate?: number | null;
+  platforms?: { linkedin: boolean; instagram: boolean; twitter: boolean; facebook: boolean };
+  platformCount?: number;
+}
+
+export interface ThoughtLeadershipRaw {
+  postsCount?: number;
+  newsCount?: number;
+  bylinePct?: number;
+  items?: ThoughtLeadershipItem[];
+}
+
+export interface ReputationRaw {
+  gbpListed?: boolean;
+  matchedFirmName?: string;
+  matchedFirmDomain?: string | null;
+  chambers?: DirectorySubScore;
+  legal500?: DirectorySubScore;
+  iflr1000?: DirectorySubScore;
+}
+
 export interface AuditRow {
   id: string;
   audited_domain: string;
@@ -59,13 +108,12 @@ export interface AuditRow {
   total_score: number;
   provenance: Record<string, string>;
   raw_metrics?: {
-    siteHealth?: {
-      hasContactForm: boolean;
-      copyrightYear: number | null;
-      copyrightStale: boolean;
-      brokenLinks: string[];
-      checkedLinks: number;
-    } | null;
+    siteHealth?: SiteHealthRaw | null;
+    performance?: PerformanceRaw;
+    social?: SocialRaw;
+    seoAuthority?: Record<string, unknown>;
+    thoughtLeadership?: ThoughtLeadershipRaw;
+    reputation?: ReputationRaw;
   };
   updated_at: string;
 }
@@ -74,6 +122,11 @@ export interface HistoryRow {
   audited_domain: string;
   market: string;
   total_score: number;
+  performance_score?: number;
+  social_score?: number;
+  seo_authority_score?: number;
+  thought_leadership_score?: number;
+  reputation_score?: number;
   recorded_at: string;
 }
 
@@ -87,6 +140,7 @@ interface CommandCenterProps {
   onOpenWorkshopTool: (toolId: WorkshopToolId) => void;
   onOpenGuidebook: () => void;
   onOpenMaturity: () => void;
+  onOpenAnalytics: () => void;
 }
 
 const timeAgo = (ts: number): string => {
@@ -100,7 +154,7 @@ const timeAgo = (ts: number): string => {
 
 const CommandCenter = ({
   audits, history, readChaptersCount, totalChapters, implementationScore,
-  onOpenWorkshop, onOpenWorkshopTool, onOpenGuidebook, onOpenMaturity,
+  onOpenWorkshop, onOpenWorkshopTool, onOpenGuidebook, onOpenMaturity, onOpenAnalytics,
 }: CommandCenterProps) => {
   const [rerunOpen, setRerunOpen] = useState(false);
   const primary = audits[0];
@@ -303,7 +357,8 @@ const CommandCenter = ({
           )}
 
           <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-            {Object.entries(categories).map(([key, cat], i) => {
+            {CATEGORY_ORDER.map((key, i) => {
+              const cat = categories[key];
               const meta = CATEGORY_LABELS[key];
               const pct = meta ? Math.min(100, (cat.score / meta.max) * 100) : 0;
               return (
@@ -314,21 +369,32 @@ const CommandCenter = ({
                   transition={{ delay: i * 0.06 }}
                   className="bg-card border border-border/50 rounded-sm p-5"
                 >
-                  <p className="text-xs font-body text-foreground mb-2">{meta?.label ?? key}</p>
+                  <div className="flex items-center gap-1.5 mb-2">
+                    <p className="text-xs font-body text-foreground">{meta?.label ?? key}</p>
+                    <CategoryExplainer categoryKey={key} />
+                  </div>
                   <div className="font-display text-2xl text-foreground font-semibold mb-2">
                     {Math.round(cat.score * 10) / 10}
                     <span className="text-sm text-muted-foreground"> / {meta?.max ?? "—"}</span>
                   </div>
-                  <div className="w-full h-1.5 bg-muted rounded-full overflow-hidden">
+                  <div className="w-full h-1.5 bg-muted rounded-full overflow-hidden mb-2">
                     <div
                       className={`h-full rounded-full ${cat.provenance === "missing" ? "bg-muted-foreground/30" : "bg-emerald-500"}`}
                       style={{ width: `${pct}%` }}
                     />
                   </div>
+                  <ProvenanceBadge provenance={cat.provenance} />
                 </motion.div>
               );
             })}
           </div>
+
+          <button
+            onClick={onOpenAnalytics}
+            className="text-xs text-muted-foreground hover:text-primary font-body inline-flex items-center gap-1.5 -mt-2"
+          >
+            Explore the full breakdown in Analytics <ArrowRight className="w-3 h-3" />
+          </button>
 
           {/* Key Insights */}
           <div>
