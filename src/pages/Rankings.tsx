@@ -100,9 +100,16 @@ const Rankings = () => {
           <p className="text-[10px] tracking-[0.2em] uppercase text-muted-foreground font-body">
             Live ranking · updates as firms publish
           </p>
-          <Link to="/" className="text-xs text-primary hover:text-gold-light font-body inline-flex items-center gap-1">
-            Run your own <ArrowRight className="w-3 h-3" />
-          </Link>
+          <div className="flex items-center gap-4">
+            {market && (
+              <Link to={`/directory/${market}`} className="text-xs text-muted-foreground hover:text-foreground font-body inline-flex items-center gap-1">
+                Directory Standing Index <ArrowRight className="w-3 h-3" />
+              </Link>
+            )}
+            <Link to="/" className="text-xs text-primary hover:text-gold-light font-body inline-flex items-center gap-1">
+              Run your own <ArrowRight className="w-3 h-3" />
+            </Link>
+          </div>
         </footer>
         <p className="mt-6 text-[10px] tracking-[0.2em] uppercase text-muted-foreground/60 font-body text-center">
           For Authorized Use Only

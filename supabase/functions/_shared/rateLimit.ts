@@ -101,6 +101,25 @@ export async function checkRateLimit(
   return checkRateLimitGeneric(serviceClient, { table: "teaser_rate_limit", keyColumn: "ip_hash", key: ipHash, limit, windowMs });
 }
 
+const DEFAULT_DIRECTORY_INDEX_LIMIT = 60;
+const DEFAULT_DIRECTORY_INDEX_WINDOW_MS = 10 * 60 * 1000; // 10min
+
+/**
+ * Rate-limits the public Directory Standing Index — much more generous than
+ * the teaser's bucket since this endpoint makes no external paid API calls,
+ * just a DB read and arithmetic, and is meant to be freely shared/re-visited.
+ */
+export async function checkDirectoryIndexRateLimit(
+  // deno-lint-ignore no-explicit-any
+  serviceClient: SupabaseClient<any, any, any>,
+  ip: string,
+  limit = DEFAULT_DIRECTORY_INDEX_LIMIT,
+  windowMs = DEFAULT_DIRECTORY_INDEX_WINDOW_MS,
+): Promise<RateLimitResult> {
+  const ipHash = await hashIp(ip);
+  return checkRateLimitGeneric(serviceClient, { table: "directory_index_rate_limit", keyColumn: "ip_hash", key: ipHash, limit, windowMs });
+}
+
 const DEFAULT_BENCHMARK_LIMIT = 20;
 const DEFAULT_BENCHMARK_WINDOW_MS = 24 * 60 * 60 * 1000; // 24h
 

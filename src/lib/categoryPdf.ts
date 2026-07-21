@@ -4,6 +4,7 @@
 // jsPDF is dynamically imported so it's never in Analytics' initial chunk.
 import type { CategoryKey, CategoryMeta } from "@/lib/visibilityCategories";
 import type { PerformanceRaw, SocialRaw, ThoughtLeadershipRaw, ReputationRaw } from "@/components/dashboard/CommandCenter";
+import { practiceAreaLabel } from "@/lib/practiceAreas";
 
 interface ExportParams {
   firmName: string;
@@ -57,6 +58,21 @@ function buildRows(categoryKey: CategoryKey, raw: ExportParams["raw"]): string[]
       if (r.chambers) rows.push(`Chambers: ${Math.round(r.chambers.points * 10) / 10} pts · ${r.chambers.count} ranked tables`);
       if (r.legal500) rows.push(`Legal 500: ${Math.round(r.legal500.points * 10) / 10} pts · ${r.legal500.count} ranked tables`);
       if (r.iflr1000) rows.push(`IFLR1000: ${Math.round(r.iflr1000.points * 10) / 10} pts · ${r.iflr1000.count} ranked tables`);
+      const codes = Array.from(new Set([
+        ...Object.keys(r.chambersRankedTables ?? {}),
+        ...Object.keys(r.legal500RankedTables ?? {}),
+        ...Object.keys(r.iflr1000RankedTables ?? {}),
+      ])).sort();
+      if (codes.length > 0) {
+        rows.push("By practice area:");
+        codes.forEach((code) => {
+          const parts: string[] = [];
+          if (r.chambersRankedTables?.[code]) parts.push(`Chambers Band ${r.chambersRankedTables[code]}`);
+          if (r.legal500RankedTables?.[code]) parts.push(`Legal 500 Tier ${r.legal500RankedTables[code]}`);
+          if (r.iflr1000RankedTables?.[code]) parts.push(`IFLR1000 Tier ${r.iflr1000RankedTables[code]}`);
+          rows.push(`  ${practiceAreaLabel(code)}: ${parts.join(", ")}`);
+        });
+      }
     } else {
       rows.push("No directory match found yet — queued for a manual lookup pass.");
     }

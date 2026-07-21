@@ -1,7 +1,7 @@
 import { ReactNode } from "react";
 import {
   LayoutDashboard, Hammer, BookOpen, BarChart3, FlaskConical, Settings, Circle, LogOut,
-  Gauge, FileText, Trophy, Users, History, Bell,
+  Gauge, FileText, Trophy, Users, History, Bell, Landmark,
 } from "lucide-react";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 
@@ -29,6 +29,7 @@ interface AppShellProps {
   onOpenCompetitors?: () => void;
   onOpenWorkshopHistory?: () => void;
   rankingsHref?: string;
+  directoryIndexHref?: string;
 }
 
 const NAV_ITEMS: { id: Section; label: string; icon: typeof LayoutDashboard }[] = [
@@ -53,9 +54,9 @@ const NavGroupLabel = ({ children }: { children: ReactNode }) => (
  */
 const AppShell = ({
   active, onNavigate, children, demoMode, onExitDemo, onSignOut, firmName, scoreLabel, alerts,
-  onOpenSettings, onOpenMaturity, onOpenBattlePlan, onOpenCompetitors, onOpenWorkshopHistory, rankingsHref,
+  onOpenSettings, onOpenMaturity, onOpenBattlePlan, onOpenCompetitors, onOpenWorkshopHistory, rankingsHref, directoryIndexHref,
 }: AppShellProps) => {
-  const hasTools = Boolean(onOpenMaturity || onOpenBattlePlan || onOpenCompetitors || onOpenWorkshopHistory || rankingsHref);
+  const hasTools = Boolean(onOpenMaturity || onOpenBattlePlan || onOpenCompetitors || onOpenWorkshopHistory || rankingsHref || directoryIndexHref);
   const alertList = alerts ?? [];
   const hasAlerts = alertList.length > 0;
 
@@ -183,6 +184,17 @@ const AppShell = ({
                   >
                     <Trophy className="w-4 h-4" />
                     Public Rankings
+                  </a>
+                )}
+                {directoryIndexHref && (
+                  <a
+                    href={directoryIndexHref}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="w-full flex items-center gap-3 px-3 py-2.5 rounded-sm text-sm font-body text-muted-foreground hover:text-foreground hover:bg-secondary/50 transition-colors"
+                  >
+                    <Landmark className="w-4 h-4" />
+                    Directory Standing
                   </a>
                 )}
               </nav>

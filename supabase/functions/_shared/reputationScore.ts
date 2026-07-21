@@ -162,7 +162,18 @@ export async function computeReputationScore(
 
   return {
     score,
-    raw: { gbpListed, matchedFirmName: matched.firm_name, matchedFirmDomain: matched.firm_domain, chambers, legal500, iflr1000 },
+    raw: {
+      gbpListed,
+      matchedFirmName: matched.firm_name,
+      matchedFirmDomain: matched.firm_domain,
+      chambers, legal500, iflr1000,
+      // Per-practice-area ranks, not just the aggregate points/count/avgRank
+      // above — lets the UI show exactly which tables a firm is ranked in,
+      // not just a blended number.
+      chambersRankedTables: matched.chambers?.rankedTables ?? null,
+      legal500RankedTables: matched.legal500?.rankedTables ?? null,
+      iflr1000RankedTables: matched.iflr1000?.rankedTables ?? null,
+    },
     provenance: "api",
     directory: "matched",
   };

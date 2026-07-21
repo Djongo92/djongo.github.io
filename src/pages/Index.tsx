@@ -170,6 +170,7 @@ const Index = () => {
   const firmName = primaryAudit?.display_name || primaryAudit?.audited_domain;
   const scoreLabel = primaryAudit ? `${Math.round(primaryAudit.total_score)} / 200` : undefined;
   const rankingsHref = primaryAudit ? `${import.meta.env.BASE_URL}rankings/${primaryAudit.market}` : undefined;
+  const directoryIndexHref = primaryAudit ? `${import.meta.env.BASE_URL}directory/${primaryAudit.market}` : undefined;
 
   // Sidebar's alert bell — the same "is anything worth reviewing" signal
   // CommandCenter's own insights feed surfaces, but as real entries here
@@ -329,6 +330,7 @@ const Index = () => {
         onOpenCompetitors={() => setCompetitorsOpen(true)}
         onOpenWorkshopHistory={() => setWorkshopHistoryOpen(true)}
         rankingsHref={rankingsHref}
+        directoryIndexHref={directoryIndexHref}
       >
         {section === "dashboard" && (
           <Suspense fallback={<div className="min-h-screen bg-background" />}>

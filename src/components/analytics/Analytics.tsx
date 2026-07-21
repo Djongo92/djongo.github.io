@@ -9,6 +9,7 @@ import { CATEGORY_META, CATEGORY_ORDER, type CategoryKey } from "@/lib/visibilit
 import { CategoryExplainer, ProvenanceBadge } from "@/components/visibility/Explainers";
 import { useScoreGoals } from "@/hooks/useScoreGoals";
 import { exportCategoryPdf } from "@/lib/categoryPdf";
+import { practiceAreaLabel } from "@/lib/practiceAreas";
 
 interface AnalyticsProps {
   audits: AuditRow[];
@@ -364,6 +365,13 @@ const ThoughtLeadershipBreakdown = ({ raw }: { raw?: ThoughtLeadershipRaw }) => 
 
 const ReputationBreakdown = ({ raw }: { raw?: ReputationRaw }) => {
   if (!raw) return <p className="text-sm text-muted-foreground font-body">Not scored yet.</p>;
+
+  const practiceAreaCodes = Array.from(new Set([
+    ...Object.keys(raw.chambersRankedTables ?? {}),
+    ...Object.keys(raw.legal500RankedTables ?? {}),
+    ...Object.keys(raw.iflr1000RankedTables ?? {}),
+  ])).sort();
+
   return (
     <div>
       <Row label="Google Business Profile" value={raw.gbpListed ? "Listed" : "Not listed"} />
@@ -374,6 +382,26 @@ const ReputationBreakdown = ({ raw }: { raw?: ReputationRaw }) => {
           {raw.chambers && <Row label="Chambers" value={`${Math.round(raw.chambers.points * 10) / 10} pts · ${raw.chambers.count} ranked tables`} />}
           {raw.legal500 && <Row label="Legal 500" value={`${Math.round(raw.legal500.points * 10) / 10} pts · ${raw.legal500.count} ranked tables`} />}
           {raw.iflr1000 && <Row label="IFLR1000" value={`${Math.round(raw.iflr1000.points * 10) / 10} pts · ${raw.iflr1000.count} ranked tables`} />}
+
+          {practiceAreaCodes.length > 0 && (
+            <>
+              <p className="text-xs text-muted-foreground font-body mt-4 mb-2">By practice area</p>
+              <div className="space-y-1.5">
+                {practiceAreaCodes.map((code) => (
+                  <div key={code} className="flex items-center justify-between text-sm font-body py-1 border-b border-border/20 last:border-0">
+                    <span className="text-secondary-foreground/70">{practiceAreaLabel(code)}</span>
+                    <span className="text-foreground text-xs">
+                      {raw.chambersRankedTables?.[code] && `Chambers Band ${raw.chambersRankedTables[code]}`}
+                      {raw.chambersRankedTables?.[code] && raw.legal500RankedTables?.[code] && " · "}
+                      {raw.legal500RankedTables?.[code] && `Legal 500 Tier ${raw.legal500RankedTables[code]}`}
+                      {(raw.chambersRankedTables?.[code] || raw.legal500RankedTables?.[code]) && raw.iflr1000RankedTables?.[code] && " · "}
+                      {raw.iflr1000RankedTables?.[code] && `IFLR1000 Tier ${raw.iflr1000RankedTables[code]}`}
+                    </span>
+                  </div>
+                ))}
+              </div>
+            </>
+          )}
         </>
       ) : (
         <p className="text-sm text-muted-foreground font-body mt-2">
