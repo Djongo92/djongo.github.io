@@ -3,6 +3,7 @@ import { Link, useParams } from "react-router-dom";
 import { Loader2, ShieldCheck, ArrowRight, Flag, Download } from "lucide-react";
 import { PEER_GROUPS, FIRM_TYPE_TO_PEER_GROUP } from "@/lib/marketVisibilityConfig";
 import { toCsv, downloadCsv } from "@/lib/csv";
+import { setPageMeta } from "@/lib/pageMeta";
 
 const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL;
 const SUPABASE_KEY = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY;
@@ -74,7 +75,11 @@ const DirectoryIndex = () => {
   }, [market]);
 
   useEffect(() => {
-    document.title = market ? `${market[0].toUpperCase() + market.slice(1)} Directory Standing · LegalOS` : "Directory Standing · LegalOS";
+    const marketLabel = market ? market[0].toUpperCase() + market.slice(1) : "Market";
+    setPageMeta({
+      title: market ? `${marketLabel} Directory Standing Index · LegalOS` : "Directory Standing · LegalOS",
+      description: `Chambers Europe and Legal 500 rankings for law firms in ${marketLabel}, aggregated and peer-normalized — directory breadth and depth, computed directly from published rankings.`,
+    });
   }, [market]);
 
   const grouped: Record<string, FirmStanding[]> = {};

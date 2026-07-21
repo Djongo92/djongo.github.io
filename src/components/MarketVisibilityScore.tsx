@@ -34,6 +34,7 @@ const MarketVisibilityScore = () => {
   const [platforms, setPlatforms] = useState({ linkedin: false, instagram: false, twitter: false, facebook: false });
   const { loading, publishing, result, error, run, publish, verifyDomain, scheduleRerun, reset } = useMarketVisibility();
   const [confirmingPublish, setConfirmingPublish] = useState(false);
+  const [confirmingUnpublish, setConfirmingUnpublish] = useState(false);
   const [step, setStep] = useState<1 | 2 | 3>(1);
   const [verifyRecord, setVerifyRecord] = useState<{ recordHost: string; recordValue: string } | null>(null);
   const [checkingVerification, setCheckingVerification] = useState(false);
@@ -121,6 +122,7 @@ const MarketVisibilityScore = () => {
 
   const handleUnpublish = async () => {
     if (!result) return;
+    setConfirmingUnpublish(false);
     const { ok } = await publish(result.id, false);
     if (ok) toast.success("Removed from the public ranking");
     else toast.error("Couldn't unpublish");
@@ -145,6 +147,7 @@ const MarketVisibilityScore = () => {
     setAuditedDomain("");
     setDisplayName("");
     setConfirmingPublish(false);
+    setConfirmingUnpublish(false);
     setStep(1);
     setVerifyRecord(null);
     setVerifyError(null);
@@ -485,13 +488,35 @@ const MarketVisibilityScore = () => {
                         <div className="flex items-center justify-center gap-2 text-emerald-500 text-sm font-body py-2">
                           <CheckCircle2 className="w-4 h-4" /> Published to the public ranking
                         </div>
-                        <button
-                          onClick={handleUnpublish}
-                          disabled={publishing}
-                          className="w-full text-xs text-muted-foreground hover:text-destructive font-body py-1.5 disabled:opacity-30 transition-colors"
-                        >
-                          {publishing ? "Removing…" : "Remove from public ranking"}
-                        </button>
+                        {confirmingUnpublish ? (
+                          <div className="border border-destructive/30 bg-destructive/5 rounded-sm p-3 space-y-2">
+                            <p className="text-xs text-foreground font-body">
+                              This removes your score from the public {market} ranking. You can publish again later.
+                            </p>
+                            <div className="flex gap-2">
+                              <button
+                                onClick={handleUnpublish}
+                                disabled={publishing}
+                                className="flex-1 bg-destructive text-destructive-foreground py-2 rounded-sm font-body text-xs disabled:opacity-30 hover:bg-destructive/90 transition-colors"
+                              >
+                                {publishing ? "Removing…" : "Yes, remove it"}
+                              </button>
+                              <button
+                                onClick={() => setConfirmingUnpublish(false)}
+                                className="px-3 py-2 rounded-sm font-body text-xs border border-border/50 text-muted-foreground hover:text-foreground transition-colors"
+                              >
+                                Cancel
+                              </button>
+                            </div>
+                          </div>
+                        ) : (
+                          <button
+                            onClick={() => setConfirmingUnpublish(true)}
+                            className="w-full text-xs text-muted-foreground hover:text-destructive font-body py-1.5 transition-colors"
+                          >
+                            Remove from public ranking
+                          </button>
+                        )}
                       </div>
                     ) : confirmingPublish ? (
                       <div className="border border-emerald-500/30 bg-emerald-500/5 rounded-sm p-3 space-y-2">

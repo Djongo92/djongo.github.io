@@ -1,8 +1,9 @@
 import { useRef, useState } from "react";
-import { Settings as SettingsIcon, Target, Download, Upload, Trash2, Briefcase, ShieldAlert, ImageIcon, X } from "lucide-react";
+import { Settings as SettingsIcon, Target, Download, Upload, Trash2, Briefcase, ShieldAlert, ImageIcon, X, Sun, Moon, Coffee, Palette } from "lucide-react";
 import { toast } from "sonner";
 import { useFirmContext } from "@/hooks/useFirmContext";
 import { useFirmLogo } from "@/hooks/useFirmLogo";
+import { useReadingTheme, type ReadingTheme } from "@/hooks/useReadingTheme";
 import { useScoreGoals } from "@/hooks/useScoreGoals";
 import { PRACTICE_AREAS, FIRM_SIZES, GOALS } from "@/components/PersonalizeOnboarding";
 import { CATEGORY_META, CATEGORY_ORDER } from "@/lib/visibilityCategories";
@@ -12,6 +13,12 @@ import type { AuditRow } from "@/components/dashboard/CommandCenter";
 interface SettingsPageProps {
   primaryAudit?: AuditRow;
 }
+
+const THEME_OPTIONS: { id: ReadingTheme; label: string; icon: typeof Sun }[] = [
+  { id: "dark", label: "Dark", icon: Moon },
+  { id: "light", label: "Light", icon: Sun },
+  { id: "sepia", label: "Sepia", icon: Coffee },
+];
 
 const SCORE_FIELD_FOR: Record<string, keyof AuditRow> = {
   performance: "performance_score",
@@ -54,6 +61,7 @@ function resizeImageFile(file: File, maxDim = 160): Promise<string> {
 const SettingsPage = ({ primaryAudit }: SettingsPageProps) => {
   const { context, save } = useFirmContext();
   const { logo, save: saveLogo, clear: clearLogo } = useFirmLogo();
+  const { theme, setTheme } = useReadingTheme();
   const { goals, setGoal } = useScoreGoals();
   const [practiceArea, setPracticeArea] = useState(context?.practiceArea ?? "");
   const [firmSize, setFirmSize] = useState(context?.firmSize ?? "");
@@ -125,6 +133,34 @@ const SettingsPage = ({ primaryAudit }: SettingsPageProps) => {
       </header>
 
       <div className="max-w-3xl mx-auto px-6 space-y-6">
+        {/* Appearance */}
+        <div className="bg-card border border-border/50 rounded-sm p-5">
+          <div className="flex items-center gap-2 mb-4">
+            <Palette className="w-4 h-4 text-primary" />
+            <h2 className="font-display text-lg text-foreground">Appearance</h2>
+          </div>
+          <p className="text-xs text-muted-foreground font-body mb-4">
+            Applies across the whole app, not just the Guidebook. Text size and page-turn transitions are still set
+            from the reading controls while inside a chapter.
+          </p>
+          <div className="grid grid-cols-3 gap-2 max-w-sm">
+            {THEME_OPTIONS.map(({ id, label, icon: Icon }) => (
+              <button
+                key={id}
+                onClick={() => setTheme(id)}
+                className={`flex flex-col items-center gap-1.5 py-3 rounded-sm border text-xs font-body transition-colors ${
+                  theme === id
+                    ? "border-primary bg-primary/10 text-foreground"
+                    : "border-border/50 text-muted-foreground hover:border-primary/40 hover:text-foreground"
+                }`}
+              >
+                <Icon className="w-4 h-4" />
+                {label}
+              </button>
+            ))}
+          </div>
+        </div>
+
         {/* Firm context */}
         <div className="bg-card border border-border/50 rounded-sm p-5">
           <div className="flex items-center gap-2 mb-4">

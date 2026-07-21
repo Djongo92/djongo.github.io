@@ -1,0 +1,18 @@
+{
+  "name": "LegalOS",
+  "short_name": "LegalOS",
+  "description": "Your firm's marketing & digital presence command center.",
+  "start_url": "/djongo.github.io/",
+  "scope": "/djongo.github.io/",
+  "display": "standalone",
+  "background_color": "#12182A",
+  "theme_color": "#12182A",
+  "icons": [
+    {
+      "src": "/djongo.github.io/icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}
