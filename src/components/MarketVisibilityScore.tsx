@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { ShieldCheck, X, Loader2, TrendingUp, Share2, CheckCircle2 } from "lucide-react";
+import { ShieldCheck, X, Loader2, TrendingUp, Share2, CheckCircle2, Globe } from "lucide-react";
 import { toast } from "sonner";
 import { useMarketVisibility } from "@/hooks/useMarketVisibility";
 import { saveVisibilityScore } from "@/hooks/useBattlePlanCache";
@@ -32,9 +32,12 @@ const MarketVisibilityScore = () => {
   const [posts30d, setPosts30d] = useState("");
   const [engagementRate, setEngagementRate] = useState("");
   const [platforms, setPlatforms] = useState({ linkedin: false, instagram: false, twitter: false, facebook: false });
-  const { loading, publishing, result, error, run, publish, reset } = useMarketVisibility();
+  const { loading, publishing, result, error, run, publish, verifyDomain, reset } = useMarketVisibility();
   const [confirmingPublish, setConfirmingPublish] = useState(false);
   const [step, setStep] = useState<1 | 2 | 3>(1);
+  const [verifyRecord, setVerifyRecord] = useState<{ recordHost: string; recordValue: string } | null>(null);
+  const [checkingVerification, setCheckingVerification] = useState(false);
+  const [verifyError, setVerifyError] = useState<string | null>(null);
 
   const submit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -73,14 +76,49 @@ const MarketVisibilityScore = () => {
   const handlePublish = async () => {
     if (!result) return;
     setConfirmingPublish(false);
-    const ok = await publish(result.id, true);
-    if (ok) toast.success("Published to the public ranking");
-    else toast.error("Couldn't publish");
+    const { ok, code } = await publish(result.id, true);
+    if (ok) {
+      toast.success("Published to the public ranking");
+      return;
+    }
+    if (code === "unverified") {
+      // Not an error — kick off the verification flow instead of a toast.
+      try {
+        const data = await verifyDomain(result.id, "start");
+        if (data.recordHost && data.recordValue) setVerifyRecord({ recordHost: data.recordHost, recordValue: data.recordValue });
+      } catch {
+        toast.error("Couldn't start domain verification");
+      }
+      return;
+    }
+    toast.error("Couldn't publish");
+  };
+
+  const handleCheckVerification = async () => {
+    if (!result) return;
+    setCheckingVerification(true);
+    setVerifyError(null);
+    try {
+      const data = await verifyDomain(result.id, "check");
+      if (data.verified) {
+        setVerifyRecord(null);
+        toast.success("Domain verified — publishing…");
+        const { ok } = await publish(result.id, true);
+        if (ok) toast.success("Published to the public ranking");
+        else toast.error("Couldn't publish");
+      } else {
+        setVerifyError("That TXT record isn't showing up yet — DNS changes can take a few minutes to propagate.");
+      }
+    } catch {
+      setVerifyError("Couldn't check verification right now.");
+    } finally {
+      setCheckingVerification(false);
+    }
   };
 
   const handleUnpublish = async () => {
     if (!result) return;
-    const ok = await publish(result.id, false);
+    const { ok } = await publish(result.id, false);
     if (ok) toast.success("Removed from the public ranking");
     else toast.error("Couldn't unpublish");
   };
@@ -91,6 +129,8 @@ const MarketVisibilityScore = () => {
     setDisplayName("");
     setConfirmingPublish(false);
     setStep(1);
+    setVerifyRecord(null);
+    setVerifyError(null);
   };
 
   return (
@@ -394,7 +434,35 @@ const MarketVisibilityScore = () => {
                       })}
                     </div>
 
-                    {result.isPublic ? (
+                    {verifyRecord ? (
+                      <div className="border border-primary/30 bg-primary/5 rounded-sm p-3 space-y-2">
+                        <p className="text-xs text-foreground font-body flex items-center gap-1.5">
+                          <Globe className="w-3.5 h-3.5 text-primary shrink-0" /> Verify you control {auditedDomain} before publishing
+                        </p>
+                        <p className="text-[11px] text-muted-foreground font-body">
+                          Add a TXT record on <span className="font-mono text-foreground">{verifyRecord.recordHost}</span> with this value:
+                        </p>
+                        <code className="block text-[11px] font-mono bg-background border border-border/50 rounded-sm px-2 py-1.5 break-all text-foreground">
+                          {verifyRecord.recordValue}
+                        </code>
+                        {verifyError && <p className="text-[11px] text-amber-500 font-body">{verifyError}</p>}
+                        <div className="flex gap-2">
+                          <button
+                            onClick={handleCheckVerification}
+                            disabled={checkingVerification}
+                            className="flex-1 bg-primary text-primary-foreground py-2 rounded-sm font-body text-xs disabled:opacity-30 hover:bg-gold-light transition-colors flex items-center justify-center gap-1.5"
+                          >
+                            {checkingVerification ? (<><Loader2 className="w-3.5 h-3.5 animate-spin" /> Checking…</>) : "I've added it — check now"}
+                          </button>
+                          <button
+                            onClick={() => { setVerifyRecord(null); setVerifyError(null); }}
+                            className="px-3 py-2 rounded-sm font-body text-xs border border-border/50 text-muted-foreground hover:text-foreground transition-colors"
+                          >
+                            Cancel
+                          </button>
+                        </div>
+                      </div>
+                    ) : result.isPublic ? (
                       <div className="space-y-2">
                         <div className="flex items-center justify-center gap-2 text-emerald-500 text-sm font-body py-2">
                           <CheckCircle2 className="w-4 h-4" /> Published to the public ranking

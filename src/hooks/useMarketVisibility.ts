@@ -74,7 +74,7 @@ export const useMarketVisibility = () => {
     }
   }, [user?.id, session?.access_token]);
 
-  const publish = useCallback(async (auditId: string, isPublic = true) => {
+  const publish = useCallback(async (auditId: string, isPublic = true): Promise<{ ok: boolean; code?: string }> => {
     setPublishing(true);
     try {
       const clientId = user?.id ?? getOrCreateClientId();
@@ -84,15 +84,30 @@ export const useMarketVisibility = () => {
         body: JSON.stringify({ clientId, accessToken: session?.access_token, auditId, isPublic }),
       });
       const data = await resp.json();
-      if (!resp.ok) throw new Error(data.error || "Couldn't publish");
+      if (!resp.ok) {
+        setError(data.error || "Couldn't publish");
+        return { ok: false, code: data.code };
+      }
       setResult((r) => (r ? { ...r, isPublic: data.is_public } : r));
-      return true;
+      return { ok: true };
     } catch {
       setError("Couldn't publish the audit");
-      return false;
+      return { ok: false };
     } finally {
       setPublishing(false);
     }
+  }, [user?.id, session?.access_token]);
+
+  const verifyDomain = useCallback(async (auditId: string, action: "start" | "check") => {
+    const clientId = user?.id ?? getOrCreateClientId();
+    const resp = await fetch(`${SUPABASE_URL}/functions/v1/visibility-audit-verify-domain`, {
+      method: "POST",
+      headers: edgeHeaders("benchmark"),
+      body: JSON.stringify({ clientId, accessToken: session?.access_token, auditId, action }),
+    });
+    const data = await resp.json();
+    if (!resp.ok) throw new Error(data.error || "Verification failed");
+    return data as { verified: boolean; recordType?: string; recordHost?: string; recordValue?: string };
   }, [user?.id, session?.access_token]);
 
   const reset = useCallback(() => {
@@ -100,5 +115,5 @@ export const useMarketVisibility = () => {
     setError(null);
   }, []);
 
-  return { loading, publishing, result, error, run, publish, reset };
+  return { loading, publishing, result, error, run, publish, verifyDomain, reset };
 };
