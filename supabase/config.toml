@@ -84,6 +84,9 @@ verify_jwt = false
 [functions.visibility-audit-get]
 verify_jwt = false
 
+[functions.visibility-audit-claim]
+verify_jwt = false
+
 [functions.visibility-audit-narrative]
 verify_jwt = false
 

@@ -1,6 +1,7 @@
 import { useCallback, useState } from "react";
 import { edgeHeaders } from "@/lib/edgeAuth";
 import { getOrCreateClientId } from "@/lib/clientId";
+import { useAuth } from "@/hooks/useAuth";
 
 const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL;
 
@@ -42,6 +43,7 @@ export interface RunAuditInput {
 }
 
 export const useMarketVisibility = () => {
+  const { user } = useAuth();
   const [loading, setLoading] = useState(false);
   const [publishing, setPublishing] = useState(false);
   const [result, setResult] = useState<AuditResult | null>(null);
@@ -51,7 +53,7 @@ export const useMarketVisibility = () => {
     setLoading(true);
     setError(null);
     try {
-      const clientId = getOrCreateClientId();
+      const clientId = user?.id ?? getOrCreateClientId();
       const resp = await fetch(`${SUPABASE_URL}/functions/v1/visibility-audit-run`, {
         method: "POST",
         headers: edgeHeaders("benchmark"),
@@ -70,12 +72,12 @@ export const useMarketVisibility = () => {
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [user?.id]);
 
   const publish = useCallback(async (auditId: string, isPublic = true) => {
     setPublishing(true);
     try {
-      const clientId = getOrCreateClientId();
+      const clientId = user?.id ?? getOrCreateClientId();
       const resp = await fetch(`${SUPABASE_URL}/functions/v1/visibility-audit-publish`, {
         method: "POST",
         headers: edgeHeaders("benchmark"),
@@ -91,7 +93,7 @@ export const useMarketVisibility = () => {
     } finally {
       setPublishing(false);
     }
-  }, []);
+  }, [user?.id]);
 
   const reset = useCallback(() => {
     setResult(null);
