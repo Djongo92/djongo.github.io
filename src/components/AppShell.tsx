@@ -1,7 +1,10 @@
 import { ReactNode } from "react";
-import { LayoutDashboard, Hammer, BookOpen, FlaskConical, Settings, Circle, LogOut } from "lucide-react";
+import {
+  LayoutDashboard, Hammer, BookOpen, BarChart3, FlaskConical, Settings, Circle, LogOut,
+  Gauge, FileText, Trophy,
+} from "lucide-react";
 
-export type Section = "dashboard" | "workshop" | "guidebook";
+export type Section = "dashboard" | "analytics" | "workshop" | "guidebook";
 
 interface AppShellProps {
   active: Section;
@@ -14,28 +17,42 @@ interface AppShellProps {
   scoreLabel?: string;
   hasAlerts?: boolean;
   onOpenSettings?: () => void;
+  onOpenMaturity?: () => void;
+  onOpenBattlePlan?: () => void;
+  rankingsHref?: string;
 }
 
 const NAV_ITEMS: { id: Section; label: string; icon: typeof LayoutDashboard }[] = [
   { id: "dashboard", label: "Dashboard", icon: LayoutDashboard },
+  { id: "analytics", label: "Analytics", icon: BarChart3 },
   { id: "workshop", label: "Workshop", icon: Hammer },
   { id: "guidebook", label: "Guidebook", icon: BookOpen },
 ];
 
+const NavGroupLabel = ({ children }: { children: ReactNode }) => (
+  <p className="px-3 pt-5 pb-1.5 text-[10px] tracking-[0.15em] uppercase text-muted-foreground/50 font-body">
+    {children}
+  </p>
+);
+
 /**
  * Persistent app shell — the thing every section lives inside, so moving
- * between Dashboard/Workshop/Guidebook is in-app navigation, not a
- * full-screen takeover you have to "back" out of. Desktop gets a fixed,
- * sticky left sidebar; mobile gets a bottom tab bar.
+ * between Dashboard/Analytics/Workshop/Guidebook is in-app navigation, not
+ * a full-screen takeover you have to "back" out of. Desktop gets a fixed,
+ * sticky left sidebar grouped into Workspace / Tools / Account; mobile gets
+ * a bottom tab bar with the four primary sections.
  */
 const AppShell = ({
-  active, onNavigate, children, demoMode, onExitDemo, onSignOut, firmName, scoreLabel, hasAlerts, onOpenSettings,
+  active, onNavigate, children, demoMode, onExitDemo, onSignOut, firmName, scoreLabel, hasAlerts,
+  onOpenSettings, onOpenMaturity, onOpenBattlePlan, rankingsHref,
 }: AppShellProps) => {
+  const hasTools = Boolean(onOpenMaturity || onOpenBattlePlan || rankingsHref);
+
   return (
     <div className="min-h-screen bg-background md:flex">
       {/* Desktop sidebar — sticky so it stays put while content scrolls */}
       <aside className="hidden md:flex md:flex-col md:w-56 md:shrink-0 md:sticky md:top-0 md:h-screen md:overflow-y-auto md:border-r md:border-border/50 md:bg-card/40">
-        <div className="px-6 pt-8 pb-6">
+        <div className="px-6 pt-8 pb-2">
           <span className="font-display text-xl font-semibold text-foreground tracking-tight">LegalOS</span>
           {firmName && (
             <p className="text-xs text-muted-foreground font-body mt-1 truncate" title={firmName}>
@@ -48,65 +65,112 @@ const AppShell = ({
             </p>
           )}
         </div>
-        <nav className="flex-1 px-3 space-y-1">
-          {NAV_ITEMS.map(({ id, label, icon: Icon }) => {
-            const isActive = active === id;
-            const showAlertDot = id === "dashboard" && hasAlerts;
-            return (
-              <button
-                key={id}
-                onClick={() => onNavigate(id)}
-                className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-sm text-sm font-body transition-colors relative ${
-                  isActive
-                    ? "bg-primary/10 text-primary"
-                    : "text-muted-foreground hover:text-foreground hover:bg-secondary/50"
-                }`}
-              >
-                <Icon className="w-4 h-4" />
-                {label}
-                {showAlertDot && (
-                  <Circle className="w-2 h-2 fill-amber-500 text-amber-500 absolute right-3" />
-                )}
-              </button>
-            );
-          })}
-        </nav>
-        {onOpenSettings && (
-          <div className="px-3 pb-3">
-            <button
-              onClick={onOpenSettings}
-              className="w-full flex items-center gap-3 px-3 py-2.5 rounded-sm text-sm font-body text-muted-foreground hover:text-foreground hover:bg-secondary/50 transition-colors"
-            >
-              <Settings className="w-4 h-4" />
-              Firm Profile
-            </button>
-          </div>
-        )}
-        {demoMode ? (
-          <div className="px-3 pb-6">
-            <div className="flex items-center gap-2 px-3 py-2.5 rounded-sm bg-amber-500/10 border border-amber-500/30">
-              <FlaskConical className="w-3.5 h-3.5 text-amber-500 shrink-0" />
-              <div className="flex-1 min-w-0">
-                <p className="text-xs font-body text-amber-500">Demo mode</p>
-              </div>
-              {onExitDemo && (
-                <button onClick={onExitDemo} className="text-[10px] font-body text-amber-500/70 hover:text-amber-500 underline shrink-0">
-                  Exit
+
+        <div className="flex-1">
+          <NavGroupLabel>Workspace</NavGroupLabel>
+          <nav className="px-3 space-y-1">
+            {NAV_ITEMS.map(({ id, label, icon: Icon }) => {
+              const isActive = active === id;
+              const showAlertDot = id === "dashboard" && hasAlerts;
+              return (
+                <button
+                  key={id}
+                  onClick={() => onNavigate(id)}
+                  className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-sm text-sm font-body transition-colors relative ${
+                    isActive
+                      ? "bg-primary/10 text-primary"
+                      : "text-muted-foreground hover:text-foreground hover:bg-secondary/50"
+                  }`}
+                >
+                  <Icon className="w-4 h-4" />
+                  {label}
+                  {showAlertDot && (
+                    <Circle className="w-2 h-2 fill-amber-500 text-amber-500 absolute right-3" />
+                  )}
                 </button>
-              )}
+              );
+            })}
+          </nav>
+
+          {hasTools && (
+            <>
+              <NavGroupLabel>Tools</NavGroupLabel>
+              <nav className="px-3 space-y-1">
+                {onOpenMaturity && (
+                  <button
+                    onClick={onOpenMaturity}
+                    className="w-full flex items-center gap-3 px-3 py-2.5 rounded-sm text-sm font-body text-muted-foreground hover:text-foreground hover:bg-secondary/50 transition-colors"
+                  >
+                    <Gauge className="w-4 h-4" />
+                    Firm Maturity Score
+                  </button>
+                )}
+                {onOpenBattlePlan && (
+                  <button
+                    onClick={onOpenBattlePlan}
+                    className="w-full flex items-center gap-3 px-3 py-2.5 rounded-sm text-sm font-body text-muted-foreground hover:text-foreground hover:bg-secondary/50 transition-colors"
+                  >
+                    <FileText className="w-4 h-4" />
+                    Battle Plan
+                  </button>
+                )}
+                {rankingsHref && (
+                  <a
+                    href={rankingsHref}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="w-full flex items-center gap-3 px-3 py-2.5 rounded-sm text-sm font-body text-muted-foreground hover:text-foreground hover:bg-secondary/50 transition-colors"
+                  >
+                    <Trophy className="w-4 h-4" />
+                    Public Rankings
+                  </a>
+                )}
+              </nav>
+            </>
+          )}
+        </div>
+
+        <div className="mt-auto">
+          {onOpenSettings && (
+            <NavGroupLabel>Account</NavGroupLabel>
+          )}
+          {onOpenSettings && (
+            <div className="px-3 pb-3">
+              <button
+                onClick={onOpenSettings}
+                className="w-full flex items-center gap-3 px-3 py-2.5 rounded-sm text-sm font-body text-muted-foreground hover:text-foreground hover:bg-secondary/50 transition-colors"
+              >
+                <Settings className="w-4 h-4" />
+                Firm Profile
+              </button>
             </div>
-          </div>
-        ) : onSignOut ? (
-          <div className="px-3 pb-6">
-            <button
-              onClick={onSignOut}
-              className="w-full flex items-center gap-3 px-3 py-2.5 rounded-sm text-sm font-body text-muted-foreground hover:text-foreground hover:bg-secondary/50 transition-colors"
-            >
-              <LogOut className="w-4 h-4" />
-              Sign out
-            </button>
-          </div>
-        ) : null}
+          )}
+          {demoMode ? (
+            <div className="px-3 pb-6">
+              <div className="flex items-center gap-2 px-3 py-2.5 rounded-sm bg-amber-500/10 border border-amber-500/30">
+                <FlaskConical className="w-3.5 h-3.5 text-amber-500 shrink-0" />
+                <div className="flex-1 min-w-0">
+                  <p className="text-xs font-body text-amber-500">Demo mode</p>
+                </div>
+                {onExitDemo && (
+                  <button onClick={onExitDemo} className="text-[10px] font-body text-amber-500/70 hover:text-amber-500 underline shrink-0">
+                    Exit
+                  </button>
+                )}
+              </div>
+            </div>
+          ) : onSignOut ? (
+            <div className="px-3 pb-6">
+              <button
+                onClick={onSignOut}
+                className="w-full flex items-center gap-3 px-3 py-2.5 rounded-sm text-sm font-body text-muted-foreground hover:text-foreground hover:bg-secondary/50 transition-colors"
+              >
+                <LogOut className="w-4 h-4" />
+                Sign out
+              </button>
+            </div>
+          ) : null}
+        </div>
       </aside>
 
       {/* Content area */}
@@ -124,7 +188,7 @@ const AppShell = ({
         </div>
       )}
 
-      {/* Mobile bottom nav */}
+      {/* Mobile bottom nav — primary sections only; Tools/Account live in the desktop sidebar */}
       <nav className="fixed bottom-0 left-0 right-0 z-40 md:hidden bg-card/95 backdrop-blur-md border-t border-border/50 safe-area-pb">
         <div className="flex items-center justify-around py-2 px-2">
           {NAV_ITEMS.map(({ id, label, icon: Icon }) => {
@@ -134,14 +198,14 @@ const AppShell = ({
               <button
                 key={id}
                 onClick={() => onNavigate(id)}
-                className={`flex flex-col items-center gap-0.5 px-6 py-1.5 rounded-sm transition-colors relative ${
+                className={`flex flex-col items-center gap-0.5 px-4 py-1.5 rounded-sm transition-colors relative ${
                   isActive ? "text-primary" : "text-muted-foreground"
                 }`}
               >
                 <Icon className="w-5 h-5" />
                 <span className="text-[9px] font-body tracking-wide">{label}</span>
                 {showAlertDot && (
-                  <Circle className="w-1.5 h-1.5 fill-amber-500 text-amber-500 absolute top-1 right-4" />
+                  <Circle className="w-1.5 h-1.5 fill-amber-500 text-amber-500 absolute top-1 right-3" />
                 )}
               </button>
             );

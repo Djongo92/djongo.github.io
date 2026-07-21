@@ -43,17 +43,49 @@ export const DEMO_AUDIT: AuditRow = {
       brokenLinks: ["https://petrovicpartners.rs/team/old-partner"],
       checkedLinks: 6,
     },
+    performance: {
+      desktop: { performance: 72, accessibility: 88, seo: 91 },
+      mobile: { performance: 58, accessibility: 85, seo: 89 },
+      perfAvg: 65,
+      accessAvg: 86.5,
+      seoAvg: 90,
+    },
+    social: {
+      followers: 1850,
+      posts30d: 3,
+      engagementRate: 1.2,
+      platforms: { linkedin: true, instagram: false, twitter: false, facebook: true },
+      platformCount: 2,
+    },
+    thoughtLeadership: {
+      postsCount: 2,
+      newsCount: 1,
+      bylinePct: 50,
+      items: [
+        { title: "Cross-Border M&A Trends in Southeast Europe", date: "2026-06-02", type: "blog", hasNamedByline: true },
+        { title: "Regulatory Shifts Affecting Manufacturing M&A", date: "2026-05-18", type: "blog", hasNamedByline: false },
+        { title: "Petrović & Partners advises on Meridian Capital transaction", date: "2026-05-10", type: "news", hasNamedByline: false },
+      ],
+    },
+    reputation: {
+      gbpListed: true,
+      matchedFirmName: "Petrović & Partners",
+      matchedFirmDomain: DEMO_DOMAIN,
+      chambers: { points: 13, count: 3, avgRank: 2.7 },
+      legal500: { points: 11, count: 3, avgRank: 3.2 },
+      iflr1000: { points: 0, count: 0, avgRank: null },
+    },
   },
   updated_at: new Date(now).toISOString(),
 };
 
 export const DEMO_HISTORY: HistoryRow[] = [
-  { audited_domain: DEMO_DOMAIN, market: "serbia", total_score: 58.2, recorded_at: new Date(now - 60 * DAY).toISOString() },
-  { audited_domain: DEMO_DOMAIN, market: "serbia", total_score: 63.5, recorded_at: new Date(now - 45 * DAY).toISOString() },
-  { audited_domain: DEMO_DOMAIN, market: "serbia", total_score: 68.1, recorded_at: new Date(now - 30 * DAY).toISOString() },
-  { audited_domain: DEMO_DOMAIN, market: "serbia", total_score: 71.4, recorded_at: new Date(now - 18 * DAY).toISOString() },
-  { audited_domain: DEMO_DOMAIN, market: "serbia", total_score: 75.9, recorded_at: new Date(now - 7 * DAY).toISOString() },
-  { audited_domain: DEMO_DOMAIN, market: "serbia", total_score: 80.3, recorded_at: new Date(now).toISOString() },
+  { audited_domain: DEMO_DOMAIN, market: "serbia", total_score: 58.2, performance_score: 10.2, social_score: 5.0, seo_authority_score: 0, thought_leadership_score: 12.0, reputation_score: 31.0, recorded_at: new Date(now - 60 * DAY).toISOString() },
+  { audited_domain: DEMO_DOMAIN, market: "serbia", total_score: 63.5, performance_score: 11.5, social_score: 6.0, seo_authority_score: 0, thought_leadership_score: 15.0, reputation_score: 31.0, recorded_at: new Date(now - 45 * DAY).toISOString() },
+  { audited_domain: DEMO_DOMAIN, market: "serbia", total_score: 68.1, performance_score: 12.5, social_score: 7.0, seo_authority_score: 0, thought_leadership_score: 17.6, reputation_score: 31.0, recorded_at: new Date(now - 30 * DAY).toISOString() },
+  { audited_domain: DEMO_DOMAIN, market: "serbia", total_score: 71.4, performance_score: 13.0, social_score: 8.0, seo_authority_score: 0, thought_leadership_score: 19.4, reputation_score: 31.0, recorded_at: new Date(now - 18 * DAY).toISOString() },
+  { audited_domain: DEMO_DOMAIN, market: "serbia", total_score: 75.9, performance_score: 13.8, social_score: 8.8, seo_authority_score: 0, thought_leadership_score: 20.3, reputation_score: 33.0, recorded_at: new Date(now - 7 * DAY).toISOString() },
+  { audited_domain: DEMO_DOMAIN, market: "serbia", total_score: 80.3, performance_score: 14.8, social_score: 9.5, seo_authority_score: 0, thought_leadership_score: 22.0, reputation_score: 34.0, recorded_at: new Date(now).toISOString() },
 ];
 
 export const DEMO_FIRM_CONTEXT: FirmContext = {

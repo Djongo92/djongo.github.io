@@ -26,8 +26,9 @@ import type { WorkshopToolId } from "@/lib/handoff";
 import type { AuditRow, HistoryRow } from "@/components/dashboard/CommandCenter";
 
 // Pulls in recharts — lazy-load so it's only fetched when the Dashboard
-// section is actually visited, not on every page load.
+// or Analytics section is actually visited, not on every page load.
 const CommandCenter = lazy(() => import("@/components/dashboard/CommandCenter"));
+const Analytics = lazy(() => import("@/components/analytics/Analytics"));
 
 const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL as string;
 
@@ -148,12 +149,21 @@ const Index = () => {
     }, 50);
   };
 
+  // Battle Plan lives inside the Guidebook's progress view (ProgressDashboard)
+  // rather than as its own section — this just jumps straight there instead
+  // of making it a three-click detour through the guidebook's table of contents.
+  const openBattlePlan = () => {
+    goToSection("guidebook");
+    setGuidebookView("progress");
+  };
+
   // Sidebar identity + alert dot — a lightweight version of the same
   // "is anything worth reviewing" check CommandCenter's insights feed
   // does, so the nav itself can flag it without duplicating that hook.
   const primaryAudit = visibilityData?.audits[0];
   const firmName = primaryAudit?.display_name || primaryAudit?.audited_domain;
   const scoreLabel = primaryAudit ? `${Math.round(primaryAudit.total_score)} / 200` : undefined;
+  const rankingsHref = primaryAudit ? `${import.meta.env.BASE_URL}rankings/${primaryAudit.market}` : undefined;
   const weakCategoryChecks: { score: number; max: number; provenance?: string }[] = primaryAudit
     ? [
         { score: primaryAudit.performance_score, max: 20, provenance: primaryAudit.provenance?.performance },
@@ -284,6 +294,9 @@ const Index = () => {
         scoreLabel={scoreLabel}
         hasAlerts={hasAlerts}
         onOpenSettings={() => setPersonalizeOpen(true)}
+        onOpenMaturity={() => setMaturityOpen(true)}
+        onOpenBattlePlan={openBattlePlan}
+        rankingsHref={rankingsHref}
       >
         {section === "dashboard" && (
           <Suspense fallback={<div className="min-h-screen bg-background" />}>
@@ -297,7 +310,13 @@ const Index = () => {
               onOpenWorkshopTool={openWorkshopTool}
               onOpenGuidebook={() => goToSection("guidebook")}
               onOpenMaturity={() => setMaturityOpen(true)}
+              onOpenAnalytics={() => goToSection("analytics")}
             />
+          </Suspense>
+        )}
+        {section === "analytics" && (
+          <Suspense fallback={<div className="min-h-screen bg-background" />}>
+            <Analytics audits={visibilityData?.audits ?? []} history={visibilityData?.history ?? []} />
           </Suspense>
         )}
         {section === "workshop" && <Workshop onBack={() => goToSection("dashboard")} />}
