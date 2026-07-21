@@ -235,6 +235,33 @@
   .shadow-apple { box-shadow: var(--shadow-md); }
   .shadow-apple-lg { box-shadow: var(--shadow-lg); }
 
+  /* Opening paragraph of a chapter — an editorial drop cap, not a UI
+     affordance, so it uses ::first-letter rather than a wrapping element
+     (keeps the paragraph's own text selectable/copyable as one string). */
+  .drop-cap::first-letter {
+    font-family: var(--font-display);
+    font-size: 3.4em;
+    font-weight: 600;
+    line-height: 0.8;
+    float: left;
+    margin: 0.03em 0.09em 0 0;
+    color: hsl(var(--primary));
+  }
+
+  /* Sepia's "paper" — a barely-there grain on reading surfaces so sepia mode
+     reads as library paper instead of a flat color swatch shifted warm.
+     Purely CSS-gated on the .sepia root class (see useReadingTheme), no
+     per-component theme check needed — tag a surface `reading-surface` and
+     it only textures itself while sepia is the active theme. Generated, not
+     an image asset, so it costs nothing to ship and never needs a request. */
+  .sepia .reading-surface {
+    background-image:
+      radial-gradient(hsl(var(--foreground) / 0.025) 1px, transparent 1px),
+      radial-gradient(hsl(var(--foreground) / 0.02) 1px, transparent 1px);
+    background-size: 3px 3px, 7px 7px;
+    background-position: 0 0, 1.5px 1.5px;
+  }
+
   /* Spring-like transition timing — Apple uses critically damped springs */
   .ease-apple {
     transition-timing-function: cubic-bezier(0.32, 0.72, 0, 1);

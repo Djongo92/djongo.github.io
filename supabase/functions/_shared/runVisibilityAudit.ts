@@ -45,7 +45,7 @@ export interface RunVisibilityAuditResult {
   };
 }
 
-async function computePercentile(
+export async function computePercentile(
   // deno-lint-ignore no-explicit-any
   serviceClient: any,
   market: string,

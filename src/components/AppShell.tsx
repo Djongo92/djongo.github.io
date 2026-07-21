@@ -5,6 +5,7 @@ import {
   Gauge, FileText, Eye, Users, History, Bell, Landmark, MoreHorizontal, X, Award,
 } from "lucide-react";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import FirmCrest from "@/components/FirmCrest";
 
 export type Section = "dashboard" | "analytics" | "workshop" | "progress" | "guidebook" | "settings";
 
@@ -133,8 +134,10 @@ const AppShell = ({
           </div>
           {firmName && (
             <div className="flex items-center gap-1.5 mt-1 min-w-0">
-              {firmLogo && (
+              {firmLogo ? (
                 <img src={firmLogo} alt="" className="w-4 h-4 rounded-sm object-cover shrink-0" />
+              ) : (
+                <FirmCrest name={firmName} size={16} />
               )}
               <p className="text-xs text-muted-foreground font-body truncate" title={firmName}>
                 {firmName}

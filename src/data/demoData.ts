@@ -80,6 +80,8 @@ export const DEMO_AUDIT: AuditRow = {
     },
   },
   updated_at: new Date(now).toISOString(),
+  percentile: 61,
+  peer_count: 18,
 };
 
 export const DEMO_HISTORY: HistoryRow[] = [

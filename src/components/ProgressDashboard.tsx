@@ -11,6 +11,7 @@ import MarketVisibilityScore from "./MarketVisibilityScore";
 import BattlePlan from "./BattlePlan";
 import AskTheBook from "./AskTheBook";
 import Achievements from "./Achievements";
+import AchievementUnlock from "./AchievementUnlock";
 import { useAchievements } from "@/hooks/useAchievements";
 
 interface ProgressDashboardProps {
@@ -80,6 +81,10 @@ const ProgressDashboard = ({
 
   return (
     <div className="min-h-screen bg-background">
+      <AchievementUnlock
+        badge={achievements.newlyUnlocked[0] ?? null}
+        onDismiss={() => achievements.newlyUnlocked[0] && achievements.acknowledge(achievements.newlyUnlocked[0].id)}
+      />
       <nav className="sticky top-0 z-10 bg-background/90 backdrop-blur-sm border-b border-border/50">
         <div className="max-w-4xl mx-auto px-6 py-3 flex items-center justify-between">
           <button onClick={onBack} className="flex items-center gap-2 text-sm text-muted-foreground hover:text-primary transition-colors font-body">

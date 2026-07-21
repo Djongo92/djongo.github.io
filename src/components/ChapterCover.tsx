@@ -48,7 +48,7 @@ const ChapterCover = ({ chapter }: Props) => {
       exit={{ opacity: 0 }}
       animate={{ opacity: [1, 1, 0], transition: { times: [0, 0.85, 1], duration: 2.8 } }}
       onClick={() => setShow(false)}
-      className="fixed inset-0 z-[60] bg-background flex flex-col items-center justify-center cursor-pointer overflow-hidden"
+      className="fixed inset-0 z-[60] bg-background reading-surface flex flex-col items-center justify-center cursor-pointer overflow-hidden"
       role="presentation"
       aria-hidden="true"
     >

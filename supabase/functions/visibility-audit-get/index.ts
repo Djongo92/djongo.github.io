@@ -4,6 +4,7 @@
 // already used for url_cache and shared_artifacts writes.
 import { requireAccess, ACCESS_CORS_HEADERS } from "../_shared/access.ts";
 import { resolveClientId } from "../_shared/verifiedClientId.ts";
+import { computePercentile } from "../_shared/runVisibilityAudit.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
 
 const corsHeaders = ACCESS_CORS_HEADERS;
@@ -55,7 +56,15 @@ Deno.serve(async (req) => {
 
     if (historyError) console.error("visibility-audit-get history error:", historyError);
 
-    return new Response(JSON.stringify({ audits: data ?? [], history: history ?? [] }), {
+    // Peer position for the dashboard's "where you stand" visual — computed
+    // fresh rather than stored, since the peer group's own scores can move
+    // between visits even when this firm's own audit hasn't changed.
+    const audits = await Promise.all((data ?? []).map(async (row) => {
+      const result = await computePercentile(serviceClient, row.market, row.peer_group, row.total_score);
+      return { ...row, percentile: result?.percentile ?? null, peer_count: result?.peerCount ?? 0 };
+    }));
+
+    return new Response(JSON.stringify({ audits, history: history ?? [] }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
   } catch (e) {

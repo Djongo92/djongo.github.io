@@ -79,7 +79,7 @@ const ChapterView = ({
   };
 
   return (
-    <div className="min-h-screen bg-background pb-20 md:pb-0">
+    <div className="min-h-screen bg-background reading-surface pb-20 md:pb-0">
       <ReadingProgress />
       {!readerMode && <SectionNav chapter={chapter} />}
       <AnimatePresence>
@@ -185,7 +185,12 @@ const ChapterView = ({
               )}
 
               {section.paragraphs?.map((p, pIndex) => (
-                <p key={pIndex} className="text-secondary-foreground/80 font-body text-[15px] leading-[1.85] mb-5">
+                <p
+                  key={pIndex}
+                  className={`text-secondary-foreground/80 font-body text-[15px] leading-[1.85] mb-5 ${
+                    sIndex === 0 && pIndex === 0 && !readerMode ? "drop-cap" : ""
+                  }`}
+                >
                   <GlossaryText text={p} />
                 </p>
               ))}
@@ -231,7 +236,13 @@ const ChapterView = ({
                   transition={{ duration: 0.6, ease: "easeOut" }}
                   className="border-l-2 border-primary/40 pl-6 py-2 my-8 group relative"
                 >
-                  <p className="font-display text-lg md:text-xl text-primary italic leading-relaxed">
+                  <span
+                    aria-hidden
+                    className="absolute -top-3 left-2 font-display text-6xl text-primary/10 leading-none select-none"
+                  >
+                    &ldquo;
+                  </span>
+                  <p className="font-display text-lg md:text-xl text-primary italic leading-relaxed relative">
                     {section.pullQuote}
                   </p>
                   <button

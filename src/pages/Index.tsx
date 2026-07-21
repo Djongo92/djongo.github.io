@@ -313,7 +313,11 @@ const Index = () => {
         )}
         {section === "analytics" && (
           <Suspense fallback={<AnalyticsSkeleton />}>
-            <Analytics audits={visibilityData?.audits ?? []} history={visibilityData?.history ?? []} />
+            <Analytics
+              audits={visibilityData?.audits ?? []}
+              history={visibilityData?.history ?? []}
+              onOpenDashboard={() => goToSection("dashboard")}
+            />
           </Suspense>
         )}
         {section === "workshop" && <Workshop onBack={() => goToSection("dashboard")} />}
