@@ -17,14 +17,10 @@
 import { requireAccess, ACCESS_CORS_HEADERS } from "../_shared/access.ts";
 import { resolveClientId } from "../_shared/verifiedClientId.ts";
 import { normalizeUrl } from "../_shared/safeFetch.ts";
+import { randomToken, challengeRecordValue, parseTxtAnswers, matchesChallenge } from "../_shared/domainVerification.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
 
 const corsHeaders = ACCESS_CORS_HEADERS;
-const CHALLENGE_PREFIX = "legalos-verify=";
-
-function randomToken(): string {
-  return crypto.randomUUID().replace(/-/g, "").slice(0, 20);
-}
 
 async function lookupTxtRecords(domain: string): Promise<string[]> {
   const resp = await fetch(`https://cloudflare-dns.com/dns-query?name=${encodeURIComponent(domain)}&type=TXT`, {
@@ -32,9 +28,7 @@ async function lookupTxtRecords(domain: string): Promise<string[]> {
   });
   if (!resp.ok) return [];
   const data = await resp.json();
-  const answers = (data?.Answer ?? []) as { data?: string }[];
-  // Cloudflare returns TXT values wrapped in literal quotes — strip them.
-  return answers.map((a) => (a.data ?? "").replace(/^"|"$/g, ""));
+  return parseTxtAnswers(data?.Answer ?? []);
 }
 
 Deno.serve(async (req) => {
@@ -103,7 +97,7 @@ Deno.serve(async (req) => {
         verified: false,
         recordType: "TXT",
         recordHost: row.audited_domain,
-        recordValue: `${CHALLENGE_PREFIX}${token}`,
+        recordValue: challengeRecordValue(token),
       }), {
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
@@ -123,8 +117,7 @@ Deno.serve(async (req) => {
 
     const hostname = new URL(normalizeUrl(row.audited_domain)).hostname;
     const records = await lookupTxtRecords(hostname);
-    const expected = `${CHALLENGE_PREFIX}${row.verification_token}`;
-    const found = records.some((r) => r.includes(expected));
+    const found = matchesChallenge(records, row.verification_token);
 
     if (!found) {
       return new Response(JSON.stringify({ verified: false }), {
