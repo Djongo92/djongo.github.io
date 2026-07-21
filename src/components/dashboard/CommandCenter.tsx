@@ -15,7 +15,7 @@ import { useBattlePlanCache } from "@/hooks/useBattlePlanCache";
 import { useStrategyBrief } from "@/hooks/useStrategyBrief";
 import { useScoreGoals } from "@/hooks/useScoreGoals";
 import { PEER_GROUPS } from "@/lib/marketVisibilityConfig";
-import { CATEGORY_META, CATEGORY_ORDER } from "@/lib/visibilityCategories";
+import { CATEGORY_META, CATEGORY_ORDER, type CategoryKey } from "@/lib/visibilityCategories";
 import { CategoryExplainer, ProvenanceBadge } from "@/components/visibility/Explainers";
 import ScoreRing from "@/components/visibility/ScoreRing";
 import MarketVisibilityScore from "@/components/MarketVisibilityScore";
@@ -23,6 +23,14 @@ import type { WorkshopToolId } from "@/lib/handoff";
 import { enableDemoMode } from "@/lib/demoMode";
 
 const CATEGORY_LABELS = CATEGORY_META;
+
+const HISTORY_FIELD_FOR: Record<CategoryKey, keyof HistoryRow> = {
+  performance: "performance_score",
+  social: "social_score",
+  seoAuthority: "seo_authority_score",
+  thoughtLeadership: "thought_leadership_score",
+  reputation: "reputation_score",
+};
 
 const TONE_STYLES: Record<string, { border: string; text: string; icon: typeof TrendingUp }> = {
   warning: { border: "border-amber-500/30", text: "text-amber-500", icon: AlertTriangle },
@@ -214,6 +222,23 @@ const CommandCenter = ({
 
   const scoreDelta = trend.length > 1 ? trend[trend.length - 1].score - trend[0].score : 0;
 
+  const categoryDeltas = useMemo(() => {
+    if (!primary) return null;
+    const ownHistory = history
+      .filter((h) => h.audited_domain === primary.audited_domain && h.market === primary.market)
+      .sort((a, b) => new Date(a.recorded_at).getTime() - new Date(b.recorded_at).getTime());
+    if (ownHistory.length < 2) return null;
+    const previous = ownHistory[ownHistory.length - 2];
+    const latest = ownHistory[ownHistory.length - 1];
+    const deltas = CATEGORY_ORDER.map((key) => {
+      const field = HISTORY_FIELD_FOR[key];
+      const prevScore = Number(previous[field] ?? 0);
+      const latestScore = Number(latest[field] ?? 0);
+      return { key, delta: Math.round((latestScore - prevScore) * 10) / 10 };
+    }).filter((d) => Math.abs(d.delta) >= 0.1);
+    return { deltas, recordedAt: latest.recorded_at };
+  }, [history, primary]);
+
   const insights = useCommandCenterInsights({
     categories, siteHealthIssues, maturity, implementationScore, readChaptersCount, totalChapters,
   });
@@ -379,6 +404,25 @@ const CommandCenter = ({
                   <Line type="monotone" dataKey="score" stroke="rgb(16 185 129)" strokeWidth={2} dot={{ r: 3 }} />
                 </LineChart>
               </ResponsiveContainer>
+            </div>
+          )}
+
+          {categoryDeltas && categoryDeltas.deltas.length > 0 && (
+            <div className="bg-card border border-border/50 rounded-sm p-5">
+              <p className="text-xs text-muted-foreground font-body mb-3">
+                What changed since {new Date(categoryDeltas.recordedAt).toLocaleDateString(undefined, { month: "short", day: "numeric" })}
+              </p>
+              <div className="space-y-2">
+                {categoryDeltas.deltas.map(({ key, delta }) => (
+                  <div key={key} className="flex items-center justify-between">
+                    <span className="text-sm font-body text-foreground">{CATEGORY_LABELS[key].label}</span>
+                    <span className={`text-sm font-body font-medium flex items-center gap-1 ${delta > 0 ? "text-emerald-500" : "text-destructive"}`}>
+                      {delta > 0 ? <TrendingUp className="w-3.5 h-3.5" /> : <TrendingDown className="w-3.5 h-3.5" />}
+                      {delta > 0 ? "+" : ""}{delta}
+                    </span>
+                  </div>
+                ))}
+              </div>
             </div>
           )}
 
