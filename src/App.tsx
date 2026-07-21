@@ -9,6 +9,7 @@ import Share from "./pages/Share.tsx";
 import Rankings from "./pages/Rankings.tsx";
 import Teaser from "./pages/Teaser.tsx";
 import DirectoryIndex from "./pages/DirectoryIndex.tsx";
+import OpsDirectoryQueue from "./pages/OpsDirectoryQueue.tsx";
 
 const queryClient = new QueryClient();
 
@@ -24,6 +25,7 @@ const App = () => (
           <Route path="/rankings/:market" element={<Rankings />} />
           <Route path="/directory/:market" element={<DirectoryIndex />} />
           <Route path="/teaser" element={<Teaser />} />
+          <Route path="/ops/directory-queue" element={<OpsDirectoryQueue />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>

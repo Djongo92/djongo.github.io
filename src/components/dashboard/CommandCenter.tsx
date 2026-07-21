@@ -17,6 +17,7 @@ import { useScoreGoals } from "@/hooks/useScoreGoals";
 import { PEER_GROUPS } from "@/lib/marketVisibilityConfig";
 import { CATEGORY_META, CATEGORY_ORDER } from "@/lib/visibilityCategories";
 import { CategoryExplainer, ProvenanceBadge } from "@/components/visibility/Explainers";
+import ScoreRing from "@/components/visibility/ScoreRing";
 import MarketVisibilityScore from "@/components/MarketVisibilityScore";
 import type { WorkshopToolId } from "@/lib/handoff";
 import { enableDemoMode } from "@/lib/demoMode";
@@ -308,24 +309,26 @@ const CommandCenter = ({
   return (
     <div className="min-h-screen bg-background pb-16">
       <header className="max-w-5xl mx-auto px-6 pt-12 pb-8">
-        <div className="flex items-center gap-2 mb-2">
-          <ShieldCheck className="w-4 h-4 text-emerald-500" />
-          <span className="text-[10px] tracking-[0.2em] uppercase text-emerald-500 font-body">Command Center</span>
-        </div>
-        <h1 className="font-display text-4xl font-semibold text-foreground tracking-tight mb-2">
-          {primary.display_name || primary.audited_domain}
-        </h1>
-        <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-sm text-muted-foreground font-body">
-          <span>
-            <span className="text-foreground font-medium">{Math.round(primary.total_score)}</span> / 200 visibility score
-          </span>
-          {scoreDelta !== 0 && (
-            <span className={`inline-flex items-center gap-1 ${scoreDelta > 0 ? "text-emerald-500" : "text-destructive"}`}>
-              {scoreDelta > 0 ? <TrendingUp className="w-3.5 h-3.5" /> : <TrendingDown className="w-3.5 h-3.5" />}
-              {scoreDelta > 0 ? "+" : ""}{scoreDelta} since first audit
-            </span>
-          )}
-          <span>{peerGroupLabel} · {primary.market[0].toUpperCase() + primary.market.slice(1)}</span>
+        <div className="flex flex-col sm:flex-row sm:items-center gap-6 sm:gap-8">
+          <div className="flex-1 min-w-0">
+            <div className="flex items-center gap-2 mb-2">
+              <ShieldCheck className="w-4 h-4 text-emerald-500" />
+              <span className="text-[10px] tracking-[0.2em] uppercase text-emerald-500 font-body">Command Center</span>
+            </div>
+            <h1 className="font-display text-4xl font-semibold text-foreground tracking-tight mb-2">
+              {primary.display_name || primary.audited_domain}
+            </h1>
+            <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-sm text-muted-foreground font-body">
+              {scoreDelta !== 0 && (
+                <span className={`inline-flex items-center gap-1 ${scoreDelta > 0 ? "text-emerald-500" : "text-destructive"}`}>
+                  {scoreDelta > 0 ? <TrendingUp className="w-3.5 h-3.5" /> : <TrendingDown className="w-3.5 h-3.5" />}
+                  {scoreDelta > 0 ? "+" : ""}{scoreDelta} since first audit
+                </span>
+              )}
+              <span>{peerGroupLabel} · {primary.market[0].toUpperCase() + primary.market.slice(1)}</span>
+            </div>
+          </div>
+          <ScoreRing score={primary.total_score} max={200} size={132} sublabel="Visibility Score" />
         </div>
       </header>
 
@@ -477,9 +480,11 @@ const CommandCenter = ({
           </div>
         </div>
 
-        {/* Right column — Ongoing Endeavors */}
+        {/* Right column — Ongoing Endeavors. Deliberately quieter than the
+            left column's analysis (softer border/background): secondary
+            reference info, not the thing you came here to look at. */}
         <div className="space-y-6">
-          <div className="bg-card border border-border/50 rounded-sm p-5">
+          <div className="bg-card/40 border border-border/30 rounded-sm p-4">
             <h2 className="font-display text-base text-foreground mb-4">Ongoing Endeavors</h2>
 
             <div className="space-y-4">
@@ -510,7 +515,7 @@ const CommandCenter = ({
             </div>
           </div>
 
-          <div className="bg-card border border-border/50 rounded-sm p-5">
+          <div className="bg-card/40 border border-border/30 rounded-sm p-4">
             <h2 className="font-display text-base text-foreground mb-4">Recent Workshop Activity</h2>
             {runs.length === 0 ? (
               <p className="text-xs text-muted-foreground font-body">

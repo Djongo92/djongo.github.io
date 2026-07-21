@@ -110,7 +110,7 @@ export function buildPdf({ roast, competitor, roadmap, maturity, headline, bio, 
   // ── Roast section ──
   if (roast) {
     cursor = ensureSpace(doc, cursor, 140);
-    cursor = drawSectionHeader(doc, "Homepage Diagnosis", cursor);
+    cursor = drawSectionHeader(doc, "Homepage Diagnosis", cursor, "AI-assisted", GOLD);
 
     // Grade badge
     doc.setFillColor(...gradeColor(roast.grade));
@@ -147,7 +147,7 @@ export function buildPdf({ roast, competitor, roadmap, maturity, headline, bio, 
   // ── Competitor section ──
   if (competitor) {
     cursor = ensureSpace(doc, cursor, 160);
-    cursor = drawSectionHeader(doc, "Competitive Position", cursor);
+    cursor = drawSectionHeader(doc, "Competitive Position", cursor, "AI-assisted", GOLD);
 
     cursor = drawSubheader(doc, "Where you stand", cursor);
     cursor = drawParagraph(doc, competitor.yourPositioning.summary, cursor, contentW, margin);
@@ -203,7 +203,7 @@ export function buildPdf({ roast, competitor, roadmap, maturity, headline, bio, 
   // ── Roadmap section ──
   if (roadmap) {
     cursor = ensureSpace(doc, cursor, 160);
-    cursor = drawSectionHeader(doc, "30 / 60 / 90 Day Battle Plan", cursor);
+    cursor = drawSectionHeader(doc, "30 / 60 / 90 Day Battle Plan", cursor, "AI-assisted", GOLD);
     cursor = drawParagraph(doc, roadmap.summary, cursor, contentW, margin);
     cursor += 8;
 
@@ -252,7 +252,7 @@ export function buildPdf({ roast, competitor, roadmap, maturity, headline, bio, 
   // ── Maturity score ──
   if (maturity) {
     cursor = ensureSpace(doc, cursor, 200);
-    cursor = drawSectionHeader(doc, "Firm Maturity Index", cursor);
+    cursor = drawSectionHeader(doc, "Firm Maturity Index", cursor, "Self-assessed", GOLD);
 
     // Big score
     doc.setFont("times", "bold");
@@ -295,7 +295,7 @@ export function buildPdf({ roast, competitor, roadmap, maturity, headline, bio, 
   // ── Headline champion ──
   if (headline) {
     cursor = ensureSpace(doc, cursor, 140);
-    cursor = drawSectionHeader(doc, "Champion Headline", cursor);
+    cursor = drawSectionHeader(doc, "Champion Headline", cursor, "AI-assisted", GOLD);
 
     // The line itself, large
     doc.setFont("times", "bold");
@@ -325,7 +325,7 @@ export function buildPdf({ roast, competitor, roadmap, maturity, headline, bio, 
   // ── Bio rewrite ──
   if (bio) {
     cursor = ensureSpace(doc, cursor, 160);
-    cursor = drawSectionHeader(doc, "Bio Rewrite", cursor);
+    cursor = drawSectionHeader(doc, "Bio Rewrite", cursor, "AI-assisted", GOLD);
 
     if (bio.name || bio.role) {
       doc.setFont("helvetica", "italic");
@@ -348,7 +348,7 @@ export function buildPdf({ roast, competitor, roadmap, maturity, headline, bio, 
   // ── Market Visibility Score ──
   if (visibilityScore) {
     cursor = ensureSpace(doc, cursor, 160);
-    cursor = drawSectionHeader(doc, "Market Visibility Score", cursor);
+    cursor = drawSectionHeader(doc, "Market Visibility Score", cursor, "Externally verified", GREEN);
 
     doc.setFont("times", "bold");
     doc.setFontSize(48);
@@ -444,8 +444,13 @@ function ensureSpace(doc: jsPDF, cursor: number, needed: number): number {
   return cursor;
 }
 
-function drawSectionHeader(doc: jsPDF, label: string, y: number): number {
+// A section-level provenance tag — the single clearest signal in this
+// document for a partner skimming it: which pages are a real, externally-
+// verified number versus an AI's read of the situation. Drawn top-right of
+// the section header, in the given accent color.
+function drawSectionHeader(doc: jsPDF, label: string, y: number, tag?: string, tagColor: [number, number, number] = MUTED): number {
   const margin = 48;
+  const pageW = doc.internal.pageSize.getWidth();
   doc.setTextColor(...NAVY);
   doc.setFont("times", "bold");
   doc.setFontSize(20);
@@ -453,6 +458,14 @@ function drawSectionHeader(doc: jsPDF, label: string, y: number): number {
   doc.setDrawColor(...GOLD);
   doc.setLineWidth(2);
   doc.line(margin, y + 26, margin + 36, y + 26);
+
+  if (tag) {
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(8);
+    doc.setTextColor(...tagColor);
+    doc.text(tag.toUpperCase(), pageW - margin, y + 14, { align: "right" });
+  }
+
   return y + 42;
 }
 

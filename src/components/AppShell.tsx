@@ -1,7 +1,8 @@
-import { ReactNode } from "react";
+import { ReactNode, useState } from "react";
+import { AnimatePresence, motion } from "framer-motion";
 import {
   LayoutDashboard, Hammer, BookOpen, BarChart3, FlaskConical, Settings, Circle, LogOut,
-  Gauge, FileText, Trophy, Users, History, Bell, Landmark,
+  Gauge, FileText, Trophy, Users, History, Bell, Landmark, MoreHorizontal, X,
 } from "lucide-react";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 
@@ -50,15 +51,20 @@ const NavGroupLabel = ({ children }: { children: ReactNode }) => (
  * between Dashboard/Analytics/Workshop/Guidebook is in-app navigation, not
  * a full-screen takeover you have to "back" out of. Desktop gets a fixed,
  * sticky left sidebar grouped into Workspace / Tools / Account; mobile gets
- * a bottom tab bar with the four primary sections.
+ * a bottom tab bar with the four primary sections plus a "More" sheet for
+ * everything the desktop sidebar's Tools/Account groups hold — those were
+ * previously desktop-only and unreachable from a phone.
  */
 const AppShell = ({
   active, onNavigate, children, demoMode, onExitDemo, onSignOut, firmName, scoreLabel, alerts,
   onOpenSettings, onOpenMaturity, onOpenBattlePlan, onOpenCompetitors, onOpenWorkshopHistory, rankingsHref, directoryIndexHref,
 }: AppShellProps) => {
+  const [moreOpen, setMoreOpen] = useState(false);
   const hasTools = Boolean(onOpenMaturity || onOpenBattlePlan || onOpenCompetitors || onOpenWorkshopHistory || rankingsHref || directoryIndexHref);
   const alertList = alerts ?? [];
   const hasAlerts = alertList.length > 0;
+
+  const closeMore = () => setMoreOpen(false);
 
   return (
     <div className="min-h-screen bg-background md:flex">
@@ -262,9 +268,10 @@ const AppShell = ({
         </div>
       )}
 
-      {/* Mobile bottom nav — primary sections only; Tools/Account live in the desktop sidebar */}
+      {/* Mobile bottom nav — four primary sections + a "More" sheet holding
+          everything the desktop Tools/Account groups have. */}
       <nav className="fixed bottom-0 left-0 right-0 z-40 md:hidden bg-card/95 backdrop-blur-md border-t border-border/50 safe-area-pb">
-        <div className="flex items-center justify-around py-2 px-2">
+        <div className="flex items-center justify-around py-2 px-1">
           {NAV_ITEMS.map(({ id, label, icon: Icon }) => {
             const isActive = active === id;
             const showAlertDot = id === "dashboard" && hasAlerts;
@@ -272,20 +279,134 @@ const AppShell = ({
               <button
                 key={id}
                 onClick={() => onNavigate(id)}
-                className={`flex flex-col items-center gap-0.5 px-4 py-1.5 rounded-sm transition-colors relative ${
+                className={`flex flex-col items-center gap-0.5 px-3 py-1.5 rounded-sm transition-colors relative ${
                   isActive ? "text-primary" : "text-muted-foreground"
                 }`}
               >
                 <Icon className="w-5 h-5" />
                 <span className="text-[9px] font-body tracking-wide">{label}</span>
                 {showAlertDot && (
-                  <Circle className="w-1.5 h-1.5 fill-amber-500 text-amber-500 absolute top-1 right-3" />
+                  <Circle className="w-1.5 h-1.5 fill-amber-500 text-amber-500 absolute top-1 right-2" />
                 )}
               </button>
             );
           })}
+          <button
+            onClick={() => setMoreOpen(true)}
+            className={`flex flex-col items-center gap-0.5 px-3 py-1.5 rounded-sm transition-colors relative ${
+              moreOpen || active === "settings" ? "text-primary" : "text-muted-foreground"
+            }`}
+          >
+            <MoreHorizontal className="w-5 h-5" />
+            <span className="text-[9px] font-body tracking-wide">More</span>
+            {hasAlerts && <Circle className="w-1.5 h-1.5 fill-amber-500 text-amber-500 absolute top-1 right-2" />}
+          </button>
         </div>
       </nav>
+
+      {/* Mobile "More" sheet — Tools + Account, unreachable from the bottom
+          nav's four primary slots. */}
+      <AnimatePresence>
+        {moreOpen && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-50 md:hidden bg-background/80 backdrop-blur-sm"
+            onClick={closeMore}
+          >
+            <motion.div
+              initial={{ y: "100%" }}
+              animate={{ y: 0 }}
+              exit={{ y: "100%" }}
+              transition={{ type: "spring", damping: 28, stiffness: 300 }}
+              onClick={(e) => e.stopPropagation()}
+              className="absolute bottom-0 left-0 right-0 bg-card border-t border-border rounded-t-lg max-h-[80vh] overflow-y-auto safe-area-pb"
+            >
+              <div className="flex items-center justify-between px-5 pt-5 pb-3">
+                <span className="font-display text-lg text-foreground">More</span>
+                <button onClick={closeMore} className="p-1.5 text-muted-foreground hover:text-foreground">
+                  <X className="w-4 h-4" />
+                </button>
+              </div>
+
+              {alertList.length > 0 && (
+                <div className="px-5 pb-3">
+                  <p className="text-[10px] tracking-[0.15em] uppercase text-amber-500 font-body mb-2">Alerts</p>
+                  <div className="space-y-2">
+                    {alertList.map((a) => (
+                      <div key={a.id} className="text-sm font-body">
+                        <p className="text-foreground">{a.title}</p>
+                        <p className="text-xs text-muted-foreground">{a.body}</p>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {hasTools && (
+                <>
+                  <p className="px-5 pt-2 pb-1.5 text-[10px] tracking-[0.15em] uppercase text-muted-foreground/50 font-body">Tools</p>
+                  <div className="px-3 pb-2">
+                    {onOpenMaturity && (
+                      <button onClick={() => { onOpenMaturity(); closeMore(); }} className="w-full flex items-center gap-3 px-3 py-3 rounded-sm text-sm font-body text-foreground hover:bg-secondary/50 transition-colors">
+                        <Gauge className="w-4 h-4 text-primary" /> Firm Maturity Score
+                      </button>
+                    )}
+                    {onOpenBattlePlan && (
+                      <button onClick={() => { onOpenBattlePlan(); closeMore(); }} className="w-full flex items-center gap-3 px-3 py-3 rounded-sm text-sm font-body text-foreground hover:bg-secondary/50 transition-colors">
+                        <FileText className="w-4 h-4 text-primary" /> Battle Plan
+                      </button>
+                    )}
+                    {onOpenCompetitors && (
+                      <button onClick={() => { onOpenCompetitors(); closeMore(); }} className="w-full flex items-center gap-3 px-3 py-3 rounded-sm text-sm font-body text-foreground hover:bg-secondary/50 transition-colors">
+                        <Users className="w-4 h-4 text-primary" /> Competitors
+                      </button>
+                    )}
+                    {onOpenWorkshopHistory && (
+                      <button onClick={() => { onOpenWorkshopHistory(); closeMore(); }} className="w-full flex items-center gap-3 px-3 py-3 rounded-sm text-sm font-body text-foreground hover:bg-secondary/50 transition-colors">
+                        <History className="w-4 h-4 text-primary" /> Workshop History
+                      </button>
+                    )}
+                    {rankingsHref && (
+                      <a href={rankingsHref} target="_blank" rel="noreferrer" className="w-full flex items-center gap-3 px-3 py-3 rounded-sm text-sm font-body text-foreground hover:bg-secondary/50 transition-colors">
+                        <Trophy className="w-4 h-4 text-primary" /> Public Rankings
+                      </a>
+                    )}
+                    {directoryIndexHref && (
+                      <a href={directoryIndexHref} target="_blank" rel="noreferrer" className="w-full flex items-center gap-3 px-3 py-3 rounded-sm text-sm font-body text-foreground hover:bg-secondary/50 transition-colors">
+                        <Landmark className="w-4 h-4 text-primary" /> Directory Standing
+                      </a>
+                    )}
+                  </div>
+                </>
+              )}
+
+              <p className="px-5 pt-2 pb-1.5 text-[10px] tracking-[0.15em] uppercase text-muted-foreground/50 font-body">Account</p>
+              <div className="px-3 pb-6">
+                {onOpenSettings && (
+                  <button onClick={() => { onOpenSettings(); closeMore(); }} className="w-full flex items-center gap-3 px-3 py-3 rounded-sm text-sm font-body text-foreground hover:bg-secondary/50 transition-colors">
+                    <Settings className="w-4 h-4 text-primary" /> Settings
+                  </button>
+                )}
+                {demoMode ? (
+                  onExitDemo && (
+                    <button onClick={() => { onExitDemo(); closeMore(); }} className="w-full flex items-center gap-3 px-3 py-3 rounded-sm text-sm font-body text-amber-500 hover:bg-secondary/50 transition-colors">
+                      <FlaskConical className="w-4 h-4" /> Exit demo mode
+                    </button>
+                  )
+                ) : (
+                  onSignOut && (
+                    <button onClick={() => { onSignOut(); closeMore(); }} className="w-full flex items-center gap-3 px-3 py-3 rounded-sm text-sm font-body text-foreground hover:bg-secondary/50 transition-colors">
+                      <LogOut className="w-4 h-4 text-primary" /> Sign out
+                    </button>
+                  )
+                )}
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 };
