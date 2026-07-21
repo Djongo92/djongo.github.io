@@ -1,8 +1,8 @@
-import { useState, useEffect, useCallback, useMemo, lazy, Suspense } from "react";
+import { useState, useEffect, useCallback, lazy, Suspense } from "react";
 import SignInGate from "@/components/SignInGate";
 import TableOfContents from "@/components/TableOfContents";
 import ChapterView from "@/components/ChapterView";
-import AppShell, { Section, SidebarAlert } from "@/components/AppShell";
+import AppShell, { Section } from "@/components/AppShell";
 import GlobalAdvisor from "@/components/GlobalAdvisor";
 import PersonalizeOnboarding from "@/components/PersonalizeOnboarding";
 import Workshop from "@/components/Workshop";
@@ -10,7 +10,6 @@ import FirmMaturityScore from "@/components/FirmMaturityScore";
 import CompetitorTracker from "@/components/CompetitorTracker";
 import WorkshopHistoryModal from "@/components/WorkshopHistoryModal";
 import { chapters } from "@/data/chapters";
-import { CATEGORY_META, type CategoryKey } from "@/lib/visibilityCategories";
 import { useBookmarks } from "@/hooks/useBookmarks";
 import { useReadingProgress } from "@/hooks/useReadingProgress";
 import { useChecklists } from "@/hooks/useChecklists";
@@ -20,6 +19,7 @@ import { useFirmContext } from "@/hooks/useFirmContext";
 import { useFirmLogo } from "@/hooks/useFirmLogo";
 import { useScrollVelocity } from "@/hooks/useAmbientMode";
 import { useAuth } from "@/hooks/useAuth";
+import { useNotifications } from "@/hooks/useNotifications";
 import { AnimatePresence, motion } from "framer-motion";
 import { Loader2 } from "lucide-react";
 import { edgeHeaders } from "@/lib/edgeAuth";
@@ -174,43 +174,11 @@ const Index = () => {
   const visibilityIndexHref = primaryAudit ? `${import.meta.env.BASE_URL}visibility-index/${primaryAudit.market}` : undefined;
   const recognitionIndexHref = primaryAudit ? `${import.meta.env.BASE_URL}recognition-index/${primaryAudit.market}` : undefined;
 
-  // Sidebar's alert bell — the same "is anything worth reviewing" signal
-  // CommandCenter's own insights feed surfaces, but as real entries here
-  // instead of a boolean, so the nav can show what's actually wrong.
-  const sidebarAlerts: SidebarAlert[] = useMemo(() => {
-    if (!primaryAudit) return [];
-    const list: SidebarAlert[] = [];
-    const catFields: { key: CategoryKey; score: number; provenance?: string }[] = [
-      { key: "performance", score: primaryAudit.performance_score, provenance: primaryAudit.provenance?.performance },
-      { key: "social", score: primaryAudit.social_score, provenance: primaryAudit.provenance?.social },
-      { key: "thoughtLeadership", score: primaryAudit.thought_leadership_score, provenance: primaryAudit.provenance?.thoughtLeadership },
-      { key: "reputation", score: primaryAudit.reputation_score, provenance: primaryAudit.provenance?.reputation },
-    ];
-    catFields.forEach(({ key, score, provenance }) => {
-      if (provenance === "missing") return;
-      const max = CATEGORY_META[key].max;
-      if (score / max < 0.5) {
-        list.push({
-          id: `weak-${key}`,
-          title: `${CATEGORY_META[key].label} is your weakest area`,
-          body: `Scoring ${Math.round(score * 10) / 10} of ${max} points.`,
-        });
-      }
-    });
-    const health = primaryAudit.raw_metrics?.siteHealth;
-    if (health) {
-      if (!health.hasContactForm) {
-        list.push({ id: "health-contact", title: "No contact form detected", body: "Your homepage doesn't appear to have one." });
-      }
-      if (health.copyrightStale && health.copyrightYear) {
-        list.push({ id: "health-copyright", title: "Stale copyright year", body: `Your footer shows ${health.copyrightYear}.` });
-      }
-      if (health.brokenLinks.length > 0) {
-        list.push({ id: "health-links", title: "Broken links found", body: `${health.brokenLinks.length} broken link(s) on your homepage.` });
-      }
-    }
-    return list;
-  }, [primaryAudit]);
+  // Sidebar's Bell is a real, persisted notification inbox now (see
+  // useNotifications) — CommandCenter's own "Key Insights" cards already
+  // cover the "what's currently wrong with your score" advisory role, so
+  // the Bell doesn't need to duplicate that as a derived list anymore.
+  const { notifications, unreadCount, markAllRead } = useNotifications();
 
   // Calculate overall implementation score
   const chapterActions = chapters
@@ -316,7 +284,9 @@ const Index = () => {
         firmName={firmName}
         firmLogo={firmLogo}
         scoreLabel={scoreLabel}
-        alerts={sidebarAlerts}
+        notifications={notifications.map((n) => ({ id: n.id, title: n.title, body: n.body, createdAt: n.created_at, read: !!n.read_at }))}
+        unreadCount={unreadCount}
+        onOpenNotifications={markAllRead}
         onOpenSettings={() => goToSection("settings")}
         onOpenMaturity={() => setMaturityOpen(true)}
         onOpenBattlePlan={openBattlePlan}

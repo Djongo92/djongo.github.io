@@ -8,10 +8,24 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 
 export type Section = "dashboard" | "analytics" | "workshop" | "progress" | "guidebook" | "settings";
 
-export interface SidebarAlert {
+export interface SidebarNotification {
   id: string;
   title: string;
-  body: string;
+  body: string | null;
+  createdAt: string;
+  read: boolean;
+}
+
+/** "3h ago" / "2d ago" — coarse on purpose, this is a short notification list, not a log viewer. */
+function relativeTime(iso: string): string {
+  const diffMs = Date.now() - new Date(iso).getTime();
+  const minutes = Math.round(diffMs / 60000);
+  if (minutes < 1) return "just now";
+  if (minutes < 60) return `${minutes}m ago`;
+  const hours = Math.round(minutes / 60);
+  if (hours < 24) return `${hours}h ago`;
+  const days = Math.round(hours / 24);
+  return `${days}d ago`;
 }
 
 interface AppShellProps {
@@ -24,7 +38,9 @@ interface AppShellProps {
   firmName?: string;
   firmLogo?: string | null;
   scoreLabel?: string;
-  alerts?: SidebarAlert[];
+  notifications?: SidebarNotification[];
+  unreadCount?: number;
+  onOpenNotifications?: () => void;
   onOpenSettings?: () => void;
   onOpenMaturity?: () => void;
   onOpenBattlePlan?: () => void;
@@ -58,13 +74,13 @@ const NavGroupLabel = ({ children }: { children: ReactNode }) => (
  * hold — those were previously desktop-only and unreachable from a phone.
  */
 const AppShell = ({
-  active, onNavigate, children, demoMode, onExitDemo, onSignOut, firmName, firmLogo, scoreLabel, alerts,
+  active, onNavigate, children, demoMode, onExitDemo, onSignOut, firmName, firmLogo, scoreLabel, notifications, unreadCount, onOpenNotifications,
   onOpenSettings, onOpenMaturity, onOpenBattlePlan, onOpenCompetitors, onOpenWorkshopHistory, visibilityIndexHref, recognitionIndexHref,
 }: AppShellProps) => {
   const [moreOpen, setMoreOpen] = useState(false);
   const hasTools = Boolean(onOpenMaturity || onOpenBattlePlan || onOpenCompetitors || onOpenWorkshopHistory || visibilityIndexHref || recognitionIndexHref);
-  const alertList = alerts ?? [];
-  const hasAlerts = alertList.length > 0;
+  const notificationList = notifications ?? [];
+  const hasUnread = (unreadCount ?? 0) > 0;
 
   const closeMore = () => setMoreOpen(false);
 
@@ -76,21 +92,31 @@ const AppShell = ({
           <div className="flex items-center justify-between gap-2">
             <span className="font-display text-xl font-semibold text-foreground tracking-tight">LegalOS</span>
             {(firmName || scoreLabel) && (
-              <Popover>
-                <PopoverTrigger className="relative p-1 text-muted-foreground hover:text-foreground transition-colors" aria-label="Alerts">
+              <Popover onOpenChange={(open) => open && onOpenNotifications?.()}>
+                <PopoverTrigger className="relative p-1 text-muted-foreground hover:text-foreground transition-colors" aria-label="Notifications">
                   <Bell className="w-4 h-4" />
-                  {hasAlerts && <Circle className="w-1.5 h-1.5 fill-amber-500 text-amber-500 absolute top-0.5 right-0.5" />}
+                  {hasUnread && <Circle className="w-1.5 h-1.5 fill-amber-500 text-amber-500 absolute top-0.5 right-0.5" />}
                 </PopoverTrigger>
-                <PopoverContent align="end" className="w-72">
-                  <p className="text-[10px] tracking-[0.15em] uppercase text-muted-foreground font-body mb-2">Alerts</p>
-                  {alertList.length === 0 ? (
-                    <p className="text-sm text-muted-foreground font-body">Nothing needs attention right now.</p>
+                <PopoverContent align="end" className="w-80">
+                  <div className="flex items-center justify-between mb-2">
+                    <p className="text-[10px] tracking-[0.15em] uppercase text-muted-foreground font-body">Notifications</p>
+                  </div>
+                  {notificationList.length === 0 ? (
+                    <p className="text-sm text-muted-foreground font-body">
+                      Nothing yet — you'll see updates here when your score changes automatically.
+                    </p>
                   ) : (
                     <div className="space-y-3 max-h-72 overflow-y-auto">
-                      {alertList.map((a) => (
-                        <div key={a.id} className="border-b border-border/40 last:border-0 pb-2 last:pb-0">
-                          <p className="text-sm font-body text-foreground">{a.title}</p>
-                          <p className="text-xs text-muted-foreground font-body">{a.body}</p>
+                      {notificationList.map((n) => (
+                        <div key={n.id} className="border-b border-border/40 last:border-0 pb-2 last:pb-0 flex items-start gap-2">
+                          {!n.read && <Circle className="w-1.5 h-1.5 fill-amber-500 text-amber-500 shrink-0 mt-1.5" />}
+                          <div className={n.read ? "pl-3.5" : undefined}>
+                            <div className="flex items-baseline justify-between gap-2">
+                              <p className="text-sm font-body text-foreground">{n.title}</p>
+                              <span className="text-[10px] text-muted-foreground font-body shrink-0">{relativeTime(n.createdAt)}</span>
+                            </div>
+                            {n.body && <p className="text-xs text-muted-foreground font-body">{n.body}</p>}
+                          </div>
                         </div>
                       ))}
                     </div>
@@ -127,7 +153,7 @@ const AppShell = ({
           <nav className="px-3 space-y-1">
             {NAV_ITEMS.map(({ id, label, icon: Icon }) => {
               const isActive = active === id;
-              const showAlertDot = id === "dashboard" && hasAlerts;
+              const showAlertDot = id === "dashboard" && hasUnread;
               return (
                 <button
                   key={id}
@@ -281,7 +307,7 @@ const AppShell = ({
         <div className="flex items-center justify-around py-2 px-1">
           {NAV_ITEMS.map(({ id, label, icon: Icon }) => {
             const isActive = active === id;
-            const showAlertDot = id === "dashboard" && hasAlerts;
+            const showAlertDot = id === "dashboard" && hasUnread;
             return (
               <button
                 key={id}
@@ -306,7 +332,7 @@ const AppShell = ({
           >
             <MoreHorizontal className="w-5 h-5" />
             <span className="text-[9px] font-body tracking-wide">More</span>
-            {hasAlerts && <Circle className="w-1.5 h-1.5 fill-amber-500 text-amber-500 absolute top-1 right-2" />}
+            {hasUnread && <Circle className="w-1.5 h-1.5 fill-amber-500 text-amber-500 absolute top-1 right-2" />}
           </button>
         </div>
       </nav>
@@ -337,14 +363,14 @@ const AppShell = ({
                 </button>
               </div>
 
-              {alertList.length > 0 && (
+              {notificationList.length > 0 && (
                 <div className="px-5 pb-3">
-                  <p className="text-[10px] tracking-[0.15em] uppercase text-amber-500 font-body mb-2">Alerts</p>
+                  <p className="text-[10px] tracking-[0.15em] uppercase text-amber-500 font-body mb-2">Notifications</p>
                   <div className="space-y-2">
-                    {alertList.map((a) => (
-                      <div key={a.id} className="text-sm font-body">
-                        <p className="text-foreground">{a.title}</p>
-                        <p className="text-xs text-muted-foreground">{a.body}</p>
+                    {notificationList.map((n) => (
+                      <div key={n.id} className="text-sm font-body">
+                        <p className="text-foreground">{n.title}</p>
+                        {n.body && <p className="text-xs text-muted-foreground">{n.body}</p>}
                       </div>
                     ))}
                   </div>
