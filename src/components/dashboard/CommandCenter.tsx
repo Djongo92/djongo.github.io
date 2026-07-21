@@ -408,7 +408,7 @@ const CommandCenter = ({
               </div>
             )}
           </div>
-          <div className="relative">
+          <div className="relative" data-coachmark="dashboard-score">
             <ScoreRing score={primary.total_score} max={200} size={132} sublabel="Visibility Score" />
             {isPersonalBest && <ScoreBurst />}
           </div>

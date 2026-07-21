@@ -163,6 +163,10 @@ const SignInGate = ({ onDemo, sessionExpired, onDismissSessionExpired }: SignInG
                 <span className="relative z-10">See it with sample data</span>
                 <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-700" />
               </button>
+              <p className="text-[11px] text-muted-foreground/80 font-body text-center leading-relaxed -mt-1">
+                A fictional firm's fully populated dashboard — every score, tool, and report already run.
+                No signup, nothing saved to a real account, exit anytime.
+              </p>
 
               <div className="flex items-center gap-3">
                 <div className="h-px flex-1 bg-border" />

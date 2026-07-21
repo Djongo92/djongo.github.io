@@ -161,6 +161,7 @@ const AppShell = ({
                 <button
                   key={id}
                   onClick={() => onNavigate(id)}
+                  data-coachmark={`nav-${id}`}
                   className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-body transition-colors relative tap-scale ${
                     isActive ? "text-primary" : "text-muted-foreground hover:text-foreground hover:bg-secondary/50"
                   }`}
@@ -327,6 +328,7 @@ const AppShell = ({
               <button
                 key={id}
                 onClick={() => onNavigate(id)}
+                data-coachmark={`nav-${id}`}
                 className={`flex flex-col items-center gap-0.5 px-3 py-1.5 rounded-xl transition-colors relative tap-scale ${
                   isActive ? "text-primary" : "text-muted-foreground"
                 }`}
