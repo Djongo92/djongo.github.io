@@ -4,17 +4,17 @@ import { Briefcase, Users, Target, X, Sparkles } from "lucide-react";
 import { useFirmContext, FirmContext } from "@/hooks/useFirmContext";
 import { toast } from "sonner";
 
-const PRACTICE_AREAS = [
+export const PRACTICE_AREAS = [
   "Corporate / M&A", "Litigation", "Family Law", "Real Estate", "IP & Tech",
   "Employment & Labor", "Tax", "Criminal Defense", "Estate Planning", "Other",
 ];
 
-const FIRM_SIZES = [
+export const FIRM_SIZES = [
   "Solo (1 attorney)", "Small (2-10 attorneys)", "Mid-size (11-50 attorneys)",
   "Large (51-200 attorneys)", "Major (200+ attorneys)",
 ];
 
-const GOALS = [
+export const GOALS = [
   "Win more high-value clients", "Build firm-wide brand & visibility",
   "Generate qualified inbound leads", "Position lawyers as thought leaders",
   "Modernize digital presence",

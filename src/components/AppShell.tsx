@@ -1,10 +1,17 @@
 import { ReactNode } from "react";
 import {
   LayoutDashboard, Hammer, BookOpen, BarChart3, FlaskConical, Settings, Circle, LogOut,
-  Gauge, FileText, Trophy,
+  Gauge, FileText, Trophy, Users, History, Bell,
 } from "lucide-react";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 
-export type Section = "dashboard" | "analytics" | "workshop" | "guidebook";
+export type Section = "dashboard" | "analytics" | "workshop" | "guidebook" | "settings";
+
+export interface SidebarAlert {
+  id: string;
+  title: string;
+  body: string;
+}
 
 interface AppShellProps {
   active: Section;
@@ -15,10 +22,12 @@ interface AppShellProps {
   onSignOut?: () => void;
   firmName?: string;
   scoreLabel?: string;
-  hasAlerts?: boolean;
+  alerts?: SidebarAlert[];
   onOpenSettings?: () => void;
   onOpenMaturity?: () => void;
   onOpenBattlePlan?: () => void;
+  onOpenCompetitors?: () => void;
+  onOpenWorkshopHistory?: () => void;
   rankingsHref?: string;
 }
 
@@ -43,17 +52,50 @@ const NavGroupLabel = ({ children }: { children: ReactNode }) => (
  * a bottom tab bar with the four primary sections.
  */
 const AppShell = ({
-  active, onNavigate, children, demoMode, onExitDemo, onSignOut, firmName, scoreLabel, hasAlerts,
-  onOpenSettings, onOpenMaturity, onOpenBattlePlan, rankingsHref,
+  active, onNavigate, children, demoMode, onExitDemo, onSignOut, firmName, scoreLabel, alerts,
+  onOpenSettings, onOpenMaturity, onOpenBattlePlan, onOpenCompetitors, onOpenWorkshopHistory, rankingsHref,
 }: AppShellProps) => {
-  const hasTools = Boolean(onOpenMaturity || onOpenBattlePlan || rankingsHref);
+  const hasTools = Boolean(onOpenMaturity || onOpenBattlePlan || onOpenCompetitors || onOpenWorkshopHistory || rankingsHref);
+  const alertList = alerts ?? [];
+  const hasAlerts = alertList.length > 0;
 
   return (
     <div className="min-h-screen bg-background md:flex">
       {/* Desktop sidebar — sticky so it stays put while content scrolls */}
       <aside className="hidden md:flex md:flex-col md:w-56 md:shrink-0 md:sticky md:top-0 md:h-screen md:overflow-y-auto md:border-r md:border-border/50 md:bg-card/40">
         <div className="px-6 pt-8 pb-2">
-          <span className="font-display text-xl font-semibold text-foreground tracking-tight">LegalOS</span>
+          <div className="flex items-center justify-between gap-2">
+            <span className="font-display text-xl font-semibold text-foreground tracking-tight">LegalOS</span>
+            {(firmName || scoreLabel) && (
+              <Popover>
+                <PopoverTrigger className="relative p-1 text-muted-foreground hover:text-foreground transition-colors" aria-label="Alerts">
+                  <Bell className="w-4 h-4" />
+                  {hasAlerts && <Circle className="w-1.5 h-1.5 fill-amber-500 text-amber-500 absolute top-0.5 right-0.5" />}
+                </PopoverTrigger>
+                <PopoverContent align="end" className="w-72">
+                  <p className="text-[10px] tracking-[0.15em] uppercase text-muted-foreground font-body mb-2">Alerts</p>
+                  {alertList.length === 0 ? (
+                    <p className="text-sm text-muted-foreground font-body">Nothing needs attention right now.</p>
+                  ) : (
+                    <div className="space-y-3 max-h-72 overflow-y-auto">
+                      {alertList.map((a) => (
+                        <div key={a.id} className="border-b border-border/40 last:border-0 pb-2 last:pb-0">
+                          <p className="text-sm font-body text-foreground">{a.title}</p>
+                          <p className="text-xs text-muted-foreground font-body">{a.body}</p>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                  <button
+                    onClick={() => onNavigate("dashboard")}
+                    className="mt-3 text-xs text-primary hover:text-gold-light font-body"
+                  >
+                    Go to Dashboard →
+                  </button>
+                </PopoverContent>
+              </Popover>
+            )}
+          </div>
           {firmName && (
             <p className="text-xs text-muted-foreground font-body mt-1 truncate" title={firmName}>
               {firmName}
@@ -114,6 +156,24 @@ const AppShell = ({
                     Battle Plan
                   </button>
                 )}
+                {onOpenCompetitors && (
+                  <button
+                    onClick={onOpenCompetitors}
+                    className="w-full flex items-center gap-3 px-3 py-2.5 rounded-sm text-sm font-body text-muted-foreground hover:text-foreground hover:bg-secondary/50 transition-colors"
+                  >
+                    <Users className="w-4 h-4" />
+                    Competitors
+                  </button>
+                )}
+                {onOpenWorkshopHistory && (
+                  <button
+                    onClick={onOpenWorkshopHistory}
+                    className="w-full flex items-center gap-3 px-3 py-2.5 rounded-sm text-sm font-body text-muted-foreground hover:text-foreground hover:bg-secondary/50 transition-colors"
+                  >
+                    <History className="w-4 h-4" />
+                    Workshop History
+                  </button>
+                )}
                 {rankingsHref && (
                   <a
                     href={rankingsHref}
@@ -138,10 +198,12 @@ const AppShell = ({
             <div className="px-3 pb-3">
               <button
                 onClick={onOpenSettings}
-                className="w-full flex items-center gap-3 px-3 py-2.5 rounded-sm text-sm font-body text-muted-foreground hover:text-foreground hover:bg-secondary/50 transition-colors"
+                className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-sm text-sm font-body transition-colors ${
+                  active === "settings" ? "bg-primary/10 text-primary" : "text-muted-foreground hover:text-foreground hover:bg-secondary/50"
+                }`}
               >
                 <Settings className="w-4 h-4" />
-                Firm Profile
+                Settings
               </button>
             </div>
           )}

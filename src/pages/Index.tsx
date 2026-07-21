@@ -1,14 +1,17 @@
-import { useState, useEffect, lazy, Suspense } from "react";
+import { useState, useEffect, useMemo, lazy, Suspense } from "react";
 import SignInGate from "@/components/SignInGate";
 import TableOfContents from "@/components/TableOfContents";
 import ChapterView from "@/components/ChapterView";
 import ProgressDashboard from "@/components/ProgressDashboard";
-import AppShell, { Section } from "@/components/AppShell";
+import AppShell, { Section, SidebarAlert } from "@/components/AppShell";
 import GlobalAdvisor from "@/components/GlobalAdvisor";
 import PersonalizeOnboarding from "@/components/PersonalizeOnboarding";
 import Workshop from "@/components/Workshop";
 import FirmMaturityScore from "@/components/FirmMaturityScore";
+import CompetitorTracker from "@/components/CompetitorTracker";
+import WorkshopHistoryModal from "@/components/WorkshopHistoryModal";
 import { chapters } from "@/data/chapters";
+import { CATEGORY_META, type CategoryKey } from "@/lib/visibilityCategories";
 import { useBookmarks } from "@/hooks/useBookmarks";
 import { useReadingProgress } from "@/hooks/useReadingProgress";
 import { useChecklists } from "@/hooks/useChecklists";
@@ -29,6 +32,7 @@ import type { AuditRow, HistoryRow } from "@/components/dashboard/CommandCenter"
 // or Analytics section is actually visited, not on every page load.
 const CommandCenter = lazy(() => import("@/components/dashboard/CommandCenter"));
 const Analytics = lazy(() => import("@/components/analytics/Analytics"));
+const SettingsPage = lazy(() => import("@/components/settings/SettingsPage"));
 
 const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL as string;
 
@@ -58,6 +62,8 @@ const Index = () => {
   const { hasContext } = useFirmContext();
   const [personalizeOpen, setPersonalizeOpen] = useState(false);
   const [maturityOpen, setMaturityOpen] = useState(false);
+  const [competitorsOpen, setCompetitorsOpen] = useState(false);
+  const [workshopHistoryOpen, setWorkshopHistoryOpen] = useState(false);
 
   // Fetch the firm's own visibility data once authenticated — the
   // Dashboard section renders its own empty state if there isn't any yet,
@@ -164,22 +170,44 @@ const Index = () => {
   const firmName = primaryAudit?.display_name || primaryAudit?.audited_domain;
   const scoreLabel = primaryAudit ? `${Math.round(primaryAudit.total_score)} / 200` : undefined;
   const rankingsHref = primaryAudit ? `${import.meta.env.BASE_URL}rankings/${primaryAudit.market}` : undefined;
-  const weakCategoryChecks: { score: number; max: number; provenance?: string }[] = primaryAudit
-    ? [
-        { score: primaryAudit.performance_score, max: 20, provenance: primaryAudit.provenance?.performance },
-        { score: primaryAudit.social_score, max: 20, provenance: primaryAudit.provenance?.social },
-        { score: primaryAudit.thought_leadership_score, max: 45, provenance: primaryAudit.provenance?.thoughtLeadership },
-        { score: primaryAudit.reputation_score, max: 55, provenance: primaryAudit.provenance?.reputation },
-      ]
-    : [];
-  const hasWeakCategory = weakCategoryChecks.some(
-    ({ score, max, provenance }) => provenance !== "missing" && score / max < 0.5,
-  );
-  const siteHealth = primaryAudit?.raw_metrics?.siteHealth;
-  const hasSiteHealthIssue = Boolean(
-    siteHealth && (!siteHealth.hasContactForm || siteHealth.copyrightStale || siteHealth.brokenLinks.length > 0),
-  );
-  const hasAlerts = hasWeakCategory || hasSiteHealthIssue;
+
+  // Sidebar's alert bell — the same "is anything worth reviewing" signal
+  // CommandCenter's own insights feed surfaces, but as real entries here
+  // instead of a boolean, so the nav can show what's actually wrong.
+  const sidebarAlerts: SidebarAlert[] = useMemo(() => {
+    if (!primaryAudit) return [];
+    const list: SidebarAlert[] = [];
+    const catFields: { key: CategoryKey; score: number; provenance?: string }[] = [
+      { key: "performance", score: primaryAudit.performance_score, provenance: primaryAudit.provenance?.performance },
+      { key: "social", score: primaryAudit.social_score, provenance: primaryAudit.provenance?.social },
+      { key: "thoughtLeadership", score: primaryAudit.thought_leadership_score, provenance: primaryAudit.provenance?.thoughtLeadership },
+      { key: "reputation", score: primaryAudit.reputation_score, provenance: primaryAudit.provenance?.reputation },
+    ];
+    catFields.forEach(({ key, score, provenance }) => {
+      if (provenance === "missing") return;
+      const max = CATEGORY_META[key].max;
+      if (score / max < 0.5) {
+        list.push({
+          id: `weak-${key}`,
+          title: `${CATEGORY_META[key].label} is your weakest area`,
+          body: `Scoring ${Math.round(score * 10) / 10} of ${max} points.`,
+        });
+      }
+    });
+    const health = primaryAudit.raw_metrics?.siteHealth;
+    if (health) {
+      if (!health.hasContactForm) {
+        list.push({ id: "health-contact", title: "No contact form detected", body: "Your homepage doesn't appear to have one." });
+      }
+      if (health.copyrightStale && health.copyrightYear) {
+        list.push({ id: "health-copyright", title: "Stale copyright year", body: `Your footer shows ${health.copyrightYear}.` });
+      }
+      if (health.brokenLinks.length > 0) {
+        list.push({ id: "health-links", title: "Broken links found", body: `${health.brokenLinks.length} broken link(s) on your homepage.` });
+      }
+    }
+    return list;
+  }, [primaryAudit]);
 
   // Calculate overall implementation score
   const chapterActions = chapters
@@ -213,6 +241,8 @@ const Index = () => {
       )}
       <PersonalizeOnboarding open={personalizeOpen} onClose={() => setPersonalizeOpen(false)} />
       <FirmMaturityScore open={maturityOpen} onClose={() => setMaturityOpen(false)} />
+      <CompetitorTracker open={competitorsOpen} onClose={() => setCompetitorsOpen(false)} primaryAudit={primaryAudit} />
+      <WorkshopHistoryModal open={workshopHistoryOpen} onClose={() => setWorkshopHistoryOpen(false)} onOpenWorkshopTool={openWorkshopTool} />
     </>
   );
 
@@ -292,10 +322,12 @@ const Index = () => {
         onSignOut={handleSignOut}
         firmName={firmName}
         scoreLabel={scoreLabel}
-        hasAlerts={hasAlerts}
-        onOpenSettings={() => setPersonalizeOpen(true)}
+        alerts={sidebarAlerts}
+        onOpenSettings={() => goToSection("settings")}
         onOpenMaturity={() => setMaturityOpen(true)}
         onOpenBattlePlan={openBattlePlan}
+        onOpenCompetitors={() => setCompetitorsOpen(true)}
+        onOpenWorkshopHistory={() => setWorkshopHistoryOpen(true)}
         rankingsHref={rankingsHref}
       >
         {section === "dashboard" && (
@@ -321,6 +353,11 @@ const Index = () => {
         )}
         {section === "workshop" && <Workshop onBack={() => goToSection("dashboard")} />}
         {section === "guidebook" && renderGuidebook()}
+        {section === "settings" && (
+          <Suspense fallback={<div className="min-h-screen bg-background" />}>
+            <SettingsPage primaryAudit={primaryAudit} />
+          </Suspense>
+        )}
       </AppShell>
       {advisorAndOnboarding(section !== "guidebook" || guidebookView !== "chapter")}
     </>

@@ -13,6 +13,7 @@ import { useCommandCenterInsights, type InsightAction } from "@/hooks/useCommand
 import { useWorkshopHistory } from "@/hooks/useWorkshopHistory";
 import { useBattlePlanCache } from "@/hooks/useBattlePlanCache";
 import { useStrategyBrief } from "@/hooks/useStrategyBrief";
+import { useScoreGoals } from "@/hooks/useScoreGoals";
 import { PEER_GROUPS } from "@/lib/marketVisibilityConfig";
 import { CATEGORY_META, CATEGORY_ORDER } from "@/lib/visibilityCategories";
 import { CategoryExplainer, ProvenanceBadge } from "@/components/visibility/Explainers";
@@ -160,6 +161,7 @@ const CommandCenter = ({
   const primary = audits[0];
   const { runs } = useWorkshopHistory();
   const { maturity, roast, headline, bio, roadmap, competitor, visibilityScore } = useBattlePlanCache();
+  const { goals } = useScoreGoals();
 
   const categories = useMemo(() => {
     if (!primary) return null;
@@ -377,13 +379,21 @@ const CommandCenter = ({
                     {Math.round(cat.score * 10) / 10}
                     <span className="text-sm text-muted-foreground"> / {meta?.max ?? "—"}</span>
                   </div>
-                  <div className="w-full h-1.5 bg-muted rounded-full overflow-hidden mb-2">
+                  <div className="relative w-full h-1.5 bg-muted rounded-full overflow-hidden mb-2">
                     <div
                       className={`h-full rounded-full ${cat.provenance === "missing" ? "bg-muted-foreground/30" : "bg-emerald-500"}`}
                       style={{ width: `${pct}%` }}
                     />
+                    {goals[key] !== undefined && meta && (
+                      <div className="absolute top-0 h-full w-0.5 bg-primary" style={{ left: `${Math.min(100, (goals[key]! / meta.max) * 100)}%` }} />
+                    )}
                   </div>
-                  <ProvenanceBadge provenance={cat.provenance} />
+                  <div className="flex items-center justify-between gap-2">
+                    <ProvenanceBadge provenance={cat.provenance} />
+                    {goals[key] !== undefined && (
+                      <span className="text-[10px] text-primary font-body">Target {goals[key]}</span>
+                    )}
+                  </div>
                 </motion.div>
               );
             })}

@@ -1,12 +1,14 @@
 import { useMemo, useState } from "react";
 import { ResponsiveContainer, LineChart, Line, XAxis, YAxis, Tooltip } from "recharts";
-import { BarChart3, ShieldCheck, CheckCircle2, XCircle, Newspaper, FileText as FileTextIcon } from "lucide-react";
+import { BarChart3, CheckCircle2, XCircle, Newspaper, FileText as FileTextIcon, Download } from "lucide-react";
 import type {
   AuditRow, HistoryRow, ThoughtLeadershipItem,
   PerformanceRaw, SocialRaw, ThoughtLeadershipRaw, ReputationRaw,
 } from "@/components/dashboard/CommandCenter";
 import { CATEGORY_META, CATEGORY_ORDER, type CategoryKey } from "@/lib/visibilityCategories";
 import { CategoryExplainer, ProvenanceBadge } from "@/components/visibility/Explainers";
+import { useScoreGoals } from "@/hooks/useScoreGoals";
+import { exportCategoryPdf } from "@/lib/categoryPdf";
 
 interface AnalyticsProps {
   audits: AuditRow[];
@@ -33,6 +35,7 @@ const formatPct = (n: number) => `${Math.round(n * 100)}%`;
 
 const Analytics = ({ audits, history }: AnalyticsProps) => {
   const primary = audits[0];
+  const { goals } = useScoreGoals();
 
   const categories = useMemo(() => {
     if (!primary) return null;
@@ -149,17 +152,41 @@ const Analytics = ({ audits, history }: AnalyticsProps) => {
                   <h2 className="font-display text-lg text-foreground">{meta.label}</h2>
                   <CategoryExplainer categoryKey={selected} />
                 </div>
-                <ProvenanceBadge provenance={cat.provenance} />
+                <div className="flex items-center gap-3 shrink-0">
+                  <ProvenanceBadge provenance={cat.provenance} />
+                  <button
+                    onClick={() => exportCategoryPdf({
+                      firmName: primary.display_name || primary.audited_domain,
+                      categoryKey: selected,
+                      meta,
+                      score: cat.score,
+                      provenance: cat.provenance,
+                      raw,
+                    })}
+                    className="inline-flex items-center gap-1 text-xs font-body text-muted-foreground hover:text-primary transition-colors"
+                  >
+                    <Download className="w-3 h-3" /> Export
+                  </button>
+                </div>
               </div>
               <div className="font-display text-3xl text-foreground font-semibold mb-2">
                 {Math.round(cat.score * 10) / 10}
                 <span className="text-base text-muted-foreground"> / {meta.max}</span>
+                {goals[selected] !== undefined && (
+                  <span className="text-sm text-primary font-body ml-2">Target: {goals[selected]}</span>
+                )}
               </div>
-              <div className="w-full h-1.5 bg-muted rounded-full overflow-hidden mb-4">
+              <div className="relative w-full h-1.5 bg-muted rounded-full overflow-hidden mb-4">
                 <div
                   className={`h-full rounded-full ${cat.provenance === "missing" ? "bg-muted-foreground/30" : "bg-emerald-500"}`}
                   style={{ width: `${Math.min(100, (cat.score / meta.max) * 100)}%` }}
                 />
+                {goals[selected] !== undefined && (
+                  <div
+                    className="absolute top-0 h-full w-0.5 bg-primary"
+                    style={{ left: `${Math.min(100, (goals[selected]! / meta.max) * 100)}%` }}
+                  />
+                )}
               </div>
               <p className="text-sm text-secondary-foreground/80 font-body mb-1">{meta.what}</p>
               <p className="text-xs text-muted-foreground font-body">{meta.why}</p>
