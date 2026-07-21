@@ -6,12 +6,14 @@ import { useAuth } from "@/hooks/useAuth";
 
 interface SignInGateProps {
   onDemo: () => void;
+  sessionExpired?: boolean;
+  onDismissSessionExpired?: () => void;
 }
 
 type Mode = "signin" | "signup" | "reset";
 type Stage = "idle" | "submitting" | "check-email" | "reset-sent";
 
-const SignInGate = ({ onDemo }: SignInGateProps) => {
+const SignInGate = ({ onDemo, sessionExpired, onDismissSessionExpired }: SignInGateProps) => {
   const { signUp, signIn, resetPassword } = useAuth();
   const [mode, setMode] = useState<Mode>("signin");
   const [email, setEmail] = useState("");
@@ -142,6 +144,17 @@ const SignInGate = ({ onDemo }: SignInGateProps) => {
               transition={{ duration: 0.3 }}
               className="space-y-5"
             >
+              {sessionExpired && (
+                <div className="flex items-center justify-between gap-3 bg-amber-500/10 border border-amber-500/30 rounded-lg px-4 py-2.5">
+                  <p className="text-xs text-amber-500 font-body">Your session expired — please sign in again.</p>
+                  {onDismissSessionExpired && (
+                    <button onClick={onDismissSessionExpired} className="text-amber-500/70 hover:text-amber-500 text-xs shrink-0">
+                      ✕
+                    </button>
+                  )}
+                </div>
+              )}
+
               <button
                 onClick={onDemo}
                 className="w-full bg-primary text-primary-foreground py-3.5 text-sm font-body font-medium tracking-wide rounded-lg hover:bg-gold-light transition-all relative overflow-hidden group flex items-center justify-center gap-2"

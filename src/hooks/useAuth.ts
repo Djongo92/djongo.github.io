@@ -2,20 +2,33 @@
 // sample-data flag and from the anonymous per-browser client_id used before
 // any real account existed. supabase-js already persists the session
 // (localStorage, autoRefreshToken) — this hook just exposes it as state.
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import type { Session } from "@supabase/supabase-js";
 import { supabase } from "@/integrations/supabase/client";
 
 export const useAuth = () => {
   const [session, setSession] = useState<Session | null>(null);
   const [loading, setLoading] = useState(true);
+  // Distinguishes "you clicked sign out" from "your session quietly expired"
+  // (a refresh-token failure surfaces as the same SIGNED_OUT event) — the
+  // gate should say something different in each case.
+  const [sessionExpired, setSessionExpired] = useState(false);
+  const hadSessionRef = useRef(false);
+  const explicitSignOutRef = useRef(false);
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data }) => {
+      hadSessionRef.current = !!data.session;
       setSession(data.session);
       setLoading(false);
     });
-    const { data: listener } = supabase.auth.onAuthStateChange((_event, newSession) => {
+    const { data: listener } = supabase.auth.onAuthStateChange((event, newSession) => {
+      if (event === "SIGNED_OUT" && hadSessionRef.current && !explicitSignOutRef.current) {
+        setSessionExpired(true);
+      }
+      if (newSession) setSessionExpired(false);
+      hadSessionRef.current = !!newSession;
+      explicitSignOutRef.current = false;
       setSession(newSession);
     });
     return () => listener.subscription.unsubscribe();
@@ -36,6 +49,7 @@ export const useAuth = () => {
   };
 
   const signOut = async () => {
+    explicitSignOutRef.current = true;
     await supabase.auth.signOut();
   };
 
@@ -46,5 +60,7 @@ export const useAuth = () => {
     return { error: error?.message ?? null };
   };
 
-  return { session, user: session?.user ?? null, loading, signUp, signIn, signOut, resetPassword };
+  const clearSessionExpired = () => setSessionExpired(false);
+
+  return { session, user: session?.user ?? null, loading, sessionExpired, clearSessionExpired, signUp, signIn, signOut, resetPassword };
 };

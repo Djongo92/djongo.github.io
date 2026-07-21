@@ -1,8 +1,9 @@
 import { useEffect, useState } from "react";
 import { Link, useParams } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
-import { Loader2, ArrowRight, Trophy } from "lucide-react";
+import { Loader2, ArrowRight, Trophy, Download } from "lucide-react";
 import { PEER_GROUPS } from "@/lib/marketVisibilityConfig";
+import { toCsv, downloadCsv } from "@/lib/csv";
 
 interface AuditRow {
   audited_domain: string;
@@ -47,6 +48,21 @@ const Rankings = () => {
   });
   const peerGroupsWithData = PEER_GROUP_ORDER.filter((pg) => grouped[pg]?.length > 0);
 
+  const exportCsv = () => {
+    if (!rows || rows.length === 0) return;
+    const csv = toCsv(
+      [...rows].sort((a, b) => b.total_score - a.total_score),
+      [
+        { key: "display_name", header: "Firm" },
+        { key: "audited_domain", header: "Domain" },
+        { key: "peer_group", header: "Peer group" },
+        { key: "total_score", header: "Total score (/200)" },
+        { key: "published_at", header: "Published at" },
+      ],
+    );
+    downloadCsv(`legalos-rankings-${market}.csv`, csv);
+  };
+
   return (
     <div className="min-h-screen bg-background">
       <header className="border-b border-border/50">
@@ -60,9 +76,18 @@ const Rankings = () => {
 
       <main className="max-w-3xl mx-auto px-6 py-12">
         <h1 className="font-display text-4xl text-foreground mb-2 leading-tight capitalize">{market} Market Visibility Ranking</h1>
-        <p className="text-xs text-muted-foreground font-body mb-10">
+        <p className="text-xs text-muted-foreground font-body mb-4">
           Externally-sourced, peer-group-normalized Market Visibility Scores — firms that opted to publish their audit.
         </p>
+
+        {!loading && !error && peerGroupsWithData.length > 0 && (
+          <button
+            onClick={exportCsv}
+            className="inline-flex items-center gap-1.5 text-xs text-muted-foreground hover:text-foreground font-body mb-6"
+          >
+            <Download className="w-3 h-3" /> Export as CSV
+          </button>
+        )}
 
         {loading && (
           <div className="flex justify-center py-16"><Loader2 className="w-5 h-5 animate-spin text-primary" /></div>

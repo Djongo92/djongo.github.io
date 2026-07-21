@@ -47,7 +47,7 @@ const Index = () => {
   // Demo mode (sample data, no real account) and a real Supabase Auth
   // session are the two independent ways in: either unlocks the app.
   const [demoActive, setDemoActive] = useState(isDemoMode());
-  const { session: authSession, loading: authLoading, signOut: authSignOut } = useAuth();
+  const { session: authSession, loading: authLoading, signOut: authSignOut, sessionExpired, clearSessionExpired } = useAuth();
   const authenticated = demoActive || !!authSession;
   useAmbientMode();
   useScrollVelocity();
@@ -243,7 +243,7 @@ const Index = () => {
   }
 
   if (!authenticated) {
-    return <SignInGate onDemo={handleDemo} />;
+    return <SignInGate onDemo={handleDemo} sessionExpired={sessionExpired} onDismissSessionExpired={clearSessionExpired} />;
   }
 
   // Hide the floating advisor while actively reading a chapter to reduce clutter.

@@ -4,6 +4,7 @@
 // so market_directory_data actually gets maintained. Reached only by
 // visiting /ops/directory-queue directly.
 import { useEffect, useState } from "react";
+import { Link } from "react-router-dom";
 import { Loader2, X } from "lucide-react";
 import { edgeHeaders } from "@/lib/edgeAuth";
 
@@ -71,11 +72,15 @@ const OpsDirectoryQueue = () => {
     <div className="min-h-screen bg-background">
       <main className="max-w-3xl mx-auto px-6 py-12">
         <h1 className="font-display text-3xl text-foreground mb-2">Directory Queue</h1>
-        <p className="text-xs text-muted-foreground font-body mb-10">
+        <p className="text-xs text-muted-foreground font-body mb-2">
           Internal tooling — not linked anywhere in the app. Resolve a lookup miss by adding the firm to
           market_directory_data; resolve a removal request by reviewing it manually, then dismiss either from here.
         </p>
+        <Link to="/ops/rate-limits" className="text-xs text-primary hover:text-gold-light font-body">
+          Rate Limits →
+        </Link>
 
+        <div className="mt-8">
         {loading && <div className="flex justify-center py-16"><Loader2 className="w-5 h-5 animate-spin text-primary" /></div>}
         {!loading && error && <p className="text-sm text-destructive font-body">{error}</p>}
 
@@ -129,6 +134,7 @@ const OpsDirectoryQueue = () => {
             </section>
           </>
         )}
+        </div>
       </main>
     </div>
   );

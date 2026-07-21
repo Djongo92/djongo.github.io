@@ -107,3 +107,6 @@ verify_jwt = false
 
 [functions.ops-directory-queue]
 verify_jwt = false
+
+[functions.ops-rate-limits]
+verify_jwt = false

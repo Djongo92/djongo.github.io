@@ -10,6 +10,7 @@ import Rankings from "./pages/Rankings.tsx";
 import Teaser from "./pages/Teaser.tsx";
 import DirectoryIndex from "./pages/DirectoryIndex.tsx";
 import OpsDirectoryQueue from "./pages/OpsDirectoryQueue.tsx";
+import OpsRateLimits from "./pages/OpsRateLimits.tsx";
 
 const queryClient = new QueryClient();
 
@@ -26,6 +27,7 @@ const App = () => (
           <Route path="/directory/:market" element={<DirectoryIndex />} />
           <Route path="/teaser" element={<Teaser />} />
           <Route path="/ops/directory-queue" element={<OpsDirectoryQueue />} />
+          <Route path="/ops/rate-limits" element={<OpsRateLimits />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>
