@@ -1,12 +1,13 @@
 import { useEffect, useState } from "react";
 import ReactMarkdown from "react-markdown";
 import { motion } from "framer-motion";
-import { Loader2, Presentation, Copy, Download } from "lucide-react";
+import { Loader2, Presentation, Copy, Download, FileType2 } from "lucide-react";
 import { toast } from "sonner";
 import { useFirmContext } from "@/hooks/useFirmContext";
 import { fnUrl, authHeaders, handleHttpError } from "./shared";
 import { streamSSE } from "@/lib/streamSSE";
 import { recordRun } from "@/hooks/useWorkshopHistory";
+import { parsePitchDeckMarkdown } from "@/components/pitchDeckParser";
 
 const PitchDeck = () => {
   const { context } = useFirmContext();
@@ -18,6 +19,7 @@ const PitchDeck = () => {
   const [advanced, setAdvanced] = useState(false);
   const [output, setOutput] = useState("");
   const [loading, setLoading] = useState(false);
+  const [exportingPptx, setExportingPptx] = useState(false);
 
   useEffect(() => {
     if (!loading && output && audience && opportunity) {
@@ -56,6 +58,25 @@ const PitchDeck = () => {
     URL.revokeObjectURL(a.href);
   };
 
+  const downloadPptx = async () => {
+    if (!output || exportingPptx) return;
+    const slides = parsePitchDeckMarkdown(output);
+    if (slides.length === 0) {
+      toast.error("Couldn't find any slides to export — try regenerating the deck.");
+      return;
+    }
+    setExportingPptx(true);
+    try {
+      const { buildPitchDeckPptx } = await import("@/components/pitchDeckPptx");
+      await buildPitchDeckPptx({ slides, audience, opportunity });
+    } catch (e) {
+      console.error(e);
+      toast.error("Couldn't build the .pptx file.");
+    } finally {
+      setExportingPptx(false);
+    }
+  };
+
   return (
     <div className="space-y-6">
       <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
@@ -84,6 +105,14 @@ const PitchDeck = () => {
             <div className="flex justify-end gap-3 mb-4">
               <button onClick={() => { navigator.clipboard.writeText(output); toast.success("Copied"); }} className="text-xs text-primary hover:text-gold-light font-body inline-flex items-center gap-1"><Copy className="w-3 h-3" /> Copy</button>
               <button onClick={download} className="text-xs text-primary hover:text-gold-light font-body inline-flex items-center gap-1"><Download className="w-3 h-3" /> .md</button>
+              <button
+                onClick={downloadPptx}
+                disabled={exportingPptx}
+                className="text-xs text-primary hover:text-gold-light font-body inline-flex items-center gap-1 disabled:opacity-50"
+              >
+                {exportingPptx ? <Loader2 className="w-3 h-3 animate-spin" /> : <FileType2 className="w-3 h-3" />}
+                {exportingPptx ? "Building…" : ".pptx"}
+              </button>
             </div>
           )}
           {loading && !output && <div className="flex items-center gap-2 text-muted-foreground text-sm font-body"><Loader2 className="w-4 h-4 animate-spin" /> Structuring 10 slides…</div>}

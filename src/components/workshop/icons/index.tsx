@@ -94,6 +94,14 @@ export const BioIcon = (p: IconProps) => (
   </Svg>
 );
 
+export const DeckRoastIcon = (p: IconProps) => (
+  <Svg {...p}>
+    <rect x="3" y="4" width="18" height="12" rx="1.5" />
+    <path d="M8 20h8M12 16v4" />
+    <path d="M14 8l3 3M17 8l-3 3" />
+  </Svg>
+);
+
 export const CalendarIcon = (p: IconProps) => (
   <Svg {...p}>
     <rect x="4" y="5" width="16" height="15" rx="1.5" />

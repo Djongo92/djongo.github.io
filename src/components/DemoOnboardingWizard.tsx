@@ -27,7 +27,7 @@ const STEPS = [
   },
   {
     icon: Hammer,
-    title: "Ten AI tools, ready to try",
+    title: "Eleven AI tools, ready to try",
     body: "Open the Workshop to test drive real tools — headline testing, competitor teardowns, practice-page audits — against this sample firm's context before you ever run one on your own.",
   },
   {

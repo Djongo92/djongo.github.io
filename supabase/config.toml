@@ -54,6 +54,9 @@ verify_jwt = false
 [functions.workshop-pitch-deck]
 verify_jwt = false
 
+[functions.workshop-deck-roast]
+verify_jwt = false
+
 [functions.workshop-bio-rewrite]
 verify_jwt = false
 

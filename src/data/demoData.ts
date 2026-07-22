@@ -66,6 +66,13 @@ export const DEMO_AUDIT: AuditRow = {
         { title: "Regulatory Shifts Affecting Manufacturing M&A", date: "2026-05-18", type: "blog", hasNamedByline: false },
         { title: "Petrović & Partners advises on Meridian Capital transaction", date: "2026-05-10", type: "news", hasNamedByline: false },
       ],
+      // Real third-party coverage, independently found via Google News RSS
+      // (the firm's own domain is excluded from these results) — not the
+      // "news"-tagged item above, which is the firm's own announcement of
+      // the same deal and isn't counted toward newsCount for that reason.
+      pressMentions: [
+        { title: "Petrović & Partners advises Meridian Capital on manufacturing acquisition", source: "ceelegalmatters.com", link: "https://ceelegalmatters.com/serbia/petrovic-partners-meridian-capital", date: "2026-05-12T00:00:00.000Z" },
+      ],
     },
     reputation: {
       gbpListed: true,

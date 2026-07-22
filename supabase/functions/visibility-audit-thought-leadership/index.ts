@@ -11,7 +11,7 @@ Deno.serve(async (req) => {
   if (unauthorized) return unauthorized;
 
   try {
-    const { url, market, peerGroup } = await req.json();
+    const { url, market, peerGroup, displayName } = await req.json();
     if (!url || typeof url !== "string") {
       return new Response(JSON.stringify({ error: "URL is required" }), {
         status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" },
@@ -29,7 +29,7 @@ Deno.serve(async (req) => {
       { auth: { persistSession: false } },
     );
 
-    const result = await computeThoughtLeadershipScore(serviceClient, market, peerGroup, url);
+    const result = await computeThoughtLeadershipScore(serviceClient, market, peerGroup, url, displayName);
 
     return new Response(JSON.stringify(result), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },

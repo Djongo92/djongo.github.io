@@ -14,7 +14,7 @@ const KEY = (toolId: string) => `workshop:handoff:${toolId}`;
 
 export type WorkshopToolId =
   | "swipe" | "copywriter" | "rewrite" | "autopsy" | "audit"
-  | "headlines" | "teardown" | "deck" | "bio" | "calendar";
+  | "headlines" | "teardown" | "deck" | "bio" | "calendar" | "deckroast";
 
 /** Compatibility map: which destinations can receive which payload kinds. */
 export const HANDOFF_TARGETS: { id: WorkshopToolId; label: string; accepts: HandoffPayload["kind"][] }[] = [

@@ -819,7 +819,7 @@ const CATEGORY_FORMULA: Record<CategoryKey, string> = {
   performance: "10 x (desktop + mobile Lighthouse performance avg) / 100 + 5 x (accessibility avg) / 100 + 5 x (SEO avg) / 100",
   social: "Peer-normalized LinkedIn followers, posts, and engagement rate (5+5+6 pts) + up to 4 pts per platform claimed",
   seoAuthority: "6 Ahrefs/Moz authority metrics, each 10 x (this firm's value / peer-group maximum)",
-  thoughtLeadership: "25 x (posts / peer-group max) + 5 x (byline %) + 15 x (news mentions / peer-group max), over a 60-day window",
+  thoughtLeadership: "25 x (posts / peer-group max) + 5 x (byline %) + 15 x (press mentions / peer-group max), over a 60-day window. Press mentions are verified via Google News, excluding the firm's own site.",
   reputation: "10 x Google Business Profile claimed + Chambers (band avg + ranked-table count/N) + Legal 500 (tier avg + count/N) + IFLR1000 (count/N + tier avg)",
 };
 
@@ -852,8 +852,15 @@ function formatThoughtLeadershipInputs(raw: any): string | null {
   if (!t) return null;
   const parts: string[] = [];
   if (t.postsCount != null) parts.push(`${t.postsCount} blog post${t.postsCount === 1 ? "" : "s"}`);
-  if (t.newsCount != null) parts.push(`${t.newsCount} news mention${t.newsCount === 1 ? "" : "s"}`);
   if (t.bylinePct != null) parts.push(`${t.bylinePct}% carry a named byline`);
+
+  const mentions: { title: string; source: string }[] = Array.isArray(t.pressMentions) ? t.pressMentions : [];
+  if (mentions.length > 0) {
+    const cited = mentions.slice(0, 2).map((m) => `"${m.title}" (${m.source})`).join("; ");
+    parts.push(`${mentions.length} press mention${mentions.length === 1 ? "" : "s"} independently verified — ${cited}${mentions.length > 2 ? "; …" : ""}`);
+  } else if (t.newsCount != null) {
+    parts.push(`${t.newsCount} press mention${t.newsCount === 1 ? "" : "s"} found via Google News`);
+  }
   return parts.length ? parts.join(" · ") : null;
 }
 
