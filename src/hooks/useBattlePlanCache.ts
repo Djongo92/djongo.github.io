@@ -2,6 +2,10 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import { pushServerState } from "@/lib/serverStateSync";
 import { edgeHeaders } from "@/lib/edgeAuth";
+import { isDemoMode } from "@/lib/demoMode";
+import {
+  DEMO_ROAST, DEMO_COMPETITOR, DEMO_ROADMAP, DEMO_MATURITY, DEMO_HEADLINE, DEMO_BIO, DEMO_VISIBILITY_SCORE,
+} from "@/data/demoData";
 
 /**
  * Lightweight caches for the analyses that feed the Battle Plan PDF.
@@ -125,6 +129,24 @@ const read = <T,>(key: string): T | null => {
   }
 };
 
+// Demo mode reads always resolve to the current DEMO_* constants rather than
+// whatever got written into localStorage back when demo mode was first
+// switched on (seedDemoData() is a one-shot write — it never re-runs on
+// reload, so a browser that entered demo mode before a Battle Plan content
+// fix would otherwise keep downloading the stale, pre-fix version forever).
+const demoNow = Date.now();
+const DEMO_BY_KEY: Record<string, unknown> = {
+  [ROAST_KEY]: { ...DEMO_ROAST, capturedAt: demoNow },
+  [COMP_KEY]: { ...DEMO_COMPETITOR, capturedAt: demoNow },
+  [ROADMAP_KEY]: { ...DEMO_ROADMAP, capturedAt: demoNow },
+  [MATURITY_KEY]: { ...DEMO_MATURITY, capturedAt: demoNow },
+  [HEADLINE_KEY]: { ...DEMO_HEADLINE, capturedAt: demoNow },
+  [BIO_KEY]: { ...DEMO_BIO, capturedAt: demoNow },
+  [VISIBILITY_KEY]: { ...DEMO_VISIBILITY_SCORE, capturedAt: demoNow },
+};
+
+const readSlot = <T,>(key: string): T | null => (isDemoMode() ? (DEMO_BY_KEY[key] as T) : read<T>(key));
+
 export const saveRoast = (roast: Omit<RoastCache, "capturedAt">) => {
   const value = { ...roast, capturedAt: Date.now() };
   localStorage.setItem(ROAST_KEY, JSON.stringify(value));
@@ -176,23 +198,23 @@ export const saveVisibilityScore = (data: Omit<VisibilityScoreCache, "capturedAt
 
 export const useBattlePlanCache = () => {
   const { user, session } = useAuth();
-  const [roast, setRoast] = useState<RoastCache | null>(() => read<RoastCache>(ROAST_KEY));
-  const [competitor, setCompetitor] = useState<CompetitorCache | null>(() => read<CompetitorCache>(COMP_KEY));
-  const [roadmap, setRoadmap] = useState<RoadmapCache | null>(() => read<RoadmapCache>(ROADMAP_KEY));
-  const [maturity, setMaturity] = useState<MaturityCache | null>(() => read<MaturityCache>(MATURITY_KEY));
-  const [headline, setHeadline] = useState<HeadlineWinnerCache | null>(() => read<HeadlineWinnerCache>(HEADLINE_KEY));
-  const [bio, setBio] = useState<BioCache | null>(() => read<BioCache>(BIO_KEY));
-  const [visibilityScore, setVisibilityScore] = useState<VisibilityScoreCache | null>(() => read<VisibilityScoreCache>(VISIBILITY_KEY));
+  const [roast, setRoast] = useState<RoastCache | null>(() => readSlot<RoastCache>(ROAST_KEY));
+  const [competitor, setCompetitor] = useState<CompetitorCache | null>(() => readSlot<CompetitorCache>(COMP_KEY));
+  const [roadmap, setRoadmap] = useState<RoadmapCache | null>(() => readSlot<RoadmapCache>(ROADMAP_KEY));
+  const [maturity, setMaturity] = useState<MaturityCache | null>(() => readSlot<MaturityCache>(MATURITY_KEY));
+  const [headline, setHeadline] = useState<HeadlineWinnerCache | null>(() => readSlot<HeadlineWinnerCache>(HEADLINE_KEY));
+  const [bio, setBio] = useState<BioCache | null>(() => readSlot<BioCache>(BIO_KEY));
+  const [visibilityScore, setVisibilityScore] = useState<VisibilityScoreCache | null>(() => readSlot<VisibilityScoreCache>(VISIBILITY_KEY));
   const syncedForUser = useRef<string | null>(null);
 
   const refresh = useCallback(() => {
-    setRoast(read<RoastCache>(ROAST_KEY));
-    setCompetitor(read<CompetitorCache>(COMP_KEY));
-    setRoadmap(read<RoadmapCache>(ROADMAP_KEY));
-    setMaturity(read<MaturityCache>(MATURITY_KEY));
-    setHeadline(read<HeadlineWinnerCache>(HEADLINE_KEY));
-    setBio(read<BioCache>(BIO_KEY));
-    setVisibilityScore(read<VisibilityScoreCache>(VISIBILITY_KEY));
+    setRoast(readSlot<RoastCache>(ROAST_KEY));
+    setCompetitor(readSlot<CompetitorCache>(COMP_KEY));
+    setRoadmap(readSlot<RoadmapCache>(ROADMAP_KEY));
+    setMaturity(readSlot<MaturityCache>(MATURITY_KEY));
+    setHeadline(readSlot<HeadlineWinnerCache>(HEADLINE_KEY));
+    setBio(readSlot<BioCache>(BIO_KEY));
+    setVisibilityScore(readSlot<VisibilityScoreCache>(VISIBILITY_KEY));
   }, []);
 
   useEffect(() => {
@@ -207,7 +229,7 @@ export const useBattlePlanCache = () => {
 
   // One batched round-trip for all 7 slots rather than 7 separate ones.
   useEffect(() => {
-    if (!user || syncedForUser.current === user.id) return;
+    if (!user || isDemoMode() || syncedForUser.current === user.id) return;
     syncedForUser.current = user.id;
     (async () => {
       try {
