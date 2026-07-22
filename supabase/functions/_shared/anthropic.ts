@@ -27,18 +27,33 @@ export interface ClaudeTool {
   input_schema: Record<string, unknown>;
 }
 
+/** A data-URL image ("data:image/jpeg;base64,...") — the shape a browser's canvas.toDataURL() produces. */
+export type DataUrlImage = string;
+
 interface CallToolOpts {
   system: string;
   user: string;
+  /** Images (data URLs) to attach alongside the text, for vision-capable critique. */
+  images?: DataUrlImage[];
   tool: ClaudeTool;
   model?: string;
   maxTokens?: number;
 }
 
+const dataUrlToImageBlock = (dataUrl: string) => {
+  const match = /^data:(image\/[a-zA-Z]+);base64,(.+)$/.exec(dataUrl);
+  if (!match) throw new Error("Expected a base64 data URL image");
+  return { type: "image", source: { type: "base64", media_type: match[1], data: match[2] } };
+};
+
 /** Forces Claude to call the given tool and returns its parsed input object. */
 export async function callClaudeTool(opts: CallToolOpts): Promise<Record<string, unknown>> {
   const apiKey = Deno.env.get("ANTHROPIC_API_KEY");
   if (!apiKey) throw new Error("ANTHROPIC_API_KEY not configured");
+
+  const content = opts.images?.length
+    ? [{ type: "text", text: opts.user }, ...opts.images.map(dataUrlToImageBlock)]
+    : opts.user;
 
   const response = await fetch(ANTHROPIC_API_URL, {
     method: "POST",
@@ -51,7 +66,7 @@ export async function callClaudeTool(opts: CallToolOpts): Promise<Record<string,
       model: opts.model ?? DEFAULT_MODEL,
       max_tokens: opts.maxTokens ?? DEFAULT_MAX_TOKENS,
       system: opts.system,
-      messages: [{ role: "user", content: opts.user }],
+      messages: [{ role: "user", content }],
       tools: [opts.tool],
       tool_choice: { type: "tool", name: opts.tool.name },
     }),

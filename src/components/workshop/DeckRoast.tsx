@@ -1,26 +1,38 @@
 import { useRef, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Flame, Loader2, Upload, FileWarning } from "lucide-react";
+import { Flame, Loader2, Upload, FileWarning, Palette } from "lucide-react";
 import { toast } from "sonner";
 import { useFirmContext } from "@/hooks/useFirmContext";
 import { fnUrl, authHeaders, handleHttpError } from "./shared";
 import { recordRun } from "@/hooks/useWorkshopHistory";
 
-interface SlideNote {
+interface TextSlideNote {
   slideNumber: number;
   issue: string;
   fix: string;
+}
+
+interface VisualSlideNote {
+  slideNumber: number;
+  designIssue: string;
+  designFix: string;
+  copyIssue: string;
+  copyFix: string;
 }
 
 interface DeckRoastResult {
   verdict: string;
   grade: "A" | "B" | "C" | "D" | "F";
   burn: string;
-  slideNotes: SlideNote[];
+  designSummary?: string;
+  slideNotes: (TextSlideNote | VisualSlideNote)[];
   topThreeFixes: string[];
   redemption: string;
   slideCount: number;
+  mode: "text" | "visual";
 }
+
+const isVisualNote = (n: TextSlideNote | VisualSlideNote): n is VisualSlideNote => "designIssue" in n;
 
 const gradeStyles: Record<string, string> = {
   A: "text-primary bg-primary/10 border-primary/40",
@@ -57,45 +69,64 @@ const DeckRoast = () => {
     }
   };
 
+  const submitToBackend = async (body: Record<string, unknown>) => {
+    setExtracting(false);
+    setLoading(true);
+    const resp = await fetch(fnUrl("workshop-deck-roast"), {
+      method: "POST",
+      headers: authHeaders(),
+      body: JSON.stringify({ ...body, firmContext: context }),
+    });
+    const err = await handleHttpError(resp);
+    if (err) {
+      toast.error(err);
+      return;
+    }
+    const data = await resp.json();
+    setResult(data);
+    recordRun({
+      toolId: "deckroast",
+      toolLabel: "Roast My Deck",
+      title: `Deck roast · ${fileName}`,
+      preview: data.verdict,
+      output: data.burn,
+    });
+  };
+
   const handleFile = async (file: File) => {
-    if (!file.name.toLowerCase().endsWith(".pptx")) {
-      toast.error("Only .pptx files are supported right now.");
+    const isPdf = file.name.toLowerCase().endsWith(".pdf");
+    const isPptx = file.name.toLowerCase().endsWith(".pptx");
+    if (!isPdf && !isPptx) {
+      toast.error("Only .pdf and .pptx files are supported.");
       return;
     }
     setFileName(file.name);
     setResult(null);
     setExtracting(true);
     try {
-      const { extractPptxSlides } = await import("@/components/pptxExtractor");
-      const slides = await extractPptxSlides(file);
-      if (slides.length === 0) {
-        toast.error("Couldn't find any slides in that file.");
-        return;
+      if (isPdf) {
+        const { rasterizePdfToImages, PDF_RASTERIZE_MAX_PAGES } = await import("@/components/pdfRasterizer");
+        const pages = await rasterizePdfToImages(file);
+        if (pages.length === 0) {
+          toast.error("Couldn't find any pages in that PDF.");
+          return;
+        }
+        if (pages.length >= PDF_RASTERIZE_MAX_PAGES) {
+          toast.info(`Analyzing the first ${PDF_RASTERIZE_MAX_PAGES} slides.`);
+        }
+        await submitToBackend({ pageImages: pages.map((p) => p.dataUrl) });
+      } else {
+        const { extractPptxSlides } = await import("@/components/pptxExtractor");
+        const slides = await extractPptxSlides(file);
+        if (slides.length === 0) {
+          toast.error("Couldn't find any slides in that file.");
+          return;
+        }
+        await submitToBackend({ slides });
       }
-      setExtracting(false);
-      setLoading(true);
-      const resp = await fetch(fnUrl("workshop-deck-roast"), {
-        method: "POST",
-        headers: authHeaders(),
-        body: JSON.stringify({ slides, firmContext: context }),
-      });
-      const err = await handleHttpError(resp);
-      if (err) {
-        toast.error(err);
-        return;
-      }
-      const data = await resp.json();
-      setResult(data);
-      recordRun({
-        toolId: "deckroast",
-        toolLabel: "Roast My Deck",
-        title: `Deck roast · ${file.name}`,
-        preview: data.verdict,
-        output: data.burn,
-      });
     } catch (e) {
       console.error(e);
-      toast.error("Couldn't read that file — make sure it's a valid .pptx.");
+      toast.error(`Couldn't read that file — make sure it's a valid ${isPdf ? ".pdf" : ".pptx"}.`);
     } finally {
       setExtracting(false);
       setLoading(false);
@@ -108,18 +139,19 @@ const DeckRoast = () => {
     <div className="space-y-6">
       {!result && (
         <div className="text-center">
-          <p className="text-sm text-muted-foreground font-body mb-4">
-            Upload an existing pitch deck (.pptx). Extracted entirely in your browser — nothing is uploaded
-            except the text, and only after you see it worked.
+          <p className="text-sm text-muted-foreground font-body mb-1">
+            Upload a .pdf for full design + copy critique (Canva, Keynote, Google Slides, and PowerPoint all export
+            PDF natively) — rendered entirely in your browser, nothing uploaded except the images. .pptx works too,
+            but gets a copy-only critique — there's no layout renderer available for that format client-side.
           </p>
           <input
             ref={fileInputRef}
             type="file"
-            accept=".pptx"
+            accept=".pdf,.pptx"
             className="hidden"
             onChange={(e) => { const f = e.target.files?.[0]; if (f) handleFile(f); }}
           />
-          <div className="flex items-center justify-center gap-3 flex-wrap">
+          <div className="flex items-center justify-center gap-3 flex-wrap mt-4">
             <button
               onClick={() => fileInputRef.current?.click()}
               disabled={busy}
@@ -128,7 +160,7 @@ const DeckRoast = () => {
               {extracting || loading ? (
                 <><Loader2 className="w-4 h-4 animate-spin" /> {extracting ? "Reading deck…" : "Roasting…"}</>
               ) : (
-                <><Upload className="w-4 h-4" /> Upload a .pptx to roast</>
+                <><Upload className="w-4 h-4" /> Upload a .pdf or .pptx to roast</>
               )}
             </button>
             <button
@@ -155,7 +187,9 @@ const DeckRoast = () => {
               </div>
               <div className="flex-1">
                 <p className="font-display text-xl text-foreground italic leading-snug mb-1">"{result.verdict}"</p>
-                <p className="text-[11px] text-muted-foreground font-body">{fileName} · {result.slideCount} slides</p>
+                <p className="text-[11px] text-muted-foreground font-body">
+                  {fileName} · {result.slideCount} slides · {result.mode === "visual" ? "design + copy critique" : "copy critique (text-only)"}
+                </p>
               </div>
             </div>
 
@@ -163,6 +197,15 @@ const DeckRoast = () => {
               <p className="text-[10px] tracking-[0.2em] uppercase font-body text-destructive mb-2">The Burn</p>
               <p className="font-body text-sm text-foreground leading-relaxed">{result.burn}</p>
             </div>
+
+            {result.designSummary && (
+              <div className="bg-primary/5 border-l-4 border-primary/60 p-5 rounded-r-sm mb-6">
+                <p className="text-[10px] tracking-[0.2em] uppercase font-body text-primary mb-2 flex items-center gap-1.5">
+                  <Palette className="w-3 h-3" /> Visual Design
+                </p>
+                <p className="font-body text-sm text-foreground leading-relaxed">{result.designSummary}</p>
+              </div>
+            )}
 
             <div className="mb-6">
               <h4 className="font-display text-base text-foreground mb-3">Top 3 Fixes (in order)</h4>
@@ -186,12 +229,35 @@ const DeckRoast = () => {
                         Slide {s.slideNumber}
                       </span>
                     </div>
-                    <p className="text-xs text-destructive/90 font-body italic mb-2">
-                      <span className="font-medium not-italic">Issue:</span> {s.issue}
-                    </p>
-                    <p className="text-xs text-primary font-body">
-                      <span className="font-medium">Fix:</span> {s.fix}
-                    </p>
+                    {isVisualNote(s) ? (
+                      <div className="space-y-2.5">
+                        <div>
+                          <p className="text-xs text-destructive/90 font-body italic">
+                            <span className="font-medium not-italic">Design:</span> {s.designIssue}
+                          </p>
+                          <p className="text-xs text-primary font-body mt-0.5">
+                            <span className="font-medium">Fix:</span> {s.designFix}
+                          </p>
+                        </div>
+                        <div className="pt-2 border-t border-border/30">
+                          <p className="text-xs text-destructive/90 font-body italic">
+                            <span className="font-medium not-italic">Copy:</span> {s.copyIssue}
+                          </p>
+                          <p className="text-xs text-primary font-body mt-0.5">
+                            <span className="font-medium">Fix:</span> {s.copyFix}
+                          </p>
+                        </div>
+                      </div>
+                    ) : (
+                      <>
+                        <p className="text-xs text-destructive/90 font-body italic mb-2">
+                          <span className="font-medium not-italic">Issue:</span> {s.issue}
+                        </p>
+                        <p className="text-xs text-primary font-body">
+                          <span className="font-medium">Fix:</span> {s.fix}
+                        </p>
+                      </>
+                    )}
                   </div>
                 ))}
               </div>
@@ -215,7 +281,7 @@ const DeckRoast = () => {
       {!result && (
         <div className="flex items-start gap-2 text-[11px] text-muted-foreground font-body italic justify-center">
           <FileWarning className="w-3.5 h-3.5 shrink-0 mt-0.5" />
-          <span>Only .pptx is supported today — export a Keynote or Google Slides deck to PowerPoint format first.</span>
+          <span>.pdf and .pptx are supported — export a Keynote, Canva, or Google Slides deck to one of those first.</span>
         </div>
       )}
     </div>
