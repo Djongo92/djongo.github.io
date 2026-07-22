@@ -129,7 +129,7 @@ const Workshop = ({ onBack, initialToolId }: Props) => {
     { id: "audit", tag: "Diagnose", title: "Practice Page Audit", blurb: "Score any practice page against the Chapter 8 framework.", icon: <AuditIcon size={18} />, render: () => <PracticePageAudit /> },
     { id: "headlines", tag: "Test", title: "Headline Lab", blurb: "20 angles, then a head-to-head tournament judged by AI.", icon: <HeadlinesIcon size={18} />, render: () => <HeadlineLab /> },
     { id: "teardown", tag: "Strategy", title: "Competitor Teardown", blurb: "Strong moves, weak spots, gaps you can own — and how.", icon: <TeardownIcon size={18} />, render: () => <CompetitorTeardown /> },
-    { id: "deck", tag: "Pitch", title: "Pitch Deck Drafter", blurb: "A 10-slide draft for a specific audience and opportunity — with a real .pptx download.", icon: <PitchDeckIcon size={18} />, render: () => <PitchDeck /> },
+    { id: "deck", tag: "Pitch", title: "Pitch Deck Drafter", blurb: "Pick your sections, draft a deck sized to fit — with a real .pptx download.", icon: <PitchDeckIcon size={18} />, render: () => <PitchDeck /> },
     { id: "deckroast", tag: "Diagnose", title: "Roast My Deck", blurb: "Upload an existing pitch deck — brutally honest, slide-by-slide critique.", icon: <DeckRoastIcon size={18} />, render: () => <DeckRoast /> },
     { id: "bio", tag: "Profile", title: "Bio Rewriter", blurb: "Rewrite an attorney bio with emphasis you control.", icon: <BioIcon size={18} />, render: () => <BioRewriter /> },
     { id: "calendar", tag: "Plan", title: "12-Month Calendar", blurb: "Themed content calendar with tempo, channels, and key moments.", icon: <CalendarIcon size={18} />, render: () => <MarketingCalendar /> },
