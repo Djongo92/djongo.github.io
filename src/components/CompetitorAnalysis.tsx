@@ -4,6 +4,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { Swords, Loader2, X, Plus, Trash2, ArrowRight, Download } from "lucide-react";
 import { useFirmContext } from "@/hooks/useFirmContext";
 import { saveCompetitor } from "@/hooks/useBattlePlanCache";
+import { isDemoMode } from "@/lib/demoMode";
 import { toast } from "sonner";
 
 const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL;
@@ -55,18 +56,22 @@ const CompetitorAnalysis = () => {
         return;
       }
       setResult(data);
-      try {
-        saveCompetitor({
-          yourUrl: data.meta?.yourUrl || yourUrl,
-          competitorUrls: data.meta?.competitorUrls || cleaned,
-          executiveSummary: data.executiveSummary,
-          yourPositioning: data.yourPositioning,
-          competitors: data.competitors || [],
-          gaps: data.gaps || [],
-          opportunities: data.opportunities || [],
-          recommendedMoves: data.recommendedMoves || [],
-        });
-      } catch { /* non-fatal */ }
+      // Demo mode still runs the real analysis but doesn't let it overwrite
+      // the demo's seeded Battle Plan sample — see RoastHomepage.tsx for why.
+      if (!isDemoMode()) {
+        try {
+          saveCompetitor({
+            yourUrl: data.meta?.yourUrl || yourUrl,
+            competitorUrls: data.meta?.competitorUrls || cleaned,
+            executiveSummary: data.executiveSummary,
+            yourPositioning: data.yourPositioning,
+            competitors: data.competitors || [],
+            gaps: data.gaps || [],
+            opportunities: data.opportunities || [],
+            recommendedMoves: data.recommendedMoves || [],
+          });
+        } catch { /* non-fatal */ }
+      }
       if (data.meta?.unreachable?.length) {
         toast.warning(`Couldn't load ${data.meta.unreachable.length} competitor site(s) — analysis based on the rest.`);
       }
@@ -222,6 +227,11 @@ const CompetitorAnalysis = () => {
 
                 {result && (
                   <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}>
+                    {isDemoMode() && (
+                      <p className="text-[11px] text-muted-foreground font-body italic mb-4">
+                        Demo mode — this real analysis won't be saved to your Battle Plan sample.
+                      </p>
+                    )}
                     {/* Executive summary */}
                     <div className="mb-6 pb-6 border-b border-border/40">
                       <p className="text-[10px] tracking-[0.2em] uppercase text-primary font-body mb-2">Executive Summary</p>

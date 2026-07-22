@@ -4,6 +4,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { Flame, Loader2, X, ArrowRight, Sparkles, Copy, Check } from "lucide-react";
 import { useFirmContext } from "@/hooks/useFirmContext";
 import { saveRoast } from "@/hooks/useBattlePlanCache";
+import { isDemoMode } from "@/lib/demoMode";
 import { toast } from "sonner";
 
 const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL;
@@ -70,18 +71,25 @@ const RoastHomepage = () => {
         return;
       }
       setResult(data);
-      try {
-        saveRoast({
-          url: data.url,
-          grade: data.grade,
-          verdict: data.verdict,
-          burn: data.burn,
-          topThreeFixes: data.topThreeFixes || [],
-          annotations: data.annotations || [],
-          redemption: data.redemption,
-          pageTitle: data.pageTitle,
-        });
-      } catch { /* non-fatal */ }
+      // Demo mode still runs the real critique (roasting your own actual
+      // site is a genuine reason to try the tool) but doesn't let that
+      // result silently overwrite the demo's seeded Battle Plan sample —
+      // that mismatch (Dashboard/PDF disagreeing) is exactly the bug class
+      // already fixed for Market Visibility Score.
+      if (!isDemoMode()) {
+        try {
+          saveRoast({
+            url: data.url,
+            grade: data.grade,
+            verdict: data.verdict,
+            burn: data.burn,
+            topThreeFixes: data.topThreeFixes || [],
+            annotations: data.annotations || [],
+            redemption: data.redemption,
+            pageTitle: data.pageTitle,
+          });
+        } catch { /* non-fatal */ }
+      }
     } catch {
       toast.error("Couldn't reach the AI service");
     } finally {
@@ -207,6 +215,11 @@ const RoastHomepage = () => {
 
                 {result && (
                   <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}>
+                    {isDemoMode() && (
+                      <p className="text-[11px] text-muted-foreground font-body italic mb-4">
+                        Demo mode — this real critique won't be saved to your Battle Plan sample.
+                      </p>
+                    )}
                     {/* Verdict */}
                     <div className="flex items-start gap-4 mb-6">
                       <div className={`shrink-0 w-16 h-16 rounded-sm border-2 flex items-center justify-center font-display text-3xl font-semibold ${gradeStyles[result.grade]}`}>

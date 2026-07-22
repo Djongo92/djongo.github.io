@@ -8,6 +8,7 @@ import HandoffButton from "./HandoffButton";
 import { useHandoffReceive } from "@/lib/handoff";
 import { recordRun } from "@/hooks/useWorkshopHistory";
 import { saveHeadlineWinner } from "@/hooks/useBattlePlanCache";
+import { isDemoMode } from "@/lib/demoMode";
 
 interface Headline { text: string; angle: string; score: number; why: string; }
 
@@ -91,9 +92,11 @@ const HeadlineLab = () => {
 
   const champion = bracket.length === 1 ? bracket[0] : null;
 
-  // When a champion is crowned, persist for the Battle Plan
+  // When a champion is crowned, persist for the Battle Plan — skipped in
+  // demo mode so a real tournament run doesn't overwrite the demo's seeded
+  // Battle Plan sample (see RoastHomepage.tsx for why).
   useEffect(() => {
-    if (champion) {
+    if (champion && !isDemoMode()) {
       saveHeadlineWinner({
         text: champion.text,
         angle: champion.angle,
@@ -187,6 +190,11 @@ const HeadlineLab = () => {
 
         {champion && (
           <motion.div initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} className="bg-primary/10 border-2 border-primary rounded-sm p-8 text-center">
+            {isDemoMode() && (
+              <p className="text-[11px] text-muted-foreground font-body italic mb-3">
+                Demo mode — this champion won't be saved to your Battle Plan sample.
+              </p>
+            )}
             <Crown className="w-8 h-8 text-primary mx-auto mb-3" />
             <div className="text-[10px] uppercase tracking-[0.3em] text-primary font-body mb-2">Champion headline</div>
             <p className="font-display text-3xl text-foreground mb-3">{champion.text}</p>

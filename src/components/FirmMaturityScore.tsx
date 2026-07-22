@@ -7,6 +7,7 @@ import { useFirmContext } from "@/hooks/useFirmContext";
 import { streamSSE } from "@/lib/streamSSE";
 import { toast } from "sonner";
 import { saveMaturity } from "@/hooks/useBattlePlanCache";
+import { isDemoMode } from "@/lib/demoMode";
 import ModalShell from "@/components/ui/modal-shell";
 
 const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL;
@@ -45,7 +46,10 @@ const FirmMaturityScore = ({ open, onClose }: Props) => {
 
   // When the plan finishes streaming, top up the saved maturity cache with the plan text
   useEffect(() => {
-    if (!loading && plan && phase === "report") {
+    // Demo mode still runs the real survey + plan generation but doesn't let
+    // it overwrite the demo's seeded Battle Plan sample — see
+    // RoastHomepage.tsx for why.
+    if (!loading && plan && phase === "report" && !isDemoMode()) {
       const payload = DIMENSIONS.map((d) => ({ label: d.label, score: scores[d.key] ?? 3 }));
       const avgPct = Math.round((payload.reduce((a, b) => a + b.score, 0) / payload.length) * 20);
       saveMaturity({ score: avgPct, dimensions: payload, plan });
@@ -83,13 +87,15 @@ const FirmMaturityScore = ({ open, onClose }: Props) => {
       if (resp.status === 402) { toast.error("AI credits exhausted."); return; }
       if (!resp.ok) throw new Error("Stream failed");
       await streamSSE(resp, (full) => setPlan(full));
-      // Persist for Battle Plan
-      const avgPct = Math.round((payload.reduce((a, b) => a + b.score, 0) / payload.length) * 20);
-      saveMaturity({
-        score: avgPct,
-        dimensions: payload.map((d) => ({ label: d.dimension, score: d.score })),
-        plan: "", // populated after streaming completes via effect below if needed
-      });
+      // Persist for Battle Plan (skipped in demo mode — see effect above)
+      if (!isDemoMode()) {
+        const avgPct = Math.round((payload.reduce((a, b) => a + b.score, 0) / payload.length) * 20);
+        saveMaturity({
+          score: avgPct,
+          dimensions: payload.map((d) => ({ label: d.dimension, score: d.score })),
+          plan: "", // populated after streaming completes via effect below if needed
+        });
+      }
     } catch (e) {
       console.error(e);
       toast.error("Couldn't generate plan.");
@@ -186,6 +192,11 @@ const FirmMaturityScore = ({ open, onClose }: Props) => {
 
             {phase === "report" && (
               <div className="p-8">
+                {isDemoMode() && (
+                  <p className="text-[11px] text-muted-foreground font-body italic text-center mb-4">
+                    Demo mode — this real result won't be saved to your Battle Plan sample.
+                  </p>
+                )}
                 <div className="text-center mb-8">
                   <div className="font-display text-5xl text-primary font-semibold mb-2">{avg}<span className="text-2xl text-muted-foreground">/100</span></div>
                   <p className="text-xs tracking-[0.3em] uppercase text-muted-foreground font-body">Maturity Index</p>
