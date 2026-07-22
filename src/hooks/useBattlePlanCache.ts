@@ -70,6 +70,7 @@ export interface BioCache {
 
 export interface VisibilityScoreCache {
   auditedDomain: string;
+  displayName?: string | null;
   market: string;
   peerGroup: string;
   totalScore: number;       // / 200

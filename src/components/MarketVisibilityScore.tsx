@@ -68,6 +68,7 @@ const MarketVisibilityScore = () => {
     }
     saveVisibilityScore({
       auditedDomain: auditedDomain.trim(),
+      displayName: displayName.trim() || undefined,
       market,
       peerGroup,
       totalScore: audit.totalScore,

@@ -6,7 +6,7 @@
 import type { AuditRow, HistoryRow } from "@/components/dashboard/CommandCenter";
 import type { WorkshopRun } from "@/hooks/useWorkshopHistory";
 import type {
-  RoastCache, CompetitorCache, RoadmapCache, MaturityCache, HeadlineWinnerCache, BioCache,
+  RoastCache, CompetitorCache, RoadmapCache, MaturityCache, HeadlineWinnerCache, BioCache, VisibilityScoreCache,
 } from "@/hooks/useBattlePlanCache";
 import type { FirmContext } from "@/hooks/useFirmContext";
 
@@ -107,6 +107,17 @@ export const DEMO_READ_CHAPTER_IDS = [
   "messaging-positioning",
 ];
 
+// A couple of quick-win action items already checked off — enough to show
+// this is a firm actively working the plan, not one where 7/7 analyses
+// ran but zero follow-through happened. Deliberately leaves the two
+// items the Roast/Roadmap explicitly call out as still-open (rewriting
+// the practice page, fixing the stale copyright) unchecked — marking
+// those done would contradict the rest of the Battle Plan's own narrative.
+export const DEMO_IMPLEMENTATION: Record<string, Record<number, boolean>> = {
+  "website-checklist": { 0: true },
+  "google-search-console": { 0: true },
+};
+
 export const DEMO_WORKSHOP_RUNS: WorkshopRun[] = [
   {
     id: "demo-run-1",
@@ -150,14 +161,19 @@ export const DEMO_WORKSHOP_RUNS: WorkshopRun[] = [
   },
 ];
 
+// Dimension scores are on the same 1-5 scale FirmMaturityScore.tsx's own
+// survey uses (1 "Not at all" .. 5 "Best in class") — the PDF table
+// renders them as "score / 5", so anything outside that range (an
+// earlier version of this data used a 0-100 scale here) shows up as
+// obvious nonsense like "55 / 5".
 export const DEMO_MATURITY: Omit<MaturityCache, "capturedAt"> = {
-  score: 62,
+  score: 60,
   dimensions: [
-    { label: "Website & Digital Presence", score: 55 },
-    { label: "Content & Thought Leadership", score: 70 },
-    { label: "Brand & Positioning", score: 45 },
-    { label: "Client Experience", score: 75 },
-    { label: "Marketing Operations", score: 60 },
+    { label: "Website & Digital Presence", score: 3 },
+    { label: "Content & Thought Leadership", score: 3 },
+    { label: "Brand & Positioning", score: 2 },
+    { label: "Client Experience", score: 4 },
+    { label: "Marketing Operations", score: 3 },
   ],
   plan: "## Your 30-Day Plan\n\n**Week 1-2:** Rewrite the Corporate/M&A practice page — lead with named deal experience, not generic capability language.\n\n**Week 3:** Publish one bylined article on cross-border deal structuring under a partner's name.\n\n**Week 4:** Claim and complete your Google Business Profile; audit for broken links and stale copyright.",
 };
@@ -200,9 +216,99 @@ export const DEMO_ROADMAP: Omit<RoadmapCache, "capturedAt"> = {
       focus: "Fix the practice area page and site health basics",
       actions: [
         { title: "Rewrite Corporate/M&A practice page", why: "Currently scores 4/10 on positioning clarity", chapterRef: "practice-area-pages" },
+        { title: "Fix the stale 2023 copyright year and 1 broken team-page link", why: "A prospective client notices unmaintained details right before they decide you're not actively managing your public presence", chapterRef: "website-checklist" },
+      ],
+    },
+    {
+      label: "Phase 2 — Momentum (Weeks 3-6)",
+      focus: "Convert real deal experience and Chambers standing into visible proof",
+      actions: [
+        { title: "Publish a tombstone wall of your last 10 closed deals", why: "Chambers Band 2 and Legal 500 Tier 2 standing isn't doing any work if a prospective client can't verify it on the site", chapterRef: "building-credibility" },
+        { title: "Publish one bylined article on cross-border deal structuring", why: "Thought Leadership is scoring under half its points — this is the most controllable category in the whole audit", chapterRef: "thought-leadership" },
+        { title: "Claim and complete your Google Business Profile", why: "A free, 10-point line item that's currently unclaimed", chapterRef: "google-search-console" },
+      ],
+    },
+    {
+      label: "Phase 3 — Compounding (Weeks 7-12)",
+      focus: "Turn one-off wins into a cadence competitors can't easily match",
+      actions: [
+        { title: "Commit to a monthly bylined-content and deal-announcement cadence", why: "BDK Advokati's publishing rhythm is inconsistent enough to out-publish with a real schedule, not a burst", chapterRef: "marketing-as-strategy" },
+        { title: "Rework homepage and practice-page copy around named outcomes", why: "\"Trusted advisors delivering results-driven solutions\" reads like every other regional firm's homepage", chapterRef: "messaging-positioning" },
       ],
     },
   ],
+};
+
+// BDK Advokati is a real firm from the verified Serbia seed data (see
+// CLAUDE.md) — using it here (rather than an invented competitor) means
+// the demo Battle Plan's Competitive Position section stays consistent
+// with what the Visibility/Recognition Index pages would actually show
+// for this market.
+export const DEMO_COMPETITOR: Omit<CompetitorCache, "capturedAt"> = {
+  yourUrl: "https://petrovicpartners.rs",
+  competitorUrls: ["https://bdkadvokati.com"],
+  executiveSummary:
+    "Petrović & Partners and BDK Advokati sit close on paper — both ranked for Corporate/M&A in Chambers and Legal 500 — but BDK is winning the visibility fight: a maintained deal page, a steadier press cadence, and named partner bylines. Petrović & Partners has comparable deal experience and isn't saying so anywhere on the site.",
+  yourPositioning: {
+    summary: "A credible mid-market M&A practice that reads as generic online — the website doesn't back up what the Chambers ranking already confirms about you.",
+    strengths: [
+      "Real Chambers Band 2 and Legal 500 Tier 2 standing in Corporate/M&A",
+      "Genuine cross-border deal experience across CEE, concentrated in manufacturing and logistics",
+    ],
+    weaknesses: [
+      "No deal tombstones or case studies published anywhere on the site",
+      "Homepage copy is generic — could belong to any regional firm",
+      "No bylined content in the last 90 days",
+    ],
+  },
+  competitors: [
+    {
+      url: "https://bdkadvokati.com",
+      positioning: "Positions as the go-to for cross-border corporate work, backed by a visible, regularly updated deal page.",
+      doingBetter: [
+        "Publishes a tombstone wall of named, dated deals",
+        "Partners quoted in regional press roughly monthly",
+        "Practice-area copy is specific rather than generic",
+      ],
+      doingWorse: [
+        "Slower page load on mobile",
+        "No visible client-facing content calendar",
+      ],
+    },
+  ],
+  gaps: [
+    { gap: "No public deal record", why: "A prospective client can't verify deal experience Chambers already confirms is real — the ranking isn't doing any work on the website." },
+    { gap: "Zero bylined thought leadership in the last quarter", why: "BDK's partners are quoted in the regional press; yours aren't, which cedes the \"who do I call about cross-border M&A\" question by default." },
+  ],
+  opportunities: [
+    "Own the \"named deal experience\" angle BDK hasn't claimed — publish a tombstone wall with real, dated deals",
+    "Pitch one bylined article per month on cross-border deal structuring — BDK's cadence is inconsistent enough to out-publish with a real schedule",
+  ],
+  recommendedMoves: [
+    { move: "Publish a tombstone wall of your last 10 closed deals", impact: "high", effort: "low" },
+    { move: "Get one partner bylined article placed this quarter", impact: "high", effort: "medium" },
+    { move: "Rewrite the Corporate/M&A practice page around named outcomes", impact: "medium", effort: "low" },
+  ],
+};
+
+// Mirrors DEMO_AUDIT exactly — the Battle Plan's Visibility Score section
+// and the Dashboard's own hero card should always agree on the number,
+// since in a real account both read from the same audit row.
+export const DEMO_VISIBILITY_SCORE: Omit<VisibilityScoreCache, "capturedAt"> = {
+  auditedDomain: DEMO_DOMAIN,
+  displayName: DEMO_DISPLAY_NAME,
+  market: "serbia",
+  peerGroup: "regional",
+  totalScore: DEMO_AUDIT.total_score,
+  categories: {
+    performance: { score: DEMO_AUDIT.performance_score, provenance: DEMO_AUDIT.provenance.performance },
+    social: { score: DEMO_AUDIT.social_score, provenance: DEMO_AUDIT.provenance.social },
+    seoAuthority: { score: DEMO_AUDIT.seo_authority_score, provenance: DEMO_AUDIT.provenance.seoAuthority },
+    thoughtLeadership: { score: DEMO_AUDIT.thought_leadership_score, provenance: DEMO_AUDIT.provenance.thoughtLeadership },
+    reputation: { score: DEMO_AUDIT.reputation_score, provenance: DEMO_AUDIT.provenance.reputation },
+  },
+  percentile: DEMO_AUDIT.percentile ?? null,
+  peerCount: DEMO_AUDIT.peer_count ?? 0,
 };
 
 export const DEMO_STRATEGY_BRIEF = {
@@ -216,11 +322,14 @@ export function seedDemoData() {
   localStorage.setItem("guidebook_reading_progress", JSON.stringify(DEMO_READ_CHAPTER_IDS));
   localStorage.setItem("guidebook_last_read", DEMO_READ_CHAPTER_IDS[DEMO_READ_CHAPTER_IDS.length - 1]);
   localStorage.setItem("workshop_run_history", JSON.stringify(DEMO_WORKSHOP_RUNS));
+  localStorage.setItem("guidebook_implementation", JSON.stringify(DEMO_IMPLEMENTATION));
   localStorage.setItem("guidebook_battleplan_maturity", JSON.stringify({ ...DEMO_MATURITY, capturedAt: now }));
   localStorage.setItem("guidebook_battleplan_roast", JSON.stringify({ ...DEMO_ROAST, capturedAt: now }));
   localStorage.setItem("guidebook_battleplan_headline", JSON.stringify({ ...DEMO_HEADLINE, capturedAt: now }));
   localStorage.setItem("guidebook_battleplan_bio", JSON.stringify({ ...DEMO_BIO, capturedAt: now }));
   localStorage.setItem("guidebook_battleplan_roadmap", JSON.stringify({ ...DEMO_ROADMAP, capturedAt: now }));
+  localStorage.setItem("guidebook_battleplan_competitor", JSON.stringify({ ...DEMO_COMPETITOR, capturedAt: now }));
+  localStorage.setItem("guidebook_battleplan_visibility", JSON.stringify({ ...DEMO_VISIBILITY_SCORE, capturedAt: now }));
 }
 
 const SEEDED_KEYS = [
@@ -228,11 +337,14 @@ const SEEDED_KEYS = [
   "guidebook_reading_progress",
   "guidebook_last_read",
   "workshop_run_history",
+  "guidebook_implementation",
   "guidebook_battleplan_maturity",
   "guidebook_battleplan_roast",
   "guidebook_battleplan_headline",
   "guidebook_battleplan_bio",
   "guidebook_battleplan_roadmap",
+  "guidebook_battleplan_competitor",
+  "guidebook_battleplan_visibility",
 ];
 
 export function clearDemoData() {
