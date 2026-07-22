@@ -41,7 +41,7 @@ const SettingsPage = lazy(() => import("@/components/settings/SettingsPage"));
 // ScoreWebsite, RoastHomepage, CompetitorAnalysis, MarketVisibilityScore,
 // AskTheBook) plus BattlePlan/jsPDF — same reasoning as the above three.
 const ProgressDashboard = lazy(() => import("@/components/ProgressDashboard"));
-// The Workshop's ten tools (each its own sub-component) and these three
+// The Workshop's eleven tools (each its own sub-component) and these three
 // opt-in modals were previously eagerly imported here, meaning every
 // visitor — including an anonymous SignInGate view that never
 // authenticates — downloaded them as part of the main bundle. None of the
@@ -61,7 +61,7 @@ const COACH_MARK_STEPS: CoachMarkStep[] = [
   },
   {
     target: "nav-workshop",
-    title: "Ten AI tools live here",
+    title: "Eleven AI tools live here",
     body: "Headline testing, competitor teardowns, practice-page audits, and more — each one grounded in your own firm's context.",
   },
   {

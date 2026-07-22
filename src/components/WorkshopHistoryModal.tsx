@@ -81,7 +81,7 @@ const WorkshopHistoryModal = ({ open, onClose, onOpenWorkshopTool }: Props) => {
             <div className="p-6 overflow-y-auto flex-1">
               {filtered.length === 0 ? (
                 <p className="text-sm text-muted-foreground font-body italic">
-                  {runs.length === 0 ? "Nothing run yet — the Workshop's ten tools are one click away." : "No runs match that search."}
+                  {runs.length === 0 ? "Nothing run yet — the Workshop's eleven tools are one click away." : "No runs match that search."}
                 </p>
               ) : (
                 <div className="space-y-2">

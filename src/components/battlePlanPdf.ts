@@ -174,7 +174,7 @@ export function buildPdf({ roast, competitor, roadmap, maturity, headline, bio, 
   drawStat(doc, margin + (contentW / 3), statY, "IMPLEMENTATION", `${implementationScore}%`, `actions executed`);
   const allInputs = [roast, competitor, roadmap, maturity, headline, bio, visibilityScore];
   const inputsCount = allInputs.filter(Boolean).length;
-  drawStat(doc, margin + (contentW / 3) * 2, statY, "ANALYSES RUN", `${inputsCount}/${allInputs.length}`, `intelligence gathered`);
+  drawStat(doc, margin + (contentW / 3) * 2, statY, "ANALYSES RUN", `${inputsCount}/${allInputs.length}`, `of ${allInputs.length} Battle Plan inputs`);
 
   // Footer on cover
   const today = new Date().toLocaleDateString("en-US", { year: "numeric", month: "long", day: "numeric" });
@@ -387,14 +387,14 @@ export function buildPdf({ roast, competitor, roadmap, maturity, headline, bio, 
     doc.setFont(SANS, "italic");
     doc.setFontSize(9);
     doc.setTextColor(...GOLD);
-    doc.text("Self-assessed across 12 marketing dimensions", margin + 110, cursor + 24);
+    doc.text(`Self-assessed across ${maturity.dimensions.length} marketing dimensions, 1 (not at all) to 5 (best in class)`, margin + 110, cursor + 24);
     cursor += 56;
 
     // Dimension table
     autoTable(doc, {
       startY: cursor,
       margin: { left: margin, right: margin },
-      head: [["Dimension", "Score"]],
+      head: [["Dimension", "Score (of 5)"]],
       body: maturity.dimensions.map((d) => [d.label, `${d.score} / 5`]),
       headStyles: { fillColor: NAVY, textColor: GOLD_LIGHT, fontStyle: "bold", fontSize: 9 },
       bodyStyles: { fontSize: 9, textColor: INK, valign: "top", cellPadding: 6 },
@@ -509,6 +509,64 @@ export function buildPdf({ roast, competitor, roadmap, maturity, headline, bio, 
       styles: { font: SANS, lineColor: RULE, lineWidth: 0.5 },
     });
     cursor = (doc as any).lastAutoTable.finalY + 16;
+
+    // How this score was calculated — every figure above traced back to
+    // its formula and this firm's actual measured inputs, so the number
+    // is never just "trust us."
+    cursor = ensureSpace(doc, cursor, 90);
+    cursor = drawSubheader(doc, "How this score was calculated", cursor);
+    doc.setFont(SANS, "italic");
+    doc.setFontSize(8.5);
+    doc.setTextColor(...MUTED);
+    const methodIntro = doc.splitTextToSize(
+      "Each category is peer-group-normalized against other firms actually audited in this market — not an internal estimate. The rule is shown first, then this firm's own measured inputs.",
+      contentW
+    );
+    doc.text(methodIntro, margin, cursor);
+    cursor += methodIntro.length * 11 + 10;
+
+    CATEGORY_ORDER.forEach((key: CategoryKey) => {
+      cursor = ensureSpace(doc, cursor, 55);
+      const cat = visibilityScore.categories[key];
+      const meta = CATEGORY_META[key];
+      const scoreLabel = cat ? `${Math.round(cat.score * 10) / 10} / ${meta.max}` : `— / ${meta.max}`;
+
+      doc.setFont(SANS, "bold");
+      doc.setFontSize(10);
+      doc.setTextColor(...NAVY);
+      doc.text(`${meta.label} — ${scoreLabel}`, margin, cursor);
+      cursor += 12;
+
+      doc.setFont(SANS, "italic");
+      doc.setFontSize(7.5);
+      doc.setTextColor(...GOLD);
+      const formulaLines = doc.splitTextToSize(CATEGORY_FORMULA[key], contentW);
+      doc.text(formulaLines, margin, cursor);
+      cursor += formulaLines.length * 9 + 3;
+
+      doc.setFont(SANS, "normal");
+      doc.setFontSize(9);
+      doc.setTextColor(...INK);
+      const inputLine = cat?.provenance === "missing"
+        ? "Not yet configured for this audit — shown as pending rather than a silent zero."
+        : (CATEGORY_INPUTS[key](visibilityScore.rawMetrics) ?? "Raw inputs weren't recorded for this run.");
+      const inputLines = doc.splitTextToSize(inputLine, contentW);
+      doc.text(inputLines, margin, cursor);
+      cursor += inputLines.length * 11 + 10;
+    });
+
+    if (visibilityScore.percentile !== null) {
+      doc.setFont(SANS, "italic");
+      doc.setFontSize(8.5);
+      doc.setTextColor(...MUTED);
+      const percentileNote = doc.splitTextToSize(
+        `Percentile: this firm's total score ranked against every other published audit in the same market and peer group at the time this report ran (${visibilityScore.peerCount} firms).`,
+        contentW
+      );
+      cursor = ensureSpace(doc, cursor, percentileNote.length * 11 + 8);
+      doc.text(percentileNote, margin, cursor);
+      cursor += percentileNote.length * 11 + 8;
+    }
   }
 
   // ── Final page: signature line ──
@@ -748,6 +806,81 @@ function gradeColor(grade: string): [number, number, number] {
   if (grade === "C") return GOLD;
   return RED;
 }
+
+// ── Visibility Score methodology appendix ──
+// The formula shapes here are the public methodology (see the scoring
+// reference this product is built on) — condensed, not simplified into
+// something that no longer matches what actually ran. Peer-group maxima
+// used inside "peer-normalized" formulas live server-side (they change as
+// more firms get audited), so this appendix states the rule and this
+// firm's actual measured inputs rather than fabricating a fake peer max
+// client-side just to show a complete equation.
+const CATEGORY_FORMULA: Record<CategoryKey, string> = {
+  performance: "10 x (desktop + mobile Lighthouse performance avg) / 100 + 5 x (accessibility avg) / 100 + 5 x (SEO avg) / 100",
+  social: "Peer-normalized LinkedIn followers, posts, and engagement rate (5+5+6 pts) + up to 4 pts per platform claimed",
+  seoAuthority: "6 Ahrefs/Moz authority metrics, each 10 x (this firm's value / peer-group maximum)",
+  thoughtLeadership: "25 x (posts / peer-group max) + 5 x (byline %) + 15 x (press mentions / peer-group max), over a 60-day window. Press mentions are verified via Google News, excluding the firm's own site.",
+  reputation: "10 x Google Business Profile claimed + Chambers (band avg + ranked-table count/N) + Legal 500 (tier avg + count/N) + IFLR1000 (count/N + tier avg)",
+};
+
+function formatPerformanceInputs(raw: any): string | null {
+  const p = raw?.performance;
+  if (!p) return null;
+  const parts: string[] = [];
+  if (p.desktop?.performance != null && p.mobile?.performance != null) {
+    const avg = p.perfAvg ?? Math.round((p.desktop.performance + p.mobile.performance) / 2);
+    parts.push(`Desktop ${p.desktop.performance} / Mobile ${p.mobile.performance} (avg ${avg})`);
+  }
+  if (p.accessAvg != null) parts.push(`Accessibility avg ${p.accessAvg}`);
+  if (p.seoAvg != null) parts.push(`SEO avg ${p.seoAvg}`);
+  return parts.length ? parts.join(" · ") : null;
+}
+
+function formatSocialInputs(raw: any): string | null {
+  const s = raw?.social;
+  if (!s) return null;
+  const parts: string[] = [];
+  if (s.followers != null) parts.push(`${Number(s.followers).toLocaleString()} LinkedIn followers`);
+  if (s.posts30d != null) parts.push(`${s.posts30d} posts in the last 30 days`);
+  if (s.engagementRate != null) parts.push(`${s.engagementRate}% engagement`);
+  if (s.platformCount != null) parts.push(`${s.platformCount} of 4 platforms claimed`);
+  return parts.length ? parts.join(" · ") : null;
+}
+
+function formatThoughtLeadershipInputs(raw: any): string | null {
+  const t = raw?.thoughtLeadership;
+  if (!t) return null;
+  const parts: string[] = [];
+  if (t.postsCount != null) parts.push(`${t.postsCount} blog post${t.postsCount === 1 ? "" : "s"}`);
+  if (t.bylinePct != null) parts.push(`${t.bylinePct}% carry a named byline`);
+
+  const mentions: { title: string; source: string }[] = Array.isArray(t.pressMentions) ? t.pressMentions : [];
+  if (mentions.length > 0) {
+    const cited = mentions.slice(0, 2).map((m) => `"${m.title}" (${m.source})`).join("; ");
+    parts.push(`${mentions.length} press mention${mentions.length === 1 ? "" : "s"} independently verified — ${cited}${mentions.length > 2 ? "; …" : ""}`);
+  } else if (t.newsCount != null) {
+    parts.push(`${t.newsCount} press mention${t.newsCount === 1 ? "" : "s"} found via Google News`);
+  }
+  return parts.length ? parts.join(" · ") : null;
+}
+
+function formatReputationInputs(raw: any): string | null {
+  const r = raw?.reputation;
+  if (!r) return null;
+  const parts: string[] = [r.gbpListed ? "Google Business Profile claimed" : "Google Business Profile not claimed"];
+  if (r.chambers?.count) parts.push(`Chambers: ${r.chambers.count} ranked table${r.chambers.count > 1 ? "s" : ""}, avg band ${r.chambers.avgRank}`);
+  if (r.legal500?.count) parts.push(`Legal 500: ${r.legal500.count} ranked table${r.legal500.count > 1 ? "s" : ""}, avg tier ${r.legal500.avgRank}`);
+  if (r.iflr1000?.count) parts.push(`IFLR1000: ${r.iflr1000.count} ranked table${r.iflr1000.count > 1 ? "s" : ""}, avg tier ${r.iflr1000.avgRank}`);
+  return parts.join(" · ");
+}
+
+const CATEGORY_INPUTS: Record<CategoryKey, (raw: any) => string | null> = {
+  performance: formatPerformanceInputs,
+  social: formatSocialInputs,
+  seoAuthority: () => null,
+  thoughtLeadership: formatThoughtLeadershipInputs,
+  reputation: formatReputationInputs,
+};
 
 // Crude markdown → plain text for PDF rendering. Every call site renders
 // this under a section subheader battlePlanPdf.ts already drew (e.g.

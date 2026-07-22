@@ -92,11 +92,19 @@ export interface SocialRaw {
   platformCount?: number;
 }
 
+export interface PressMention {
+  title: string;
+  source: string;
+  link: string;
+  date: string;
+}
+
 export interface ThoughtLeadershipRaw {
   postsCount?: number;
   newsCount?: number;
   bylinePct?: number;
   items?: ThoughtLeadershipItem[];
+  pressMentions?: PressMention[];
 }
 
 export interface ReputationRaw {
@@ -356,7 +364,7 @@ const CommandCenter = ({
               <span className="text-[10px] tracking-[0.2em] uppercase text-primary font-body">In the meantime</span>
             </div>
             <p className="text-sm text-secondary-foreground/80 font-body mb-4">
-              The Workshop's ten AI tools don't need an audit to be useful — draft copy, audit a page, generate a
+              The Workshop's eleven AI tools don't need an audit to be useful — draft copy, audit a page, generate a
               marketing calendar, whatever you need right now.
             </p>
             <button
@@ -637,7 +645,7 @@ const CommandCenter = ({
             <h2 className="font-display text-base text-foreground mb-4">Recent Workshop Activity</h2>
             {runs.length === 0 ? (
               <p className="text-xs text-muted-foreground font-body">
-                Nothing run yet — the Workshop's ten tools are one click away.
+                Nothing run yet — the Workshop's eleven tools are one click away.
               </p>
             ) : (
               <div className="space-y-3">

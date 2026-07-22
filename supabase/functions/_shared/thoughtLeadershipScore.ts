@@ -1,10 +1,19 @@
 // Thought Leadership category (45 pts): 25×posts/peer-max + 5×byline% +
 // 15×news/peer-max, over the market's contentWindowDays.
 //
-// "posts" = self-authored blog content (type "blog"), "news" = external
-// press mentions (type "news"). Byline% is measured over posts only — a
-// news mention about the firm doesn't carry an authorship byline the way
-// a blog post does.
+// "posts" = self-authored blog content (type "blog"), scraped from the
+// firm's own site and LLM-classified — legitimate to self-source since
+// it's measuring the firm's own output. Byline% is measured over posts
+// only — a press mention about the firm doesn't carry an authorship
+// byline the way a blog post does.
+//
+// "news" used to ALSO come from that same self-scraped page (an LLM
+// tagging items as type "news"), which meant a firm could inflate its own
+// "press coverage" score just by writing about itself — no independent
+// check. It now comes from findPressMentions(), a real query against
+// Google News' public RSS search with the firm's own domain explicitly
+// excluded from the results — a source the firm doesn't control. See
+// pressMentionsFormula.ts for the exclusion logic.
 //
 // peer-max here means the live current maximum among OTHER published
 // audits sharing market+peer_group (raw_metrics.thoughtLeadership), per
@@ -19,6 +28,8 @@ import { getCached, setCached } from "./cache.ts";
 import { DMV_MARKETS } from "./marketVisibilityConfig.ts";
 import { peerMaxFor } from "./peerMax.ts";
 import { filterToWindow, aggregateContentItems, calculateThoughtLeadershipScore, type ContentItem } from "./thoughtLeadershipFormula.ts";
+import { findPressMentions } from "./pressMentions.ts";
+import type { PressMention } from "./pressMentionsFormula.ts";
 import { callClaudeTool } from "./anthropic.ts";
 
 const SEVEN_DAYS_MS = 7 * 24 * 60 * 60 * 1000;
@@ -27,7 +38,7 @@ export type { ContentItem };
 
 export interface ThoughtLeadershipResult {
   score: number;
-  raw: { postsCount: number; newsCount: number; bylinePct: number; items: ContentItem[] };
+  raw: { postsCount: number; newsCount: number; bylinePct: number; items: ContentItem[]; pressMentions: PressMention[] };
   provenance: "ai_classified" | "missing";
 }
 
@@ -69,11 +80,12 @@ export async function computeThoughtLeadershipScore(
   market: string,
   peerGroup: string,
   url: string,
+  displayName?: string | null,
 ): Promise<ThoughtLeadershipResult> {
   const apiKey = Deno.env.get("ANTHROPIC_API_KEY");
   if (!apiKey) {
     console.warn("[visibility-audit-thought-leadership] ANTHROPIC_API_KEY not configured — scoring as missing");
-    return { score: 0, raw: { postsCount: 0, newsCount: 0, bylinePct: 0, items: [] }, provenance: "missing" };
+    return { score: 0, raw: { postsCount: 0, newsCount: 0, bylinePct: 0, items: [], pressMentions: [] }, provenance: "missing" };
   }
 
   const normalizedUrl = normalizeUrl(url);
@@ -104,14 +116,24 @@ export async function computeThoughtLeadershipScore(
       await setCached(cached.key, "visibility-audit-thought-leadership", normalizedUrl, { items }, SEVEN_DAYS_MS);
     } catch (e) {
       console.error("[visibility-audit-thought-leadership] fetch/extract failed:", e);
-      return { score: 0, raw: { postsCount: 0, newsCount: 0, bylinePct: 0, items: [] }, provenance: "missing" };
+      return { score: 0, raw: { postsCount: 0, newsCount: 0, bylinePct: 0, items: [], pressMentions: [] }, provenance: "missing" };
     }
   }
 
   const marketConfig = DMV_MARKETS[market];
   const windowDays = marketConfig?.contentWindowDays ?? 60;
   const inWindow = filterToWindow(items, windowDays);
-  const { postsCount, newsCount, bylinePct } = aggregateContentItems(inWindow);
+  const { postsCount, bylinePct } = aggregateContentItems(inWindow);
+
+  // Real, external check — not the self-scraped "type: news" items above.
+  // Falls back to the page title (best-effort) if no firm name was given;
+  // an empty query short-circuits to no mentions rather than a noisy guess.
+  const searchName = (displayName ?? "").trim() || pageTitle;
+  const pressMentions = await findPressMentions(searchName, normalizedUrl, windowDays).catch((e) => {
+    console.error("[visibility-audit-thought-leadership] press mention lookup failed:", e);
+    return [];
+  });
+  const newsCount = pressMentions.length;
 
   const postsPeerMax = await peerMaxFor(serviceClient, market, peerGroup, "thoughtLeadership", "postsCount", postsCount);
   const newsPeerMax = await peerMaxFor(serviceClient, market, peerGroup, "thoughtLeadership", "newsCount", newsCount);
@@ -120,7 +142,7 @@ export async function computeThoughtLeadershipScore(
 
   return {
     score,
-    raw: { postsCount, newsCount, bylinePct, items: inWindow },
+    raw: { postsCount, newsCount, bylinePct, items: inWindow, pressMentions },
     provenance: "ai_classified",
   };
 }

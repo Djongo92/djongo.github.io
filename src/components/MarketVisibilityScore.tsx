@@ -2,9 +2,29 @@ import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { ShieldCheck, X, Loader2, TrendingUp, Share2, CheckCircle2, Globe } from "lucide-react";
 import { toast } from "sonner";
-import { useMarketVisibility } from "@/hooks/useMarketVisibility";
+import { useMarketVisibility, type AuditResult } from "@/hooks/useMarketVisibility";
 import { saveVisibilityScore } from "@/hooks/useBattlePlanCache";
 import { DMV_MARKETS, PEER_GROUPS } from "@/lib/marketVisibilityConfig";
+import { isDemoMode } from "@/lib/demoMode";
+import { DEMO_AUDIT, DEMO_VISIBILITY_SCORE, DEMO_DOMAIN, DEMO_DISPLAY_NAME } from "@/data/demoData";
+
+// Demo mode never touches the real audit backend — running a live PageSpeed/
+// directory/thought-leadership audit against whatever the visitor happens to
+// type would (a) burn real API quota on garbage input and (b) can silently
+// fuzzy-match a REAL firm from the seed data (e.g. a real Serbia firm), which
+// then overwrites the demo's Battle Plan cache with an unrelated, real,
+// low-scoring result — exactly the "wrong firm / score mismatch" bug this
+// guards against. So in demo mode the intake is locked to the sample firm
+// and "running" the audit just replays DEMO_AUDIT locally, no network call.
+const buildDemoAuditResult = (): AuditResult => ({
+  id: DEMO_AUDIT.id,
+  isPublic: false,
+  totalScore: DEMO_AUDIT.total_score,
+  categories: DEMO_VISIBILITY_SCORE.categories as AuditResult["categories"],
+  rawMetrics: (DEMO_AUDIT.raw_metrics ?? {}) as Record<string, unknown>,
+  percentile: DEMO_VISIBILITY_SCORE.percentile,
+  peerCount: DEMO_VISIBILITY_SCORE.peerCount,
+});
 
 const CATEGORY_LABELS: Record<string, { label: string; max: number }> = {
   performance: { label: "Performance", max: 20 },
@@ -22,17 +42,20 @@ const PROVENANCE_LABEL: Record<string, string> = {
 };
 
 const MarketVisibilityScore = () => {
+  const demoMode = isDemoMode();
   const [open, setOpen] = useState(false);
-  const [auditedDomain, setAuditedDomain] = useState("");
-  const [displayName, setDisplayName] = useState("");
-  const [market, setMarket] = useState("serbia");
-  const [peerGroup, setPeerGroup] = useState("regional");
-  const [gbpListed, setGbpListed] = useState(false);
+  const [auditedDomain, setAuditedDomain] = useState(demoMode ? DEMO_DOMAIN : "");
+  const [displayName, setDisplayName] = useState(demoMode ? DEMO_DISPLAY_NAME : "");
+  const [market, setMarket] = useState(demoMode ? DEMO_VISIBILITY_SCORE.market : "serbia");
+  const [peerGroup, setPeerGroup] = useState(demoMode ? DEMO_VISIBILITY_SCORE.peerGroup : "regional");
+  const [gbpListed, setGbpListed] = useState(demoMode);
   const [followers, setFollowers] = useState("");
   const [posts30d, setPosts30d] = useState("");
   const [engagementRate, setEngagementRate] = useState("");
   const [platforms, setPlatforms] = useState({ linkedin: false, instagram: false, twitter: false, facebook: false });
-  const { loading, publishing, result, error, run, publish, verifyDomain, scheduleRerun, reset } = useMarketVisibility();
+  const { loading, publishing, result: liveResult, error, run, publish, verifyDomain, scheduleRerun, reset } = useMarketVisibility();
+  const [demoResult, setDemoResult] = useState<AuditResult | null>(null);
+  const result = demoMode ? demoResult : liveResult;
   const [confirmingPublish, setConfirmingPublish] = useState(false);
   const [confirmingUnpublish, setConfirmingUnpublish] = useState(false);
   const [step, setStep] = useState<1 | 2 | 3>(1);
@@ -46,6 +69,16 @@ const MarketVisibilityScore = () => {
   const submit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!auditedDomain.trim() || loading) return;
+
+    if (demoMode) {
+      // No network call, no real fuzzy-match against real seed data — just
+      // replay the sample firm's audit so the Dashboard and Battle Plan PDF
+      // always agree on the same number while in demo mode.
+      setDemoResult(buildDemoAuditResult());
+      toast.info(`Demo mode — showing the sample audit for ${DEMO_DISPLAY_NAME}.`);
+      return;
+    }
+
     const hasSocialInput = followers.trim() !== "" || posts30d.trim() !== "" || Object.values(platforms).some(Boolean);
     const audit = await run({
       auditedDomain: auditedDomain.trim(),
@@ -75,12 +108,17 @@ const MarketVisibilityScore = () => {
       categories: audit.categories,
       percentile: audit.percentile,
       peerCount: audit.peerCount,
+      rawMetrics: audit.rawMetrics,
     });
   };
 
   const handlePublish = async () => {
     if (!result) return;
     setConfirmingPublish(false);
+    if (demoMode) {
+      toast.info("Publishing isn't available in demo mode — this is what it'll look like with your real firm.");
+      return;
+    }
     const { ok, code } = await publish(result.id, true);
     if (ok) {
       toast.success("Published to the Visibility Index");
@@ -100,7 +138,7 @@ const MarketVisibilityScore = () => {
   };
 
   const handleCheckVerification = async () => {
-    if (!result) return;
+    if (!result || demoMode) return;
     setCheckingVerification(true);
     setVerifyError(null);
     try {
@@ -124,6 +162,7 @@ const MarketVisibilityScore = () => {
   const handleUnpublish = async () => {
     if (!result) return;
     setConfirmingUnpublish(false);
+    if (demoMode) return;
     const { ok } = await publish(result.id, false);
     if (ok) toast.success("Removed from the Visibility Index");
     else toast.error("Couldn't unpublish");
@@ -131,6 +170,10 @@ const MarketVisibilityScore = () => {
 
   const handleToggleAutoRerun = async (next: boolean) => {
     if (!result) return;
+    if (demoMode) {
+      toast.info("Re-run scheduling isn't available in demo mode.");
+      return;
+    }
     setSavingSchedule(true);
     try {
       await scheduleRerun(result.id, next, next ? rerunFrequencyDays : undefined);
@@ -145,8 +188,9 @@ const MarketVisibilityScore = () => {
 
   const startOver = () => {
     reset();
-    setAuditedDomain("");
-    setDisplayName("");
+    setDemoResult(null);
+    setAuditedDomain(demoMode ? DEMO_DOMAIN : "");
+    setDisplayName(demoMode ? DEMO_DISPLAY_NAME : "");
     setConfirmingPublish(false);
     setConfirmingUnpublish(false);
     setStep(1);
@@ -228,6 +272,13 @@ const MarketVisibilityScore = () => {
                           benchmarks it against your peer group. Persisted centrally, so it gets more meaningful as more firms run it.
                         </p>
 
+                        {demoMode && (
+                          <p className="text-xs text-emerald-600 font-body bg-emerald-500/10 border border-emerald-500/30 rounded-sm px-3 py-2">
+                            Demo mode — the domain and firm name below are locked to the sample firm so this always matches the rest
+                            of the demo. Exit demo mode to audit a real firm.
+                          </p>
+                        )}
+
                         <div>
                           <label className="block text-xs text-muted-foreground font-body mb-1.5">Firm domain</label>
                           <input
@@ -236,7 +287,8 @@ const MarketVisibilityScore = () => {
                             onChange={(e) => setAuditedDomain(e.target.value)}
                             placeholder="yourlawfirm.com"
                             autoFocus
-                            className="w-full bg-background border border-border rounded-sm px-3 py-2.5 text-sm font-body focus:outline-none focus:border-emerald-500/50"
+                            disabled={demoMode}
+                            className="w-full bg-background border border-border rounded-sm px-3 py-2.5 text-sm font-body focus:outline-none focus:border-emerald-500/50 disabled:opacity-60"
                           />
                         </div>
 
@@ -247,7 +299,8 @@ const MarketVisibilityScore = () => {
                             value={displayName}
                             onChange={(e) => setDisplayName(e.target.value)}
                             placeholder="Your Firm LLP"
-                            className="w-full bg-background border border-border rounded-sm px-3 py-2.5 text-sm font-body focus:outline-none focus:border-emerald-500/50"
+                            disabled={demoMode}
+                            className="w-full bg-background border border-border rounded-sm px-3 py-2.5 text-sm font-body focus:outline-none focus:border-emerald-500/50 disabled:opacity-60"
                           />
                         </div>
 
@@ -270,7 +323,8 @@ const MarketVisibilityScore = () => {
                             <select
                               value={market}
                               onChange={(e) => setMarket(e.target.value)}
-                              className="w-full bg-background border border-border rounded-sm px-3 py-2.5 text-sm font-body focus:outline-none focus:border-emerald-500/50"
+                              disabled={demoMode}
+                              className="w-full bg-background border border-border rounded-sm px-3 py-2.5 text-sm font-body focus:outline-none focus:border-emerald-500/50 disabled:opacity-60"
                             >
                               {Object.keys(DMV_MARKETS).map((m) => (
                                 <option key={m} value={m}>{m[0].toUpperCase() + m.slice(1)}</option>
@@ -282,7 +336,8 @@ const MarketVisibilityScore = () => {
                             <select
                               value={peerGroup}
                               onChange={(e) => setPeerGroup(e.target.value)}
-                              className="w-full bg-background border border-border rounded-sm px-3 py-2.5 text-sm font-body focus:outline-none focus:border-emerald-500/50"
+                              disabled={demoMode}
+                              className="w-full bg-background border border-border rounded-sm px-3 py-2.5 text-sm font-body focus:outline-none focus:border-emerald-500/50 disabled:opacity-60"
                             >
                               {PEER_GROUPS.map((p) => (
                                 <option key={p.value} value={p.value}>{p.label}</option>
@@ -296,6 +351,7 @@ const MarketVisibilityScore = () => {
                             type="checkbox"
                             checked={gbpListed}
                             onChange={(e) => setGbpListed(e.target.checked)}
+                            disabled={demoMode}
                             className="accent-emerald-600"
                           />
                           We have a claimed, active Google Business Profile

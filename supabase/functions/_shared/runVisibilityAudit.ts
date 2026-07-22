@@ -100,7 +100,7 @@ export async function runVisibilityAudit(
   const [performance, reputation, thoughtLeadership, social, siteHealth] = await Promise.all([
     computePerformanceScore(normalizedUrl),
     computeReputationScore(serviceClient, market, auditedDomain, gbpListed === true),
-    computeThoughtLeadershipScore(serviceClient, market, peerGroup, normalizedUrl),
+    computeThoughtLeadershipScore(serviceClient, market, peerGroup, normalizedUrl, displayName),
     computeSocialScore(serviceClient, market, peerGroup, socialInput),
     checkSiteHealth(normalizedUrl),
   ]);

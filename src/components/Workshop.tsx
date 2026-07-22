@@ -3,7 +3,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { ArrowLeft, Hammer, Copy, Loader2, Filter, ArrowRight, Sparkles, Wand2 } from "lucide-react";
 import {
   SwipeIcon, CopywriterIcon, RewriteIcon, AutopsyIcon, AuditIcon,
-  HeadlinesIcon, TeardownIcon, PitchDeckIcon, BioIcon, CalendarIcon,
+  HeadlinesIcon, TeardownIcon, PitchDeckIcon, BioIcon, CalendarIcon, DeckRoastIcon,
 } from "./workshop/icons";
 import ReactMarkdown from "react-markdown";
 import { swipeFile, SwipeItem } from "@/data/swipeFile";
@@ -18,6 +18,7 @@ import CompetitorTeardown from "./workshop/CompetitorTeardown";
 import PitchDeck from "./workshop/PitchDeck";
 import BioRewriter from "./workshop/BioRewriter";
 import MarketingCalendar from "./workshop/MarketingCalendar";
+import DeckRoast from "./workshop/DeckRoast";
 import ModalShell from "@/components/ui/modal-shell";
 import MyWorkshopDrawer from "./workshop/MyWorkshopDrawer";
 import HandoffButton from "./workshop/HandoffButton";
@@ -128,7 +129,8 @@ const Workshop = ({ onBack, initialToolId }: Props) => {
     { id: "audit", tag: "Diagnose", title: "Practice Page Audit", blurb: "Score any practice page against the Chapter 8 framework.", icon: <AuditIcon size={18} />, render: () => <PracticePageAudit /> },
     { id: "headlines", tag: "Test", title: "Headline Lab", blurb: "20 angles, then a head-to-head tournament judged by AI.", icon: <HeadlinesIcon size={18} />, render: () => <HeadlineLab /> },
     { id: "teardown", tag: "Strategy", title: "Competitor Teardown", blurb: "Strong moves, weak spots, gaps you can own — and how.", icon: <TeardownIcon size={18} />, render: () => <CompetitorTeardown /> },
-    { id: "deck", tag: "Pitch", title: "Pitch Deck Drafter", blurb: "A 10-slide draft for a specific audience and opportunity.", icon: <PitchDeckIcon size={18} />, render: () => <PitchDeck /> },
+    { id: "deck", tag: "Pitch", title: "Pitch Deck Drafter", blurb: "A 10-slide draft for a specific audience and opportunity — with a real .pptx download.", icon: <PitchDeckIcon size={18} />, render: () => <PitchDeck /> },
+    { id: "deckroast", tag: "Diagnose", title: "Roast My Deck", blurb: "Upload an existing pitch deck — brutally honest, slide-by-slide critique.", icon: <DeckRoastIcon size={18} />, render: () => <DeckRoast /> },
     { id: "bio", tag: "Profile", title: "Bio Rewriter", blurb: "Rewrite an attorney bio with emphasis you control.", icon: <BioIcon size={18} />, render: () => <BioRewriter /> },
     { id: "calendar", tag: "Plan", title: "12-Month Calendar", blurb: "Themed content calendar with tempo, channels, and key moments.", icon: <CalendarIcon size={18} />, render: () => <MarketingCalendar /> },
   ];
@@ -168,7 +170,7 @@ const Workshop = ({ onBack, initialToolId }: Props) => {
           </p>
           {!active && (
             <p className="text-sm text-muted-foreground font-body max-w-xl mx-auto">
-              Ten tools built for practitioners. Pick one and ship.
+              {TOOLS.length} tools built for practitioners. Pick one and ship.
             </p>
           )}
         </div>
