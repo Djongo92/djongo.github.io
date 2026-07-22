@@ -166,14 +166,26 @@ export const DEMO_WORKSHOP_RUNS: WorkshopRun[] = [
 // renders them as "score / 5", so anything outside that range (an
 // earlier version of this data used a 0-100 scale here) shows up as
 // obvious nonsense like "55 / 5".
+// Labels match FirmMaturityScore.tsx's 12 real survey dimensions exactly —
+// the PDF's "Self-assessed across 12 marketing dimensions" caption only
+// makes sense if the demo table actually has 12 rows, not a shortened
+// subset. Scores are 1-5 (see FirmMaturityScore.tsx's SCORE_LABELS), sum
+// to 36 so the 60% overall (score: 60 below) is arithmetically exact.
 export const DEMO_MATURITY: Omit<MaturityCache, "capturedAt"> = {
   score: 60,
   dimensions: [
-    { label: "Website & Digital Presence", score: 3 },
-    { label: "Content & Thought Leadership", score: 3 },
-    { label: "Brand & Positioning", score: 2 },
-    { label: "Client Experience", score: 4 },
-    { label: "Marketing Operations", score: 3 },
+    { label: "Website & digital home", score: 3 },
+    { label: "Brand identity & positioning", score: 2 },
+    { label: "Content & thought leadership", score: 3 },
+    { label: "SEO & organic visibility", score: 2 },
+    { label: "Event marketing", score: 2 },
+    { label: "Social media presence", score: 3 },
+    { label: "PR & media relations", score: 3 },
+    { label: "Email & newsletter", score: 3 },
+    { label: "Client experience", score: 4 },
+    { label: "Data & analytics", score: 2 },
+    { label: "Reputation management", score: 5 },
+    { label: "Internal marketing culture", score: 4 },
   ],
   plan: "## Your 30-Day Plan\n\n**Week 1-2:** Rewrite the Corporate/M&A practice page — lead with named deal experience, not generic capability language.\n\n**Week 3:** Publish one bylined article on cross-border deal structuring under a partner's name.\n\n**Week 4:** Claim and complete your Google Business Profile; audit for broken links and stale copyright.",
 };
@@ -309,6 +321,7 @@ export const DEMO_VISIBILITY_SCORE: Omit<VisibilityScoreCache, "capturedAt"> = {
   },
   percentile: DEMO_AUDIT.percentile ?? null,
   peerCount: DEMO_AUDIT.peer_count ?? 0,
+  rawMetrics: DEMO_AUDIT.raw_metrics as Record<string, unknown>,
 };
 
 export const DEMO_STRATEGY_BRIEF = {

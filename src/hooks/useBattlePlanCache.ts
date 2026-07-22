@@ -77,6 +77,11 @@ export interface VisibilityScoreCache {
   categories: Record<string, { score: number; provenance: string }>;
   percentile: number | null;
   peerCount: number;
+  // Every raw input behind the category scores (PSI lighthouse figures,
+  // directory ranked-table counts, thought-leadership post counts, etc.) —
+  // stored so the Battle Plan can show its arithmetic, not just the
+  // resulting number. Optional because older cached audits won't have it.
+  rawMetrics?: Record<string, unknown>;
   capturedAt: number;
 }
 
