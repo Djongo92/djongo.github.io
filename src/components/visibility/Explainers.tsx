@@ -1,6 +1,7 @@
 import { Info } from "lucide-react";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { CATEGORY_META, PROVENANCE_META, type CategoryKey, type Provenance } from "@/lib/visibilityCategories";
+import { CATEGORY_INPUT_FORMATTERS } from "@/lib/visibilityInputFormatters";
 
 // Shared "what am I looking at" layer for the Market Visibility Score —
 // used on both the Command Center's category grid and the Analytics
@@ -9,10 +10,15 @@ import { CATEGORY_META, PROVENANCE_META, type CategoryKey, type Provenance } fro
 
 interface CategoryExplainerProps {
   categoryKey: CategoryKey;
+  /** This firm's actual raw_metrics, if available — shown as real evidence
+   *  under the formula (the same numbers the Battle Plan PDF's "how this
+   *  was calculated" appendix cites), not just an abstract rule. */
+  rawMetrics?: Record<string, unknown>;
 }
 
-export const CategoryExplainer = ({ categoryKey }: CategoryExplainerProps) => {
+export const CategoryExplainer = ({ categoryKey, rawMetrics }: CategoryExplainerProps) => {
   const meta = CATEGORY_META[categoryKey];
+  const inputsLine = rawMetrics ? CATEGORY_INPUT_FORMATTERS[categoryKey](rawMetrics) : null;
   return (
     <Popover>
       <PopoverTrigger
@@ -27,6 +33,11 @@ export const CategoryExplainer = ({ categoryKey }: CategoryExplainerProps) => {
         <p className="text-foreground">{meta.what}</p>
         <p className="text-secondary-foreground/80">{meta.why}</p>
         <p className="text-[11px] text-muted-foreground border-t border-border/50 pt-2 mt-2">{meta.how}</p>
+        {inputsLine && (
+          <p className="text-[11px] text-foreground/80 border-t border-border/50 pt-2 mt-2">
+            <span className="text-primary">Your inputs: </span>{inputsLine}
+          </p>
+        )}
       </PopoverContent>
     </Popover>
   );

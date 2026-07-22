@@ -483,7 +483,7 @@ const CommandCenter = ({
             </div>
           )}
 
-          <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+          <div className="grid grid-cols-2 md:grid-cols-3 gap-4" data-coachmark="category-methodology">
             {CATEGORY_ORDER.map((key, i) => {
               const cat = categories[key];
               const meta = CATEGORY_LABELS[key];
@@ -500,7 +500,7 @@ const CommandCenter = ({
                 >
                   <div className="flex items-center gap-1.5 mb-2">
                     <p className="text-xs font-body text-foreground">{meta?.label ?? key}</p>
-                    <CategoryExplainer categoryKey={key} />
+                    <CategoryExplainer categoryKey={key} rawMetrics={primary?.raw_metrics as Record<string, unknown> | undefined} />
                   </div>
                   <div className="flex items-end justify-between gap-2 mb-2">
                     <div className="font-display text-2xl text-foreground font-semibold">

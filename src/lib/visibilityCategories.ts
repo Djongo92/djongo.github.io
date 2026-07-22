@@ -48,7 +48,7 @@ export const CATEGORY_META: Record<CategoryKey, CategoryMeta> = {
     max: 45,
     what: "How often you publish original analysis, whether it's attributed to a named partner, and how often the market writes about you.",
     why: "This is the most controllable category — it's pure output, not reputation you inherited or infrastructure you paid for.",
-    how: "25 pts posts (relative to peer max) + 5 pts byline rate + 15 pts news mentions (relative to peer max), over a rolling content window.",
+    how: "25 pts posts (relative to peer max) + 5 pts byline rate + 15 pts press mentions (relative to peer max), over a rolling content window. Press mentions are independently verified via Google News — your own site is excluded from the results, so this can't be inflated by self-published announcements.",
     color: "amber",
   },
   reputation: {

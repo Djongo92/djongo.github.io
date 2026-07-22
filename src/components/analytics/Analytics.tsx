@@ -182,7 +182,7 @@ const Analytics = ({ audits, history, onOpenDashboard }: AnalyticsProps) => {
               <div className="flex items-start justify-between gap-4 mb-4">
                 <div className="flex items-center gap-2">
                   <h2 className="font-display text-lg text-foreground">{meta.label}</h2>
-                  <CategoryExplainer categoryKey={selected} />
+                  <CategoryExplainer categoryKey={selected} rawMetrics={raw as Record<string, unknown>} />
                 </div>
                 <div className="flex items-center gap-3 shrink-0">
                   <ProvenanceBadge provenance={cat.provenance} />
