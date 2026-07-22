@@ -43,6 +43,19 @@ export function buildPdf({ roast, competitor, roadmap, maturity, headline, bio, 
   doc.setFillColor(...NAVY);
   doc.rect(0, 0, pageW, pageH, "F");
 
+  // Faint concentric-ring motif, echoing the same geometric language as
+  // the in-app FirmCrest mark — gives the cover real depth instead of a
+  // flat fill, without competing with the title for attention. Uses
+  // pre-blended navy/gold solids rather than jsPDF's ExtGState opacity —
+  // that API renders inconsistently (fully opaque in some renderers), so
+  // a real low-contrast color is the only reliable way to get "faint"
+  // here across every PDF viewer.
+  [[31, 33, 40], [26, 29, 39], [23, 27, 39]].forEach((rgb, i) => {
+    doc.setDrawColor(rgb[0], rgb[1], rgb[2]);
+    doc.setLineWidth(1.5);
+    doc.circle(pageW - 40, pageH * 0.32, 90 + i * 70, "S");
+  });
+
   // gold rule top
   doc.setFillColor(...GOLD);
   doc.rect(margin, margin, 80, 3, "F");
@@ -59,7 +72,15 @@ export function buildPdf({ roast, competitor, roadmap, maturity, headline, bio, 
   doc.setTextColor(...GOLD_LIGHT);
   doc.setFont("helvetica", "normal");
   doc.setFontSize(9);
-  doc.text("THE LEGAL WEB PLAYBOOK", margin, margin + 24);
+  doc.text("LEGALOS", margin, margin + 24);
+
+  const firmName = visibilityScore?.auditedDomain;
+  if (firmName) {
+    doc.setFont("helvetica", "normal");
+    doc.setFontSize(10);
+    doc.setTextColor(...GOLD_LIGHT);
+    doc.text(firmName, pageW - margin, margin + 24, { align: "right" });
+  }
 
   doc.setTextColor(255, 255, 255);
   doc.setFont("times", "normal");
@@ -80,6 +101,32 @@ export function buildPdf({ roast, competitor, roadmap, maturity, headline, bio, 
     doc.setTextColor(220, 215, 200);
     const goal = doc.splitTextToSize(`Primary goal: ${context.primaryGoal}`, contentW);
     doc.text(goal, margin, margin + 162);
+  }
+
+  // Verified Visibility Score badge — the flagship, externally-sourced
+  // number gets top billing on the cover itself, not just a buried table
+  // row, since it's the one score here that isn't an LLM's opinion.
+  if (visibilityScore) {
+    const badgeY = margin + 186;
+    doc.setDrawColor(...GREEN);
+    doc.setLineWidth(1);
+    doc.roundedRect(margin, badgeY, 190, 40, 4, 4, "S");
+    doc.setFont("times", "bold");
+    doc.setFontSize(22);
+    doc.setTextColor(...GREEN);
+    doc.text(`${Math.round(visibilityScore.totalScore)}`, margin + 12, badgeY + 27);
+    doc.setFont("helvetica", "normal");
+    doc.setFontSize(9);
+    doc.setTextColor(...GOLD_LIGHT);
+    doc.text("/200", margin + 40, badgeY + 27);
+    doc.setFontSize(8);
+    doc.setFont("helvetica", "bold");
+    doc.setTextColor(...GREEN);
+    const badgeLabel = visibilityScore.percentile !== null
+      ? `TOP ${100 - visibilityScore.percentile}% · VERIFIED VISIBILITY SCORE`
+      : "VERIFIED VISIBILITY SCORE";
+    const badgeLines = doc.splitTextToSize(badgeLabel, 128);
+    doc.text(badgeLines, margin + 62, badgeY + (badgeLines.length > 1 ? 14 : 20));
   }
 
   // Big stat blocks
@@ -218,19 +265,30 @@ export function buildPdf({ roast, competitor, roadmap, maturity, headline, bio, 
     cursor += 8;
 
     roadmap.phases.forEach((phase) => {
-      cursor = ensureSpace(doc, cursor, 90);
-      // phase header bar
+      cursor = ensureSpace(doc, cursor, 100);
+      // Phase header bar — label and focus stack on separate lines rather
+      // than sharing one (a long phase label, e.g. "Phase 1 — Foundations
+      // (Weeks 1-2)", ran past where the focus text started and the two
+      // overlapped).
+      doc.setFont("helvetica", "bold");
+      doc.setFontSize(10);
+      const labelText = phase.label.toUpperCase();
+      doc.setFont("helvetica", "italic");
+      doc.setFontSize(9);
+      const focusLines = doc.splitTextToSize(phase.focus, contentW - 20);
+      const barH = 16 + focusLines.length * 12 + 6;
+
       doc.setFillColor(...NAVY);
-      doc.rect(margin, cursor, contentW, 22, "F");
+      doc.rect(margin, cursor, contentW, barH, "F");
       doc.setTextColor(...GOLD_LIGHT);
       doc.setFont("helvetica", "bold");
       doc.setFontSize(10);
-      doc.text(phase.label.toUpperCase(), margin + 10, cursor + 14);
+      doc.text(labelText, margin + 10, cursor + 14);
       doc.setFont("helvetica", "italic");
       doc.setFontSize(9);
       doc.setTextColor(220, 215, 200);
-      doc.text(phase.focus, margin + 100, cursor + 14);
-      cursor += 30;
+      doc.text(focusLines, margin + 10, cursor + 28);
+      cursor += barH + 8;
 
       phase.actions.forEach((a, i) => {
         cursor = ensureSpace(doc, cursor, 60);
@@ -424,7 +482,7 @@ export function buildPdf({ roast, competitor, roadmap, maturity, headline, bio, 
     doc.setFont("helvetica", "normal");
     doc.setFontSize(8);
     doc.setTextColor(...MUTED);
-    doc.text("The Legal Web Playbook · Battle Plan", margin, pageH - 22);
+    doc.text("LegalOS · Battle Plan", margin, pageH - 22);
     doc.text(`${p} / ${totalPages}`, pageW - margin, pageH - 22, { align: "right" });
   }
 

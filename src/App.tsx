@@ -3,6 +3,7 @@ import { BrowserRouter, Route, Routes } from "react-router-dom";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
+import { useReadingTheme } from "@/hooks/useReadingTheme";
 import Index from "./pages/Index.tsx";
 import NotFound from "./pages/NotFound.tsx";
 import Share from "./pages/Share.tsx";
@@ -15,7 +16,19 @@ import JoinFirm from "./pages/JoinFirm.tsx";
 
 const queryClient = new QueryClient();
 
-const App = () => (
+const App = () => {
+  // The theme/font-scale choice is only ever mutated from Settings or
+  // ReadingControls, but the CSS class that actually applies it lived
+  // entirely inside useReadingTheme's own effect — which only ran while
+  // one of those two components happened to be mounted. Any other route
+  // (Dashboard, a public share link, a reload) started from a bare <html>
+  // with no class at all, silently reverting a saved Light/Sepia choice
+  // back to dark until the user opened Settings again. Calling the hook
+  // here, once, for its side effect only, applies the stored theme on
+  // every mount regardless of which route or section is active.
+  useReadingTheme();
+
+  return (
   <QueryClientProvider client={queryClient}>
     <TooltipProvider>
       <Toaster />
@@ -36,6 +49,7 @@ const App = () => (
       </BrowserRouter>
     </TooltipProvider>
   </QueryClientProvider>
-);
+  );
+};
 
 export default App;

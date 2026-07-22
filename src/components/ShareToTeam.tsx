@@ -24,7 +24,7 @@ ${takeaways}
 ACTION ITEMS:
 ${actions}
 
-— Sent from The Legal Web Playbook`;
+— Sent from LegalOS`;
   };
 
   const summary = buildSummary();

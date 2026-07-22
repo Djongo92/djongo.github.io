@@ -58,6 +58,19 @@ export const ProgressSkeleton = () => (
   </div>
 );
 
+export const WorkshopSkeleton = () => (
+  <div className="min-h-screen bg-background pb-16">
+    <div className="max-w-5xl mx-auto px-6 py-4 flex items-center justify-between">
+      <Skeleton className="h-5 w-24" />
+    </div>
+    <div className="max-w-5xl mx-auto px-6 py-10 grid grid-cols-1 md:grid-cols-2 gap-4">
+      {[0, 1, 2, 3, 4, 5, 6, 7, 8, 9].map((i) => (
+        <Skeleton key={i} className="h-28 rounded-sm" />
+      ))}
+    </div>
+  </div>
+);
+
 export const SettingsSkeleton = () => (
   <div className="min-h-screen bg-background pb-16">
     <header className="max-w-3xl mx-auto px-6 pt-12 pb-8 space-y-3">

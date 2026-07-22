@@ -5,10 +5,6 @@ import ChapterView from "@/components/ChapterView";
 import AppShell, { Section } from "@/components/AppShell";
 import GlobalAdvisor from "@/components/GlobalAdvisor";
 import PersonalizeOnboarding from "@/components/PersonalizeOnboarding";
-import Workshop from "@/components/Workshop";
-import FirmMaturityScore from "@/components/FirmMaturityScore";
-import CompetitorTracker from "@/components/CompetitorTracker";
-import WorkshopHistoryModal from "@/components/WorkshopHistoryModal";
 import DemoOnboardingWizard from "@/components/DemoOnboardingWizard";
 import CoachMarks from "@/components/CoachMarks";
 import { chapters } from "@/data/chapters";
@@ -32,7 +28,7 @@ import { isDemoMode, disableDemoMode, enableDemoMode, consumeDemoWizardPending }
 import { clearSession } from "@/lib/session";
 import { DEMO_AUDIT, DEMO_HISTORY } from "@/data/demoData";
 import ClaimDataBanner from "@/components/ClaimDataBanner";
-import { DashboardSkeleton, AnalyticsSkeleton, SettingsSkeleton, ProgressSkeleton } from "@/components/SectionSkeletons";
+import { DashboardSkeleton, AnalyticsSkeleton, SettingsSkeleton, ProgressSkeleton, WorkshopSkeleton } from "@/components/SectionSkeletons";
 import type { WorkshopToolId } from "@/lib/handoff";
 import type { AuditRow, HistoryRow } from "@/components/dashboard/CommandCenter";
 
@@ -45,6 +41,15 @@ const SettingsPage = lazy(() => import("@/components/settings/SettingsPage"));
 // ScoreWebsite, RoastHomepage, CompetitorAnalysis, MarketVisibilityScore,
 // AskTheBook) plus BattlePlan/jsPDF — same reasoning as the above three.
 const ProgressDashboard = lazy(() => import("@/components/ProgressDashboard"));
+// The Workshop's ten tools (each its own sub-component) and these three
+// opt-in modals were previously eagerly imported here, meaning every
+// visitor — including an anonymous SignInGate view that never
+// authenticates — downloaded them as part of the main bundle. None of the
+// four are needed until a signed-in user explicitly opens them.
+const Workshop = lazy(() => import("@/components/Workshop"));
+const FirmMaturityScore = lazy(() => import("@/components/FirmMaturityScore"));
+const CompetitorTracker = lazy(() => import("@/components/CompetitorTracker"));
+const WorkshopHistoryModal = lazy(() => import("@/components/WorkshopHistoryModal"));
 
 const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL as string;
 
@@ -82,6 +87,7 @@ const Index = () => {
   const [guidebookView, setGuidebookView] = useState<GuidebookView>("toc");
   const [currentChapterId, setCurrentChapterId] = useState<string | null>(null);
   const [visibilityData, setVisibilityData] = useState<{ audits: AuditRow[]; history: HistoryRow[] } | null>(null);
+  const [pendingWorkshopTool, setPendingWorkshopTool] = useState<WorkshopToolId | null>(null);
 
   const { bookmarks, toggleBookmark, isBookmarked } = useBookmarks();
   const { readChapters, lastReadChapterId, markAsRead } = useReadingProgress();
@@ -209,14 +215,14 @@ const Index = () => {
   };
 
   // Deep-links straight into a specific Workshop tool from a Dashboard
-  // quick action or insight. Workshop only starts listening for the
-  // "switch tool" event once it's mounted, so the dispatch is deferred a
-  // tick behind the section switch.
+  // quick action or insight. pendingWorkshopTool covers a fresh mount
+  // (Workshop is lazy-loaded, so it can't be assumed to already be
+  // mounted and listening); the CustomEvent below covers the case
+  // Workshop is already open and just needs to switch tools in place.
   const openWorkshopTool = (toolId: WorkshopToolId) => {
+    setPendingWorkshopTool(toolId);
     goToSection("workshop");
-    setTimeout(() => {
-      window.dispatchEvent(new CustomEvent("workshop:switch-tool", { detail: { toolId } }));
-    }, 50);
+    window.dispatchEvent(new CustomEvent("workshop:switch-tool", { detail: { toolId } }));
   };
 
   const openBattlePlan = () => goToSection("progress");
@@ -278,9 +284,11 @@ const Index = () => {
         />
       )}
       <PersonalizeOnboarding open={personalizeOpen} onClose={() => setPersonalizeOpen(false)} />
-      <FirmMaturityScore open={maturityOpen} onClose={() => setMaturityOpen(false)} />
-      <CompetitorTracker open={competitorsOpen} onClose={() => setCompetitorsOpen(false)} primaryAudit={primaryAudit} />
-      <WorkshopHistoryModal open={workshopHistoryOpen} onClose={() => setWorkshopHistoryOpen(false)} onOpenWorkshopTool={openWorkshopTool} />
+      <Suspense fallback={null}>
+        <FirmMaturityScore open={maturityOpen} onClose={() => setMaturityOpen(false)} />
+        <CompetitorTracker open={competitorsOpen} onClose={() => setCompetitorsOpen(false)} primaryAudit={primaryAudit} />
+        <WorkshopHistoryModal open={workshopHistoryOpen} onClose={() => setWorkshopHistoryOpen(false)} onOpenWorkshopTool={openWorkshopTool} />
+      </Suspense>
       <DemoOnboardingWizard open={demoWizardOpen} onClose={closeDemoWizard} />
       <CoachMarks steps={COACH_MARK_STEPS} active={coachMarks.active} onDone={coachMarks.finish} />
     </>
@@ -386,7 +394,11 @@ const Index = () => {
                 />
               </Suspense>
             )}
-            {section === "workshop" && <Workshop onBack={() => goToSection("dashboard")} />}
+            {section === "workshop" && (
+              <Suspense fallback={<WorkshopSkeleton />}>
+                <Workshop onBack={() => goToSection("dashboard")} initialToolId={pendingWorkshopTool} />
+              </Suspense>
+            )}
             {section === "progress" && (
               <Suspense fallback={<ProgressSkeleton />}>
                 <ProgressDashboard
