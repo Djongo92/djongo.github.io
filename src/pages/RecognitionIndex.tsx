@@ -146,7 +146,21 @@ const RecognitionIndex = () => {
         {!loading && error && <p className="text-sm text-destructive font-body">{error}</p>}
 
         {!loading && !error && groupsWithData.length === 0 && (
-          <p className="text-sm text-muted-foreground font-body italic">No directory data for this market yet.</p>
+          <div className="bg-card border border-border/50 rounded-sm p-6">
+            <p className="text-sm text-foreground font-body mb-1">No directory data for this market yet.</p>
+            <p className="text-xs text-muted-foreground font-body mb-6">
+              This index only covers markets we've reviewed against Chambers and Legal 500's own published rankings —
+              this one isn't seeded yet, and there's no user action that changes that.
+            </p>
+            {market && (
+              <Link
+                to={`/visibility-index/${market}`}
+                className="inline-flex items-center gap-1.5 text-sm text-primary hover:text-gold-light font-body capitalize"
+              >
+                See the Visibility Index for {market} instead <ArrowRight className="w-3.5 h-3.5" />
+              </Link>
+            )}
+          </div>
         )}
 
         {!loading && !error && groupsWithData.length > 0 && (

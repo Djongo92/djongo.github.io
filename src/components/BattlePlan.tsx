@@ -162,7 +162,7 @@ const BattlePlan = ({ readChaptersCount, totalChapters, implementationScore }: P
                 <div className="bg-gold/5 border-l-4 border-gold/60 p-4 rounded-r-sm mb-6">
                   <p className="text-[10px] tracking-[0.2em] uppercase text-gold-light font-body mb-1">Included automatically</p>
                   <p className="text-xs text-secondary-foreground/80 font-body leading-relaxed">
-                    Firm context · Reading & implementation progress · Cover page · Legal Web Playbook branding · Generated date
+                    Firm context · Reading & implementation progress · Cover page · LegalOS branding · Generated date
                   </p>
                 </div>
 

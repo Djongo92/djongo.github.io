@@ -30,14 +30,20 @@ const SUPABASE_KEY = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY;
 
 interface Props {
   onBack: () => void;
+  initialToolId?: string | null;
 }
 
-const Workshop = ({ onBack }: Props) => {
+const Workshop = ({ onBack, initialToolId }: Props) => {
   const [authed, setAuthed] = useState(() => hasValidAccess("workshop"));
   const [pw, setPw] = useState("");
   const [err, setErr] = useState(false);
   const [busy, setBusy] = useState(false);
-  const [tool, setTool] = useState<string | null>(null);
+  // initialToolId covers the deep-link-into-a-fresh-mount case reliably
+  // (Workshop is now lazy-loaded, so a caller can no longer assume it's
+  // already mounted and listening by the time it dispatches an event);
+  // the event listener below still covers switching tools while Workshop
+  // is already open and mounted.
+  const [tool, setTool] = useState<string | null>(initialToolId ?? null);
 
   // Cross-tool handoff: another tool / drawer can request a tool switch
   useEffect(() => {

@@ -3,7 +3,7 @@ import { motion } from "framer-motion";
 import { ResponsiveContainer, LineChart, Line, XAxis, YAxis, Tooltip } from "recharts";
 import {
   ArrowRight, ShieldCheck, TrendingUp, TrendingDown, Sparkles, Hammer, AlertTriangle, CheckCircle2,
-  Gauge, BookOpen, FileText,
+  Gauge, BookOpen, FileText, Share2,
 } from "lucide-react";
 import {
   SwipeIcon, CopywriterIcon, RewriteIcon, AutopsyIcon, AuditIcon,
@@ -24,6 +24,7 @@ import PeerPositionBar from "@/components/visibility/PeerPositionBar";
 import MarketVisibilityScore from "@/components/MarketVisibilityScore";
 import type { WorkshopToolId } from "@/lib/handoff";
 import { enableDemoMode } from "@/lib/demoMode";
+import { downloadScoreCard } from "@/lib/visibilityScoreCard";
 
 const CATEGORY_LABELS = CATEGORY_META;
 
@@ -408,9 +409,17 @@ const CommandCenter = ({
               </div>
             )}
           </div>
-          <div className="relative" data-coachmark="dashboard-score">
-            <ScoreRing score={primary.total_score} max={200} size={132} sublabel="Visibility Score" />
-            {isPersonalBest && <ScoreBurst />}
+          <div className="flex flex-col items-center gap-2">
+            <div className="relative" data-coachmark="dashboard-score">
+              <ScoreRing score={primary.total_score} max={200} size={132} sublabel="Visibility Score" />
+              {isPersonalBest && <ScoreBurst />}
+            </div>
+            <button
+              onClick={() => downloadScoreCard(primary)}
+              className="inline-flex items-center gap-1.5 text-[11px] text-muted-foreground hover:text-primary font-body tap-scale"
+            >
+              <Share2 className="w-3 h-3" /> Share score card
+            </button>
           </div>
         </div>
       </header>

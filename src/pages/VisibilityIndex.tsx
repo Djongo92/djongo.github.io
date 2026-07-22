@@ -1,10 +1,16 @@
 import { useEffect, useState } from "react";
 import { Link, useParams } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
-import { Loader2, ArrowRight, Eye, Download, ShieldCheck } from "lucide-react";
+import { Loader2, ArrowRight, Eye, Download, ShieldCheck, Gauge, TrendingUp } from "lucide-react";
 import { PEER_GROUPS } from "@/lib/marketVisibilityConfig";
 import { toCsv, downloadCsv } from "@/lib/csv";
 import { setPageMeta } from "@/lib/pageMeta";
+
+const EMPTY_STEPS = [
+  { n: 1, label: "Run a full Market Visibility audit of your firm", icon: Gauge },
+  { n: 2, label: "Get a real score across five categories, benchmarked to peers", icon: TrendingUp },
+  { n: 3, label: "Publish it — your firm appears here, ranked", icon: Eye },
+] as const;
 
 interface AuditRow {
   audited_domain: string;
@@ -110,9 +116,26 @@ const VisibilityIndex = () => {
         {!loading && error && <p className="text-sm text-destructive font-body">{error}</p>}
 
         {!loading && !error && peerGroupsWithData.length === 0 && (
-          <p className="text-sm text-muted-foreground font-body italic">
-            No published audits in this market yet — be the first to publish yours.
-          </p>
+          <div className="bg-card border border-border/50 rounded-sm p-6">
+            <p className="text-sm text-foreground font-body mb-1">No published audits in this market yet.</p>
+            <p className="text-xs text-muted-foreground font-body mb-6">Be the first firm to appear here.</p>
+            <div className="flex flex-col sm:flex-row gap-4 mb-6">
+              {EMPTY_STEPS.map(({ n, label, icon: StepIcon }) => (
+                <div key={n} className="flex-1 flex items-start gap-3">
+                  <div className="shrink-0 w-7 h-7 rounded-full border border-primary/40 flex items-center justify-center text-xs font-body text-primary">
+                    {n}
+                  </div>
+                  <div className="min-w-0">
+                    <StepIcon className="w-3.5 h-3.5 text-muted-foreground mb-1" />
+                    <p className="text-xs text-muted-foreground font-body leading-snug">{label}</p>
+                  </div>
+                </div>
+              ))}
+            </div>
+            <Link to="/" className="inline-flex items-center gap-1.5 text-sm text-primary hover:text-gold-light font-body">
+              Run your own audit <ArrowRight className="w-3.5 h-3.5" />
+            </Link>
+          </div>
         )}
 
         {!loading && !error && peerGroupsWithData.map((pg) => (

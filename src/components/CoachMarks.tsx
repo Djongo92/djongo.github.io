@@ -5,7 +5,7 @@
 // the same logical target (e.g. "Workshop" nav) legitimately exists
 // twice in the DOM — once in the desktop sidebar, once in the mobile tab
 // bar — and only one is actually rendered (non-zero size) at a time.
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 
 export interface CoachMarkStep {
@@ -35,6 +35,8 @@ const findVisibleRect = (target: string): DOMRect | null => {
 const CoachMarks = ({ steps, active, onDone }: Props) => {
   const [step, setStep] = useState(0);
   const [rect, setRect] = useState<DOMRect | null>(null);
+  const bubbleRef = useRef<HTMLDivElement>(null);
+  const previouslyFocused = useRef<HTMLElement | null>(null);
 
   const measure = useCallback(() => {
     const target = steps[step]?.target;
@@ -44,7 +46,27 @@ const CoachMarks = ({ steps, active, onDone }: Props) => {
   useEffect(() => {
     if (!active) return;
     setStep(0);
+    previouslyFocused.current = document.activeElement as HTMLElement | null;
+    return () => previouslyFocused.current?.focus();
   }, [active]);
+
+  // Escape skips the whole tour, same as clicking Skip.
+  useEffect(() => {
+    if (!active) return;
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Escape") onDone();
+    };
+    document.addEventListener("keydown", handleKeyDown);
+    return () => document.removeEventListener("keydown", handleKeyDown);
+  }, [active, onDone]);
+
+  // Move focus into the callout on every step change so keyboard/screen
+  // reader users land on the new copy without hunting for it, and so
+  // Tab reaches Skip/Next immediately.
+  useEffect(() => {
+    if (!active) return;
+    bubbleRef.current?.focus();
+  }, [active, step]);
 
   useEffect(() => {
     if (!active) return;
@@ -119,10 +141,15 @@ const CoachMarks = ({ steps, active, onDone }: Props) => {
 
         <motion.div
           key={step}
+          ref={bubbleRef}
+          role="dialog"
+          aria-label={`${current.title} — step ${step + 1} of ${steps.length}`}
+          aria-live="polite"
+          tabIndex={-1}
           initial={{ opacity: 0, y: 8 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.2 }}
-          className="fixed bg-card hairline border rounded-2xl shadow-apple-lg p-4"
+          className="fixed bg-card hairline border rounded-2xl shadow-apple-lg p-4 outline-none"
           style={{ top: bubbleTop, left: bubbleLeft, width: BUBBLE_WIDTH }}
         >
           <p className="text-[10px] tracking-[0.15em] uppercase text-primary font-body mb-1">
