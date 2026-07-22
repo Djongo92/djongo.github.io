@@ -38,6 +38,25 @@ const DeckRoast = () => {
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState<DeckRoastResult | null>(null);
 
+  const [loadingSample, setLoadingSample] = useState(false);
+
+  const trySampleDeck = async () => {
+    if (extracting || loading || loadingSample) return;
+    setLoadingSample(true);
+    try {
+      const resp = await fetch(`${import.meta.env.BASE_URL}sample-pitch-deck.pptx`);
+      if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
+      const blob = await resp.blob();
+      const file = new File([blob], "sample-pitch-deck.pptx", { type: blob.type });
+      await handleFile(file);
+    } catch (e) {
+      console.error(e);
+      toast.error("Couldn't load the sample deck.");
+    } finally {
+      setLoadingSample(false);
+    }
+  };
+
   const handleFile = async (file: File) => {
     if (!file.name.toLowerCase().endsWith(".pptx")) {
       toast.error("Only .pptx files are supported right now.");
@@ -83,7 +102,7 @@ const DeckRoast = () => {
     }
   };
 
-  const busy = extracting || loading;
+  const busy = extracting || loading || loadingSample;
 
   return (
     <div className="space-y-6">
@@ -100,17 +119,27 @@ const DeckRoast = () => {
             className="hidden"
             onChange={(e) => { const f = e.target.files?.[0]; if (f) handleFile(f); }}
           />
-          <button
-            onClick={() => fileInputRef.current?.click()}
-            disabled={busy}
-            className="bg-destructive text-destructive-foreground px-8 py-3 text-sm font-body font-medium tracking-widest uppercase hover:bg-destructive/90 transition-all rounded-sm disabled:opacity-40 inline-flex items-center gap-2"
-          >
-            {busy ? (
-              <><Loader2 className="w-4 h-4 animate-spin" /> {extracting ? "Reading deck…" : "Roasting…"}</>
-            ) : (
-              <><Upload className="w-4 h-4" /> Upload a .pptx to roast</>
-            )}
-          </button>
+          <div className="flex items-center justify-center gap-3 flex-wrap">
+            <button
+              onClick={() => fileInputRef.current?.click()}
+              disabled={busy}
+              className="bg-destructive text-destructive-foreground px-8 py-3 text-sm font-body font-medium tracking-widest uppercase hover:bg-destructive/90 transition-all rounded-sm disabled:opacity-40 inline-flex items-center gap-2"
+            >
+              {extracting || loading ? (
+                <><Loader2 className="w-4 h-4 animate-spin" /> {extracting ? "Reading deck…" : "Roasting…"}</>
+              ) : (
+                <><Upload className="w-4 h-4" /> Upload a .pptx to roast</>
+              )}
+            </button>
+            <button
+              onClick={trySampleDeck}
+              disabled={busy}
+              className="text-xs text-primary hover:text-gold-light font-body inline-flex items-center gap-1.5 disabled:opacity-40"
+            >
+              {loadingSample ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Flame className="w-3.5 h-3.5" />}
+              {loadingSample ? "Loading sample…" : "Or try our sample deck"}
+            </button>
+          </div>
           {fileName && !result && (
             <p className="text-xs text-muted-foreground font-body mt-3">{fileName}</p>
           )}

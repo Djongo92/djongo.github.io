@@ -5,6 +5,7 @@ import { Map, Loader2, X, Download, Sparkles, ChevronRight } from "lucide-react"
 import { chapters } from "@/data/chapters";
 import { useFirmContext } from "@/hooks/useFirmContext";
 import { saveRoadmap } from "@/hooks/useBattlePlanCache";
+import { isDemoMode } from "@/lib/demoMode";
 import { toast } from "sonner";
 
 const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL;
@@ -63,9 +64,14 @@ const RoadmapGenerator = ({ readChapters, bookmarks, isImplemented, onRequestPer
         return;
       }
       setRoadmap(data);
-      try {
-        saveRoadmap({ summary: data.summary, phases: data.phases || [] });
-      } catch { /* non-fatal */ }
+      // Demo mode still generates a real roadmap from the seeded demo
+      // progress but doesn't let it overwrite the demo's seeded Battle Plan
+      // sample — see RoastHomepage.tsx for why.
+      if (!isDemoMode()) {
+        try {
+          saveRoadmap({ summary: data.summary, phases: data.phases || [] });
+        } catch { /* non-fatal */ }
+      }
     } catch {
       toast.error("Couldn't reach AI service");
     } finally {
@@ -181,6 +187,11 @@ const RoadmapGenerator = ({ readChapters, bookmarks, isImplemented, onRequestPer
 
                 {roadmap && (
                   <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
+                    {isDemoMode() && (
+                      <p className="text-[11px] text-muted-foreground font-body italic mb-4">
+                        Demo mode — this real roadmap won't be saved to your Battle Plan sample.
+                      </p>
+                    )}
                     <p className="font-display text-base text-foreground italic mb-8 leading-relaxed">
                       {roadmap.summary}
                     </p>

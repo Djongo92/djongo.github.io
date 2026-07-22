@@ -1,10 +1,12 @@
 import { useEffect, useState } from "react";
 import { Link, useParams } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
-import { Loader2, ArrowRight, Eye, Download, ShieldCheck, Gauge, TrendingUp } from "lucide-react";
+import { Loader2, ArrowRight, Eye, Download, ShieldCheck, Gauge, TrendingUp, FlaskConical } from "lucide-react";
 import { PEER_GROUPS } from "@/lib/marketVisibilityConfig";
 import { toCsv, downloadCsv } from "@/lib/csv";
 import { setPageMeta } from "@/lib/pageMeta";
+import { isDemoMode } from "@/lib/demoMode";
+import { DEMO_RANKINGS, DEMO_DOMAIN } from "@/data/demoData";
 
 const EMPTY_STEPS = [
   { n: 1, label: "Run a full Market Visibility audit of your firm", icon: Gauge },
@@ -30,9 +32,29 @@ const VisibilityIndex = () => {
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
 
+  const showDemoRankings = isDemoMode() && market === "serbia";
+
   useEffect(() => {
     (async () => {
       if (!market) return;
+      // Demo mode: the real index is cold-start empty until real firms
+      // publish an audit, so a first-time visitor would see nothing here.
+      // Show an illustrative (clearly fictional, clearly labeled) sample
+      // leaderboard instead of the real query.
+      if (showDemoRankings) {
+        setRows(
+          DEMO_RANKINGS.map((r) => ({
+            audited_domain: r.domain,
+            display_name: r.displayName,
+            peer_group: "regional",
+            total_score: r.score,
+            published_at: new Date().toISOString(),
+            verified_at: r.domain === DEMO_DOMAIN ? new Date().toISOString() : null,
+          })),
+        );
+        setLoading(false);
+        return;
+      }
       const { data, error } = await supabase
         .from("market_visibility_audits")
         .select("audited_domain, display_name, peer_group, total_score, published_at, verified_at")
@@ -44,7 +66,7 @@ const VisibilityIndex = () => {
       else setRows((data ?? []) as AuditRow[]);
       setLoading(false);
     })();
-  }, [market]);
+  }, [market, showDemoRankings]);
 
   useEffect(() => {
     const marketLabel = market ? market[0].toUpperCase() + market.slice(1) : "Market";
@@ -88,6 +110,11 @@ const VisibilityIndex = () => {
 
       <main className="max-w-3xl mx-auto px-6 py-12">
         <h1 className="font-display text-4xl text-foreground mb-2 leading-tight capitalize">{market} Visibility Index</h1>
+        {showDemoRankings && (
+          <p className="text-xs text-amber-500 font-body mb-3 flex items-center gap-1.5">
+            <FlaskConical className="w-3.5 h-3.5" /> Demo mode — this leaderboard is illustrative sample data, not real firms.
+          </p>
+        )}
         <p className="text-xs text-muted-foreground font-body mb-1">
           Externally-sourced, peer-group-normalized Market Visibility Scores — firms that opted to run a full audit
           and publish it.
@@ -164,8 +191,12 @@ const VisibilityIndex = () => {
         ))}
 
         <footer className="mt-10 pt-6 border-t border-border/40 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
-          <p className="text-[10px] tracking-[0.2em] uppercase text-muted-foreground font-body">
-            Live index · updates as firms publish
+          <p className="text-[10px] tracking-[0.2em] uppercase text-muted-foreground font-body flex items-center gap-1.5">
+            {showDemoRankings ? (
+              <><FlaskConical className="w-3 h-3" /> Sample data — for demo purposes, not real firms</>
+            ) : (
+              "Live index · updates as firms publish"
+            )}
           </p>
           <div className="flex items-center gap-4">
             {market && (

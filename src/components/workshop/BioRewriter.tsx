@@ -10,6 +10,7 @@ import HandoffButton from "./HandoffButton";
 import { useHandoffReceive } from "@/lib/handoff";
 import { recordRun } from "@/hooks/useWorkshopHistory";
 import { saveBio } from "@/hooks/useBattlePlanCache";
+import { isDemoMode } from "@/lib/demoMode";
 
 const EMPHASES = [
   { key: "trial", label: "Trial cred" },
@@ -43,7 +44,8 @@ const BioRewriter = () => {
         preview: currentBio.slice(0, 120),
         output,
       });
-      saveBio({ name, role, emphases, rewrite: output });
+      // Skipped in demo mode — see RoastHomepage.tsx for why.
+      if (!isDemoMode()) saveBio({ name, role, emphases, rewrite: output });
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [loading]);
@@ -111,6 +113,11 @@ const BioRewriter = () => {
 
       {(output || loading) && (
         <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} className="bg-card border border-border/50 rounded-sm p-6 min-h-[300px]">
+          {output && !loading && isDemoMode() && (
+            <p className="text-[11px] text-muted-foreground font-body italic mb-3">
+              Demo mode — this rewrite won't be saved to your Battle Plan sample.
+            </p>
+          )}
           {output && !loading && (
             <div className="flex justify-end gap-2 mb-3">
               <HandoffButton payload={{ kind: "text", text: output, source: "Bio Rewriter" }} exclude="bio" />

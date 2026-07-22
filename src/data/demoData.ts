@@ -331,6 +331,36 @@ export const DEMO_VISIBILITY_SCORE: Omit<VisibilityScoreCache, "capturedAt"> = {
   rawMetrics: DEMO_AUDIT.raw_metrics as Record<string, unknown>,
 };
 
+// Demo-only leaderboard for the public Visibility Index page — the real
+// index is cold-start empty until real firms actually publish an audit, so
+// a first-time demo visitor would otherwise see nothing there at all. Uses
+// entirely fictional firm names (never a real Serbia firm — those carry
+// real, independently-verifiable Chambers/Legal 500 standing and it would
+// be misleading to attach a fabricated audit score to one) and is clearly
+// labeled as sample data wherever it's rendered. 18 entries total, 11
+// scoring below Petrović & Partners and 6 above, to exactly match the
+// "Better than 61% of 18 peers" stat already shown elsewhere in the demo.
+export const DEMO_RANKINGS: { displayName: string; domain: string; score: number }[] = [
+  { displayName: "Vasić Cross-Border Advocates", domain: "vasic-advocates.example", score: 142.0 },
+  { displayName: "Nikolić & Delić Partners", domain: "nikolic-delic.example", score: 128.5 },
+  { displayName: "Regional Corporate Law Group", domain: "regionalcorplaw.example", score: 115.2 },
+  { displayName: "Stevanović Legal Alliance", domain: "stevanovic-legal.example", score: 103.8 },
+  { displayName: "Belgrade Commercial Partners", domain: "belgradecommercial.example", score: 95.4 },
+  { displayName: "Đurić & Associates", domain: "duric-associates.example", score: 84.1 },
+  { displayName: DEMO_DISPLAY_NAME, domain: DEMO_DOMAIN, score: DEMO_AUDIT.total_score },
+  { displayName: "Antić Law Office", domain: "antic-law.example", score: 76.5 },
+  { displayName: "Southeast Legal Partners", domain: "southeastlegal.example", score: 71.2 },
+  { displayName: "Kostić & Ranković", domain: "kostic-rankovic.example", score: 68.9 },
+  { displayName: "Danube Advisory Partners", domain: "danubeadvisory.example", score: 63.4 },
+  { displayName: "Ilić Corporate Counsel", domain: "ilic-counsel.example", score: 58.7 },
+  { displayName: "Marinković Law Group", domain: "marinkovic-law.example", score: 52.1 },
+  { displayName: "Popadić & Co.", domain: "popadic-co.example", score: 47.6 },
+  { displayName: "Regional Business Law", domain: "regionalbusinesslaw.example", score: 41.3 },
+  { displayName: "Todorović Partners", domain: "todorovic-partners.example", score: 35.8 },
+  { displayName: "Savić Legal Services", domain: "savic-legal.example", score: 28.4 },
+  { displayName: "Cross-Adriatic Law", domain: "crossadriatic.example", score: 21.0 },
+].sort((a, b) => b.score - a.score);
+
 export const DEMO_STRATEGY_BRIEF = {
   headline: "Your reputation is carrying a firm that isn't talking.",
   narrative:

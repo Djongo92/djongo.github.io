@@ -69,6 +69,11 @@ const COACH_MARK_STEPS: CoachMarkStep[] = [
     title: "It all rolls into a Battle Plan",
     body: "My Progress assembles everything you've run into one exportable PDF you can hand to your partners.",
   },
+  {
+    target: "category-methodology",
+    title: "Every number shows its work",
+    body: "Click the ⓘ on any category for the exact formula and this firm's actual measured inputs — not just an asserted score. The same evidence appears in the Battle Plan PDF.",
+  },
 ];
 
 type GuidebookView = "toc" | "chapter" | "bookmarks";
