@@ -3,6 +3,7 @@ import { AnimatePresence, motion } from "framer-motion";
 import {
   LayoutDashboard, Hammer, BookOpen, BarChart3, FlaskConical, Settings, Circle, LogOut,
   Gauge, FileText, Eye, Users, History, Bell, Landmark, MoreHorizontal, X, Award,
+  ArrowRight, ExternalLink,
 } from "lucide-react";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import FirmCrest from "@/components/FirmCrest";
@@ -79,7 +80,7 @@ const AppShell = ({
   onOpenSettings, onOpenMaturity, onOpenBattlePlan, onOpenCompetitors, onOpenWorkshopHistory, visibilityIndexHref, recognitionIndexHref,
 }: AppShellProps) => {
   const [moreOpen, setMoreOpen] = useState(false);
-  const hasTools = Boolean(onOpenMaturity || onOpenBattlePlan || onOpenCompetitors || onOpenWorkshopHistory || visibilityIndexHref || recognitionIndexHref);
+  const hasTools = Boolean(onOpenMaturity || onOpenBattlePlan || onOpenCompetitors || onOpenWorkshopHistory);
   const notificationList = notifications ?? [];
   const hasUnread = (unreadCount ?? 0) > 0;
 
@@ -214,6 +215,16 @@ const AppShell = ({
                     Competitors
                   </button>
                 )}
+                {(onOpenMaturity || onOpenBattlePlan || onOpenCompetitors) && (
+                  <button
+                    onClick={() => onNavigate("workshop")}
+                    className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-body text-muted-foreground hover:text-foreground hover:bg-secondary/50 transition-colors tap-scale"
+                  >
+                    <Hammer className="w-4 h-4" />
+                    More in Workshop
+                    <ArrowRight className="w-3 h-3 ml-auto opacity-60" />
+                  </button>
+                )}
                 {onOpenWorkshopHistory && (
                   <button
                     onClick={onOpenWorkshopHistory}
@@ -223,6 +234,14 @@ const AppShell = ({
                     Workshop History
                   </button>
                 )}
+              </nav>
+            </>
+          )}
+
+          {(visibilityIndexHref || recognitionIndexHref) && (
+            <>
+              <NavGroupLabel>Public pages</NavGroupLabel>
+              <nav className="px-3 space-y-1">
                 {visibilityIndexHref && (
                   <a
                     href={visibilityIndexHref}
@@ -232,6 +251,7 @@ const AppShell = ({
                   >
                     <Eye className="w-4 h-4" />
                     Visibility Index
+                    <ExternalLink className="w-3 h-3 ml-auto opacity-40" />
                   </a>
                 )}
                 {recognitionIndexHref && (
@@ -243,6 +263,7 @@ const AppShell = ({
                   >
                     <Landmark className="w-4 h-4" />
                     Recognition Index
+                    <ExternalLink className="w-3 h-3 ml-auto opacity-40" />
                   </a>
                 )}
               </nav>
@@ -427,19 +448,32 @@ const AppShell = ({
                         <Users className="w-4 h-4 text-primary" /> Competitors
                       </button>
                     )}
+                    {(onOpenMaturity || onOpenBattlePlan || onOpenCompetitors) && (
+                      <button onClick={() => { onNavigate("workshop"); closeMore(); }} className="w-full flex items-center gap-3 px-3 py-3 rounded-xl text-sm font-body text-foreground hover:bg-secondary/50 transition-colors tap-scale">
+                        <Hammer className="w-4 h-4 text-primary" /> More in Workshop <ArrowRight className="w-3.5 h-3.5 ml-auto opacity-60" />
+                      </button>
+                    )}
                     {onOpenWorkshopHistory && (
                       <button onClick={() => { onOpenWorkshopHistory(); closeMore(); }} className="w-full flex items-center gap-3 px-3 py-3 rounded-xl text-sm font-body text-foreground hover:bg-secondary/50 transition-colors tap-scale">
                         <History className="w-4 h-4 text-primary" /> Workshop History
                       </button>
                     )}
+                  </div>
+                </>
+              )}
+
+              {(visibilityIndexHref || recognitionIndexHref) && (
+                <>
+                  <p className="px-5 pt-2 pb-1.5 text-[10px] tracking-[0.15em] uppercase text-muted-foreground font-body">Public pages</p>
+                  <div className="px-3 pb-2">
                     {visibilityIndexHref && (
                       <a href={visibilityIndexHref} target="_blank" rel="noreferrer" className="w-full flex items-center gap-3 px-3 py-3 rounded-xl text-sm font-body text-foreground hover:bg-secondary/50 transition-colors tap-scale">
-                        <Eye className="w-4 h-4 text-primary" /> Visibility Index
+                        <Eye className="w-4 h-4 text-primary" /> Visibility Index <ExternalLink className="w-3.5 h-3.5 ml-auto opacity-40" />
                       </a>
                     )}
                     {recognitionIndexHref && (
                       <a href={recognitionIndexHref} target="_blank" rel="noreferrer" className="w-full flex items-center gap-3 px-3 py-3 rounded-xl text-sm font-body text-foreground hover:bg-secondary/50 transition-colors tap-scale">
-                        <Landmark className="w-4 h-4 text-primary" /> Recognition Index
+                        <Landmark className="w-4 h-4 text-primary" /> Recognition Index <ExternalLink className="w-3.5 h-3.5 ml-auto opacity-40" />
                       </a>
                     )}
                   </div>
