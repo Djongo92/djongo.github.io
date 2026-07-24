@@ -12,7 +12,7 @@ Deno.serve(async (req) => {
 
     const unauthorized = await requireAccess(req, corsHeaders, "workshop");
     if (unauthorized) return unauthorized;try {
-    const { brief, format, tone, firmContext, clientId: rawClientId, accessToken } = await req.json();
+    const { brief, format, tone, firmContext, clientId: rawClientId, accessToken, voiceTag } = await req.json();
 
     let styleBlock = "";
     if (rawClientId && typeof rawClientId === "string") {
@@ -22,7 +22,7 @@ Deno.serve(async (req) => {
         { auth: { persistSession: false } },
       );
       const clientId = await resolveClientId(serviceClient, rawClientId, accessToken);
-      styleBlock = buildStyleMemoryBlock(await getStyleExamples(serviceClient, clientId, "copywriter", brief));
+      styleBlock = buildStyleMemoryBlock(await getStyleExamples(serviceClient, clientId, "copywriter", brief, 3, typeof voiceTag === "string" ? voiceTag : null));
     }
 
     const firmBlock = firmContext

@@ -75,17 +75,22 @@ const COACH_MARK_STEPS: CoachMarkStep[] = [
   {
     target: "nav-workshop",
     title: "Eleven AI tools live here",
-    body: "Headline testing, competitor teardowns, practice-page audits, and more — each one grounded in your own firm's context.",
+    body: "Headline testing, competitor teardowns, practice-page audits, and more — each one grounded in your own firm's context, and each one now remembers your firm's voice the more you use it.",
+  },
+  {
+    target: "what-if-simulator",
+    title: "See a move before you make it",
+    body: "Drag real inputs — PageSpeed scores, LinkedIn followers, posting cadence — and watch your actual score recompute live, using the same formula the audit uses.",
   },
   {
     target: "nav-progress",
-    title: "It all rolls into a Battle Plan",
-    body: "My Progress assembles everything you've run into one exportable PDF you can hand to your partners.",
+    title: "It all rolls into a living Battle Plan",
+    body: "My Progress isn't just a PDF export anymore — it's a plan you build over time, with real previews of every section, badges for real milestones, and campaigns to track what you're actually working on right now.",
   },
   {
     target: "category-methodology",
     title: "Every number shows its work",
-    body: "Click the ⓘ on any category for the exact formula and this firm's actual measured inputs — not just an asserted score. The same evidence appears in the Battle Plan PDF.",
+    body: "Click the ⓘ on any category for the exact formula and this firm's actual measured inputs — not just an asserted score. The same evidence appears in the Battle Plan.",
   },
 ];
 

@@ -7,6 +7,7 @@ import { saveVisibilityScore } from "@/hooks/useBattlePlanCache";
 import { DMV_MARKETS, PEER_GROUPS } from "@/lib/marketVisibilityConfig";
 import { isDemoMode } from "@/lib/demoMode";
 import { DEMO_AUDIT, DEMO_VISIBILITY_SCORE, DEMO_DOMAIN, DEMO_DISPLAY_NAME } from "@/data/demoData";
+import { consumeAuditPrefill } from "@/lib/auditPrefill";
 
 // Demo mode never touches the real audit backend — running a live PageSpeed/
 // directory/thought-leadership audit against whatever the visitor happens to
@@ -43,10 +44,14 @@ const PROVENANCE_LABEL: Record<string, string> = {
 
 const MarketVisibilityScore = () => {
   const demoMode = isDemoMode();
-  const [open, setOpen] = useState(false);
-  const [auditedDomain, setAuditedDomain] = useState(demoMode ? DEMO_DOMAIN : "");
-  const [displayName, setDisplayName] = useState(demoMode ? DEMO_DISPLAY_NAME : "");
-  const [market, setMarket] = useState(demoMode ? DEMO_VISIBILITY_SCORE.market : "serbia");
+  // Consumed once per mount (see auditPrefill.ts) — set by the Recognition
+  // Index's "Claim your full score" CTA so a real page navigation doesn't
+  // just land on a blank intake form.
+  const [prefill] = useState(() => (demoMode ? null : consumeAuditPrefill()));
+  const [open, setOpen] = useState(() => !!prefill);
+  const [auditedDomain, setAuditedDomain] = useState(demoMode ? DEMO_DOMAIN : (prefill?.auditedDomain ?? ""));
+  const [displayName, setDisplayName] = useState(demoMode ? DEMO_DISPLAY_NAME : (prefill?.displayName ?? ""));
+  const [market, setMarket] = useState(demoMode ? DEMO_VISIBILITY_SCORE.market : (prefill?.market ?? "serbia"));
   const [peerGroup, setPeerGroup] = useState(demoMode ? DEMO_VISIBILITY_SCORE.peerGroup : "regional");
   const [gbpListed, setGbpListed] = useState(demoMode);
   const [followers, setFollowers] = useState("");

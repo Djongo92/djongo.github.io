@@ -12,6 +12,7 @@ export type InsightAction =
   | { kind: "workshop"; toolId: WorkshopToolId }
   | { kind: "guidebook" }
   | { kind: "maturity" }
+  | { kind: "rerun" }
   | { kind: "none" };
 
 export interface Insight {
@@ -32,6 +33,8 @@ interface Params {
   implementationScore: number;
   readChaptersCount: number;
   totalChapters: number;
+  /** Senior-PM "instant first win": a zero-cost, one-checkbox +10 points, so it deserves priority over a generic weak-category insight. */
+  gbpListed?: boolean;
 }
 
 /**
@@ -42,10 +45,24 @@ interface Params {
  * because this is an overview surface, not a single CTA.
  */
 export function useCommandCenterInsights({
-  categories, siteHealthIssues, maturity, implementationScore, readChaptersCount, totalChapters,
+  categories, siteHealthIssues, maturity, implementationScore, readChaptersCount, totalChapters, gbpListed,
 }: Params): Insight[] {
   return useMemo(() => {
     const insights: Insight[] = [];
+
+    // The cheapest possible win: a free, one-checkbox +10 points. Surfaced
+    // ahead of every other insight (unshift, not push) since nothing else
+    // here costs zero effort and zero money.
+    if (categories && gbpListed === false) {
+      insights.unshift({
+        id: "gbp-unclaimed",
+        tone: "opportunity",
+        title: "Claim your free Google Business Profile",
+        body: "Worth 10 points, zero cost — just a checkbox on your next audit run.",
+        actionLabel: "Claim it now",
+        action: { kind: "rerun" },
+      });
+    }
 
     if (categories) {
       for (const [key, cat] of Object.entries(categories)) {

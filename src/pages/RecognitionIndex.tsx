@@ -1,9 +1,10 @@
 import { useEffect, useState } from "react";
-import { Link, useParams } from "react-router-dom";
-import { Loader2, ShieldCheck, ArrowRight, Flag, Download, Landmark } from "lucide-react";
+import { Link, useNavigate, useParams } from "react-router-dom";
+import { Loader2, ShieldCheck, ArrowRight, Flag, Download, Landmark, Sparkles } from "lucide-react";
 import { PEER_GROUPS, FIRM_TYPE_TO_PEER_GROUP } from "@/lib/marketVisibilityConfig";
 import { toCsv, downloadCsv } from "@/lib/csv";
 import { setPageMeta } from "@/lib/pageMeta";
+import { setAuditPrefill } from "@/lib/auditPrefill";
 
 const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL;
 const SUPABASE_KEY = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY;
@@ -16,12 +17,14 @@ interface FirmStanding {
   legal500: { points: number; count: number; avgRank: number | null };
   iflr1000: { points: number; count: number; avgRank: number | null };
   directoryPoints: number;
+  hasPublishedAudit: boolean;
 }
 
 const PEER_GROUP_LABEL: Record<string, string> = Object.fromEntries(PEER_GROUPS.map((p) => [p.value, p.label]));
 
 const RecognitionIndex = () => {
   const { market } = useParams();
+  const navigate = useNavigate();
   const [firms, setFirms] = useState<FirmStanding[] | null>(null);
   const [max, setMax] = useState(45);
   const [error, setError] = useState<string | null>(null);
@@ -113,6 +116,11 @@ const RecognitionIndex = () => {
     downloadCsv(`legalos-recognition-index-${market}.csv`, csv);
   };
 
+  const claimScore = (firm: FirmStanding) => {
+    setAuditPrefill({ displayName: firm.firmName, auditedDomain: firm.firmDomain ?? undefined, market });
+    navigate("/");
+  };
+
   return (
     <div className="min-h-screen bg-background">
       <header className="border-b border-border/50">
@@ -187,6 +195,23 @@ const RecognitionIndex = () => {
                       <p className="text-[10px] text-muted-foreground font-body">
                         Chambers {Math.round(f.chambers.points * 10) / 10} · Legal 500 {Math.round(f.legal500.points * 10) / 10} · IFLR1000 {Math.round(f.iflr1000.points * 10) / 10}
                       </p>
+                      {f.hasPublishedAudit ? (
+                        market && (
+                          <Link
+                            to={`/visibility-index/${market}`}
+                            className="text-[10px] text-emerald-500 hover:text-emerald-400 font-body inline-flex items-center gap-1 mt-0.5"
+                          >
+                            <ShieldCheck className="w-2.5 h-2.5" /> Full score published
+                          </Link>
+                        )
+                      ) : (
+                        <button
+                          onClick={() => claimScore(f)}
+                          className="text-[10px] text-primary hover:text-gold-light font-body inline-flex items-center gap-1 mt-0.5"
+                        >
+                          <Sparkles className="w-2.5 h-2.5" /> Claim your full score
+                        </button>
+                      )}
                     </div>
                   </div>
                   <span className="font-display text-base text-emerald-500 font-semibold shrink-0">

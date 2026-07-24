@@ -102,6 +102,24 @@ verify_jwt = false
 [functions.visibility-audit-rerun-due]
 verify_jwt = false
 
+[functions.competitor-alerts-check]
+verify_jwt = false
+
+[functions.client-win-log]
+verify_jwt = false
+
+[functions.client-wins-get]
+verify_jwt = false
+
+[functions.campaigns-get]
+verify_jwt = false
+
+[functions.campaigns-save]
+verify_jwt = false
+
+[functions.campaigns-delete]
+verify_jwt = false
+
 [functions.user-state-get]
 verify_jwt = false
 

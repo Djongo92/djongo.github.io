@@ -310,6 +310,7 @@ const Copywriter = () => {
   const [brief, setBrief] = useState("");
   const [format, setFormat] = useState(FORMATS[0]);
   const [tone, setTone] = useState(TONES[0]);
+  const [voiceTag, setVoiceTag] = useState("");
   const [output, setOutput] = useState("");
   const [loading, setLoading] = useState(false);
 
@@ -325,7 +326,7 @@ const Copywriter = () => {
       const resp = await fetch(`${SUPABASE_URL}/functions/v1/workshop-copywriter`, {
         method: "POST",
         headers: edgeHeaders(),
-        body: JSON.stringify({ brief, format, tone, firmContext: context, ...styleMemoryIdentity() }),
+        body: JSON.stringify({ brief, format, tone, firmContext: context, voiceTag: voiceTag.trim() || undefined, ...styleMemoryIdentity() }),
       });
       if (resp.status === 429) { toast.error("Rate limit reached."); return; }
       if (resp.status === 402) { toast.error("AI credits exhausted."); return; }
@@ -387,6 +388,17 @@ const Copywriter = () => {
             className="w-full bg-card border border-border rounded-sm px-3 py-2.5 text-sm font-body focus:outline-none focus:border-primary resize-none"
           />
         </div>
+        <div>
+          <label className="block text-[10px] tracking-[0.3em] uppercase text-muted-foreground font-body mb-2">
+            Attribute to (optional)
+          </label>
+          <input
+            value={voiceTag}
+            onChange={(e) => setVoiceTag(e.target.value)}
+            placeholder="E.g. a specific attorney's name — keeps their voice separate from the firm's"
+            className="w-full bg-card border border-border rounded-sm px-3 py-2.5 text-sm font-body focus:outline-none focus:border-primary"
+          />
+        </div>
         <button
           onClick={generate}
           disabled={!brief.trim() || loading}
@@ -428,7 +440,7 @@ const Copywriter = () => {
               </div>
               {!loading && !isDemoMode() && (
                 <div className="mt-3 pt-3 border-t border-border/50 not-prose">
-                  <StyleFeedback toolId="copywriter" output={output} inputSummary={`${format} · ${tone} · ${brief.slice(0, 100)}`} />
+                  <StyleFeedback toolId="copywriter" output={output} inputSummary={`${format} · ${tone} · ${brief.slice(0, 100)}`} voiceTag={voiceTag || undefined} />
                 </div>
               )}
             </div>
@@ -446,6 +458,7 @@ const Rewriter = () => {
   const [original, setOriginal] = useState("");
   const [chapterId, setChapterId] = useState(chapters[5]?.id ?? chapters[0].id);
   const [goal, setGoal] = useState("");
+  const [voiceTag, setVoiceTag] = useState("");
   const [output, setOutput] = useState("");
   const [loading, setLoading] = useState(false);
 
@@ -482,6 +495,7 @@ const Rewriter = () => {
           chapterFramework: `${chapter.title} — ${chapter.subtitle}${chapter.hook ? `. Core idea: ${chapter.hook}.` : "."}`,
           goal,
           firmContext: context,
+          voiceTag: voiceTag.trim() || undefined,
           ...styleMemoryIdentity(),
         }),
       });
@@ -522,6 +536,18 @@ const Rewriter = () => {
             className="w-full bg-card border border-border rounded-sm px-3 py-2.5 text-sm font-body focus:outline-none focus:border-primary"
           />
         </div>
+      </div>
+
+      <div>
+        <label className="block text-[10px] tracking-[0.3em] uppercase text-muted-foreground font-body mb-2">
+          Attribute to (optional)
+        </label>
+        <input
+          value={voiceTag}
+          onChange={(e) => setVoiceTag(e.target.value)}
+          placeholder="E.g. a specific attorney's name — keeps their voice separate from the firm's"
+          className="w-full max-w-md bg-card border border-border rounded-sm px-3 py-2.5 text-sm font-body focus:outline-none focus:border-primary"
+        />
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
@@ -582,7 +608,7 @@ const Rewriter = () => {
             )}
             {output && !loading && !isDemoMode() && (
               <div className="mt-3 pt-3 border-t border-border/50">
-                <StyleFeedback toolId="rewrite" output={output} inputSummary={original.slice(0, 150)} />
+                <StyleFeedback toolId="rewrite" output={output} inputSummary={original.slice(0, 150)} voiceTag={voiceTag || undefined} />
               </div>
             )}
           </div>

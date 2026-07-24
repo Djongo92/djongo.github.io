@@ -19,7 +19,7 @@ Deno.serve(async (req) => {
   if (unauthorized) return unauthorized;
 
   try {
-    const { clientId: rawClientId, accessToken, toolId, inputSummary, finalText, verdict } = await req.json();
+    const { clientId: rawClientId, accessToken, toolId, inputSummary, finalText, verdict, voiceTag } = await req.json();
 
     if (!rawClientId || typeof rawClientId !== "string") {
       return new Response(JSON.stringify({ error: "clientId is required" }), {
@@ -53,6 +53,7 @@ Deno.serve(async (req) => {
       serviceClient, clientId, toolId as StyleToolId,
       typeof inputSummary === "string" ? inputSummary : "",
       finalText, verdict as StyleVerdict,
+      typeof voiceTag === "string" ? voiceTag : null,
     );
 
     if (!result.ok) {
