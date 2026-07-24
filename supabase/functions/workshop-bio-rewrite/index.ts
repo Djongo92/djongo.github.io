@@ -27,7 +27,11 @@ Deno.serve(async (req) => {
         { auth: { persistSession: false } },
       );
       const clientId = await resolveClientId(serviceClient, rawClientId, accessToken);
-      styleBlock = buildStyleMemoryBlock(await getStyleExamples(serviceClient, clientId, "bio", currentBio));
+      // Multi-seat voice separation: a bio rewrite already collects whose
+      // bio this is (name) — reused as the voice tag with no extra input
+      // needed, so a firm with several attorneys' bios doesn't blend them
+      // into one voice.
+      styleBlock = buildStyleMemoryBlock(await getStyleExamples(serviceClient, clientId, "bio", currentBio, 3, typeof name === "string" ? name : null));
     }
     const emphasisMap: Record<string, string> = {
       trial: "Trial credibility — courtroom wins, verdicts, juries handled, high-stakes outcomes.",

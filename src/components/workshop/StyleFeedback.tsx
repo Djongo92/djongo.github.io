@@ -12,9 +12,13 @@ interface Props {
   toolId: StyleToolId;
   output: string;
   inputSummary: string;
+  /** Multi-seat voice separation: attributes this example to a specific
+   *  person (e.g. the bio's own subject) rather than blending it into one
+   *  firm-wide voice. Omit for the common single-writer case. */
+  voiceTag?: string;
 }
 
-const StyleFeedback = ({ toolId, output, inputSummary }: Props) => {
+const StyleFeedback = ({ toolId, output, inputSummary, voiceTag }: Props) => {
   const [mode, setMode] = useState<"idle" | "editing" | "saved">("idle");
   const [draft, setDraft] = useState(output);
 
@@ -27,14 +31,14 @@ const StyleFeedback = ({ toolId, output, inputSummary }: Props) => {
 
   const keepAsIs = async () => {
     setMode("saved");
-    await recordStyleFeedback(toolId, inputSummary, output, "approved");
+    await recordStyleFeedback(toolId, inputSummary, output, "approved", voiceTag);
     toast.success("Got it — future drafts will match this voice.");
   };
 
   const saveEdit = async () => {
     if (!draft.trim()) return;
     setMode("saved");
-    await recordStyleFeedback(toolId, inputSummary, draft, "edited");
+    await recordStyleFeedback(toolId, inputSummary, draft, "edited", voiceTag);
     toast.success("Saved your edit — future drafts will match this voice.");
   };
 

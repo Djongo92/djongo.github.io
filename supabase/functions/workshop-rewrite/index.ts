@@ -12,7 +12,7 @@ Deno.serve(async (req) => {
 
     const unauthorized = await requireAccess(req, corsHeaders, "workshop");
     if (unauthorized) return unauthorized;try {
-    const { original, chapterTitle, chapterFramework, goal, firmContext, clientId: rawClientId, accessToken } = await req.json();
+    const { original, chapterTitle, chapterFramework, goal, firmContext, clientId: rawClientId, accessToken, voiceTag } = await req.json();
 
     if (!original || typeof original !== "string" || original.trim().length < 10) {
       return new Response(JSON.stringify({ error: "Paste at least a sentence or two of current copy." }), {
@@ -29,7 +29,7 @@ Deno.serve(async (req) => {
         { auth: { persistSession: false } },
       );
       const clientId = await resolveClientId(serviceClient, rawClientId, accessToken);
-      styleBlock = buildStyleMemoryBlock(await getStyleExamples(serviceClient, clientId, "rewrite", original));
+      styleBlock = buildStyleMemoryBlock(await getStyleExamples(serviceClient, clientId, "rewrite", original, 3, typeof voiceTag === "string" ? voiceTag : null));
     }
 
     const firmBlock = firmContext

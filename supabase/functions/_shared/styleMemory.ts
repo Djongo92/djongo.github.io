@@ -21,20 +21,42 @@ export async function getRecentStyleExamples(
   clientId: string,
   toolId: StyleToolId,
   limit = 3,
+  voiceTag?: string | null,
 ): Promise<StyleExample[]> {
   // Rejected drafts are still useful signal (see recordStyleExample), but a
   // rejected draft's own text is the last thing worth feeding back in as an
   // example to imitate — only approved/edited ones ever become few-shot
   // examples of the voice to match.
-  const { data, error } = await serviceClient
-    .from("workshop_style_examples")
-    .select("input_summary, final_text, verdict, created_at")
-    .eq("client_id", clientId)
-    .eq("tool_id", toolId)
-    .in("verdict", ["approved", "edited"])
-    .order("created_at", { ascending: false })
-    .limit(limit);
+  const base = () =>
+    serviceClient
+      .from("workshop_style_examples")
+      .select("input_summary, final_text, verdict, created_at")
+      .eq("client_id", clientId)
+      .eq("tool_id", toolId)
+      .in("verdict", ["approved", "edited"]);
 
+  // Multi-seat voice separation: prefer examples tagged for this specific
+  // person, then fill any remaining slots with the firm's untagged/other
+  // examples — never excludes them outright, since a firm with only one
+  // tagged example so far should still benefit from its broader history.
+  if (voiceTag) {
+    const { data: tagged, error: taggedError } = await base()
+      .eq("voice_tag", voiceTag)
+      .order("created_at", { ascending: false })
+      .limit(limit);
+    if (taggedError) console.error("getRecentStyleExamples (tagged) error:", taggedError);
+    const taggedRows = (tagged ?? []) as StyleExample[];
+    if (taggedRows.length >= limit) return taggedRows;
+
+    const { data: rest, error: restError } = await base()
+      .or(`voice_tag.is.null,voice_tag.neq.${voiceTag}`)
+      .order("created_at", { ascending: false })
+      .limit(limit - taggedRows.length);
+    if (restError) console.error("getRecentStyleExamples (fallback) error:", restError);
+    return [...taggedRows, ...((rest ?? []) as StyleExample[])];
+  }
+
+  const { data, error } = await base().order("created_at", { ascending: false }).limit(limit);
   if (error) {
     console.error("getRecentStyleExamples error:", error);
     return [];
@@ -56,6 +78,7 @@ export async function getStyleExamples(
   toolId: StyleToolId,
   queryText: string,
   limit = 3,
+  voiceTag?: string | null,
 ): Promise<StyleExample[]> {
   const queryEmbedding = await getEmbedding(queryText, "query");
   if (queryEmbedding) {
@@ -64,11 +87,12 @@ export async function getStyleExamples(
       p_tool_id: toolId,
       p_query_embedding: queryEmbedding,
       p_limit: limit,
+      p_voice_tag: voiceTag ?? null,
     });
     if (error) console.error("match_workshop_style_examples error:", error);
     else if (data && data.length > 0) return data as StyleExample[];
   }
-  return getRecentStyleExamples(serviceClient, clientId, toolId, limit);
+  return getRecentStyleExamples(serviceClient, clientId, toolId, limit, voiceTag);
 }
 
 /** Formats retrieved examples into a system-prompt block. Empty string if there's nothing to inject. */
@@ -87,6 +111,7 @@ export async function recordStyleExample(
   inputSummary: string,
   finalText: string,
   verdict: StyleVerdict,
+  voiceTag?: string | null,
 ): Promise<{ ok: boolean; error?: string }> {
   // Only approved/edited rows are ever retrieved as examples (see
   // getRecentStyleExamples's verdict filter) — skip the embedding call for
@@ -100,6 +125,7 @@ export async function recordStyleExample(
     final_text: finalText.slice(0, 8000),
     verdict,
     embedding,
+    voice_tag: voiceTag?.trim() || null,
   });
   if (error) {
     console.error("recordStyleExample error:", error);

@@ -14,6 +14,7 @@ export async function recordStyleFeedback(
   inputSummary: string,
   finalText: string,
   verdict: StyleVerdict,
+  voiceTag?: string,
 ): Promise<void> {
   const { userId, accessToken } = getCurrentUser();
   const clientId = userId ?? getOrCreateClientId();
@@ -21,7 +22,7 @@ export async function recordStyleFeedback(
     await fetch(fnUrl("workshop-style-feedback"), {
       method: "POST",
       headers: authHeaders(),
-      body: JSON.stringify({ clientId, accessToken, toolId, inputSummary, finalText, verdict }),
+      body: JSON.stringify({ clientId, accessToken, toolId, inputSummary, finalText, verdict, voiceTag: voiceTag?.trim() || undefined }),
     });
   } catch (e) {
     // Best-effort — a failed feedback save shouldn't interrupt the user's

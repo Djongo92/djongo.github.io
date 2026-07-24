@@ -23,6 +23,7 @@ import ScoreBurst from "@/components/visibility/ScoreBurst";
 import MilestoneCelebration from "@/components/visibility/MilestoneCelebration";
 import { useMilestoneCelebration } from "@/hooks/useMilestoneCelebration";
 import MondayBrief from "@/components/dashboard/MondayBrief";
+import ClientWinLog from "@/components/dashboard/ClientWinLog";
 import PeerPositionBar from "@/components/visibility/PeerPositionBar";
 import PeerScatterMap from "@/components/visibility/PeerScatterMap";
 import MarketVisibilityScore from "@/components/MarketVisibilityScore";
@@ -320,6 +321,7 @@ const CommandCenter = ({
 
   const insights = useCommandCenterInsights({
     categories, siteHealthIssues, maturity, implementationScore, readChaptersCount, totalChapters,
+    gbpListed: primary?.raw_metrics?.reputation?.gbpListed,
   });
 
   const briefParams = useMemo(() => {
@@ -349,6 +351,7 @@ const CommandCenter = ({
     if (action.kind === "workshop") return () => onOpenWorkshopTool(action.toolId);
     if (action.kind === "guidebook") return onOpenGuidebook;
     if (action.kind === "maturity") return onOpenMaturity;
+    if (action.kind === "rerun") return () => setRerunOpen(true);
     return undefined;
   };
 
@@ -740,6 +743,8 @@ const CommandCenter = ({
             </div>
           </div>
 
+          <ClientWinLog market={primary.market} auditedDomain={primary.audited_domain} />
+
           <div className="bg-card/40 border border-border/30 rounded-sm p-4">
             <h2 className="font-display text-base text-foreground mb-4">Recent Workshop Activity</h2>
             {runs.length === 0 ? (
@@ -787,7 +792,19 @@ const CommandCenter = ({
       </div>
 
       <WhatIfSimulator open={whatIfOpen} onClose={() => setWhatIfOpen(false)} audit={primary} />
-      <MilestoneCelebration milestone={milestone} onDismiss={dismissMilestone} />
+      <MilestoneCelebration
+        open={!!milestone}
+        celebrationKey={milestone?.id}
+        headline={milestone ? (milestone.kind === "score" ? `${milestone.value} / 200` : `Top ${100 - milestone.value}%`) : ""}
+        body={
+          milestone
+            ? milestone.kind === "score"
+              ? `Your Market Visibility Score just crossed ${milestone.value} points — a first for this firm.`
+              : `You're now better than ${milestone.value}% of your peer group — a first for this firm.`
+            : ""
+        }
+        onDismiss={dismissMilestone}
+      />
     </div>
   );
 };

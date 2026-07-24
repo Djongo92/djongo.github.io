@@ -51,7 +51,31 @@ Deno.serve(async (req) => {
 
     const firms = computeDirectoryStandingIndex(market, data as DirectoryRow[]);
 
-    return new Response(JSON.stringify({ market, max: DIRECTORY_INDEX_MAX, firms }), {
+    // Growth-channel cross-reference: which of these directory-only firms
+    // have ALSO run and published a full audit? Domains were enriched onto
+    // market_directory_data specifically so this can be a plain domain
+    // match, not fuzzy name-matching. This never exposes anything new — the
+    // matched rows are already public (is_public = true), same posture as
+    // the Visibility Index leaderboard reading them directly.
+    const domains = (data as DirectoryRow[]).map((f) => f.firm_domain).filter((d): d is string => !!d);
+    let publishedDomains = new Set<string>();
+    if (domains.length > 0) {
+      const { data: publishedAudits, error: publishedError } = await serviceClient
+        .from("market_visibility_audits")
+        .select("audited_domain")
+        .eq("market", market)
+        .eq("is_public", true)
+        .in("audited_domain", domains);
+      if (publishedError) console.error("directory-standing-index: published-audit lookup failed:", publishedError);
+      else publishedDomains = new Set((publishedAudits ?? []).map((r) => r.audited_domain));
+    }
+
+    const firmsWithClaimStatus = firms.map((f) => ({
+      ...f,
+      hasPublishedAudit: !!f.firmDomain && publishedDomains.has(f.firmDomain),
+    }));
+
+    return new Response(JSON.stringify({ market, max: DIRECTORY_INDEX_MAX, firms: firmsWithClaimStatus }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
   } catch (e) {

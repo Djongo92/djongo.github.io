@@ -4,6 +4,9 @@ import { Swords, X, Download, CheckCircle2, Circle, Loader2, Flame, Map, Target,
 import { useBattlePlanCache } from "@/hooks/useBattlePlanCache";
 import { useFirmContext } from "@/hooks/useFirmContext";
 import { useFirmLogo } from "@/hooks/useFirmLogo";
+import { useBattlePlanMilestones } from "@/hooks/useBattlePlanMilestones";
+import ScoreRing from "@/components/visibility/ScoreRing";
+import MilestoneCelebration from "@/components/visibility/MilestoneCelebration";
 import { toast } from "sonner";
 
 interface Props {
@@ -11,6 +14,22 @@ interface Props {
   totalChapters: number;
   implementationScore: number;
 }
+
+const timeAgo = (ts: number): string => {
+  const mins = Math.round((Date.now() - ts) / 60000);
+  if (mins < 60) return `${mins}m ago`;
+  const hours = Math.round(mins / 60);
+  if (hours < 24) return `${hours}h ago`;
+  const days = Math.round(hours / 24);
+  return `${days}d ago`;
+};
+
+const BADGES = [
+  { id: "foundation-builder", label: "Foundation Builder", icon: ShieldCheck },
+  { id: "voice-found", label: "Voice Found", icon: UserSquare },
+  { id: "battle-ready", label: "Battle Ready", icon: Swords },
+  { id: "fully-armed", label: "Fully Armed", icon: Trophy },
+] as const;
 
 const BattlePlan = ({ readChaptersCount, totalChapters, implementationScore }: Props) => {
   const [open, setOpen] = useState(false);
@@ -21,18 +40,34 @@ const BattlePlan = ({ readChaptersCount, totalChapters, implementationScore }: P
 
   const hasAny = !!(roast || competitor || roadmap || maturity || headline || bio || visibilityScore);
   const coreSteps = [
-    { key: "roast", label: "Run Roast My Homepage", done: !!roast, icon: "roast" as const, preview: roast ? `Grade ${roast.grade} — ${roast.verdict}` : undefined },
-    { key: "competitor", label: "Run Competitor Analysis", done: !!competitor, icon: "competitor" as const, preview: competitor?.executiveSummary },
-    { key: "roadmap", label: "Generate 30/60/90 Roadmap", done: !!roadmap, icon: "roadmap" as const, preview: roadmap?.summary },
+    { key: "roast", label: "Run Roast My Homepage", done: !!roast, icon: "roast" as const, preview: roast ? `Grade ${roast.grade} — ${roast.verdict}` : undefined, capturedAt: roast?.capturedAt },
+    { key: "competitor", label: "Run Competitor Analysis", done: !!competitor, icon: "competitor" as const, preview: competitor?.executiveSummary, capturedAt: competitor?.capturedAt },
+    { key: "roadmap", label: "Generate 30/60/90 Roadmap", done: !!roadmap, icon: "roadmap" as const, preview: roadmap?.summary, capturedAt: roadmap?.capturedAt },
   ];
   const optionalSteps = [
-    { key: "maturity", label: "Firm Maturity Score", done: !!maturity, icon: "maturity" as const },
-    { key: "headline", label: "Headline Lab champion", done: !!headline, icon: "headline" as const },
-    { key: "bio", label: "Bio Rewriter result", done: !!bio, icon: "bio" as const },
-    { key: "visibilityScore", label: "Market Visibility Score", done: !!visibilityScore, icon: "visibilityScore" as const },
+    { key: "maturity", label: "Firm Maturity Score", done: !!maturity, icon: "maturity" as const, preview: maturity ? `${maturity.score}% scored across ${maturity.dimensions.length} dimensions` : undefined, capturedAt: maturity?.capturedAt },
+    { key: "headline", label: "Headline Lab champion", done: !!headline, icon: "headline" as const, preview: headline?.text, capturedAt: headline?.capturedAt },
+    { key: "bio", label: "Bio Rewriter result", done: !!bio, icon: "bio" as const, preview: bio ? (bio.name ? `Bio for ${bio.name}` : "Bio rewrite ready") : undefined, capturedAt: bio?.capturedAt },
+    { key: "visibilityScore", label: "Market Visibility Score", done: !!visibilityScore, icon: "visibilityScore" as const, preview: visibilityScore ? `${Math.round(visibilityScore.totalScore)}/200 for ${visibilityScore.displayName || visibilityScore.auditedDomain}` : undefined, capturedAt: visibilityScore?.capturedAt },
   ];
   const completedCore = coreSteps.filter((s) => s.done).length;
   const completedOptional = optionalSteps.filter((s) => s.done).length;
+  const totalDone = completedCore + completedOptional;
+  const totalSlots = coreSteps.length + optionalSteps.length;
+
+  const { badge, dismiss: dismissBadge } = useBattlePlanMilestones({
+    roast: !!roast, competitor: !!competitor, roadmap: !!roadmap, maturity: !!maturity,
+    headline: !!headline, bio: !!bio, visibilityScore: !!visibilityScore,
+  });
+  const earnedBadgeIds = new Set(
+    BADGES.filter((b) => {
+      if (b.id === "foundation-builder") return !!visibilityScore && !!maturity;
+      if (b.id === "voice-found") return !!bio && !!headline;
+      if (b.id === "battle-ready") return !!roast && !!competitor && !!roadmap;
+      if (b.id === "fully-armed") return totalDone === totalSlots;
+      return false;
+    }).map((b) => b.id),
+  );
 
   const generate = async () => {
     if (!hasAny) {
@@ -65,17 +100,22 @@ const BattlePlan = ({ readChaptersCount, totalChapters, implementationScore }: P
           Flagship
         </div>
         <div className="flex items-start gap-4">
-          <div className="p-2.5 rounded-sm bg-gold/15 text-gold-light">
-            <Swords className="w-5 h-5" />
-          </div>
+          {hasAny ? (
+            <ScoreRing score={totalDone} max={totalSlots} size={56} strokeWidth={5} colorClass="stroke-gold" />
+          ) : (
+            <div className="p-2.5 rounded-sm bg-gold/15 text-gold-light">
+              <Swords className="w-5 h-5" />
+            </div>
+          )}
           <div className="flex-1">
             <h3 className="font-display text-lg text-foreground mb-1">Your Battle Plan</h3>
             <p className="text-xs text-muted-foreground font-body">
-              Branded one-page PDF · Roast + competitor gaps + 90-day moves · The artifact you forward to your managing partner
+              A living plan you build over time — not just a PDF · Roast + competitor gaps + 90-day moves
             </p>
             {hasAny && (
               <p className="text-[11px] text-gold-light font-body mt-2">
-                {completedCore}/3 core · {completedOptional}/3 bonus inputs ready
+                {totalDone}/{totalSlots} sections ready
+                {earnedBadgeIds.size > 0 ? ` · ${earnedBadgeIds.size} badge${earnedBadgeIds.size === 1 ? "" : "s"} earned` : ""}
               </p>
             )}
           </div>
@@ -105,12 +145,34 @@ const BattlePlan = ({ readChaptersCount, totalChapters, implementationScore }: P
               </div>
 
               <div className="flex-1 overflow-y-auto p-6">
-                <p className="text-sm text-secondary-foreground/80 font-body mb-1">
-                  A single, branded PDF that combines everything you've generated into one document worth forwarding.
-                </p>
-                <p className="text-xs text-muted-foreground font-body mb-6 italic">
-                  Each input below is optional — but the more complete, the more devastating the plan.
-                </p>
+                <div className="flex items-center gap-4 mb-6">
+                  <ScoreRing score={totalDone} max={totalSlots} size={72} strokeWidth={6} colorClass="stroke-gold" sublabel="Complete" />
+                  <div>
+                    <p className="text-sm text-secondary-foreground/80 font-body">
+                      A living plan that builds over time — every section below is real content you can read right here, not just a locked PDF preview.
+                    </p>
+                    <p className="text-xs text-muted-foreground font-body mt-1 italic">
+                      Each input is optional — but the more complete, the more devastating the plan.
+                    </p>
+                  </div>
+                </div>
+
+                <div className="flex flex-wrap gap-2 mb-6">
+                  {BADGES.map((b) => {
+                    const earned = earnedBadgeIds.has(b.id);
+                    const Icon = b.icon;
+                    return (
+                      <div
+                        key={b.id}
+                        className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-full border text-[11px] font-body ${
+                          earned ? "border-gold/50 bg-gold/10 text-gold-light" : "border-border/40 text-muted-foreground/60"
+                        }`}
+                      >
+                        <Icon className="w-3 h-3" /> {b.label}
+                      </div>
+                    );
+                  })}
+                </div>
 
                 <div className="space-y-2 mb-6">
                   <p className="text-[10px] tracking-[0.2em] uppercase text-muted-foreground font-body mb-1">Core inputs</p>
@@ -125,9 +187,12 @@ const BattlePlan = ({ readChaptersCount, totalChapters, implementationScore }: P
                         <Circle className="w-4 h-4 text-muted-foreground shrink-0 mt-0.5" />
                       )}
                       <div className="min-w-0 flex-1">
-                        <span className={`text-sm font-body ${s.done ? "text-foreground" : "text-muted-foreground"}`}>
-                          {s.label}
-                        </span>
+                        <div className="flex items-baseline justify-between gap-2">
+                          <span className={`text-sm font-body ${s.done ? "text-foreground" : "text-muted-foreground"}`}>
+                            {s.label}
+                          </span>
+                          {s.capturedAt && <span className="text-[10px] text-muted-foreground font-body shrink-0">{timeAgo(s.capturedAt)}</span>}
+                        </div>
                         {s.preview && (
                           <p className="text-[11px] text-muted-foreground font-body truncate mt-0.5">{s.preview}</p>
                         )}
@@ -141,20 +206,28 @@ const BattlePlan = ({ readChaptersCount, totalChapters, implementationScore }: P
                   {optionalSteps.map((s) => (
                     <div
                       key={s.key}
-                      className={`flex items-center gap-3 p-3 rounded-sm border ${s.done ? "border-gold/30 bg-gold/5" : "border-border/40 bg-card"}`}
+                      className={`flex items-start gap-3 p-3 rounded-sm border ${s.done ? "border-gold/30 bg-gold/5" : "border-border/40 bg-card"}`}
                     >
                       {s.done ? (
-                        <CheckCircle2 className="w-4 h-4 text-gold-light shrink-0" />
+                        <CheckCircle2 className="w-4 h-4 text-gold-light shrink-0 mt-0.5" />
                       ) : (
-                        <Circle className="w-4 h-4 text-muted-foreground shrink-0" />
+                        <Circle className="w-4 h-4 text-muted-foreground shrink-0 mt-0.5" />
                       )}
-                      <span className={`text-sm font-body ${s.done ? "text-foreground" : "text-muted-foreground"}`}>
-                        {s.label}
-                      </span>
-                      {s.icon === "maturity" && <Gauge className="w-3 h-3 text-primary/60 ml-auto" />}
-                      {s.icon === "headline" && <Trophy className="w-3 h-3 text-gold-light/70 ml-auto" />}
-                      {s.icon === "bio" && <UserSquare className="w-3 h-3 text-primary/60 ml-auto" />}
-                      {s.icon === "visibilityScore" && <ShieldCheck className="w-3 h-3 text-emerald-500/70 ml-auto" />}
+                      <div className="min-w-0 flex-1">
+                        <div className="flex items-baseline justify-between gap-2">
+                          <span className={`text-sm font-body ${s.done ? "text-foreground" : "text-muted-foreground"}`}>
+                            {s.label}
+                          </span>
+                          {s.capturedAt && <span className="text-[10px] text-muted-foreground font-body shrink-0">{timeAgo(s.capturedAt)}</span>}
+                        </div>
+                        {s.preview && (
+                          <p className="text-[11px] text-muted-foreground font-body truncate mt-0.5">{s.preview}</p>
+                        )}
+                      </div>
+                      {s.icon === "maturity" && <Gauge className="w-3 h-3 text-primary/60 shrink-0 mt-0.5" />}
+                      {s.icon === "headline" && <Trophy className="w-3 h-3 text-gold-light/70 shrink-0 mt-0.5" />}
+                      {s.icon === "bio" && <UserSquare className="w-3 h-3 text-primary/60 shrink-0 mt-0.5" />}
+                      {s.icon === "visibilityScore" && <ShieldCheck className="w-3 h-3 text-emerald-500/70 shrink-0 mt-0.5" />}
                     </div>
                   ))}
                 </div>
@@ -174,7 +247,7 @@ const BattlePlan = ({ readChaptersCount, totalChapters, implementationScore }: P
                   {generating ? (
                     <><Loader2 className="w-4 h-4 animate-spin" /> Building PDF…</>
                   ) : (
-                    <><Download className="w-4 h-4" /> {hasAny ? `Generate Battle Plan (${completedCore + completedOptional}/${coreSteps.length + optionalSteps.length} inputs)` : "Run an analysis first"}</>
+                    <><Download className="w-4 h-4" /> {hasAny ? `Download as PDF (${totalDone}/${totalSlots} inputs)` : "Run an analysis first"}</>
                   )}
                 </button>
 
@@ -188,6 +261,15 @@ const BattlePlan = ({ readChaptersCount, totalChapters, implementationScore }: P
           </motion.div>
         )}
       </AnimatePresence>
+
+      <MilestoneCelebration
+        open={!!badge}
+        celebrationKey={badge?.id}
+        eyebrow="Battle Plan badge earned"
+        headline={badge?.headline ?? ""}
+        body={badge?.body ?? ""}
+        onDismiss={dismissBadge}
+      />
     </>
   );
 };

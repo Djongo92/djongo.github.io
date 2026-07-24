@@ -134,7 +134,7 @@ const BioRewriter = () => {
           )}
           {output && !loading && !isDemoMode() && (
             <div className="mt-4 pt-4 border-t border-border/50">
-              <StyleFeedback toolId="bio" output={output} inputSummary={name ? `Bio for ${name}${role ? `, ${role}` : ""}` : "Bio rewrite"} />
+              <StyleFeedback toolId="bio" output={output} inputSummary={name ? `Bio for ${name}${role ? `, ${role}` : ""}` : "Bio rewrite"} voiceTag={name || undefined} />
             </div>
           )}
         </motion.div>
