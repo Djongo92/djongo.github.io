@@ -31,6 +31,7 @@ import ClaimDataBanner from "@/components/ClaimDataBanner";
 import { DashboardSkeleton, AnalyticsSkeleton, SettingsSkeleton, ProgressSkeleton, WorkshopSkeleton } from "@/components/SectionSkeletons";
 import type { WorkshopToolId } from "@/lib/handoff";
 import type { AuditRow, HistoryRow } from "@/components/dashboard/CommandCenter";
+import { findWeakestCategoryTool } from "@/lib/categoryToolMap";
 
 // Pulls in recharts — lazy-load so it's only fetched when the Dashboard
 // or Analytics section is actually visited, not on every page load.
@@ -230,7 +231,24 @@ const Index = () => {
     window.dispatchEvent(new CustomEvent("workshop:switch-tool", { detail: { toolId } }));
   };
 
-  const openBattlePlan = () => goToSection("progress");
+  // Battle Plan lives embedded partway down the (lazy-loaded) Progress page,
+  // not as its own route — so getting there means navigating to "progress"
+  // AND scrolling to the actual card once it's mounted. Polls briefly for
+  // the element rather than a blind timeout, since Suspense's mount timing
+  // isn't guaranteed to land within any single fixed delay.
+  const openBattlePlan = () => {
+    goToSection("progress");
+    let attempts = 0;
+    const tryScroll = () => {
+      const el = document.getElementById("battle-plan");
+      if (el) {
+        el.scrollIntoView({ behavior: "smooth", block: "start" });
+        return;
+      }
+      if (attempts++ < 20) setTimeout(tryScroll, 50);
+    };
+    setTimeout(tryScroll, 50);
+  };
 
   // Sidebar identity + alert dot — a lightweight version of the same
   // "is anything worth reviewing" check CommandCenter's insights feed
@@ -240,6 +258,19 @@ const Index = () => {
   const scoreLabel = primaryAudit ? `${Math.round(primaryAudit.total_score)} / 200` : undefined;
   const visibilityIndexHref = primaryAudit ? `${import.meta.env.BASE_URL}visibility-index/${primaryAudit.market}` : undefined;
   const recognitionIndexHref = primaryAudit ? `${import.meta.env.BASE_URL}recognition-index/${primaryAudit.market}` : undefined;
+
+  // The sidebar's "Workshop" shortcut deep-links to the single most
+  // useful next tool (same weakest-category-below-50% logic the Key
+  // Insights feed uses) instead of just duplicating the plain "Workshop"
+  // nav item above it with an identical destination.
+  const weakestCategoryTool = primaryAudit
+    ? findWeakestCategoryTool({
+        performance: { score: primaryAudit.performance_score, provenance: primaryAudit.provenance?.performance ?? "missing" },
+        social: { score: primaryAudit.social_score, provenance: primaryAudit.provenance?.social ?? "missing" },
+        thoughtLeadership: { score: primaryAudit.thought_leadership_score, provenance: primaryAudit.provenance?.thoughtLeadership ?? "missing" },
+        reputation: { score: primaryAudit.reputation_score, provenance: primaryAudit.provenance?.reputation ?? "missing" },
+      })
+    : null;
 
   // Sidebar's Bell is a real, persisted notification inbox now (see
   // useNotifications) — CommandCenter's own "Key Insights" cards already
@@ -363,6 +394,8 @@ const Index = () => {
         onOpenBattlePlan={openBattlePlan}
         onOpenCompetitors={() => setCompetitorsOpen(true)}
         onOpenWorkshopHistory={() => setWorkshopHistoryOpen(true)}
+        onOpenWorkshop={() => goToSection("workshop")}
+        workshopRecommendation={weakestCategoryTool ? { label: weakestCategoryTool.categoryLabel, onClick: () => openWorkshopTool(weakestCategoryTool.toolId) } : undefined}
         visibilityIndexHref={visibilityIndexHref}
         recognitionIndexHref={recognitionIndexHref}
       >

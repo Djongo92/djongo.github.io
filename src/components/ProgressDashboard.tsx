@@ -154,8 +154,10 @@ const ProgressDashboard = ({
         <AskTheBook onSelectChapter={onSelectChapter} />
       </div>
 
-      {/* Flagship: Battle Plan PDF */}
-      <div className="max-w-4xl mx-auto px-6 mb-12">
+      {/* Flagship: Battle Plan PDF. id targeted by the sidebar's "Battle Plan"
+          shortcut (Index.tsx's openBattlePlan) so it scrolls straight here
+          instead of just landing at the top of this page. */}
+      <div id="battle-plan" className="max-w-4xl mx-auto px-6 mb-12 scroll-mt-6">
         <BattlePlan
           readChaptersCount={totalRead}
           totalChapters={totalChapters}
