@@ -48,6 +48,11 @@ interface AppShellProps {
   onOpenBattlePlan?: () => void;
   onOpenCompetitors?: () => void;
   onOpenWorkshopHistory?: () => void;
+  onOpenWorkshop?: () => void;
+  /** The single highest-leverage next tool (weakest category below 50%), if there is one — makes
+   * the "More in Workshop" shortcut a real recommendation instead of duplicating the plain
+   * "Workshop" nav item above it with an identical destination. */
+  workshopRecommendation?: { label: string; onClick: () => void };
   visibilityIndexHref?: string;
   recognitionIndexHref?: string;
 }
@@ -77,7 +82,8 @@ const NavGroupLabel = ({ children }: { children: ReactNode }) => (
  */
 const AppShell = ({
   active, onNavigate, children, demoMode, onExitDemo, onSignOut, firmName, firmLogo, scoreLabel, notifications, unreadCount, onOpenNotifications,
-  onOpenSettings, onOpenMaturity, onOpenBattlePlan, onOpenCompetitors, onOpenWorkshopHistory, visibilityIndexHref, recognitionIndexHref,
+  onOpenSettings, onOpenMaturity, onOpenBattlePlan, onOpenCompetitors, onOpenWorkshopHistory, onOpenWorkshop, workshopRecommendation,
+  visibilityIndexHref, recognitionIndexHref,
 }: AppShellProps) => {
   const [moreOpen, setMoreOpen] = useState(false);
   const hasTools = Boolean(onOpenMaturity || onOpenBattlePlan || onOpenCompetitors || onOpenWorkshopHistory);
@@ -217,11 +223,11 @@ const AppShell = ({
                 )}
                 {(onOpenMaturity || onOpenBattlePlan || onOpenCompetitors) && (
                   <button
-                    onClick={() => onNavigate("workshop")}
+                    onClick={workshopRecommendation ? workshopRecommendation.onClick : onOpenWorkshop ?? (() => onNavigate("workshop"))}
                     className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-body text-muted-foreground hover:text-foreground hover:bg-secondary/50 transition-colors tap-scale"
                   >
                     <Hammer className="w-4 h-4" />
-                    More in Workshop
+                    {workshopRecommendation ? `Work on: ${workshopRecommendation.label}` : "More in Workshop"}
                     <ArrowRight className="w-3 h-3 ml-auto opacity-60" />
                   </button>
                 )}
@@ -449,8 +455,13 @@ const AppShell = ({
                       </button>
                     )}
                     {(onOpenMaturity || onOpenBattlePlan || onOpenCompetitors) && (
-                      <button onClick={() => { onNavigate("workshop"); closeMore(); }} className="w-full flex items-center gap-3 px-3 py-3 rounded-xl text-sm font-body text-foreground hover:bg-secondary/50 transition-colors tap-scale">
-                        <Hammer className="w-4 h-4 text-primary" /> More in Workshop <ArrowRight className="w-3.5 h-3.5 ml-auto opacity-60" />
+                      <button
+                        onClick={() => { (workshopRecommendation ? workshopRecommendation.onClick : onOpenWorkshop ?? (() => onNavigate("workshop")))(); closeMore(); }}
+                        className="w-full flex items-center gap-3 px-3 py-3 rounded-xl text-sm font-body text-foreground hover:bg-secondary/50 transition-colors tap-scale"
+                      >
+                        <Hammer className="w-4 h-4 text-primary" />
+                        {workshopRecommendation ? `Work on: ${workshopRecommendation.label}` : "More in Workshop"}
+                        <ArrowRight className="w-3.5 h-3.5 ml-auto opacity-60" />
                       </button>
                     )}
                     {onOpenWorkshopHistory && (

@@ -1,5 +1,6 @@
 import { useMemo } from "react";
 import type { WorkshopToolId } from "@/lib/handoff";
+import { CATEGORY_TOOL_MAP } from "@/lib/categoryToolMap";
 
 export interface CategoryScore {
   score: number;
@@ -22,13 +23,7 @@ export interface Insight {
   action: InsightAction;
 }
 
-const CATEGORY_META: Record<string, { label: string; max: number; toolId: WorkshopToolId }> = {
-  performance: { label: "Performance", max: 20, toolId: "audit" },
-  social: { label: "Social Media", max: 20, toolId: "copywriter" },
-  thoughtLeadership: { label: "Thought Leadership", max: 45, toolId: "copywriter" },
-  reputation: { label: "Reputation", max: 55, toolId: "teardown" },
-  // seoAuthority excluded — "missing" (not configured) isn't a real gap, see below.
-};
+const CATEGORY_META = CATEGORY_TOOL_MAP;
 
 interface Params {
   categories: Record<string, CategoryScore> | null;
