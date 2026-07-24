@@ -3,7 +3,7 @@ import { AnimatePresence, motion } from "framer-motion";
 import {
   LayoutDashboard, Hammer, BookOpen, BarChart3, FlaskConical, Settings, Circle, LogOut,
   Gauge, FileText, Eye, Users, History, Bell, Landmark, MoreHorizontal, X, Award,
-  ArrowRight, ExternalLink,
+  ArrowRight, ExternalLink, TrendingUp, TrendingDown, ChevronsLeft, ChevronsRight, Search,
 } from "lucide-react";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import FirmCrest from "@/components/FirmCrest";
@@ -40,18 +40,23 @@ interface AppShellProps {
   firmName?: string;
   firmLogo?: string | null;
   scoreLabel?: string;
+  /** Change in total score since the first recorded audit — shown next to scoreLabel so the
+   * sidebar itself reflects trajectory, not just a static snapshot, on every page, not just Dashboard. */
+  scoreDelta?: number;
   notifications?: SidebarNotification[];
   unreadCount?: number;
   onOpenNotifications?: () => void;
   onOpenSettings?: () => void;
+  onOpenPalette?: () => void;
   onOpenMaturity?: () => void;
   onOpenBattlePlan?: () => void;
   onOpenCompetitors?: () => void;
   onOpenWorkshopHistory?: () => void;
   onOpenWorkshop?: () => void;
-  /** The single highest-leverage next tool (weakest category below 50%), if there is one — makes
-   * the "More in Workshop" shortcut a real recommendation instead of duplicating the plain
-   * "Workshop" nav item above it with an identical destination. */
+  /** A concrete next step in the Workshop — "Continue: {last tool}" if there's run history,
+   * else "Work on: {weakest category}" if one qualifies — computed by Index.tsx. Replaces a
+   * generic "More in Workshop" shortcut that duplicated the plain "Workshop" nav item above it
+   * with an identical destination. Label is rendered as-is (already includes its own prefix). */
   workshopRecommendation?: { label: string; onClick: () => void };
   visibilityIndexHref?: string;
   recognitionIndexHref?: string;
@@ -71,6 +76,8 @@ const NavGroupLabel = ({ children }: { children: ReactNode }) => (
   </p>
 );
 
+const SIDEBAR_COLLAPSED_KEY = "legalos_sidebar_collapsed";
+
 /**
  * Persistent app shell — the thing every section lives inside, so moving
  * between Dashboard/Analytics/Workshop/My Progress/Guidebook is in-app
@@ -81,24 +88,35 @@ const NavGroupLabel = ({ children }: { children: ReactNode }) => (
  * hold — those were previously desktop-only and unreachable from a phone.
  */
 const AppShell = ({
-  active, onNavigate, children, demoMode, onExitDemo, onSignOut, firmName, firmLogo, scoreLabel, notifications, unreadCount, onOpenNotifications,
-  onOpenSettings, onOpenMaturity, onOpenBattlePlan, onOpenCompetitors, onOpenWorkshopHistory, onOpenWorkshop, workshopRecommendation,
+  active, onNavigate, children, demoMode, onExitDemo, onSignOut, firmName, firmLogo, scoreLabel, scoreDelta, notifications, unreadCount, onOpenNotifications,
+  onOpenSettings, onOpenPalette, onOpenMaturity, onOpenBattlePlan, onOpenCompetitors, onOpenWorkshopHistory, onOpenWorkshop, workshopRecommendation,
   visibilityIndexHref, recognitionIndexHref,
 }: AppShellProps) => {
   const [moreOpen, setMoreOpen] = useState(false);
+  const [collapsed, setCollapsed] = useState(() => localStorage.getItem(SIDEBAR_COLLAPSED_KEY) === "1");
   const hasTools = Boolean(onOpenMaturity || onOpenBattlePlan || onOpenCompetitors || onOpenWorkshopHistory);
   const notificationList = notifications ?? [];
   const hasUnread = (unreadCount ?? 0) > 0;
 
   const closeMore = () => setMoreOpen(false);
+  const toggleCollapsed = () => {
+    setCollapsed((c) => {
+      localStorage.setItem(SIDEBAR_COLLAPSED_KEY, c ? "0" : "1");
+      return !c;
+    });
+  };
 
   return (
     <div className="min-h-screen bg-background md:flex">
       {/* Desktop sidebar — sticky so it stays put while content scrolls */}
-      <aside className="hidden md:flex md:flex-col md:w-56 md:shrink-0 md:sticky md:top-0 md:h-screen md:overflow-y-auto md:border-r hairline material-thin">
-        <div className="px-6 pt-8 pb-2">
-          <div className="flex items-center justify-between gap-2">
-            <span className="font-display text-xl font-semibold text-foreground tracking-tight">LegalOS</span>
+      <aside
+        className={`hidden md:flex md:flex-col md:shrink-0 md:sticky md:top-0 md:h-screen md:overflow-y-auto md:border-r hairline material-thin transition-[width] duration-200 ${
+          collapsed ? "md:w-16" : "md:w-56"
+        }`}
+      >
+        <div className={collapsed ? "px-3 pt-8 pb-2" : "px-6 pt-8 pb-2"}>
+          <div className={`flex items-center gap-2 ${collapsed ? "justify-center" : "justify-between"}`}>
+            {!collapsed && <span className="font-display text-xl font-semibold text-foreground tracking-tight">LegalOS</span>}
             {(firmName || scoreLabel) && (
               <Popover onOpenChange={(open) => open && onOpenNotifications?.()}>
                 <PopoverTrigger className="relative p-1 text-muted-foreground hover:text-foreground transition-colors" aria-label="Notifications">
@@ -140,27 +158,52 @@ const AppShell = ({
             )}
           </div>
           {firmName && (
-            <div className="flex items-center gap-1.5 mt-1 min-w-0">
+            <div className={`flex items-center gap-1.5 mt-1 min-w-0 ${collapsed ? "justify-center" : ""}`} title={collapsed ? firmName : undefined}>
               {firmLogo ? (
                 <img src={firmLogo} alt="" className="w-4 h-4 rounded-sm object-cover shrink-0" />
               ) : (
                 <FirmCrest name={firmName} size={16} />
               )}
-              <p className="text-xs text-muted-foreground font-body truncate" title={firmName}>
-                {firmName}
-              </p>
+              {!collapsed && (
+                <p className="text-xs text-muted-foreground font-body truncate" title={firmName}>
+                  {firmName}
+                </p>
+              )}
             </div>
           )}
-          {scoreLabel && (
-            <p className="text-[11px] font-body mt-1.5 inline-flex items-center gap-1 text-emerald-500">
+          {scoreLabel && !collapsed && (
+            <p className="text-[11px] font-body mt-1.5 inline-flex items-center gap-1.5 text-emerald-500">
               {scoreLabel}
+              {!!scoreDelta && (
+                <span className={`inline-flex items-center gap-0.5 ${scoreDelta > 0 ? "text-emerald-500" : "text-destructive"}`}>
+                  {scoreDelta > 0 ? <TrendingUp className="w-3 h-3" /> : <TrendingDown className="w-3 h-3" />}
+                  {scoreDelta > 0 ? "+" : ""}{scoreDelta}
+                </span>
+              )}
             </p>
           )}
         </div>
 
         <div className="flex-1">
-          <NavGroupLabel>Workspace</NavGroupLabel>
-          <nav className="px-3 space-y-1">
+          {onOpenPalette && (
+            <div className={collapsed ? "px-3 pt-4" : "px-3 pt-3"}>
+              <button
+                onClick={onOpenPalette}
+                title="Search (⌘K)"
+                className={`w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-body text-muted-foreground border border-border/50 hover:border-primary/40 hover:text-foreground transition-colors tap-scale ${collapsed ? "justify-center" : ""}`}
+              >
+                <Search className="w-3.5 h-3.5 shrink-0" />
+                {!collapsed && (
+                  <>
+                    <span>Search</span>
+                    <span className="ml-auto text-[10px] tracking-wide opacity-60">⌘K</span>
+                  </>
+                )}
+              </button>
+            </div>
+          )}
+          {!collapsed && <NavGroupLabel>Workspace</NavGroupLabel>}
+          <nav className={`px-3 space-y-1 ${collapsed ? "mt-4" : ""}`}>
             {NAV_ITEMS.map(({ id, label, icon: Icon }) => {
               const isActive = active === id;
               const showAlertDot = id === "dashboard" && hasUnread;
@@ -169,7 +212,8 @@ const AppShell = ({
                   key={id}
                   onClick={() => onNavigate(id)}
                   data-coachmark={`nav-${id}`}
-                  className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-body transition-colors relative tap-scale ${
+                  title={collapsed ? label : undefined}
+                  className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-body transition-colors relative tap-scale ${collapsed ? "justify-center" : ""} ${
                     isActive ? "text-primary" : "text-muted-foreground hover:text-foreground hover:bg-secondary/50"
                   }`}
                 >
@@ -180,8 +224,8 @@ const AppShell = ({
                       transition={{ type: "spring", stiffness: 380, damping: 32 }}
                     />
                   )}
-                  <Icon className="w-4 h-4 relative z-10" />
-                  <span className="relative z-10">{label}</span>
+                  <Icon className="w-4 h-4 relative z-10 shrink-0" />
+                  {!collapsed && <span className="relative z-10">{label}</span>}
                   {showAlertDot && (
                     <Circle className="w-2 h-2 fill-amber-500 text-amber-500 absolute right-3 z-10" />
                   )}
@@ -192,52 +236,61 @@ const AppShell = ({
 
           {hasTools && (
             <>
-              <NavGroupLabel>Tools</NavGroupLabel>
-              <nav className="px-3 space-y-1">
+              {!collapsed && <NavGroupLabel>Tools</NavGroupLabel>}
+              <nav className={`px-3 space-y-1 ${collapsed ? "mt-4" : ""}`}>
                 {onOpenMaturity && (
                   <button
                     onClick={onOpenMaturity}
-                    className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-body text-muted-foreground hover:text-foreground hover:bg-secondary/50 transition-colors tap-scale"
+                    title={collapsed ? "Firm Maturity Score" : undefined}
+                    className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-body text-muted-foreground hover:text-foreground hover:bg-secondary/50 transition-colors tap-scale ${collapsed ? "justify-center" : ""}`}
                   >
-                    <Gauge className="w-4 h-4" />
-                    Firm Maturity Score
+                    <Gauge className="w-4 h-4 shrink-0" />
+                    {!collapsed && "Firm Maturity Score"}
                   </button>
                 )}
                 {onOpenBattlePlan && (
                   <button
                     onClick={onOpenBattlePlan}
-                    className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-body text-muted-foreground hover:text-foreground hover:bg-secondary/50 transition-colors tap-scale"
+                    title={collapsed ? "Battle Plan" : undefined}
+                    className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-body text-muted-foreground hover:text-foreground hover:bg-secondary/50 transition-colors tap-scale ${collapsed ? "justify-center" : ""}`}
                   >
-                    <FileText className="w-4 h-4" />
-                    Battle Plan
+                    <FileText className="w-4 h-4 shrink-0" />
+                    {!collapsed && "Battle Plan"}
                   </button>
                 )}
                 {onOpenCompetitors && (
                   <button
                     onClick={onOpenCompetitors}
-                    className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-body text-muted-foreground hover:text-foreground hover:bg-secondary/50 transition-colors tap-scale"
+                    title={collapsed ? "Competitors" : undefined}
+                    className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-body text-muted-foreground hover:text-foreground hover:bg-secondary/50 transition-colors tap-scale ${collapsed ? "justify-center" : ""}`}
                   >
-                    <Users className="w-4 h-4" />
-                    Competitors
+                    <Users className="w-4 h-4 shrink-0" />
+                    {!collapsed && "Competitors"}
                   </button>
                 )}
                 {(onOpenMaturity || onOpenBattlePlan || onOpenCompetitors) && (
                   <button
                     onClick={workshopRecommendation ? workshopRecommendation.onClick : onOpenWorkshop ?? (() => onNavigate("workshop"))}
-                    className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-body text-muted-foreground hover:text-foreground hover:bg-secondary/50 transition-colors tap-scale"
+                    title={collapsed ? (workshopRecommendation ? workshopRecommendation.label : "More in Workshop") : undefined}
+                    className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-body text-muted-foreground hover:text-foreground hover:bg-secondary/50 transition-colors tap-scale ${collapsed ? "justify-center" : ""}`}
                   >
-                    <Hammer className="w-4 h-4" />
-                    {workshopRecommendation ? `Work on: ${workshopRecommendation.label}` : "More in Workshop"}
-                    <ArrowRight className="w-3 h-3 ml-auto opacity-60" />
+                    <Hammer className="w-4 h-4 shrink-0" />
+                    {!collapsed && (
+                      <>
+                        {workshopRecommendation ? workshopRecommendation.label : "More in Workshop"}
+                        <ArrowRight className="w-3 h-3 ml-auto opacity-60" />
+                      </>
+                    )}
                   </button>
                 )}
                 {onOpenWorkshopHistory && (
                   <button
                     onClick={onOpenWorkshopHistory}
-                    className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-body text-muted-foreground hover:text-foreground hover:bg-secondary/50 transition-colors tap-scale"
+                    title={collapsed ? "Workshop History" : undefined}
+                    className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-body text-muted-foreground hover:text-foreground hover:bg-secondary/50 transition-colors tap-scale ${collapsed ? "justify-center" : ""}`}
                   >
-                    <History className="w-4 h-4" />
-                    Workshop History
+                    <History className="w-4 h-4 shrink-0" />
+                    {!collapsed && "Workshop History"}
                   </button>
                 )}
               </nav>
@@ -246,18 +299,23 @@ const AppShell = ({
 
           {(visibilityIndexHref || recognitionIndexHref) && (
             <>
-              <NavGroupLabel>Public pages</NavGroupLabel>
-              <nav className="px-3 space-y-1">
+              {!collapsed && <NavGroupLabel>Public pages</NavGroupLabel>}
+              <nav className={`px-3 space-y-1 ${collapsed ? "mt-4" : ""}`}>
                 {visibilityIndexHref && (
                   <a
                     href={visibilityIndexHref}
                     target="_blank"
                     rel="noreferrer"
-                    className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-body text-muted-foreground hover:text-foreground hover:bg-secondary/50 transition-colors tap-scale"
+                    title={collapsed ? "Visibility Index" : undefined}
+                    className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-body text-muted-foreground hover:text-foreground hover:bg-secondary/50 transition-colors tap-scale ${collapsed ? "justify-center" : ""}`}
                   >
-                    <Eye className="w-4 h-4" />
-                    Visibility Index
-                    <ExternalLink className="w-3 h-3 ml-auto opacity-40" />
+                    <Eye className="w-4 h-4 shrink-0" />
+                    {!collapsed && (
+                      <>
+                        Visibility Index
+                        <ExternalLink className="w-3 h-3 ml-auto opacity-40" />
+                      </>
+                    )}
                   </a>
                 )}
                 {recognitionIndexHref && (
@@ -265,11 +323,16 @@ const AppShell = ({
                     href={recognitionIndexHref}
                     target="_blank"
                     rel="noreferrer"
-                    className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-body text-muted-foreground hover:text-foreground hover:bg-secondary/50 transition-colors tap-scale"
+                    title={collapsed ? "Recognition Index" : undefined}
+                    className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-body text-muted-foreground hover:text-foreground hover:bg-secondary/50 transition-colors tap-scale ${collapsed ? "justify-center" : ""}`}
                   >
-                    <Landmark className="w-4 h-4" />
-                    Recognition Index
-                    <ExternalLink className="w-3 h-3 ml-auto opacity-40" />
+                    <Landmark className="w-4 h-4 shrink-0" />
+                    {!collapsed && (
+                      <>
+                        Recognition Index
+                        <ExternalLink className="w-3 h-3 ml-auto opacity-40" />
+                      </>
+                    )}
                   </a>
                 )}
               </nav>
@@ -278,14 +341,15 @@ const AppShell = ({
         </div>
 
         <div className="mt-auto">
-          {onOpenSettings && (
+          {onOpenSettings && !collapsed && (
             <NavGroupLabel>Account</NavGroupLabel>
           )}
           {onOpenSettings && (
-            <div className="px-3 pb-3">
+            <div className={`px-3 ${collapsed ? "pt-4 pb-3" : "pb-3"}`}>
               <button
                 onClick={onOpenSettings}
-                className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-body transition-colors relative tap-scale ${
+                title={collapsed ? "Settings" : undefined}
+                className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-body transition-colors relative tap-scale ${collapsed ? "justify-center" : ""} ${
                   active === "settings" ? "text-primary" : "text-muted-foreground hover:text-foreground hover:bg-secondary/50"
                 }`}
               >
@@ -296,36 +360,58 @@ const AppShell = ({
                     transition={{ type: "spring", stiffness: 380, damping: 32 }}
                   />
                 )}
-                <Settings className="w-4 h-4 relative z-10" />
-                <span className="relative z-10">Settings</span>
+                <Settings className="w-4 h-4 relative z-10 shrink-0" />
+                {!collapsed && <span className="relative z-10">Settings</span>}
               </button>
             </div>
           )}
           {demoMode ? (
-            <div className="px-3 pb-6">
-              <div className="flex items-center gap-2 px-3 py-2.5 rounded-sm bg-amber-500/10 border border-amber-500/30">
-                <FlaskConical className="w-3.5 h-3.5 text-amber-500 shrink-0" />
-                <div className="flex-1 min-w-0">
-                  <p className="text-xs font-body text-amber-500">Demo mode</p>
+            <div className="px-3 pb-3">
+              {collapsed ? (
+                <button
+                  onClick={onExitDemo}
+                  title="Demo mode — click to exit"
+                  className="w-full flex items-center justify-center px-3 py-2.5 rounded-sm bg-amber-500/10 border border-amber-500/30"
+                >
+                  <FlaskConical className="w-3.5 h-3.5 text-amber-500 shrink-0" />
+                </button>
+              ) : (
+                <div className="flex items-center gap-2 px-3 py-2.5 rounded-sm bg-amber-500/10 border border-amber-500/30">
+                  <FlaskConical className="w-3.5 h-3.5 text-amber-500 shrink-0" />
+                  <div className="flex-1 min-w-0">
+                    <p className="text-xs font-body text-amber-500">Demo mode</p>
+                  </div>
+                  {onExitDemo && (
+                    <button onClick={onExitDemo} className="text-[10px] font-body text-amber-500/70 hover:text-amber-500 underline shrink-0">
+                      Exit
+                    </button>
+                  )}
                 </div>
-                {onExitDemo && (
-                  <button onClick={onExitDemo} className="text-[10px] font-body text-amber-500/70 hover:text-amber-500 underline shrink-0">
-                    Exit
-                  </button>
-                )}
-              </div>
+              )}
             </div>
           ) : onSignOut ? (
-            <div className="px-3 pb-6">
+            <div className="px-3 pb-3">
               <button
                 onClick={onSignOut}
-                className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-body text-muted-foreground hover:text-foreground hover:bg-secondary/50 transition-colors tap-scale"
+                title={collapsed ? "Sign out" : undefined}
+                className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-body text-muted-foreground hover:text-foreground hover:bg-secondary/50 transition-colors tap-scale ${collapsed ? "justify-center" : ""}`}
               >
-                <LogOut className="w-4 h-4" />
-                Sign out
+                <LogOut className="w-4 h-4 shrink-0" />
+                {!collapsed && "Sign out"}
               </button>
             </div>
           ) : null}
+
+          <div className="px-3 pb-6">
+            <button
+              onClick={toggleCollapsed}
+              title={collapsed ? "Expand sidebar" : "Collapse sidebar"}
+              className={`w-full flex items-center gap-3 px-3 py-2 rounded-xl text-xs font-body text-muted-foreground hover:text-foreground hover:bg-secondary/50 transition-colors tap-scale ${collapsed ? "justify-center" : ""}`}
+            >
+              {collapsed ? <ChevronsRight className="w-4 h-4 shrink-0" /> : <ChevronsLeft className="w-4 h-4 shrink-0" />}
+              {!collapsed && "Collapse"}
+            </button>
+          </div>
         </div>
       </aside>
 
@@ -460,7 +546,7 @@ const AppShell = ({
                         className="w-full flex items-center gap-3 px-3 py-3 rounded-xl text-sm font-body text-foreground hover:bg-secondary/50 transition-colors tap-scale"
                       >
                         <Hammer className="w-4 h-4 text-primary" />
-                        {workshopRecommendation ? `Work on: ${workshopRecommendation.label}` : "More in Workshop"}
+                        {workshopRecommendation ? workshopRecommendation.label : "More in Workshop"}
                         <ArrowRight className="w-3.5 h-3.5 ml-auto opacity-60" />
                       </button>
                     )}

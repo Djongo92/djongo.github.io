@@ -23,6 +23,7 @@ import ScoreBurst from "@/components/visibility/ScoreBurst";
 import PeerPositionBar from "@/components/visibility/PeerPositionBar";
 import MarketVisibilityScore from "@/components/MarketVisibilityScore";
 import type { WorkshopToolId } from "@/lib/handoff";
+import { computeScoreDelta } from "@/lib/scoreTrend";
 import { enableDemoMode } from "@/lib/demoMode";
 import { downloadScoreCard } from "@/lib/visibilityScoreCard";
 
@@ -234,7 +235,10 @@ const CommandCenter = ({
       }));
   }, [history, primary]);
 
-  const scoreDelta = trend.length > 1 ? trend[trend.length - 1].score - trend[0].score : 0;
+  const scoreDelta = useMemo(
+    () => computeScoreDelta(history, primary ? { audited_domain: primary.audited_domain, market: primary.market } : null),
+    [history, primary],
+  );
 
   // A new personal best (strictly higher than every prior recorded score,
   // never just a plateau) gets a one-shot celebration on the ring — not on
