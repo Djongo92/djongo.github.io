@@ -3,7 +3,7 @@ import { motion } from "framer-motion";
 import { ResponsiveContainer, LineChart, Line, XAxis, YAxis, Tooltip } from "recharts";
 import {
   ArrowRight, ShieldCheck, TrendingUp, TrendingDown, Sparkles, Hammer, AlertTriangle, CheckCircle2,
-  Gauge, BookOpen, FileText, Share2, BarChart3,
+  Gauge, BookOpen, FileText, Share2, BarChart3, SlidersHorizontal,
 } from "lucide-react";
 import {
   SwipeIcon, CopywriterIcon, RewriteIcon, AutopsyIcon, AuditIcon,
@@ -20,8 +20,13 @@ import { CategoryExplainer, ProvenanceBadge } from "@/components/visibility/Expl
 import ScoreRing from "@/components/visibility/ScoreRing";
 import Sparkline from "@/components/visibility/Sparkline";
 import ScoreBurst from "@/components/visibility/ScoreBurst";
+import MilestoneCelebration from "@/components/visibility/MilestoneCelebration";
+import { useMilestoneCelebration } from "@/hooks/useMilestoneCelebration";
+import MondayBrief from "@/components/dashboard/MondayBrief";
 import PeerPositionBar from "@/components/visibility/PeerPositionBar";
+import PeerScatterMap from "@/components/visibility/PeerScatterMap";
 import MarketVisibilityScore from "@/components/MarketVisibilityScore";
+import WhatIfSimulator from "@/components/visibility/WhatIfSimulator";
 import type { WorkshopToolId } from "@/lib/handoff";
 import { computeScoreDelta } from "@/lib/scoreTrend";
 import { enableDemoMode } from "@/lib/demoMode";
@@ -91,6 +96,10 @@ export interface SocialRaw {
   engagementRate?: number | null;
   platforms?: { linkedin: boolean; instagram: boolean; twitter: boolean; facebook: boolean };
   platformCount?: number;
+  /** Peer-group maxima this score was normalized against — persisted so a client can re-run the formula (e.g. a what-if simulator) without a live query. */
+  followersPeerMax?: number;
+  postsPeerMax?: number;
+  erPeerMax?: number;
 }
 
 export interface PressMention {
@@ -103,9 +112,13 @@ export interface PressMention {
 export interface ThoughtLeadershipRaw {
   postsCount?: number;
   newsCount?: number;
+  /** Fraction 0-1, not a percentage — matches thoughtLeadershipFormula.ts's `5 * bylinePct`. */
   bylinePct?: number;
   items?: ThoughtLeadershipItem[];
   pressMentions?: PressMention[];
+  /** Peer-group maxima this score was normalized against — see SocialRaw's comment. */
+  postsPeerMax?: number;
+  newsPeerMax?: number;
 }
 
 export interface ReputationRaw {
@@ -185,6 +198,7 @@ const CommandCenter = ({
   onOpenWorkshop, onOpenWorkshopTool, onOpenGuidebook, onOpenMaturity, onOpenAnalytics,
 }: CommandCenterProps) => {
   const [rerunOpen, setRerunOpen] = useState(false);
+  const [whatIfOpen, setWhatIfOpen] = useState(false);
   const primary = audits[0];
   const { runs } = useWorkshopHistory();
   const { maturity, roast, headline, bio, roadmap, competitor, visibilityScore } = useBattlePlanCache();
@@ -284,6 +298,26 @@ const CommandCenter = ({
     return { deltas, recordedAt: latest.recorded_at };
   }, [history, primary]);
 
+  // The immediately-prior recorded total score for this firm — the same
+  // "previous vs. latest real run" comparison categoryDeltas makes above —
+  // so a milestone only ever fires on a real improvement between two
+  // actual audits, never on a firm's very first recorded score.
+  const previousTotalScore = useMemo(() => {
+    if (!primary) return null;
+    const ownHistory = history
+      .filter((h) => h.audited_domain === primary.audited_domain && h.market === primary.market)
+      .sort((a, b) => new Date(a.recorded_at).getTime() - new Date(b.recorded_at).getTime());
+    if (ownHistory.length < 2) return null;
+    return ownHistory[ownHistory.length - 2].total_score;
+  }, [history, primary]);
+
+  const { milestone, dismiss: dismissMilestone } = useMilestoneCelebration(
+    primary?.audited_domain,
+    previousTotalScore,
+    primary?.total_score ?? null,
+    primary?.percentile,
+  );
+
   const insights = useCommandCenterInsights({
     categories, siteHealthIssues, maturity, implementationScore, readChaptersCount, totalChapters,
   });
@@ -317,6 +351,31 @@ const CommandCenter = ({
     if (action.kind === "maturity") return onOpenMaturity;
     return undefined;
   };
+
+  const mondayBrief = useMemo(() => {
+    if (!primary) return null;
+    const now = new Date();
+    const diffToMonday = (now.getDay() + 6) % 7; // days since the most recent Monday (0 if today is Monday)
+    const monday = new Date(now);
+    monday.setHours(0, 0, 0, 0);
+    monday.setDate(monday.getDate() - diffToMonday);
+
+    const ownHistory = history
+      .filter((h) => h.audited_domain === primary.audited_domain && h.market === primary.market)
+      .sort((a, b) => new Date(a.recorded_at).getTime() - new Date(b.recorded_at).getTime());
+    if (ownHistory.length === 0) return null;
+
+    // The most recent row at or before this Monday — if the firm's whole
+    // history falls within the current week, fall back to its very first
+    // recorded score so "this week" still means something on week one.
+    const priorRows = ownHistory.filter((h) => new Date(h.recorded_at).getTime() <= monday.getTime());
+    const baseline = priorRows.length > 0 ? priorRows[priorRows.length - 1].total_score : ownHistory[0].total_score;
+    const weekDelta = Math.round((primary.total_score - baseline) * 10) / 10;
+
+    const weekRangeLabel = `${monday.toLocaleDateString(undefined, { month: "short", day: "numeric" })} – ${now.toLocaleDateString(undefined, { month: "short", day: "numeric" })}`;
+
+    return { weekDelta, weekRangeLabel, topInsight: insights[0] ?? null };
+  }, [primary, history, insights]);
 
   const battlePlanSlots = [roast, competitor, roadmap, maturity, headline, bio, visibilityScore];
   const battlePlanFilled = battlePlanSlots.filter(Boolean).length;
@@ -436,6 +495,17 @@ const CommandCenter = ({
         </div>
       </header>
 
+      {mondayBrief && (
+        <div className="max-w-5xl mx-auto px-6 mb-6">
+          <MondayBrief
+            weekRangeLabel={mondayBrief.weekRangeLabel}
+            weekDelta={mondayBrief.weekDelta}
+            topInsight={mondayBrief.topInsight}
+            onInsightAction={mondayBrief.topInsight ? resolveAction(mondayBrief.topInsight.action) : undefined}
+          />
+        </div>
+      )}
+
       {brief && (
         <div className="max-w-5xl mx-auto px-6 mb-6">
           <div className="bg-gradient-to-br from-primary/10 to-transparent border border-primary/30 rounded-sm p-6">
@@ -550,6 +620,15 @@ const CommandCenter = ({
             </motion.button>
           </div>
 
+          <PeerScatterMap
+            market={primary.market}
+            peerGroup={primary.peer_group}
+            currentDomain={primary.audited_domain}
+            currentDisplayName={primary.display_name}
+            currentReputation={primary.reputation_score}
+            currentThoughtLeadership={primary.thought_leadership_score}
+          />
+
           {/* Key Insights */}
           <div>
             <h2 className="font-display text-lg text-foreground mb-3">Key Insights</h2>
@@ -605,19 +684,25 @@ const CommandCenter = ({
             </div>
           </div>
 
-          <div>
+          <div className="flex flex-wrap items-center gap-x-6 gap-y-2">
             <button
               onClick={() => setRerunOpen(true)}
               className="text-xs text-muted-foreground hover:text-primary font-body inline-flex items-center gap-1.5"
             >
               Re-run my audit for a fresh score →
             </button>
-            {rerunOpen && (
-              <div className="mt-4">
-                <MarketVisibilityScore />
-              </div>
-            )}
+            <button
+              onClick={() => setWhatIfOpen(true)}
+              className="text-xs text-muted-foreground hover:text-primary font-body inline-flex items-center gap-1.5"
+            >
+              <SlidersHorizontal className="w-3 h-3" /> What if I improved my score? →
+            </button>
           </div>
+          {rerunOpen && (
+            <div className="mt-4">
+              <MarketVisibilityScore />
+            </div>
+          )}
         </div>
 
         {/* Right column — Ongoing Endeavors. Deliberately quieter than the
@@ -700,6 +785,9 @@ const CommandCenter = ({
           )}
         </div>
       </div>
+
+      <WhatIfSimulator open={whatIfOpen} onClose={() => setWhatIfOpen(false)} audit={primary} />
+      <MilestoneCelebration milestone={milestone} onDismiss={dismissMilestone} />
     </div>
   );
 };

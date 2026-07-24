@@ -57,7 +57,14 @@ export async function computeSocialScore(
 
   return {
     score,
-    raw: { followers, posts30d, engagementRate, platforms: input.platforms, platformCount },
+    // Peer-max denominators are persisted alongside the raw inputs (not just
+    // the blended score) so a client can re-run this exact formula later —
+    // a "what-if I had more followers" simulator, a methodology change —
+    // without needing a live peerMaxFor query it has no access to.
+    raw: {
+      followers, posts30d, engagementRate, platforms: input.platforms, platformCount,
+      followersPeerMax, postsPeerMax, erPeerMax,
+    },
     provenance: "self_reported",
   };
 }
