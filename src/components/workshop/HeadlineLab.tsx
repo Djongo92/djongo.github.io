@@ -9,6 +9,7 @@ import { useHandoffReceive } from "@/lib/handoff";
 import { recordRun } from "@/hooks/useWorkshopHistory";
 import { saveHeadlineWinner } from "@/hooks/useBattlePlanCache";
 import { isDemoMode } from "@/lib/demoMode";
+import { recordStyleFeedback, styleMemoryIdentity } from "@/lib/styleFeedback";
 
 interface Headline { text: string; angle: string; score: number; why: string; }
 
@@ -35,7 +36,7 @@ const HeadlineLab = () => {
     try {
       const resp = await fetch(fnUrl("workshop-headlines"), {
         method: "POST", headers: authHeaders(),
-        body: JSON.stringify({ mode: "generate", brief, audience, mustInclude, avoid, firmContext: context }),
+        body: JSON.stringify({ mode: "generate", brief, audience, mustInclude, avoid, firmContext: context, ...styleMemoryIdentity() }),
       });
       const err = await handleHttpError(resp);
       if (err) { toast.error(err); return; }
@@ -94,7 +95,9 @@ const HeadlineLab = () => {
 
   // When a champion is crowned, persist for the Battle Plan — skipped in
   // demo mode so a real tournament run doesn't overwrite the demo's seeded
-  // Battle Plan sample (see RoastHomepage.tsx for why).
+  // Battle Plan sample (see RoastHomepage.tsx for why). The tournament pick
+  // itself IS the approval signal for style memory — no separate "keep
+  // as-is" button needed the way BioRewriter/Copywriter/Rewriter have one.
   useEffect(() => {
     if (champion && !isDemoMode()) {
       saveHeadlineWinner({
@@ -103,6 +106,7 @@ const HeadlineLab = () => {
         why: champion.why,
         brief,
       });
+      recordStyleFeedback("headlines", brief, champion.text, "approved");
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [champion]);

@@ -26,6 +26,9 @@ import { useHandoffReceive } from "@/lib/handoff";
 import { recordRun } from "@/hooks/useWorkshopHistory";
 import { verifyPassword, hasValidAccess, edgeHeaders } from "@/lib/edgeAuth";
 import { WORKSHOP_TOOL_LABELS } from "@/lib/workshopToolCatalog";
+import { styleMemoryIdentity } from "@/lib/styleFeedback";
+import { isDemoMode } from "@/lib/demoMode";
+import StyleFeedback from "./workshop/StyleFeedback";
 
 const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL;
 const SUPABASE_KEY = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY;
@@ -322,7 +325,7 @@ const Copywriter = () => {
       const resp = await fetch(`${SUPABASE_URL}/functions/v1/workshop-copywriter`, {
         method: "POST",
         headers: edgeHeaders(),
-        body: JSON.stringify({ brief, format, tone, firmContext: context }),
+        body: JSON.stringify({ brief, format, tone, firmContext: context, ...styleMemoryIdentity() }),
       });
       if (resp.status === 429) { toast.error("Rate limit reached."); return; }
       if (resp.status === 402) { toast.error("AI credits exhausted."); return; }
@@ -423,6 +426,11 @@ const Copywriter = () => {
                   <Copy className="w-3 h-3" /> Copy all
                 </button>
               </div>
+              {!loading && !isDemoMode() && (
+                <div className="mt-3 pt-3 border-t border-border/50 not-prose">
+                  <StyleFeedback toolId="copywriter" output={output} inputSummary={`${format} · ${tone} · ${brief.slice(0, 100)}`} />
+                </div>
+              )}
             </div>
           )}
         </div>
@@ -474,6 +482,7 @@ const Rewriter = () => {
           chapterFramework: `${chapter.title} — ${chapter.subtitle}${chapter.hook ? `. Core idea: ${chapter.hook}.` : "."}`,
           goal,
           firmContext: context,
+          ...styleMemoryIdentity(),
         }),
       });
       if (resp.status === 429) { toast.error("Rate limit reached."); return; }
@@ -569,6 +578,11 @@ const Rewriter = () => {
             {output && (
               <div className="prose prose-sm dark:prose-invert max-w-none prose-headings:font-display prose-headings:text-primary prose-strong:text-foreground">
                 <ReactMarkdown>{output}</ReactMarkdown>
+              </div>
+            )}
+            {output && !loading && !isDemoMode() && (
+              <div className="mt-3 pt-3 border-t border-border/50">
+                <StyleFeedback toolId="rewrite" output={output} inputSummary={original.slice(0, 150)} />
               </div>
             )}
           </div>

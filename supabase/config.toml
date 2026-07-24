@@ -60,6 +60,9 @@ verify_jwt = false
 [functions.workshop-bio-rewrite]
 verify_jwt = false
 
+[functions.workshop-style-feedback]
+verify_jwt = false
+
 [functions.workshop-calendar]
 verify_jwt = false
 

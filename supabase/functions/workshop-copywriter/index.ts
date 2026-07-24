@@ -1,15 +1,29 @@
 import { requireAccess, ACCESS_CORS_HEADERS } from "../_shared/access.ts";
 import { streamClaudeText } from "../_shared/anthropic.ts";
+import { resolveClientId } from "../_shared/verifiedClientId.ts";
+import { getRecentStyleExamples, buildStyleMemoryBlock } from "../_shared/styleMemory.ts";
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
 const corsHeaders = ACCESS_CORS_HEADERS;
 
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
 
-  
+
 
     const unauthorized = await requireAccess(req, corsHeaders, "workshop");
     if (unauthorized) return unauthorized;try {
-    const { brief, format, tone, firmContext } = await req.json();
+    const { brief, format, tone, firmContext, clientId: rawClientId, accessToken } = await req.json();
+
+    let styleBlock = "";
+    if (rawClientId && typeof rawClientId === "string") {
+      const serviceClient = createClient(
+        Deno.env.get("SUPABASE_URL")!,
+        Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!,
+        { auth: { persistSession: false } },
+      );
+      const clientId = await resolveClientId(serviceClient, rawClientId, accessToken);
+      styleBlock = buildStyleMemoryBlock(await getRecentStyleExamples(serviceClient, clientId, "copywriter"));
+    }
 
     const firmBlock = firmContext
       ? `\nFirm: ${firmContext.practiceArea} practice, ${firmContext.firmSize}, primary goal: ${firmContext.primaryGoal}.`
@@ -22,6 +36,7 @@ Write copy in the requested format and tone. Strict rules:
 - Specific over vague. Concrete over abstract. Active voice. Short sentences.
 - No "we are committed", "passionate", "trusted advisor", "results-driven", or any other legal-marketing cliché.
 - Match the format exactly. No preamble, no explanations, no "here's your copy:".${firmBlock}
+${styleBlock}
 
 Format: ${format}
 Tone: ${tone}

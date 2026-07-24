@@ -1,19 +1,33 @@
 import { requireAccess, ACCESS_CORS_HEADERS } from "../_shared/access.ts";
 import { streamClaudeText } from "../_shared/anthropic.ts";
+import { resolveClientId } from "../_shared/verifiedClientId.ts";
+import { getRecentStyleExamples, buildStyleMemoryBlock } from "../_shared/styleMemory.ts";
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
 const corsHeaders = ACCESS_CORS_HEADERS;
 
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
 
-  
+
 
     const unauthorized = await requireAccess(req, corsHeaders, "workshop");
     if (unauthorized) return unauthorized;try {
-    const { currentBio, name, role, emphases, hookLine, firmContext } = await req.json();
+    const { currentBio, name, role, emphases, hookLine, firmContext, clientId: rawClientId, accessToken } = await req.json();
     if (!currentBio || currentBio.trim().length < 30) {
       return new Response(JSON.stringify({ error: "Paste at least a few sentences of the current bio." }), {
         status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
+    }
+
+    let styleBlock = "";
+    if (rawClientId && typeof rawClientId === "string") {
+      const serviceClient = createClient(
+        Deno.env.get("SUPABASE_URL")!,
+        Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!,
+        { auth: { persistSession: false } },
+      );
+      const clientId = await resolveClientId(serviceClient, rawClientId, accessToken);
+      styleBlock = buildStyleMemoryBlock(await getRecentStyleExamples(serviceClient, clientId, "bio"));
     }
     const emphasisMap: Record<string, string> = {
       trial: "Trial credibility — courtroom wins, verdicts, juries handled, high-stakes outcomes.",
@@ -37,6 +51,7 @@ Deno.serve(async (req) => {
 - Preserve every concrete fact (firm names, schools, bar admissions, awards, deal/case names). Don't invent any.
 - If the source bio is vague, NAME that gap as "[Add specific: …]" placeholders rather than fabricating.
 ${firmBlock}
+${styleBlock}
 
 ${emphasisBlock}
 
