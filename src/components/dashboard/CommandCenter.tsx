@@ -24,6 +24,7 @@ import MilestoneCelebration from "@/components/visibility/MilestoneCelebration";
 import { useMilestoneCelebration } from "@/hooks/useMilestoneCelebration";
 import MondayBrief from "@/components/dashboard/MondayBrief";
 import ClientWinLog from "@/components/dashboard/ClientWinLog";
+import Campaigns from "@/components/dashboard/Campaigns";
 import PeerPositionBar from "@/components/visibility/PeerPositionBar";
 import PeerScatterMap from "@/components/visibility/PeerScatterMap";
 import MarketVisibilityScore from "@/components/MarketVisibilityScore";
@@ -742,6 +743,8 @@ const CommandCenter = ({
               </div>
             </div>
           </div>
+
+          <Campaigns market={primary.market} auditedDomain={primary.audited_domain} history={history} />
 
           <ClientWinLog market={primary.market} auditedDomain={primary.audited_domain} />
 

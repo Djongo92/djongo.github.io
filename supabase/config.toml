@@ -111,6 +111,15 @@ verify_jwt = false
 [functions.client-wins-get]
 verify_jwt = false
 
+[functions.campaigns-get]
+verify_jwt = false
+
+[functions.campaigns-save]
+verify_jwt = false
+
+[functions.campaigns-delete]
+verify_jwt = false
+
 [functions.user-state-get]
 verify_jwt = false
 
