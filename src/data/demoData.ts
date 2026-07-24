@@ -56,11 +56,27 @@ export const DEMO_AUDIT: AuditRow = {
       engagementRate: 1.2,
       platforms: { linkedin: true, instagram: false, twitter: false, facebook: true },
       platformCount: 2,
+      // Peer-max denominators this score was actually normalized against —
+      // reverse-engineered to reproduce social_score exactly (2.5 + 2.5 +
+      // 2.5 + platform 2 = 9.5) so the what-if simulator's live recompute
+      // starts from the same number the Dashboard already shows.
+      followersPeerMax: 3700,
+      postsPeerMax: 6,
+      erPeerMax: 2.88,
     },
     thoughtLeadership: {
       postsCount: 2,
       newsCount: 1,
-      bylinePct: 50,
+      // Fraction (0-1), matching the real formula's convention — 1 of 2
+      // posts carries a named byline.
+      bylinePct: 0.5,
+      // Peer-max denominators (see social's followersPeerMax comment above
+      // for why these are persisted) — postsPeerMax: 11, newsPeerMax: 1
+      // reproduce thought_leadership_score to within 0.05 (25*2/11 + 15*1/1
+      // + 5*0.5 = 22.05 vs the authored 22 below; the gap is demo-data noise,
+      // not a formula bug).
+      postsPeerMax: 11,
+      newsPeerMax: 1,
       items: [
         { title: "Cross-Border M&A Trends in Southeast Europe", date: "2026-06-02", type: "blog", hasNamedByline: true },
         { title: "Regulatory Shifts Affecting Manufacturing M&A", date: "2026-05-18", type: "blog", hasNamedByline: false },

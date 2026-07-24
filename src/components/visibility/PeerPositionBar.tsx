@@ -1,9 +1,17 @@
 // Where a firm sits among its peer group, as a real position marker — not
-// a fabricated bell curve. The audit only ever computes a percentile rank
-// (see computePercentile in _shared/runVisibilityAudit.ts), never each
-// peer's individual score, so a real distribution shape isn't something
-// this data can honestly show. A marker on a 0-100 track is the most
-// truthful visual this data supports.
+// a fabricated bell curve. The audit's own percentile computation (see
+// computePercentile in _shared/runVisibilityAudit.ts) is a live query
+// against every OTHER published (is_public = true) row, so it never
+// materializes a full distribution of scores for firms that haven't
+// opted to publish — a marker on a 0-100 track is what that computation
+// alone can honestly show.
+//
+// Individual peer scores DO become fair to show once a firm has actually
+// published — that's the same already-public data the Visibility Index
+// leaderboard renders as a ranked list (see VisibilityIndex.tsx) and
+// PeerScatterMap.tsx renders as a 2D competitive map. This bar stays as
+// the compact single-number summary; the scatter map is the richer view
+// built from that same opted-in dataset, not a new exposure of it.
 interface PeerPositionBarProps {
   percentile: number;
   peerCount: number;

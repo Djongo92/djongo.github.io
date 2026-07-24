@@ -38,7 +38,10 @@ export type { ContentItem };
 
 export interface ThoughtLeadershipResult {
   score: number;
-  raw: { postsCount: number; newsCount: number; bylinePct: number; items: ContentItem[]; pressMentions: PressMention[] };
+  raw: {
+    postsCount: number; newsCount: number; bylinePct: number; items: ContentItem[]; pressMentions: PressMention[];
+    postsPeerMax?: number; newsPeerMax?: number;
+  };
   provenance: "ai_classified" | "missing";
 }
 
@@ -142,7 +145,10 @@ export async function computeThoughtLeadershipScore(
 
   return {
     score,
-    raw: { postsCount, newsCount, bylinePct, items: inWindow, pressMentions },
+    // postsPeerMax/newsPeerMax persisted alongside the inputs — same reasoning
+    // as socialScore.ts — so a client can re-derive this formula's output for
+    // a hypothetical input without a live peerMaxFor query it can't run.
+    raw: { postsCount, newsCount, bylinePct, items: inWindow, pressMentions, postsPeerMax, newsPeerMax },
     provenance: "ai_classified",
   };
 }

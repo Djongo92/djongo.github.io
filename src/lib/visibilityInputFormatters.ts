@@ -35,7 +35,7 @@ export function formatThoughtLeadershipInputs(raw: any): string | null {
   if (!t) return null;
   const parts: string[] = [];
   if (t.postsCount != null) parts.push(`${t.postsCount} blog post${t.postsCount === 1 ? "" : "s"}`);
-  if (t.bylinePct != null) parts.push(`${t.bylinePct}% carry a named byline`);
+  if (t.bylinePct != null) parts.push(`${Math.round(t.bylinePct * 100)}% carry a named byline`);
 
   const mentions: { title: string; source: string }[] = Array.isArray(t.pressMentions) ? t.pressMentions : [];
   if (mentions.length > 0) {
