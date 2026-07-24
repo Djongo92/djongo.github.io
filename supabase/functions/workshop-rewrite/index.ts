@@ -1,21 +1,35 @@
 import { requireAccess, ACCESS_CORS_HEADERS } from "../_shared/access.ts";
 import { streamClaudeText } from "../_shared/anthropic.ts";
+import { resolveClientId } from "../_shared/verifiedClientId.ts";
+import { getRecentStyleExamples, buildStyleMemoryBlock } from "../_shared/styleMemory.ts";
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
 const corsHeaders = ACCESS_CORS_HEADERS;
 
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
 
-  
+
 
     const unauthorized = await requireAccess(req, corsHeaders, "workshop");
     if (unauthorized) return unauthorized;try {
-    const { original, chapterTitle, chapterFramework, goal, firmContext } = await req.json();
+    const { original, chapterTitle, chapterFramework, goal, firmContext, clientId: rawClientId, accessToken } = await req.json();
 
     if (!original || typeof original !== "string" || original.trim().length < 10) {
       return new Response(JSON.stringify({ error: "Paste at least a sentence or two of current copy." }), {
         status: 400,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
+    }
+
+    let styleBlock = "";
+    if (rawClientId && typeof rawClientId === "string") {
+      const serviceClient = createClient(
+        Deno.env.get("SUPABASE_URL")!,
+        Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!,
+        { auth: { persistSession: false } },
+      );
+      const clientId = await resolveClientId(serviceClient, rawClientId, accessToken);
+      styleBlock = buildStyleMemoryBlock(await getRecentStyleExamples(serviceClient, clientId, "rewrite"));
     }
 
     const firmBlock = firmContext
@@ -32,6 +46,7 @@ Strict output rules:
 - Specific over vague. Concrete over abstract. Active voice. Short sentences.
 - No "we are committed", "passionate", "trusted advisor", "results-driven", or any other legal-marketing cliché.
 - Preserve facts. Don't invent credentials, awards, or numbers.${firmBlock}
+${styleBlock}
 
 Goal for the rewrite: ${goal || "Make it more compelling and conversion-focused while staying on-brand."}
 

@@ -1,5 +1,8 @@
 import { requireAccess, ACCESS_CORS_HEADERS } from "../_shared/access.ts";
 import { callClaudeTool, ClaudeApiError } from "../_shared/anthropic.ts";
+import { resolveClientId } from "../_shared/verifiedClientId.ts";
+import { getRecentStyleExamples, buildStyleMemoryBlock } from "../_shared/styleMemory.ts";
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
 const corsHeaders = ACCESS_CORS_HEADERS;
 
 Deno.serve(async (req) => {
@@ -7,7 +10,7 @@ Deno.serve(async (req) => {
 
     const unauthorized = await requireAccess(req, corsHeaders, "workshop");
     if (unauthorized) return unauthorized;try {
-    const { mode, brief, audience, mustInclude, avoid, contenders, firmContext } = await req.json();
+    const { mode, brief, audience, mustInclude, avoid, contenders, firmContext, clientId: rawClientId, accessToken } = await req.json();
 
     if (mode === "judge") {
       if (!Array.isArray(contenders) || contenders.length < 2) {
@@ -53,12 +56,23 @@ Deno.serve(async (req) => {
       });
     }
 
+    let styleBlock = "";
+    if (rawClientId && typeof rawClientId === "string") {
+      const serviceClient = createClient(
+        Deno.env.get("SUPABASE_URL")!,
+        Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!,
+        { auth: { persistSession: false } },
+      );
+      const clientId = await resolveClientId(serviceClient, rawClientId, accessToken);
+      styleBlock = buildStyleMemoryBlock(await getRecentStyleExamples(serviceClient, clientId, "headlines"));
+    }
+
     const firmBlock = firmContext
       ? `\nFirm: ${firmContext.practiceArea} practice, ${firmContext.firmSize}, goal: ${firmContext.primaryGoal}.`
       : "";
 
     const systemPrompt = `You are an elite legal marketing headline writer. Generate 20 distinctly different headlines, each from a different strategic angle. No legal cliches ("trusted", "passionate", "results-driven", "committed"). Specific over vague. Active voice.${firmBlock}
-
+${styleBlock}
 Audience: ${audience || "prospective clients researching their legal options"}
 ${mustInclude ? `Must include: ${mustInclude}` : ""}
 ${avoid ? `Must avoid: ${avoid}` : ""}

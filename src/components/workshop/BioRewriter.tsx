@@ -11,6 +11,8 @@ import { useHandoffReceive } from "@/lib/handoff";
 import { recordRun } from "@/hooks/useWorkshopHistory";
 import { saveBio } from "@/hooks/useBattlePlanCache";
 import { isDemoMode } from "@/lib/demoMode";
+import { styleMemoryIdentity } from "@/lib/styleFeedback";
+import StyleFeedback from "./StyleFeedback";
 
 const EMPHASES = [
   { key: "trial", label: "Trial cred" },
@@ -59,7 +61,7 @@ const BioRewriter = () => {
     try {
       const resp = await fetch(fnUrl("workshop-bio-rewrite"), {
         method: "POST", headers: authHeaders(),
-        body: JSON.stringify({ currentBio, name, role, emphases, hookLine, firmContext: context }),
+        body: JSON.stringify({ currentBio, name, role, emphases, hookLine, firmContext: context, ...styleMemoryIdentity() }),
       });
       const err = await handleHttpError(resp);
       if (err) { toast.error(err); return; }
@@ -128,6 +130,11 @@ const BioRewriter = () => {
           {output && (
             <div className="prose prose-sm dark:prose-invert max-w-none prose-headings:font-display prose-headings:text-primary prose-strong:text-foreground">
               <ReactMarkdown>{output}</ReactMarkdown>
+            </div>
+          )}
+          {output && !loading && !isDemoMode() && (
+            <div className="mt-4 pt-4 border-t border-border/50">
+              <StyleFeedback toolId="bio" output={output} inputSummary={name ? `Bio for ${name}${role ? `, ${role}` : ""}` : "Bio rewrite"} />
             </div>
           )}
         </motion.div>
