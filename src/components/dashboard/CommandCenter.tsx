@@ -697,6 +697,7 @@ const CommandCenter = ({
             </button>
             <button
               onClick={() => setWhatIfOpen(true)}
+              data-coachmark="what-if-simulator"
               className="text-xs text-muted-foreground hover:text-primary font-body inline-flex items-center gap-1.5"
             >
               <SlidersHorizontal className="w-3 h-3" /> What if I improved my score? →
