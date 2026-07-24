@@ -1,7 +1,7 @@
 import { requireAccess, ACCESS_CORS_HEADERS } from "../_shared/access.ts";
 import { callClaudeTool, ClaudeApiError } from "../_shared/anthropic.ts";
 import { resolveClientId } from "../_shared/verifiedClientId.ts";
-import { getRecentStyleExamples, buildStyleMemoryBlock } from "../_shared/styleMemory.ts";
+import { getStyleExamples, buildStyleMemoryBlock } from "../_shared/styleMemory.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
 const corsHeaders = ACCESS_CORS_HEADERS;
 
@@ -64,7 +64,7 @@ Deno.serve(async (req) => {
         { auth: { persistSession: false } },
       );
       const clientId = await resolveClientId(serviceClient, rawClientId, accessToken);
-      styleBlock = buildStyleMemoryBlock(await getRecentStyleExamples(serviceClient, clientId, "headlines"));
+      styleBlock = buildStyleMemoryBlock(await getStyleExamples(serviceClient, clientId, "headlines", brief));
     }
 
     const firmBlock = firmContext
