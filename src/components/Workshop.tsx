@@ -25,6 +25,7 @@ import HandoffButton from "./workshop/HandoffButton";
 import { useHandoffReceive } from "@/lib/handoff";
 import { recordRun } from "@/hooks/useWorkshopHistory";
 import { verifyPassword, hasValidAccess, edgeHeaders } from "@/lib/edgeAuth";
+import { WORKSHOP_TOOL_LABELS } from "@/lib/workshopToolCatalog";
 
 const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL;
 const SUPABASE_KEY = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY;
@@ -122,17 +123,17 @@ const Workshop = ({ onBack, initialToolId }: Props) => {
   }
 
   const TOOLS: { id: string; title: string; tag: string; blurb: string; icon: React.ReactNode; render: () => JSX.Element }[] = [
-    { id: "swipe", tag: "Library", title: "Swipe File", blurb: "Field-tested templates from real firms — heroes, bios, emails, ads.", icon: <SwipeIcon size={18} />, render: () => <SwipeFileLibrary /> },
-    { id: "copywriter", tag: "Generate", title: "AI Copywriter", blurb: "Three on-brand variations for hero, email, LinkedIn, ad or bio copy.", icon: <CopywriterIcon size={18} />, render: () => <Copywriter /> },
-    { id: "rewrite", tag: "Improve", title: "Rewrite Tool", blurb: "Paste copy; rewrite with the framework from any chapter.", icon: <RewriteIcon size={18} />, render: () => <Rewriter /> },
-    { id: "autopsy", tag: "Diagnose", title: "Copy Autopsy", blurb: "6-axis scoring with weak-spot highlights and drop-in fixes.", icon: <AutopsyIcon size={18} />, render: () => <CopyAutopsy /> },
-    { id: "audit", tag: "Diagnose", title: "Practice Page Audit", blurb: "Score any practice page against the Chapter 8 framework.", icon: <AuditIcon size={18} />, render: () => <PracticePageAudit /> },
-    { id: "headlines", tag: "Test", title: "Headline Lab", blurb: "20 angles, then a head-to-head tournament judged by AI.", icon: <HeadlinesIcon size={18} />, render: () => <HeadlineLab /> },
-    { id: "teardown", tag: "Strategy", title: "Competitor Teardown", blurb: "Strong moves, weak spots, gaps you can own — and how.", icon: <TeardownIcon size={18} />, render: () => <CompetitorTeardown /> },
-    { id: "deck", tag: "Pitch", title: "Pitch Deck Drafter", blurb: "Pick your sections, draft a deck sized to fit — with a real .pptx download.", icon: <PitchDeckIcon size={18} />, render: () => <PitchDeck /> },
-    { id: "deckroast", tag: "Diagnose", title: "Roast My Deck", blurb: "Upload an existing pitch deck — brutally honest, slide-by-slide critique.", icon: <DeckRoastIcon size={18} />, render: () => <DeckRoast /> },
-    { id: "bio", tag: "Profile", title: "Bio Rewriter", blurb: "Rewrite an attorney bio with emphasis you control.", icon: <BioIcon size={18} />, render: () => <BioRewriter /> },
-    { id: "calendar", tag: "Plan", title: "12-Month Calendar", blurb: "Themed content calendar with tempo, channels, and key moments.", icon: <CalendarIcon size={18} />, render: () => <MarketingCalendar /> },
+    { id: "swipe", tag: "Library", title: WORKSHOP_TOOL_LABELS.swipe, blurb: "Field-tested templates from real firms — heroes, bios, emails, ads.", icon: <SwipeIcon size={18} />, render: () => <SwipeFileLibrary /> },
+    { id: "copywriter", tag: "Generate", title: WORKSHOP_TOOL_LABELS.copywriter, blurb: "Three on-brand variations for hero, email, LinkedIn, ad or bio copy.", icon: <CopywriterIcon size={18} />, render: () => <Copywriter /> },
+    { id: "rewrite", tag: "Improve", title: WORKSHOP_TOOL_LABELS.rewrite, blurb: "Paste copy; rewrite with the framework from any chapter.", icon: <RewriteIcon size={18} />, render: () => <Rewriter /> },
+    { id: "autopsy", tag: "Diagnose", title: WORKSHOP_TOOL_LABELS.autopsy, blurb: "6-axis scoring with weak-spot highlights and drop-in fixes.", icon: <AutopsyIcon size={18} />, render: () => <CopyAutopsy /> },
+    { id: "audit", tag: "Diagnose", title: WORKSHOP_TOOL_LABELS.audit, blurb: "Score any practice page against the Chapter 8 framework.", icon: <AuditIcon size={18} />, render: () => <PracticePageAudit /> },
+    { id: "headlines", tag: "Test", title: WORKSHOP_TOOL_LABELS.headlines, blurb: "20 angles, then a head-to-head tournament judged by AI.", icon: <HeadlinesIcon size={18} />, render: () => <HeadlineLab /> },
+    { id: "teardown", tag: "Strategy", title: WORKSHOP_TOOL_LABELS.teardown, blurb: "Strong moves, weak spots, gaps you can own — and how.", icon: <TeardownIcon size={18} />, render: () => <CompetitorTeardown /> },
+    { id: "deck", tag: "Pitch", title: WORKSHOP_TOOL_LABELS.deck, blurb: "Pick your sections, draft a deck sized to fit — with a real .pptx download.", icon: <PitchDeckIcon size={18} />, render: () => <PitchDeck /> },
+    { id: "deckroast", tag: "Diagnose", title: WORKSHOP_TOOL_LABELS.deckroast, blurb: "Upload an existing pitch deck — brutally honest, slide-by-slide critique.", icon: <DeckRoastIcon size={18} />, render: () => <DeckRoast /> },
+    { id: "bio", tag: "Profile", title: WORKSHOP_TOOL_LABELS.bio, blurb: "Rewrite an attorney bio with emphasis you control.", icon: <BioIcon size={18} />, render: () => <BioRewriter /> },
+    { id: "calendar", tag: "Plan", title: WORKSHOP_TOOL_LABELS.calendar, blurb: "Themed content calendar with tempo, channels, and key moments.", icon: <CalendarIcon size={18} />, render: () => <MarketingCalendar /> },
   ];
 
   const active = TOOLS.find((t) => t.id === tool);

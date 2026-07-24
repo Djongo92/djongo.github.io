@@ -7,6 +7,16 @@ import GlobalAdvisor from "@/components/GlobalAdvisor";
 import PersonalizeOnboarding from "@/components/PersonalizeOnboarding";
 import DemoOnboardingWizard from "@/components/DemoOnboardingWizard";
 import CoachMarks from "@/components/CoachMarks";
+import CommandPalette, { type PaletteItem } from "@/components/CommandPalette";
+import {
+  LayoutDashboard, BarChart3, Hammer, Award, BookOpen, Settings as SettingsIcon,
+  Gauge, FileText, Users, History, Eye, Landmark,
+} from "lucide-react";
+import {
+  SwipeIcon, CopywriterIcon, RewriteIcon, AutopsyIcon, AuditIcon,
+  HeadlinesIcon, TeardownIcon, PitchDeckIcon, DeckRoastIcon, BioIcon, CalendarIcon,
+} from "@/components/workshop/icons";
+import { WORKSHOP_TOOL_LABELS } from "@/lib/workshopToolCatalog";
 import { chapters } from "@/data/chapters";
 import { useBookmarks } from "@/hooks/useBookmarks";
 import { useReadingProgress } from "@/hooks/useReadingProgress";
@@ -17,6 +27,7 @@ import { useFirmContext } from "@/hooks/useFirmContext";
 import { useFirmLogo } from "@/hooks/useFirmLogo";
 import { useScrollVelocity } from "@/hooks/useAmbientMode";
 import { useAuth } from "@/hooks/useAuth";
+import { useWorkshopHistory } from "@/hooks/useWorkshopHistory";
 import { useNotifications } from "@/hooks/useNotifications";
 import { useCoachMarks } from "@/hooks/useCoachMarks";
 import type { CoachMarkStep } from "@/components/CoachMarks";
@@ -32,6 +43,7 @@ import { DashboardSkeleton, AnalyticsSkeleton, SettingsSkeleton, ProgressSkeleto
 import type { WorkshopToolId } from "@/lib/handoff";
 import type { AuditRow, HistoryRow } from "@/components/dashboard/CommandCenter";
 import { findWeakestCategoryTool } from "@/lib/categoryToolMap";
+import { computeScoreDelta } from "@/lib/scoreTrend";
 
 // Pulls in recharts — lazy-load so it's only fetched when the Dashboard
 // or Analytics section is actually visited, not on every page load.
@@ -84,6 +96,8 @@ const Index = () => {
   // session are the two independent ways in: either unlocks the app.
   const [demoActive, setDemoActive] = useState(isDemoMode());
   const { session: authSession, loading: authLoading, signOut: authSignOut, sessionExpired, clearSessionExpired } = useAuth();
+  const workshopHistory = useWorkshopHistory();
+  const [paletteOpen, setPaletteOpen] = useState(false);
   const authenticated = demoActive || !!authSession;
   useScrollVelocity();
 
@@ -256,13 +270,19 @@ const Index = () => {
   const primaryAudit = visibilityData?.audits[0];
   const firmName = primaryAudit?.display_name || primaryAudit?.audited_domain;
   const scoreLabel = primaryAudit ? `${Math.round(primaryAudit.total_score)} / 200` : undefined;
+  const scoreDelta = computeScoreDelta(
+    visibilityData?.history ?? [],
+    primaryAudit ? { audited_domain: primaryAudit.audited_domain, market: primaryAudit.market } : null,
+  );
   const visibilityIndexHref = primaryAudit ? `${import.meta.env.BASE_URL}visibility-index/${primaryAudit.market}` : undefined;
   const recognitionIndexHref = primaryAudit ? `${import.meta.env.BASE_URL}recognition-index/${primaryAudit.market}` : undefined;
 
-  // The sidebar's "Workshop" shortcut deep-links to the single most
-  // useful next tool (same weakest-category-below-50% logic the Key
-  // Insights feed uses) instead of just duplicating the plain "Workshop"
-  // nav item above it with an identical destination.
+  // The sidebar's "Workshop" shortcut deep-links to a concrete next step
+  // instead of just duplicating the plain "Workshop" nav item above it
+  // with an identical destination: prefer "Continue: {your last tool}"
+  // (recency is the strongest signal once there's any activity), falling
+  // back to "Work on: {weakest category}" for a cold start (same
+  // weakest-category-below-50% logic the Key Insights feed uses).
   const weakestCategoryTool = primaryAudit
     ? findWeakestCategoryTool({
         performance: { score: primaryAudit.performance_score, provenance: primaryAudit.provenance?.performance ?? "missing" },
@@ -271,6 +291,54 @@ const Index = () => {
         reputation: { score: primaryAudit.reputation_score, provenance: primaryAudit.provenance?.reputation ?? "missing" },
       })
     : null;
+  const lastWorkshopRun = workshopHistory.runs[0];
+  const workshopRecommendation = lastWorkshopRun
+    ? { label: `Continue: ${lastWorkshopRun.toolLabel}`, onClick: () => openWorkshopTool(lastWorkshopRun.toolId) }
+    : weakestCategoryTool
+      ? { label: `Work on: ${weakestCategoryTool.categoryLabel}`, onClick: () => openWorkshopTool(weakestCategoryTool.toolId) }
+      : undefined;
+
+  // Cmd/Ctrl+K palette — every section, sidebar tool, and Workshop tool in
+  // one searchable list, grouped the same way the sidebar is so it reads
+  // as a search box over the same structure rather than a separate map.
+  const WORKSHOP_TOOL_ICONS: Record<WorkshopToolId, JSX.Element> = {
+    swipe: <SwipeIcon size={16} />,
+    copywriter: <CopywriterIcon size={16} />,
+    rewrite: <RewriteIcon size={16} />,
+    autopsy: <AutopsyIcon size={16} />,
+    audit: <AuditIcon size={16} />,
+    headlines: <HeadlinesIcon size={16} />,
+    teardown: <TeardownIcon size={16} />,
+    deck: <PitchDeckIcon size={16} />,
+    deckroast: <DeckRoastIcon size={16} />,
+    bio: <BioIcon size={16} />,
+    calendar: <CalendarIcon size={16} />,
+  };
+  const paletteItems: PaletteItem[] = [
+    { id: "nav-dashboard", label: "Dashboard", group: "Navigate", icon: <LayoutDashboard className="w-4 h-4" />, onSelect: () => goToSection("dashboard") },
+    { id: "nav-analytics", label: "Analytics", group: "Navigate", icon: <BarChart3 className="w-4 h-4" />, onSelect: () => goToSection("analytics") },
+    { id: "nav-workshop", label: "Workshop", group: "Navigate", icon: <Hammer className="w-4 h-4" />, onSelect: () => goToSection("workshop") },
+    { id: "nav-progress", label: "My Progress", group: "Navigate", icon: <Award className="w-4 h-4" />, onSelect: () => goToSection("progress") },
+    { id: "nav-guidebook", label: "Guidebook", group: "Navigate", icon: <BookOpen className="w-4 h-4" />, onSelect: () => goToSection("guidebook") },
+    { id: "nav-settings", label: "Settings", group: "Navigate", icon: <SettingsIcon className="w-4 h-4" />, onSelect: () => goToSection("settings") },
+    { id: "tool-maturity", label: "Firm Maturity Score", group: "Tools", icon: <Gauge className="w-4 h-4" />, onSelect: () => setMaturityOpen(true) },
+    { id: "tool-battleplan", label: "Battle Plan", group: "Tools", icon: <FileText className="w-4 h-4" />, onSelect: openBattlePlan },
+    { id: "tool-competitors", label: "Competitors", group: "Tools", icon: <Users className="w-4 h-4" />, onSelect: () => setCompetitorsOpen(true) },
+    { id: "tool-workshophistory", label: "Workshop History", group: "Tools", icon: <History className="w-4 h-4" />, onSelect: () => setWorkshopHistoryOpen(true) },
+    ...(Object.keys(WORKSHOP_TOOL_LABELS) as WorkshopToolId[]).map((toolId) => ({
+      id: `workshop-${toolId}`,
+      label: WORKSHOP_TOOL_LABELS[toolId],
+      group: "Workshop tools",
+      icon: WORKSHOP_TOOL_ICONS[toolId],
+      onSelect: () => openWorkshopTool(toolId),
+    })),
+    ...(visibilityIndexHref
+      ? [{ id: "public-visibility", label: "Visibility Index", group: "Public pages", icon: <Eye className="w-4 h-4" />, onSelect: () => window.open(visibilityIndexHref, "_blank") }]
+      : []),
+    ...(recognitionIndexHref
+      ? [{ id: "public-recognition", label: "Recognition Index", group: "Public pages", icon: <Landmark className="w-4 h-4" />, onSelect: () => window.open(recognitionIndexHref, "_blank") }]
+      : []),
+  ];
 
   // Sidebar's Bell is a real, persisted notification inbox now (see
   // useNotifications) — CommandCenter's own "Key Insights" cards already
@@ -327,6 +395,7 @@ const Index = () => {
       </Suspense>
       <DemoOnboardingWizard open={demoWizardOpen} onClose={closeDemoWizard} />
       <CoachMarks steps={COACH_MARK_STEPS} active={coachMarks.active} onDone={coachMarks.finish} />
+      <CommandPalette items={paletteItems} open={paletteOpen} onOpenChange={setPaletteOpen} />
     </>
   );
 
@@ -386,16 +455,18 @@ const Index = () => {
         firmName={firmName}
         firmLogo={firmLogo}
         scoreLabel={scoreLabel}
+        scoreDelta={scoreDelta}
         notifications={notifications.map((n) => ({ id: n.id, title: n.title, body: n.body, createdAt: n.created_at, read: !!n.read_at }))}
         unreadCount={unreadCount}
         onOpenNotifications={markAllRead}
         onOpenSettings={() => goToSection("settings")}
+        onOpenPalette={() => setPaletteOpen(true)}
         onOpenMaturity={() => setMaturityOpen(true)}
         onOpenBattlePlan={openBattlePlan}
         onOpenCompetitors={() => setCompetitorsOpen(true)}
         onOpenWorkshopHistory={() => setWorkshopHistoryOpen(true)}
         onOpenWorkshop={() => goToSection("workshop")}
-        workshopRecommendation={weakestCategoryTool ? { label: weakestCategoryTool.categoryLabel, onClick: () => openWorkshopTool(weakestCategoryTool.toolId) } : undefined}
+        workshopRecommendation={workshopRecommendation}
         visibilityIndexHref={visibilityIndexHref}
         recognitionIndexHref={recognitionIndexHref}
       >
