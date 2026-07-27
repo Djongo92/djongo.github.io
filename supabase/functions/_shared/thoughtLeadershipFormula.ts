@@ -3,12 +3,14 @@
 // importable from a plain Vitest/Node test without transitively pulling in
 // cache.ts's top-level Deno.env.get() calls.
 //
-// 25×posts/peer-max + 5×byline% + 15×news/peer-max.
+// 25×posts-ratio + 5×byline% + 15×news-ratio, where each ratio is
+// p90Ratio() against the peer group's 90th percentile (percentileFormula.ts)
+// rather than dividing by the observed maximum.
 //
-// postsCount/newsCount feed a LIVE peer-group max (peerMaxFor reads other
-// published audits), same poisoning risk as Social self-report — a scraped
-// page returning a degenerate item list would otherwise inflate the max
-// for the whole peer group permanently. Cap both at a generous ceiling.
+// postsCount/newsCount feed a LIVE peer-group comparison (peerStatsFor reads
+// other published audits), same poisoning risk as Social self-report — a
+// scraped page returning a degenerate item list would otherwise distort the
+// comparison set. Cap both at a generous ceiling.
 export interface ContentItem {
   title: string;
   date: string;
@@ -45,15 +47,13 @@ export function aggregateContentItems(itemsInWindow: ContentItem[]): ContentAggr
 }
 
 export function calculateThoughtLeadershipScore(
-  postsCount: number,
-  newsCount: number,
+  postsRatio: number,
   bylinePct: number,
-  postsPeerMax: number,
-  newsPeerMax: number,
+  newsRatio: number,
 ): number {
-  const postsScore = postsPeerMax > 0 ? 25 * (postsCount / postsPeerMax) : 0;
+  const postsScore = 25 * postsRatio;
   const bylineScore = 5 * bylinePct;
-  const newsScore = newsPeerMax > 0 ? 15 * (newsCount / newsPeerMax) : 0;
+  const newsScore = 15 * newsRatio;
 
   return Math.round((postsScore + bylineScore + newsScore) * 100) / 100;
 }

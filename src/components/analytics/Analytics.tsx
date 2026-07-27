@@ -12,6 +12,7 @@ import ScoreRing from "@/components/visibility/ScoreRing";
 import { useScoreGoals } from "@/hooks/useScoreGoals";
 import { exportCategoryPdf } from "@/lib/categoryPdf";
 import { practiceAreaLabel } from "@/lib/practiceAreas";
+import type { PeerStats } from "../../../supabase/functions/_shared/percentileFormula";
 
 interface AnalyticsProps {
   audits: AuditRow[];
@@ -294,6 +295,32 @@ const Row = ({ label, value }: { label: string; value: string | number }) => (
   </div>
 );
 
+/**
+ * The six values CLAUDE.md §2 requires for every peer-normalized metric —
+ * this firm's raw value, the peer median, the 90th-percentile threshold
+ * (full marks at or above this), the highest observed, the sample size, and
+ * the comparison date — plus a low-confidence flag. This is the difference
+ * between a number a managing partner argues with and one they can audit.
+ */
+const PeerStatsPanel = ({ label, stats }: { label: string; stats: PeerStats }) => (
+  <div className="mt-2 mb-3 bg-secondary/30 rounded-sm px-3 py-2">
+    <div className="flex items-center justify-between mb-1">
+      <span className="text-[10px] tracking-[0.1em] uppercase text-muted-foreground font-body">{label} · peer comparison</span>
+      {stats.lowConfidence && (
+        <span className="text-[9px] tracking-[0.1em] uppercase text-amber-500 font-body">Low confidence — small sample</span>
+      )}
+    </div>
+    <div className="grid grid-cols-2 gap-x-4 gap-y-0.5 text-xs font-body">
+      <span className="text-secondary-foreground/70">Your value</span><span className="text-foreground text-right">{Math.round(stats.value * 100) / 100}</span>
+      <span className="text-secondary-foreground/70">Peer median</span><span className="text-foreground text-right">{stats.peerMedian}</span>
+      <span className="text-secondary-foreground/70">90th percentile</span><span className="text-foreground text-right">{stats.p90Threshold}</span>
+      <span className="text-secondary-foreground/70">Highest observed</span><span className="text-foreground text-right">{stats.highestObserved}</span>
+      <span className="text-secondary-foreground/70">Sample size</span><span className="text-foreground text-right">{stats.sampleSize}{stats.widened ? " (widened)" : ""}</span>
+      <span className="text-secondary-foreground/70">Compared on</span><span className="text-foreground text-right">{new Date(stats.comparisonDate).toLocaleDateString(undefined, { month: "short", day: "numeric", year: "numeric" })}</span>
+    </div>
+  </div>
+);
+
 const PerformanceBreakdown = ({ raw }: { raw?: PerformanceRaw }) => {
   if (!raw || !raw.desktop) {
     return <p className="text-sm text-muted-foreground font-body">Not scored yet — needs a PageSpeed Insights API key configured.</p>;
@@ -320,8 +347,11 @@ const SocialBreakdown = ({ raw }: { raw?: SocialRaw }) => {
   return (
     <div>
       <Row label="LinkedIn followers" value={raw.followers ?? 0} />
+      {raw.followersStats && <PeerStatsPanel label="Followers" stats={raw.followersStats} />}
       <Row label="Posts (last 30 days)" value={raw.posts30d ?? 0} />
+      {raw.postsStats && <PeerStatsPanel label="Posts" stats={raw.postsStats} />}
       <Row label="Engagement rate" value={raw.engagementRate != null ? `${raw.engagementRate}%` : "Not supplied"} />
+      {raw.erStats && <PeerStatsPanel label="Engagement rate" stats={raw.erStats} />}
       <p className="text-xs text-muted-foreground font-body mt-4 mb-2">Platform presence</p>
       <div className="grid grid-cols-2 gap-2">
         {Object.entries(platforms).map(([platform, present]) => (
@@ -354,7 +384,9 @@ const ThoughtLeadershipBreakdown = ({ raw }: { raw?: ThoughtLeadershipRaw }) => 
   return (
     <div>
       <Row label="Original posts (in window)" value={raw.postsCount ?? 0} />
+      {raw.postsStats && <PeerStatsPanel label="Posts" stats={raw.postsStats} />}
       <Row label="News mentions (in window)" value={raw.newsCount ?? 0} />
+      {raw.newsStats && <PeerStatsPanel label="News mentions" stats={raw.newsStats} />}
       <Row label="Byline rate" value={`${Math.round(raw.bylinePct ?? 0)}%`} />
       {raw.items.length > 0 && (
         <>
@@ -401,8 +433,11 @@ const ReputationBreakdown = ({ raw }: { raw?: ReputationRaw }) => {
           <Row label="Matched directory entry" value={raw.matchedFirmName} />
           <p className="text-xs text-muted-foreground font-body mt-4 mb-2">Directory standing</p>
           {raw.chambers && <Row label="Chambers" value={`${Math.round(raw.chambers.points * 10) / 10} pts · ${raw.chambers.count} ranked tables`} />}
+          {raw.chambers?.qualityStats && <PeerStatsPanel label="Chambers ranking depth" stats={raw.chambers.qualityStats} />}
           {raw.legal500 && <Row label="Legal 500" value={`${Math.round(raw.legal500.points * 10) / 10} pts · ${raw.legal500.count} ranked tables`} />}
+          {raw.legal500?.qualityStats && <PeerStatsPanel label="Legal 500 ranking depth" stats={raw.legal500.qualityStats} />}
           {raw.iflr1000 && <Row label="IFLR1000" value={`${Math.round(raw.iflr1000.points * 10) / 10} pts · ${raw.iflr1000.count} ranked tables`} />}
+          {raw.iflr1000?.qualityStats && <PeerStatsPanel label="IFLR1000 ranking depth" stats={raw.iflr1000.qualityStats} />}
 
           {practiceAreaCodes.length > 0 && (
             <>

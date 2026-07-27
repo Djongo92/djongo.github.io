@@ -36,6 +36,7 @@ import { computeWeekRange, formatWeekRangeLabel } from "@/lib/mondayBriefWeek";
 import { computeCategoryDeltas } from "@/lib/categoryDeltas";
 import { enableDemoMode } from "@/lib/demoMode";
 import { downloadScoreCard } from "@/lib/visibilityScoreCard";
+import type { PeerStats } from "../../../supabase/functions/_shared/percentileFormula";
 
 const CATEGORY_LABELS = CATEGORY_META;
 
@@ -77,6 +78,7 @@ export interface DirectorySubScore {
   points: number;
   count: number;
   avgRank: number | null;
+  qualityStats?: PeerStats | null;
 }
 
 export interface SiteHealthRaw {
@@ -101,10 +103,13 @@ export interface SocialRaw {
   engagementRate?: number | null;
   platforms?: { linkedin: boolean; instagram: boolean; twitter: boolean; facebook: boolean };
   platformCount?: number;
-  /** Peer-group maxima this score was normalized against — persisted so a client can re-run the formula (e.g. a what-if simulator) without a live query. */
-  followersPeerMax?: number;
-  postsPeerMax?: number;
-  erPeerMax?: number;
+  /** Full six-value peer comparison (raw value, peer median, 90th-percentile
+   *  threshold, highest observed, sample size, comparison date) this score
+   *  was benchmarked against — persisted so a client can re-run the formula
+   *  (e.g. a what-if simulator) without a live query, and so it's auditable. */
+  followersStats?: PeerStats;
+  postsStats?: PeerStats;
+  erStats?: PeerStats | null;
 }
 
 export interface PressMention {
@@ -121,9 +126,9 @@ export interface ThoughtLeadershipRaw {
   bylinePct?: number;
   items?: ThoughtLeadershipItem[];
   pressMentions?: PressMention[];
-  /** Peer-group maxima this score was normalized against — see SocialRaw's comment. */
-  postsPeerMax?: number;
-  newsPeerMax?: number;
+  /** Full six-value peer comparison — see SocialRaw's comment. */
+  postsStats?: PeerStats;
+  newsStats?: PeerStats;
 }
 
 export interface ReputationRaw {

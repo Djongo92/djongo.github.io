@@ -9,14 +9,22 @@
 // the directory gets a real number without ever touching this product.
 import { DMV_MARKETS, FIRM_TYPE_TO_PEER_GROUP, type PeerGroup } from "./marketVisibilityConfig.ts";
 import { directoryScore, invertedAvgFor, type DirectoryRow } from "./reputationScore.ts";
+import { MIN_PEER_SAMPLE, type PeerStats } from "./percentileFormula.ts";
+
+interface DirectorySubScore {
+  points: number;
+  count: number;
+  avgRank: number | null;
+  qualityStats: PeerStats | null;
+}
 
 export interface FirmDirectoryStanding {
   firmName: string;
   firmDomain: string | null;
   firmType: string | null;
-  chambers: { points: number; count: number; avgRank: number | null };
-  legal500: { points: number; count: number; avgRank: number | null };
-  iflr1000: { points: number; count: number; avgRank: number | null };
+  chambers: DirectorySubScore;
+  legal500: DirectorySubScore;
+  iflr1000: DirectorySubScore;
   directoryPoints: number;
 }
 
@@ -28,16 +36,30 @@ export function computeDirectoryStandingIndex(market: string, rows: DirectoryRow
 
   return rows
     .map((firm) => {
+      // Same minimum-sample rule as reputationScore.ts: below MIN_PEER_SAMPLE
+      // firms in this firm_type, widen to the whole market — this is exactly
+      // the small-peer-group case flagged as a coming issue (only a handful
+      // of Regional firms in a given market), so this index needs the same
+      // protection the private audit path has.
+      // Excludes the firm itself — directoryScore() adds its own inverted
+      // average back in separately, so leaving it in `peers` here would
+      // double-count it and inflate the reported sample size.
+      const others = rows.filter((r) => r !== firm);
       const peerGroup: PeerGroup | undefined = firm.firm_type ? FIRM_TYPE_TO_PEER_GROUP[firm.firm_type] : undefined;
-      const peers = peerGroup ? rows.filter((r) => r.firm_type && FIRM_TYPE_TO_PEER_GROUP[r.firm_type] === peerGroup) : rows;
+      let peers = peerGroup ? others.filter((r) => r.firm_type && FIRM_TYPE_TO_PEER_GROUP[r.firm_type] === peerGroup) : others;
+      let widened = false;
+      if (peers.length + 1 < MIN_PEER_SAMPLE && peers.length < others.length) {
+        peers = others;
+        widened = true;
+      }
 
       const chambersPeerAvgs = peers.map((r) => invertedAvgFor(r.chambers?.rankedTables, marketConfig.chambers.deepestBand));
       const legal500PeerAvgs = peers.map((r) => invertedAvgFor(r.legal500?.rankedTables, marketConfig.legal500.deepestTier));
       const iflrPeerAvgs = peers.map((r) => invertedAvgFor(r.iflr1000?.rankedTables, marketConfig.iflr1000.deepestTier));
 
-      const chambers = directoryScore(firm.chambers?.rankedTables, marketConfig.chambers.n, marketConfig.chambers.deepestBand, chambersPeerAvgs);
-      const legal500 = directoryScore(firm.legal500?.rankedTables, marketConfig.legal500.n, marketConfig.legal500.deepestTier, legal500PeerAvgs);
-      const iflr1000 = directoryScore(firm.iflr1000?.rankedTables, marketConfig.iflr1000.n, marketConfig.iflr1000.deepestTier, iflrPeerAvgs);
+      const chambers = directoryScore(firm.chambers?.rankedTables, marketConfig.chambers.n, marketConfig.chambers.deepestBand, chambersPeerAvgs, widened);
+      const legal500 = directoryScore(firm.legal500?.rankedTables, marketConfig.legal500.n, marketConfig.legal500.deepestTier, legal500PeerAvgs, widened);
+      const iflr1000 = directoryScore(firm.iflr1000?.rankedTables, marketConfig.iflr1000.n, marketConfig.iflr1000.deepestTier, iflrPeerAvgs, widened);
 
       return {
         firmName: firm.firm_name,

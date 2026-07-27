@@ -4,12 +4,16 @@
 // scores audits with — not an approximation. This is only possible
 // because performanceFormula/socialFormula/thoughtLeadershipFormula.ts are
 // deliberately pure (no Deno globals, no network, no Supabase client), and
-// because socialScore.ts/thoughtLeadershipScore.ts now persist the
-// peer-max denominators they normalized against into raw_metrics — see
-// those files' comments. Reputation and SEO & Authority aren't simulated:
-// Reputation depends on a live directory-data DB lookup and SEO & Authority
-// requires a paid Ahrefs/Moz subscription this build doesn't have — both
-// stay pinned at their current values in the total.
+// because socialScore.ts/thoughtLeadershipScore.ts now persist the full
+// peer-stats (90th-percentile threshold included) they normalized against
+// into raw_metrics — see those files' comments. A hypothetical value at or
+// above the stored p90Threshold simply earns full marks for that metric —
+// no need to guess how a "what if I had more followers" scenario would
+// move a live peer maximum, since the methodology no longer depends on one.
+// Reputation and SEO & Authority aren't simulated: Reputation depends on a
+// live directory-data DB lookup and SEO & Authority requires a paid
+// Ahrefs/Moz subscription this build doesn't have — both stay pinned at
+// their current values in the total.
 import { useMemo, useState } from "react";
 import { SlidersHorizontal, X, RotateCcw } from "lucide-react";
 import ModalShell from "@/components/ui/modal-shell";
@@ -20,6 +24,7 @@ import type { AuditRow } from "@/components/dashboard/CommandCenter";
 import { calculatePerformanceScore } from "../../../supabase/functions/_shared/performanceFormula";
 import { calculateSocialScore, MAX_FOLLOWERS, MAX_POSTS_30D, MAX_ENGAGEMENT_RATE } from "../../../supabase/functions/_shared/socialFormula";
 import { calculateThoughtLeadershipScore } from "../../../supabase/functions/_shared/thoughtLeadershipFormula";
+import { p90Ratio } from "../../../supabase/functions/_shared/percentileFormula";
 
 interface Props {
   open: boolean;
@@ -82,27 +87,26 @@ const WhatIfSimulator = ({ open, onClose, audit }: Props) => {
 
   const socialResult = useMemo(() => {
     if (!social) return null;
-    // The real backend's peer-max only ever grows — a hypothetical value
-    // above the last-known max would itself become the new max, exactly
-    // like peerMaxFor() behaves against a live query. Mirroring that here
-    // keeps a "what if I doubled my followers" scenario honest instead of
-    // silently capping at the old ceiling.
-    const followersPeerMax = Math.max(social.followersPeerMax ?? 0, followers);
-    const postsPeerMax = Math.max(social.postsPeerMax ?? 0, posts30d);
-    const erPeerMax = Math.max(social.erPeerMax ?? 0, engagementRate);
-    return calculateSocialScore(followers, posts30d, engagementRate, platforms, followersPeerMax, postsPeerMax, erPeerMax);
+    // The stored p90Threshold is the real benchmark now, not a live-growing
+    // maximum — a hypothetical value at or above it simply earns full marks
+    // for that metric (p90Ratio caps at 1), so there's nothing to simulate
+    // "growing" the way the old peer-max approach needed.
+    const followersRatio = social.followersStats ? p90Ratio({ value: followers, p90Threshold: social.followersStats.p90Threshold }) : 0;
+    const postsRatio = social.postsStats ? p90Ratio({ value: posts30d, p90Threshold: social.postsStats.p90Threshold }) : 0;
+    const erRatio = social.erStats ? p90Ratio({ value: engagementRate, p90Threshold: social.erStats.p90Threshold }) : 0;
+    return calculateSocialScore(followersRatio, postsRatio, engagementRate, erRatio, platforms);
   }, [social, followers, posts30d, engagementRate, platforms]);
 
   const tlResult = useMemo(() => {
     if (!tl) return null;
-    const postsPeerMax = Math.max(tl.postsPeerMax ?? 0, postsCount);
-    const newsPeerMax = Math.max(tl.newsPeerMax ?? 0, newsCount);
-    return calculateThoughtLeadershipScore(postsCount, newsCount, bylinePct / 100, postsPeerMax, newsPeerMax);
+    const postsRatio = tl.postsStats ? p90Ratio({ value: postsCount, p90Threshold: tl.postsStats.p90Threshold }) : 0;
+    const newsRatio = tl.newsStats ? p90Ratio({ value: newsCount, p90Threshold: tl.newsStats.p90Threshold }) : 0;
+    return calculateThoughtLeadershipScore(postsRatio, bylinePct / 100, newsRatio);
   }, [tl, postsCount, newsCount, bylinePct]);
 
   const whatIfTotal = useMemo(() => {
     const performanceScore = performanceResult?.score ?? audit.performance_score;
-    const socialScore = socialResult?.score ?? audit.social_score;
+    const socialScore = socialResult ?? audit.social_score;
     const tlScore = tlResult ?? audit.thought_leadership_score;
     return performanceScore + socialScore + tlScore + audit.seo_authority_score + audit.reputation_score;
   }, [performanceResult, socialResult, tlResult, audit]);
@@ -176,7 +180,7 @@ const WhatIfSimulator = ({ open, onClose, audit }: Props) => {
           <p className="text-xs font-body text-foreground flex items-center gap-1.5">
             <span className="w-1.5 h-1.5 rounded-full bg-rose-500" />
             {CATEGORY_META.social.label}
-            {socialResult && <span className="text-muted-foreground ml-auto">{round1(socialResult.score)} / {CATEGORY_META.social.max}</span>}
+            {socialResult != null && <span className="text-muted-foreground ml-auto">{round1(socialResult)} / {CATEGORY_META.social.max}</span>}
           </p>
           {!social ? (
             <p className="text-xs text-muted-foreground font-body">Run a real audit to unlock these sliders.</p>
@@ -186,20 +190,20 @@ const WhatIfSimulator = ({ open, onClose, audit }: Props) => {
                 label="LinkedIn followers"
                 value={followers}
                 onChange={setFollowers}
-                max={Math.max((social.followersPeerMax ?? 0) * 2, followers * 2, 1000)}
+                max={Math.max((social.followersStats?.p90Threshold ?? 0) * 2, followers * 2, 1000)}
                 format={(v) => v.toLocaleString()}
               />
               <SliderRow
                 label="Posts in last 30 days"
                 value={posts30d}
                 onChange={setPosts30d}
-                max={Math.max((social.postsPeerMax ?? 0) * 2, posts30d * 2, 20, 1)}
+                max={Math.max((social.postsStats?.p90Threshold ?? 0) * 2, posts30d * 2, 20, 1)}
               />
               <SliderRow
                 label="Engagement rate"
                 value={engagementRate}
                 onChange={setEngagementRate}
-                max={Math.max((social.erPeerMax ?? 0) * 2, engagementRate * 2, 5)}
+                max={Math.max((social.erStats?.p90Threshold ?? 0) * 2, engagementRate * 2, 5)}
                 step={0.1}
                 format={(v) => `${v.toFixed(1)}%`}
               />
@@ -233,13 +237,13 @@ const WhatIfSimulator = ({ open, onClose, audit }: Props) => {
                 label="Blog posts published"
                 value={postsCount}
                 onChange={setPostsCount}
-                max={Math.max((tl.postsPeerMax ?? 0) * 2, postsCount * 2, 20, 1)}
+                max={Math.max((tl.postsStats?.p90Threshold ?? 0) * 2, postsCount * 2, 20, 1)}
               />
               <SliderRow
                 label="Press mentions found"
                 value={newsCount}
                 onChange={setNewsCount}
-                max={Math.max((tl.newsPeerMax ?? 0) * 2, newsCount * 2, 10, 1)}
+                max={Math.max((tl.newsStats?.p90Threshold ?? 0) * 2, newsCount * 2, 10, 1)}
               />
               <SliderRow
                 label="Carry a named byline"

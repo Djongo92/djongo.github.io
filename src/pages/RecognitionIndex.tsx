@@ -22,6 +22,17 @@ interface FirmStanding {
 
 const PEER_GROUP_LABEL: Record<string, string> = Object.fromEntries(PEER_GROUPS.map((p) => [p.value, p.label]));
 
+interface FlatFirmRow {
+  [key: string]: unknown;
+  firmName: string;
+  firmDomain: string;
+  firmType: string;
+  chambersPoints: number;
+  legal500Points: number;
+  iflr1000Points?: number;
+  directoryPoints: number;
+}
+
 const RecognitionIndex = () => {
   const { market } = useParams();
   const navigate = useNavigate();
@@ -100,7 +111,7 @@ const RecognitionIndex = () => {
 
   const exportCsv = () => {
     if (!firms || firms.length === 0) return;
-    const flat = firms.map((f) => ({
+    const flat: FlatFirmRow[] = firms.map((f) => ({
       firmName: f.firmName,
       firmDomain: f.firmDomain ?? "",
       firmType: f.firmType ?? "",
@@ -109,15 +120,16 @@ const RecognitionIndex = () => {
       ...(hasIflr1000Data ? { iflr1000Points: Math.round(f.iflr1000.points * 10) / 10 } : {}),
       directoryPoints: Math.round(f.directoryPoints * 10) / 10,
     }));
-    const csv = toCsv(flat, [
+    const columns: { key: keyof FlatFirmRow; header: string }[] = [
       { key: "firmName", header: "Firm" },
       { key: "firmDomain", header: "Domain" },
       { key: "firmType", header: "Type" },
       { key: "chambersPoints", header: "Chambers points" },
       { key: "legal500Points", header: "Legal 500 points" },
-      ...(hasIflr1000Data ? [{ key: "iflr1000Points", header: "IFLR1000 points" }] : []),
+      ...(hasIflr1000Data ? [{ key: "iflr1000Points" as const, header: "IFLR1000 points" }] : []),
       { key: "directoryPoints", header: `Directory points (/${max})` },
-    ]);
+    ];
+    const csv = toCsv(flat, columns);
     downloadCsv(`legalos-recognition-index-${market}.csv`, csv);
   };
 
