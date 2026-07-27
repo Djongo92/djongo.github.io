@@ -209,8 +209,9 @@ const VisibilityIndex = () => {
             </Link>
           </div>
         </footer>
-        <p className="mt-6 text-[10px] tracking-[0.2em] uppercase text-muted-foreground font-body text-center">
-          For Authorized Use Only
+        <p className="mt-6 text-[10px] text-muted-foreground font-body text-center">
+          © {new Date().getFullYear()} LegalOS. Scores are self-published by each firm and peer-normalized within
+          market and peer group.
         </p>
       </main>
     </div>

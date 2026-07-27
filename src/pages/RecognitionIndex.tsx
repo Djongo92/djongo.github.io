@@ -302,8 +302,9 @@ const RecognitionIndex = () => {
             </Link>
           </div>
         </footer>
-        <p className="mt-6 text-[10px] tracking-[0.2em] uppercase text-muted-foreground font-body text-center">
-          For Authorized Use Only
+        <p className="mt-6 text-[10px] text-muted-foreground font-body text-center">
+          © {new Date().getFullYear()} LegalOS. Methodology: Chambers Europe and Legal 500 rankings, aggregated and
+          peer-normalized as described above.
         </p>
       </main>
     </div>
