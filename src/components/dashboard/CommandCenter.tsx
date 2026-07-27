@@ -167,6 +167,17 @@ export interface AuditRow {
   updated_at: string;
   percentile?: number | null;
   peer_count?: number;
+  /** Data-integrity metadata (CLAUDE.md §3) — which formula version scored
+   *  this, what data window it drew from, and how much to trust the number. */
+  methodology_version?: number;
+  data_window_start?: string | null;
+  data_window_end?: string | null;
+  sample_size?: number | null;
+  confidence_score?: number | null;
+  review_status?: "unreviewed" | "reviewed" | "flagged";
+  reviewed_by?: string | null;
+  manual_override?: boolean;
+  manual_override_reason?: string | null;
 }
 
 export interface HistoryRow {

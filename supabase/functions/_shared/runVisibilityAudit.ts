@@ -17,6 +17,9 @@ import { computeThoughtLeadershipScore } from "./thoughtLeadershipScore.ts";
 import { computeSocialScore, type SocialInput } from "./socialScore.ts";
 import { computeSeoAuthorityScore } from "./seoScore.ts";
 import { checkBenchmarkRateLimit } from "./rateLimit.ts";
+import { DMV_MARKETS } from "./marketVisibilityConfig.ts";
+import type { PeerStats } from "./percentileFormula.ts";
+import { METHODOLOGY_VERSION, computeAuditConfidence, computeDataWindow } from "./auditMetadata.ts";
 
 export const VALID_PEER_GROUPS = new Set(["international", "regional", "local", "localized_page", "consultancy"]);
 
@@ -124,6 +127,25 @@ export async function runVisibilityAudit(
     reputation: reputation.provenance,
   };
 
+  // Data-integrity metadata (CLAUDE.md §3): which methodology version scored
+  // this, the data window it drew from, and an audit-level confidence
+  // rolled up from every peer-normalized metric's own sample size — the
+  // weakest-link metric determines how much a managing partner should trust
+  // the number as precise versus directional.
+  const reputationRaw = reputation.raw as {
+    chambers?: { qualityStats?: PeerStats | null };
+    legal500?: { qualityStats?: PeerStats | null };
+    iflr1000?: { qualityStats?: PeerStats | null };
+  };
+  const { sampleSize, confidenceScore } = computeAuditConfidence([
+    social.raw.followersStats, social.raw.postsStats, social.raw.erStats,
+    thoughtLeadership.raw.postsStats, thoughtLeadership.raw.newsStats,
+    reputationRaw.chambers?.qualityStats, reputationRaw.legal500?.qualityStats, reputationRaw.iflr1000?.qualityStats,
+  ]);
+  const now = new Date();
+  const windowDays = DMV_MARKETS[market]?.contentWindowDays ?? 60;
+  const dataWindow = computeDataWindow(now, windowDays);
+
   const { data: savedRow, error: upsertError } = await serviceClient
     .from("market_visibility_audits")
     .upsert({
@@ -140,6 +162,11 @@ export async function runVisibilityAudit(
       raw_metrics,
       provenance,
       last_intake: { gbpListed: gbpListed === true, social: socialInput },
+      methodology_version: METHODOLOGY_VERSION,
+      data_window_start: dataWindow.start,
+      data_window_end: dataWindow.end,
+      sample_size: sampleSize,
+      confidence_score: confidenceScore,
     }, { onConflict: "client_id,audited_domain,market" })
     .select("id, total_score, is_public")
     .single();
@@ -152,6 +179,10 @@ export async function runVisibilityAudit(
   // Append-only snapshot so a returning firm can see their own score over
   // time — the upsert above overwrites the same row, so this is the only
   // history that exists. Logged, never blocks the response if it fails.
+  // Never updated once inserted — historical scores stay exactly as scored,
+  // tagged with the methodology version that actually produced them, per
+  // CLAUDE.md §3: a later methodology change scores forward, never rewrites
+  // a past result.
   const { error: historyError } = await serviceClient
     .from("market_visibility_audit_history")
     .insert({
@@ -165,6 +196,11 @@ export async function runVisibilityAudit(
       thought_leadership_score: thoughtLeadership.score,
       reputation_score: reputation.score,
       total_score: savedRow.total_score,
+      methodology_version: METHODOLOGY_VERSION,
+      data_window_start: dataWindow.start,
+      data_window_end: dataWindow.end,
+      sample_size: sampleSize,
+      confidence_score: confidenceScore,
     });
   if (historyError) console.error("runVisibilityAudit history insert error:", historyError);
 

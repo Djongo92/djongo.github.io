@@ -145,6 +145,12 @@ const Analytics = ({ audits, history, onOpenDashboard }: AnalyticsProps) => {
         <p className="text-sm text-muted-foreground font-body max-w-lg">
           Every category, broken down to its raw inputs — not just the headline number.
         </p>
+        {primary.confidence_score != null && (
+          <p className="text-[11px] text-muted-foreground font-body mt-2">
+            Methodology v{primary.methodology_version ?? 1} · {Math.round(primary.confidence_score * 100)}% of peer-normalized
+            metrics met the minimum sample size{primary.sample_size != null ? ` (smallest sample: ${primary.sample_size} firms)` : ""}.
+          </p>
+        )}
       </header>
 
       <div className="max-w-5xl mx-auto px-6">

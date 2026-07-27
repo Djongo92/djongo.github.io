@@ -105,6 +105,12 @@ export const DEMO_AUDIT: AuditRow = {
   updated_at: new Date(now).toISOString(),
   percentile: 61,
   peer_count: 18,
+  methodology_version: 2,
+  data_window_start: new Date(now - 60 * DAY).toISOString(),
+  data_window_end: new Date(now).toISOString(),
+  sample_size: 12,
+  confidence_score: 1,
+  review_status: "unreviewed",
 };
 
 export const DEMO_HISTORY: HistoryRow[] = [
