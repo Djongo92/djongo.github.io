@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { X, Users, Plus, Loader2, TrendingUp, TrendingDown } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useTrackedCompetitors } from "@/hooks/useTrackedCompetitors";
+import { useFirmProfile } from "@/hooks/useFirmProfile";
 import type { AuditRow } from "@/components/dashboard/CommandCenter";
 import ModalShell from "@/components/ui/modal-shell";
 
@@ -19,6 +20,7 @@ interface PublicRow {
 
 const CompetitorTracker = ({ open, onClose, primaryAudit }: Props) => {
   const { competitors, add, remove, maxReached, max } = useTrackedCompetitors();
+  const { profile } = useFirmProfile();
   const [domainInput, setDomainInput] = useState("");
   const [nameInput, setNameInput] = useState("");
   const [publicRows, setPublicRows] = useState<Record<string, PublicRow>>({});
@@ -52,6 +54,14 @@ const CompetitorTracker = ({ open, onClose, primaryAudit }: Props) => {
     if (ok) {
       setDomainInput("");
       setNameInput("");
+    }
+  };
+
+  const profileCompetitors = (profile?.competitor_set ?? []).filter((c) => c.domain?.trim());
+
+  const handleAddFromProfile = () => {
+    for (const c of profileCompetitors) {
+      add(c.domain, c.name);
     }
   };
 
@@ -110,6 +120,15 @@ const CompetitorTracker = ({ open, onClose, primaryAudit }: Props) => {
 
                   {loading && (
                     <div className="flex justify-center py-4"><Loader2 className="w-4 h-4 animate-spin text-primary" /></div>
+                  )}
+
+                  {competitors.length === 0 && profileCompetitors.length > 0 && (
+                    <button
+                      onClick={handleAddFromProfile}
+                      className="w-full flex items-center justify-center gap-1.5 px-3 py-2 rounded-sm text-xs font-body border border-primary/40 text-primary hover:bg-primary/10 transition-colors"
+                    >
+                      <Plus className="w-3 h-3" /> Add {profileCompetitors.length} from your firm profile
+                    </button>
                   )}
 
                   {competitors.length === 0 ? (

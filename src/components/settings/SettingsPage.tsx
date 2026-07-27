@@ -14,6 +14,7 @@ import { CATEGORY_META, CATEGORY_ORDER } from "@/lib/visibilityCategories";
 import { downloadExportBundle, clearAllLocalData, importDataBundle } from "@/lib/dataManagement";
 import type { AuditRow } from "@/components/dashboard/CommandCenter";
 import { INVITABLE_ROLES, ROLE_PERMISSIONS, roleLabel, isAdminRole, type FirmRole } from "@/lib/roles";
+import FirmProfileSettings from "@/components/settings/FirmProfileSettings";
 
 interface SettingsPageProps {
   primaryAudit?: AuditRow;
@@ -399,6 +400,8 @@ const SettingsPage = ({ primaryAudit }: SettingsPageProps) => {
             </button>
           </div>
         </div>
+
+        <FirmProfileSettings />
 
         {/* Team */}
         {user && (
