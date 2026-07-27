@@ -32,6 +32,7 @@ import WhatIfSimulator from "@/components/visibility/WhatIfSimulator";
 import type { WorkshopToolId } from "@/lib/handoff";
 import { computeScoreDelta } from "@/lib/scoreTrend";
 import { computeMeasuredTotals } from "@/lib/measuredScore";
+import { computeWeekRange, formatWeekRangeLabel } from "@/lib/mondayBriefWeek";
 import { enableDemoMode } from "@/lib/demoMode";
 import { downloadScoreCard } from "@/lib/visibilityScoreCard";
 
@@ -362,10 +363,7 @@ const CommandCenter = ({
   const mondayBrief = useMemo(() => {
     if (!primary) return null;
     const now = new Date();
-    const diffToMonday = (now.getDay() + 6) % 7; // days since the most recent Monday (0 if today is Monday)
-    const monday = new Date(now);
-    monday.setHours(0, 0, 0, 0);
-    monday.setDate(monday.getDate() - diffToMonday);
+    const { monday } = computeWeekRange(now);
 
     const ownHistory = history
       .filter((h) => h.audited_domain === primary.audited_domain && h.market === primary.market)
@@ -379,7 +377,7 @@ const CommandCenter = ({
     const baseline = priorRows.length > 0 ? priorRows[priorRows.length - 1].total_score : ownHistory[0].total_score;
     const weekDelta = Math.round((primary.total_score - baseline) * 10) / 10;
 
-    const weekRangeLabel = `${monday.toLocaleDateString(undefined, { month: "short", day: "numeric" })} – ${now.toLocaleDateString(undefined, { month: "short", day: "numeric" })}`;
+    const weekRangeLabel = formatWeekRangeLabel(now);
 
     return { weekDelta, weekRangeLabel, topInsight: insights[0] ?? null };
   }, [primary, history, insights]);
