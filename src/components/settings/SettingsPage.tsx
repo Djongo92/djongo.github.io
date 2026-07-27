@@ -13,6 +13,7 @@ import { PRACTICE_AREAS, FIRM_SIZES, GOALS } from "@/components/PersonalizeOnboa
 import { CATEGORY_META, CATEGORY_ORDER } from "@/lib/visibilityCategories";
 import { downloadExportBundle, clearAllLocalData, importDataBundle } from "@/lib/dataManagement";
 import type { AuditRow } from "@/components/dashboard/CommandCenter";
+import { INVITABLE_ROLES, ROLE_PERMISSIONS, roleLabel, isAdminRole, type FirmRole } from "@/lib/roles";
 
 interface SettingsPageProps {
   primaryAudit?: AuditRow;
@@ -77,13 +78,15 @@ const SettingsPage = ({ primaryAudit }: SettingsPageProps) => {
   const { theme, setTheme } = useReadingTheme();
   const { goals, setGoal } = useScoreGoals();
   const { user } = useAuth();
-  const { team, loading: teamLoading, inviting, sharing, createInvite, shareAuditsWithFirm } = useFirmTeam();
+  const { team, loading: teamLoading, inviting, sharing, createInvite, shareAuditsWithFirm, changeMemberRole, removeMember } = useFirmTeam();
+  const amAdmin = isAdminRole(team?.members.find((m) => m.user_id === user?.id)?.role);
   const [practiceArea, setPracticeArea] = useState(context?.practiceArea ?? "");
   const [firmSize, setFirmSize] = useState(context?.firmSize ?? "");
   const [primaryGoal, setPrimaryGoal] = useState(context?.primaryGoal ?? "");
   const [confirmingClear, setConfirmingClear] = useState(false);
   const [inviteLink, setInviteLink] = useState<string | null>(null);
   const [linkCopied, setLinkCopied] = useState(false);
+  const [inviteRole, setInviteRole] = useState<FirmRole>("marketing");
   const [desktopNotifs, setDesktopNotifs] = useState(isDesktopNotificationsEnabled());
   const importInputRef = useRef<HTMLInputElement>(null);
   const logoInputRef = useRef<HTMLInputElement>(null);
@@ -124,7 +127,7 @@ const SettingsPage = ({ primaryAudit }: SettingsPageProps) => {
   };
 
   const handleCreateInvite = async () => {
-    const result = await createInvite();
+    const result = await createInvite(inviteRole);
     if ("error" in result) {
       toast.error(result.error);
       return;
@@ -132,6 +135,18 @@ const SettingsPage = ({ primaryAudit }: SettingsPageProps) => {
     const link = `${window.location.origin}${import.meta.env.BASE_URL}join/${result.token}`;
     setInviteLink(link);
     setLinkCopied(false);
+  };
+
+  const handleChangeRole = async (targetUserId: string, role: FirmRole) => {
+    const result = await changeMemberRole(targetUserId, role);
+    if ("error" in result) toast.error(result.error);
+    else toast.success(`Role updated to ${roleLabel(role)}.`);
+  };
+
+  const handleRemoveMember = async (targetUserId: string) => {
+    const result = await removeMember(targetUserId);
+    if ("error" in result) toast.error(result.error);
+    else toast.success("Teammate removed.");
   };
 
   const handleCopyInviteLink = async () => {
@@ -405,24 +420,62 @@ const SettingsPage = ({ primaryAudit }: SettingsPageProps) => {
                 </p>
 
                 <ul className="space-y-1.5 mb-4">
-                  {team.members.map((m) => (
-                    <li key={m.user_id} className="flex items-center justify-between text-xs font-body py-1.5 px-3 rounded-sm bg-secondary/50">
-                      <span className="text-foreground">{m.user_id === user.id ? "You" : `Teammate (${m.user_id.slice(0, 8)}…)`}</span>
-                      <span className="text-muted-foreground uppercase tracking-wide text-[10px]">{m.role}</span>
-                    </li>
-                  ))}
+                  {team.members.map((m) => {
+                    const isSelf = m.user_id === user.id;
+                    const isOwner = m.role === "owner";
+                    return (
+                      <li key={m.user_id} className="flex items-center justify-between gap-2 text-xs font-body py-1.5 px-3 rounded-sm bg-secondary/50">
+                        <span className="text-foreground truncate">{isSelf ? "You" : `Teammate (${m.user_id.slice(0, 8)}…)`}</span>
+                        <div className="flex items-center gap-2 shrink-0">
+                          {amAdmin && !isSelf && !isOwner ? (
+                            <select
+                              value={m.role}
+                              onChange={(e) => handleChangeRole(m.user_id, e.target.value as FirmRole)}
+                              className="bg-secondary/80 border border-border text-muted-foreground text-[10px] uppercase tracking-wide rounded-sm px-1.5 py-1 focus:outline-none focus:border-primary"
+                            >
+                              {INVITABLE_ROLES.map((r) => (
+                                <option key={r} value={r}>{ROLE_PERMISSIONS[r].label}</option>
+                              ))}
+                            </select>
+                          ) : (
+                            <span className="text-muted-foreground uppercase tracking-wide text-[10px]">{roleLabel(m.role)}</span>
+                          )}
+                          {amAdmin && !isSelf && !isOwner && (
+                            <button
+                              onClick={() => handleRemoveMember(m.user_id)}
+                              title="Remove from firm"
+                              className="text-muted-foreground hover:text-destructive"
+                            >
+                              <X className="w-3 h-3" />
+                            </button>
+                          )}
+                        </div>
+                      </li>
+                    );
+                  })}
                 </ul>
 
-                {team.members.find((m) => m.user_id === user.id)?.role === "owner" && (
+                {amAdmin && (
                   <div className="mb-3">
                     {!inviteLink ? (
-                      <button
-                        onClick={handleCreateInvite}
-                        disabled={inviting}
-                        className="inline-flex items-center gap-2 px-4 py-2 rounded-sm text-sm font-body border border-border/50 text-foreground hover:border-primary/40 transition-colors disabled:opacity-50"
-                      >
-                        <UserPlus className="w-3.5 h-3.5" /> {inviting ? "Creating invite…" : "Invite a teammate"}
-                      </button>
+                      <div className="flex items-center gap-2">
+                        <select
+                          value={inviteRole}
+                          onChange={(e) => setInviteRole(e.target.value as FirmRole)}
+                          className="bg-secondary/80 border border-border text-foreground text-xs font-body rounded-sm px-2 py-2 focus:outline-none focus:border-primary"
+                        >
+                          {INVITABLE_ROLES.map((r) => (
+                            <option key={r} value={r}>{ROLE_PERMISSIONS[r].label}</option>
+                          ))}
+                        </select>
+                        <button
+                          onClick={handleCreateInvite}
+                          disabled={inviting}
+                          className="inline-flex items-center gap-2 px-4 py-2 rounded-sm text-sm font-body border border-border/50 text-foreground hover:border-primary/40 transition-colors disabled:opacity-50"
+                        >
+                          <UserPlus className="w-3.5 h-3.5" /> {inviting ? "Creating invite…" : "Invite a teammate"}
+                        </button>
+                      </div>
                     ) : (
                       <div className="space-y-2">
                         <p className="text-xs text-muted-foreground font-body">

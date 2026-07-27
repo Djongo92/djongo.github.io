@@ -153,6 +153,9 @@ verify_jwt = false
 [functions.firm-invite]
 verify_jwt = false
 
+[functions.firm-members-manage]
+verify_jwt = false
+
 [functions.visibility-audit-share-with-firm]
 verify_jwt = false
 

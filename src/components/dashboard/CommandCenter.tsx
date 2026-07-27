@@ -34,6 +34,9 @@ import { computeScoreDelta } from "@/lib/scoreTrend";
 import { computeMeasuredTotals } from "@/lib/measuredScore";
 import { computeWeekRange, formatWeekRangeLabel } from "@/lib/mondayBriefWeek";
 import { computeCategoryDeltas } from "@/lib/categoryDeltas";
+import { useAuth } from "@/hooks/useAuth";
+import { useFirmTeam } from "@/hooks/useFirmTeam";
+import { can } from "@/lib/roles";
 import { enableDemoMode } from "@/lib/demoMode";
 import { downloadScoreCard } from "@/lib/visibilityScoreCard";
 import type { PeerStats } from "../../../supabase/functions/_shared/percentileFormula";
@@ -224,6 +227,12 @@ const CommandCenter = ({
   const { runs } = useWorkshopHistory();
   const { maturity, roast, headline, bio, roadmap, competitor, visibilityScore } = useBattlePlanCache();
   const { goals } = useScoreGoals();
+  // §4 — a read-only executive sees the same dashboard everyone else does,
+  // but can't trigger a re-run, publish, or open a Workshop tool from it.
+  const { user } = useAuth();
+  const { team } = useFirmTeam();
+  const myRole = team?.members.find((m) => m.user_id === user?.id)?.role;
+  const isReadOnly = can(myRole, "readOnly");
 
   const categories = useMemo(() => {
     if (!primary) return null;
@@ -355,10 +364,13 @@ const CommandCenter = ({
   }, [insights]);
 
   const resolveAction = (action: InsightAction) => {
-    if (action.kind === "workshop") return () => onOpenWorkshopTool(action.toolId);
+    // A read-only executive can navigate to read-only surfaces (guidebook,
+    // maturity plan) but can't trigger a Workshop tool or a re-run — both
+    // mutate state under an identity that isn't supposed to write anything.
+    if (action.kind === "workshop") return isReadOnly ? undefined : () => onOpenWorkshopTool(action.toolId);
     if (action.kind === "guidebook") return onOpenGuidebook;
     if (action.kind === "maturity") return onOpenMaturity;
-    if (action.kind === "rerun") return () => setRerunOpen(true);
+    if (action.kind === "rerun") return isReadOnly ? undefined : () => setRerunOpen(true);
     return undefined;
   };
 
@@ -676,7 +688,12 @@ const CommandCenter = ({
 
           {/* Quick Actions */}
           <div>
-            <h2 className="font-display text-lg text-foreground mb-3">Quick Actions</h2>
+            <div className="flex items-center justify-between mb-3">
+              <h2 className="font-display text-lg text-foreground">Quick Actions</h2>
+              {isReadOnly && (
+                <span className="text-[10px] tracking-[0.15em] uppercase text-muted-foreground font-body">Read-only access</span>
+              )}
+            </div>
             {/* 10 actions: 2-col and 5-col both divide evenly, so no orphaned trailing tile
                 at any breakpoint (3-col left a lone tile stranded in its own row). */}
             <div className="grid grid-cols-2 lg:grid-cols-5 gap-3">
@@ -686,7 +703,9 @@ const CommandCenter = ({
                   <button
                     key={toolId}
                     onClick={() => onOpenWorkshopTool(toolId)}
-                    className={`relative flex items-center gap-2.5 p-4 bg-card border rounded-sm transition-colors text-left ${
+                    disabled={isReadOnly}
+                    title={isReadOnly ? "Your role has read-only access" : undefined}
+                    className={`relative flex items-center gap-2.5 p-4 bg-card border rounded-sm transition-colors text-left disabled:opacity-40 disabled:cursor-not-allowed ${
                       recommended ? "border-primary/60 bg-primary/5" : "border-border/40 hover:border-primary/40"
                     }`}
                   >
@@ -702,12 +721,14 @@ const CommandCenter = ({
           </div>
 
           <div className="flex flex-wrap items-center gap-x-6 gap-y-2">
-            <button
-              onClick={() => setRerunOpen(true)}
-              className="text-xs text-muted-foreground hover:text-primary font-body inline-flex items-center gap-1.5"
-            >
-              Re-run my audit for a fresh score →
-            </button>
+            {!isReadOnly && (
+              <button
+                onClick={() => setRerunOpen(true)}
+                className="text-xs text-muted-foreground hover:text-primary font-body inline-flex items-center gap-1.5"
+              >
+                Re-run my audit for a fresh score →
+              </button>
+            )}
             <button
               onClick={() => setWhatIfOpen(true)}
               data-coachmark="what-if-simulator"

@@ -1,7 +1,9 @@
 // Firm invite flow — a shareable-link invite rather than email (no SMTP
-// configured in this project). action "create": the caller's own firm
-// owner generates a token, valid 7 days. action "redeem": whoever holds
-// the token and is signed in joins that firm as a member.
+// configured in this project). action "create": a workspace admin
+// (owner/admin role) generates a token carrying a specific role, valid 7
+// days. action "redeem": whoever holds the token and is signed in joins
+// that firm as a member with that role (§4 — five named roles, not just
+// owner/member).
 //
 // Identity is always verified server-side from the caller's real
 // Supabase Auth access token (never trusted from the request body) — this
@@ -12,6 +14,7 @@ import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
 
 const corsHeaders = ACCESS_CORS_HEADERS;
 const INVITE_TTL_MS = 7 * 24 * 60 * 60 * 1000;
+const INVITABLE_ROLES = new Set(["admin", "marketing", "partner", "consultant", "executive"]);
 
 function randomToken(): string {
   return crypto.randomUUID().replace(/-/g, "");
@@ -24,7 +27,7 @@ Deno.serve(async (req) => {
   if (unauthorized) return unauthorized;
 
   try {
-    const { accessToken, action, token } = await req.json();
+    const { accessToken, action, token, role: requestedRole } = await req.json();
 
     if (!accessToken || typeof accessToken !== "string") {
       return new Response(JSON.stringify({ error: "accessToken is required" }), {
@@ -52,11 +55,13 @@ Deno.serve(async (req) => {
     const userId = userData.user.id;
 
     if (action === "create") {
+      const role = typeof requestedRole === "string" && INVITABLE_ROLES.has(requestedRole) ? requestedRole : "marketing";
+
       const { data: membership, error: membershipError } = await serviceClient
         .from("firm_members")
         .select("firm_id, role, firms(name)")
         .eq("user_id", userId)
-        .eq("role", "owner")
+        .in("role", ["owner", "admin"])
         .maybeSingle();
 
       if (membershipError) {
@@ -66,7 +71,7 @@ Deno.serve(async (req) => {
         });
       }
       if (!membership) {
-        return new Response(JSON.stringify({ error: "Only a firm owner can invite teammates" }), {
+        return new Response(JSON.stringify({ error: "Only a workspace admin can invite teammates" }), {
           status: 403, headers: { ...corsHeaders, "Content-Type": "application/json" },
         });
       }
@@ -76,6 +81,7 @@ Deno.serve(async (req) => {
         token: newToken,
         firm_id: membership.firm_id,
         created_by: userId,
+        role,
         expires_at: new Date(Date.now() + INVITE_TTL_MS).toISOString(),
       });
       if (insertError) {
@@ -85,7 +91,7 @@ Deno.serve(async (req) => {
         });
       }
 
-      return new Response(JSON.stringify({ token: newToken, expiresInDays: 7 }), {
+      return new Response(JSON.stringify({ token: newToken, expiresInDays: 7, role }), {
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
@@ -99,7 +105,7 @@ Deno.serve(async (req) => {
 
     const { data: invite, error: inviteError } = await serviceClient
       .from("firm_invites")
-      .select("token, firm_id, expires_at, used_at, firms(name)")
+      .select("token, firm_id, role, expires_at, used_at, firms(name)")
       .eq("token", token)
       .maybeSingle();
 
@@ -127,7 +133,7 @@ Deno.serve(async (req) => {
 
     const { error: memberInsertError } = await serviceClient
       .from("firm_members")
-      .upsert({ firm_id: invite.firm_id, user_id: userId, role: "member" }, { onConflict: "firm_id,user_id" });
+      .upsert({ firm_id: invite.firm_id, user_id: userId, role: invite.role ?? "marketing" }, { onConflict: "firm_id,user_id" });
     if (memberInsertError) {
       console.error("firm-invite redeem insert error:", memberInsertError);
       return new Response(JSON.stringify({ error: "Couldn't join the firm" }), {
