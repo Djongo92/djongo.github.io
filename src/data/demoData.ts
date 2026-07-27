@@ -230,7 +230,7 @@ export const DEMO_ROAST: Omit<RoastCache, "capturedAt"> = {
     "Cut \"trusted advisor\" and \"results-driven\" entirely",
   ],
   annotations: [
-    { element: "Hero headline", whatYouSaid: "Trusted Legal Partners for Your Business", whatItSounds: "generic template copy with the firm name swapped in" },
+    { element: "Hero headline", whatYouSaid: "Trusted Legal Partners for Your Business", whatItSounds: "generic template copy with the firm name swapped in", rewrite: "Cross-border deals close faster with counsel who's done 40 of them." },
   ],
   pageTitle: "Petrović & Partners — Home",
 };

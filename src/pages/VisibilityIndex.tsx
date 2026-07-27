@@ -15,6 +15,7 @@ const EMPTY_STEPS = [
 ] as const;
 
 interface AuditRow {
+  [key: string]: unknown;
   audited_domain: string;
   display_name: string | null;
   peer_group: string;

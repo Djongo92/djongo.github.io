@@ -54,7 +54,7 @@ const TONE_STYLES: Record<string, { border: string; text: string; icon: typeof T
   positive: { border: "border-emerald-500/30", text: "text-emerald-500", icon: CheckCircle2 },
 };
 
-const QUICK_ACTIONS: { toolId: WorkshopToolId; label: string; icon: (p: { size?: number }) => JSX.Element }[] = [
+const QUICK_ACTIONS: { toolId: WorkshopToolId; label: string; icon: (p: { size?: number; className?: string }) => JSX.Element }[] = [
   { toolId: "swipe", label: "Browse swipe file", icon: SwipeIcon },
   { toolId: "copywriter", label: "Draft copy", icon: CopywriterIcon },
   { toolId: "rewrite", label: "Rewrite existing copy", icon: RewriteIcon },
