@@ -31,6 +31,7 @@ import MarketVisibilityScore from "@/components/MarketVisibilityScore";
 import WhatIfSimulator from "@/components/visibility/WhatIfSimulator";
 import type { WorkshopToolId } from "@/lib/handoff";
 import { computeScoreDelta } from "@/lib/scoreTrend";
+import { computeMeasuredTotals } from "@/lib/measuredScore";
 import { enableDemoMode } from "@/lib/demoMode";
 import { downloadScoreCard } from "@/lib/visibilityScoreCard";
 
@@ -226,6 +227,8 @@ const CommandCenter = ({
       ]),
     );
   }, [categories]);
+
+  const measured = useMemo(() => computeMeasuredTotals(categories), [categories]);
 
   const siteHealthIssues = useMemo(() => {
     const health = primary?.raw_metrics?.siteHealth;
@@ -486,9 +489,19 @@ const CommandCenter = ({
           </div>
           <div className="flex flex-col items-center gap-2">
             <div className="relative" data-coachmark="dashboard-score">
-              <ScoreRing score={primary.total_score} max={200} size={132} sublabel="Visibility Score" />
+              <ScoreRing
+                score={primary.total_score}
+                max={measured.isPartial ? measured.measuredMax : 200}
+                size={132}
+                sublabel="Visibility Score"
+              />
               {isPersonalBest && <ScoreBurst />}
             </div>
+            {measured.isPartial && (
+              <p className="text-[10px] text-muted-foreground font-body text-center max-w-[160px]">
+                {Math.round(primary.total_score)}/{measured.measuredMax} measured · {measured.excludedLabels.join(", ")} not yet scored
+              </p>
+            )}
             <button
               onClick={() => downloadScoreCard(primary)}
               className="inline-flex items-center gap-1.5 text-[11px] text-muted-foreground hover:text-primary font-body tap-scale"
