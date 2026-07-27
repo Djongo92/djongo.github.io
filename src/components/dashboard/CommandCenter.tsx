@@ -33,6 +33,7 @@ import type { WorkshopToolId } from "@/lib/handoff";
 import { computeScoreDelta } from "@/lib/scoreTrend";
 import { computeMeasuredTotals } from "@/lib/measuredScore";
 import { computeWeekRange, formatWeekRangeLabel } from "@/lib/mondayBriefWeek";
+import { computeCategoryDeltas } from "@/lib/categoryDeltas";
 import { enableDemoMode } from "@/lib/demoMode";
 import { downloadScoreCard } from "@/lib/visibilityScoreCard";
 
@@ -287,22 +288,7 @@ const CommandCenter = ({
     return result;
   }, [history, primary]);
 
-  const categoryDeltas = useMemo(() => {
-    if (!primary) return null;
-    const ownHistory = history
-      .filter((h) => h.audited_domain === primary.audited_domain && h.market === primary.market)
-      .sort((a, b) => new Date(a.recorded_at).getTime() - new Date(b.recorded_at).getTime());
-    if (ownHistory.length < 2) return null;
-    const previous = ownHistory[ownHistory.length - 2];
-    const latest = ownHistory[ownHistory.length - 1];
-    const deltas = CATEGORY_ORDER.map((key) => {
-      const field = HISTORY_FIELD_FOR[key];
-      const prevScore = Number(previous[field] ?? 0);
-      const latestScore = Number(latest[field] ?? 0);
-      return { key, delta: Math.round((latestScore - prevScore) * 10) / 10 };
-    }).filter((d) => Math.abs(d.delta) >= 0.1);
-    return { deltas, recordedAt: latest.recorded_at };
-  }, [history, primary]);
+  const categoryDeltas = useMemo(() => computeCategoryDeltas(history, primary), [history, primary]);
 
   // The immediately-prior recorded total score for this firm — the same
   // "previous vs. latest real run" comparison categoryDeltas makes above —
