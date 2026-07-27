@@ -6,6 +6,7 @@ import type {
   PerformanceRaw, SocialRaw, ThoughtLeadershipRaw, ReputationRaw,
 } from "@/components/dashboard/CommandCenter";
 import { CATEGORY_META, CATEGORY_ORDER, CATEGORY_COLOR_CLASSES, type CategoryKey } from "@/lib/visibilityCategories";
+import { findWeakestCategoryTool } from "@/lib/categoryToolMap";
 import { CategoryExplainer, ProvenanceBadge } from "@/components/visibility/Explainers";
 import ScoreRing from "@/components/visibility/ScoreRing";
 import { useScoreGoals } from "@/hooks/useScoreGoals";
@@ -52,20 +53,14 @@ const Analytics = ({ audits, history, onOpenDashboard }: AnalyticsProps) => {
     return out;
   }, [primary]);
 
+  // Same findWeakestCategoryTool() the Key Insights feed and the sidebar's
+  // "this week's move" use — ranked by absolute points recoverable, not
+  // percentage (see categoryToolMap.ts), so this detail view can never
+  // default-select a different category than what the rest of the app
+  // calls the highest-leverage one.
   const weakestKey = useMemo(() => {
-    if (!categories) return CATEGORY_ORDER[0];
-    let weakest: CategoryKey = CATEGORY_ORDER[0];
-    let weakestPct = Infinity;
-    for (const key of CATEGORY_ORDER) {
-      const cat = categories[key];
-      if (cat.provenance === "missing") continue;
-      const pct = cat.score / CATEGORY_META[key].max;
-      if (pct < weakestPct) {
-        weakestPct = pct;
-        weakest = key;
-      }
-    }
-    return weakest;
+    const weakest = findWeakestCategoryTool(categories);
+    return (weakest?.categoryKey as CategoryKey) ?? CATEGORY_ORDER[0];
   }, [categories]);
 
   const [selected, setSelected] = useState<CategoryKey>(weakestKey);
