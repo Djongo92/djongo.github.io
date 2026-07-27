@@ -37,7 +37,7 @@ export async function rasterizePdfToImages(file: File | Blob): Promise<Rasterize
     const ctx = canvas.getContext("2d");
     if (!ctx) throw new Error("Canvas 2D context unavailable");
 
-    await page.render({ canvasContext: ctx, viewport, canvas }).promise;
+    await page.render({ canvasContext: ctx, viewport }).promise;
     pages.push({ index: i, dataUrl: canvas.toDataURL("image/jpeg", JPEG_QUALITY) });
   }
 

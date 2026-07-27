@@ -20,39 +20,47 @@ describe("clamp", () => {
 });
 
 describe("calculateSocialScore", () => {
-  it("scores the full 20 points at peer-max with full engagement and all platforms", () => {
-    const score = calculateSocialScore(1000, 10, 5, ALL_PLATFORMS, 1000, 10, 5);
+  it("scores the full 20 points at ratio 1 (at or above the 90th percentile) with full engagement and all platforms", () => {
+    const score = calculateSocialScore(1, 1, 5, 1, ALL_PLATFORMS);
     expect(score).toBe(20);
   });
 
   it("scores 0 with no data and no platforms", () => {
-    const score = calculateSocialScore(0, 0, null, NO_PLATFORMS, 1000, 10, 5);
+    const score = calculateSocialScore(0, 0, null, 0, NO_PLATFORMS);
     expect(score).toBe(0);
   });
 
-  it("does not divide by zero when a peer-max is 0", () => {
-    const score = calculateSocialScore(0, 0, null, NO_PLATFORMS, 0, 0, 0);
+  it("does not divide by zero or blow up when ratios are 0", () => {
+    const score = calculateSocialScore(0, 0, null, 0, NO_PLATFORMS);
     expect(Number.isFinite(score)).toBe(true);
     expect(score).toBe(0);
   });
 
   it("contributes 0 for engagement rate when not supplied, rather than estimating", () => {
-    const withEr = calculateSocialScore(500, 5, 3, NO_PLATFORMS, 1000, 10, 5);
-    const withoutEr = calculateSocialScore(500, 5, null, NO_PLATFORMS, 1000, 10, 5);
+    const withEr = calculateSocialScore(0.5, 0.5, 3, 0.6, NO_PLATFORMS);
+    const withoutEr = calculateSocialScore(0.5, 0.5, null, 0.6, NO_PLATFORMS);
     expect(withoutEr).toBeLessThan(withEr);
-    // The gap should be exactly the engagement sub-score (6 * 3/5 = 3.6)
+    // The gap should be exactly the engagement sub-score (6 * 0.6 = 3.6)
     expect(withEr - withoutEr).toBeCloseTo(3.6, 5);
   });
 
   it("weights followers 5, posts 5, engagement 6, platforms up to 4", () => {
-    expect(calculateSocialScore(1000, 0, null, NO_PLATFORMS, 1000, 10, 5)).toBeCloseTo(5, 5);
-    expect(calculateSocialScore(0, 10, null, NO_PLATFORMS, 1000, 10, 5)).toBeCloseTo(5, 5);
-    expect(calculateSocialScore(0, 0, 5, NO_PLATFORMS, 1000, 10, 5)).toBeCloseTo(6, 5);
-    expect(calculateSocialScore(0, 0, null, ALL_PLATFORMS, 1000, 10, 5)).toBeCloseTo(4, 5);
+    expect(calculateSocialScore(1, 0, null, 0, NO_PLATFORMS)).toBeCloseTo(5, 5);
+    expect(calculateSocialScore(0, 1, null, 0, NO_PLATFORMS)).toBeCloseTo(5, 5);
+    expect(calculateSocialScore(0, 0, 5, 1, NO_PLATFORMS)).toBeCloseTo(6, 5);
+    expect(calculateSocialScore(0, 0, null, 0, ALL_PLATFORMS)).toBeCloseTo(4, 5);
   });
 
   it("caps platform presence at 4 points even if given extra truthy keys", () => {
-    const score = calculateSocialScore(0, 0, null, { ...ALL_PLATFORMS } as any, 1000, 10, 5);
+    const score = calculateSocialScore(0, 0, null, 0, { ...ALL_PLATFORMS } as any);
     expect(score).toBeLessThanOrEqual(4);
+  });
+
+  it("a ratio above 1 (shouldn't happen once callers clamp via p90Ratio, but defends anyway) doesn't blow past the category cap alone", () => {
+    // Followers alone is still bounded to its own 5-pt weight even if an
+    // unclamped ratio slipped through — the category's overall 20-pt cap is
+    // enforced at the total-score level elsewhere, not here.
+    const score = calculateSocialScore(2, 0, null, 0, NO_PLATFORMS);
+    expect(score).toBeCloseTo(10, 5);
   });
 });

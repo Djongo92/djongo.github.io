@@ -56,13 +56,14 @@ export const DEMO_AUDIT: AuditRow = {
       engagementRate: 1.2,
       platforms: { linkedin: true, instagram: false, twitter: false, facebook: true },
       platformCount: 2,
-      // Peer-max denominators this score was actually normalized against —
-      // reverse-engineered to reproduce social_score exactly (2.5 + 2.5 +
-      // 2.5 + platform 2 = 9.5) so the what-if simulator's live recompute
-      // starts from the same number the Dashboard already shows.
-      followersPeerMax: 3700,
-      postsPeerMax: 6,
-      erPeerMax: 2.88,
+      // Full six-value peer stats this score was actually normalized
+      // against — reverse-engineered so p90Ratio(value, p90Threshold)
+      // reproduces social_score exactly (2.5 + 2.5 + 2.5 + platform 2 =
+      // 9.5), so the what-if simulator's live recompute starts from the
+      // same number the Dashboard already shows.
+      followersStats: { value: 1850, peerMedian: 1200, p90Threshold: 3700, highestObserved: 4200, sampleSize: 12, comparisonDate: "2026-07-19T00:00:00.000Z", lowConfidence: false, widened: false },
+      postsStats: { value: 3, peerMedian: 4, p90Threshold: 6, highestObserved: 9, sampleSize: 12, comparisonDate: "2026-07-19T00:00:00.000Z", lowConfidence: false, widened: false },
+      erStats: { value: 1.2, peerMedian: 1.8, p90Threshold: 2.88, highestObserved: 3.5, sampleSize: 12, comparisonDate: "2026-07-19T00:00:00.000Z", lowConfidence: false, widened: false },
     },
     thoughtLeadership: {
       postsCount: 2,
@@ -70,13 +71,12 @@ export const DEMO_AUDIT: AuditRow = {
       // Fraction (0-1), matching the real formula's convention — 1 of 2
       // posts carries a named byline.
       bylinePct: 0.5,
-      // Peer-max denominators (see social's followersPeerMax comment above
-      // for why these are persisted) — postsPeerMax: 11, newsPeerMax: 1
-      // reproduce thought_leadership_score to within 0.05 (25*2/11 + 15*1/1
-      // + 5*0.5 = 22.05 vs the authored 22 below; the gap is demo-data noise,
-      // not a formula bug).
-      postsPeerMax: 11,
-      newsPeerMax: 1,
+      // Full six-value peer stats (see social's comment above for why these
+      // are persisted) — p90Threshold 11/1 reproduce thought_leadership_score
+      // to within 0.05 (25*2/11 + 15*1/1 + 5*0.5 = 22.05 vs the authored 22
+      // below; the gap is demo-data noise, not a formula bug).
+      postsStats: { value: 2, peerMedian: 5, p90Threshold: 11, highestObserved: 14, sampleSize: 12, comparisonDate: "2026-07-19T00:00:00.000Z", lowConfidence: false, widened: false },
+      newsStats: { value: 1, peerMedian: 1, p90Threshold: 1, highestObserved: 3, sampleSize: 12, comparisonDate: "2026-07-19T00:00:00.000Z", lowConfidence: false, widened: false },
       items: [
         { title: "Cross-Border M&A Trends in Southeast Europe", date: "2026-06-02", type: "blog", hasNamedByline: true },
         { title: "Regulatory Shifts Affecting Manufacturing M&A", date: "2026-05-18", type: "blog", hasNamedByline: false },
@@ -94,9 +94,9 @@ export const DEMO_AUDIT: AuditRow = {
       gbpListed: true,
       matchedFirmName: "Petrović & Partners",
       matchedFirmDomain: DEMO_DOMAIN,
-      chambers: { points: 13, count: 3, avgRank: 2.7 },
-      legal500: { points: 11, count: 3, avgRank: 3.2 },
-      iflr1000: { points: 0, count: 0, avgRank: null },
+      chambers: { points: 13, count: 3, avgRank: 2.7, qualityStats: { value: 2.3, peerMedian: 1.8, p90Threshold: 3, highestObserved: 3.5, sampleSize: 17, comparisonDate: "2026-07-19T00:00:00.000Z", lowConfidence: false, widened: false } },
+      legal500: { points: 11, count: 3, avgRank: 3.2, qualityStats: { value: 1.8, peerMedian: 1.6, p90Threshold: 2.5, highestObserved: 3, sampleSize: 17, comparisonDate: "2026-07-19T00:00:00.000Z", lowConfidence: false, widened: false } },
+      iflr1000: { points: 0, count: 0, avgRank: null, qualityStats: null },
       chambersRankedTables: { CC: 2, DR: 3, EM: 3 },
       legal500RankedTables: { CC: 2, DR: 3, EM: 4 },
       iflr1000RankedTables: null,
@@ -105,6 +105,12 @@ export const DEMO_AUDIT: AuditRow = {
   updated_at: new Date(now).toISOString(),
   percentile: 61,
   peer_count: 18,
+  methodology_version: 2,
+  data_window_start: new Date(now - 60 * DAY).toISOString(),
+  data_window_end: new Date(now).toISOString(),
+  sample_size: 12,
+  confidence_score: 1,
+  review_status: "unreviewed",
 };
 
 export const DEMO_HISTORY: HistoryRow[] = [
@@ -224,7 +230,7 @@ export const DEMO_ROAST: Omit<RoastCache, "capturedAt"> = {
     "Cut \"trusted advisor\" and \"results-driven\" entirely",
   ],
   annotations: [
-    { element: "Hero headline", whatYouSaid: "Trusted Legal Partners for Your Business", whatItSounds: "generic template copy with the firm name swapped in" },
+    { element: "Hero headline", whatYouSaid: "Trusted Legal Partners for Your Business", whatItSounds: "generic template copy with the firm name swapped in", rewrite: "Cross-border deals close faster with counsel who's done 40 of them." },
   ],
   pageTitle: "Petrović & Partners — Home",
 };

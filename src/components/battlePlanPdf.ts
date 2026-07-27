@@ -596,7 +596,7 @@ export function buildPdf({ roast, competitor, roadmap, maturity, headline, bio, 
   drawTocPage(doc, toc.map((t) => ({ ...t, page: t.page + 1 })), margin, contentW, pageW, pageH);
 
   // Footers on every non-cover page
-  const totalPages = (doc as any).internal.getNumberOfPages();
+  const totalPages = doc.getNumberOfPages();
   for (let p = 2; p <= totalPages; p++) {
     doc.setPage(p);
     doc.setDrawColor(...RULE);
@@ -694,7 +694,7 @@ function ensureSpace(doc: jsPDF, cursor: number, needed: number): number {
 function drawSectionHeader(doc: jsPDF, label: string, y: number, toc: TocEntry[], tag?: string, tagColor: [number, number, number] = MUTED): number {
   const margin = 48;
   const pageW = doc.internal.pageSize.getWidth();
-  toc.push({ label, tag, tagColor, page: doc.internal.getNumberOfPages() });
+  toc.push({ label, tag, tagColor, page: doc.getNumberOfPages() });
   doc.setTextColor(...NAVY);
   doc.setFont(SERIF, "bold");
   doc.setFontSize(20);

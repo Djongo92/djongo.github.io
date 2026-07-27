@@ -31,8 +31,12 @@ import MarketVisibilityScore from "@/components/MarketVisibilityScore";
 import WhatIfSimulator from "@/components/visibility/WhatIfSimulator";
 import type { WorkshopToolId } from "@/lib/handoff";
 import { computeScoreDelta } from "@/lib/scoreTrend";
+import { computeMeasuredTotals } from "@/lib/measuredScore";
+import { computeWeekRange, formatWeekRangeLabel } from "@/lib/mondayBriefWeek";
+import { computeCategoryDeltas } from "@/lib/categoryDeltas";
 import { enableDemoMode } from "@/lib/demoMode";
 import { downloadScoreCard } from "@/lib/visibilityScoreCard";
+import type { PeerStats } from "../../../supabase/functions/_shared/percentileFormula";
 
 const CATEGORY_LABELS = CATEGORY_META;
 
@@ -50,7 +54,7 @@ const TONE_STYLES: Record<string, { border: string; text: string; icon: typeof T
   positive: { border: "border-emerald-500/30", text: "text-emerald-500", icon: CheckCircle2 },
 };
 
-const QUICK_ACTIONS: { toolId: WorkshopToolId; label: string; icon: (p: { size?: number }) => JSX.Element }[] = [
+const QUICK_ACTIONS: { toolId: WorkshopToolId; label: string; icon: (p: { size?: number; className?: string }) => JSX.Element }[] = [
   { toolId: "swipe", label: "Browse swipe file", icon: SwipeIcon },
   { toolId: "copywriter", label: "Draft copy", icon: CopywriterIcon },
   { toolId: "rewrite", label: "Rewrite existing copy", icon: RewriteIcon },
@@ -74,6 +78,7 @@ export interface DirectorySubScore {
   points: number;
   count: number;
   avgRank: number | null;
+  qualityStats?: PeerStats | null;
 }
 
 export interface SiteHealthRaw {
@@ -98,10 +103,13 @@ export interface SocialRaw {
   engagementRate?: number | null;
   platforms?: { linkedin: boolean; instagram: boolean; twitter: boolean; facebook: boolean };
   platformCount?: number;
-  /** Peer-group maxima this score was normalized against — persisted so a client can re-run the formula (e.g. a what-if simulator) without a live query. */
-  followersPeerMax?: number;
-  postsPeerMax?: number;
-  erPeerMax?: number;
+  /** Full six-value peer comparison (raw value, peer median, 90th-percentile
+   *  threshold, highest observed, sample size, comparison date) this score
+   *  was benchmarked against — persisted so a client can re-run the formula
+   *  (e.g. a what-if simulator) without a live query, and so it's auditable. */
+  followersStats?: PeerStats;
+  postsStats?: PeerStats;
+  erStats?: PeerStats | null;
 }
 
 export interface PressMention {
@@ -118,9 +126,9 @@ export interface ThoughtLeadershipRaw {
   bylinePct?: number;
   items?: ThoughtLeadershipItem[];
   pressMentions?: PressMention[];
-  /** Peer-group maxima this score was normalized against — see SocialRaw's comment. */
-  postsPeerMax?: number;
-  newsPeerMax?: number;
+  /** Full six-value peer comparison — see SocialRaw's comment. */
+  postsStats?: PeerStats;
+  newsStats?: PeerStats;
 }
 
 export interface ReputationRaw {
@@ -159,6 +167,17 @@ export interface AuditRow {
   updated_at: string;
   percentile?: number | null;
   peer_count?: number;
+  /** Data-integrity metadata (CLAUDE.md §3) — which formula version scored
+   *  this, what data window it drew from, and how much to trust the number. */
+  methodology_version?: number;
+  data_window_start?: string | null;
+  data_window_end?: string | null;
+  sample_size?: number | null;
+  confidence_score?: number | null;
+  review_status?: "unreviewed" | "reviewed" | "flagged";
+  reviewed_by?: string | null;
+  manual_override?: boolean;
+  manual_override_reason?: string | null;
 }
 
 export interface HistoryRow {
@@ -227,6 +246,8 @@ const CommandCenter = ({
     );
   }, [categories]);
 
+  const measured = useMemo(() => computeMeasuredTotals(categories), [categories]);
+
   const siteHealthIssues = useMemo(() => {
     const health = primary?.raw_metrics?.siteHealth;
     if (!health) return [];
@@ -283,22 +304,7 @@ const CommandCenter = ({
     return result;
   }, [history, primary]);
 
-  const categoryDeltas = useMemo(() => {
-    if (!primary) return null;
-    const ownHistory = history
-      .filter((h) => h.audited_domain === primary.audited_domain && h.market === primary.market)
-      .sort((a, b) => new Date(a.recorded_at).getTime() - new Date(b.recorded_at).getTime());
-    if (ownHistory.length < 2) return null;
-    const previous = ownHistory[ownHistory.length - 2];
-    const latest = ownHistory[ownHistory.length - 1];
-    const deltas = CATEGORY_ORDER.map((key) => {
-      const field = HISTORY_FIELD_FOR[key];
-      const prevScore = Number(previous[field] ?? 0);
-      const latestScore = Number(latest[field] ?? 0);
-      return { key, delta: Math.round((latestScore - prevScore) * 10) / 10 };
-    }).filter((d) => Math.abs(d.delta) >= 0.1);
-    return { deltas, recordedAt: latest.recorded_at };
-  }, [history, primary]);
+  const categoryDeltas = useMemo(() => computeCategoryDeltas(history, primary), [history, primary]);
 
   // The immediately-prior recorded total score for this firm — the same
   // "previous vs. latest real run" comparison categoryDeltas makes above —
@@ -359,10 +365,7 @@ const CommandCenter = ({
   const mondayBrief = useMemo(() => {
     if (!primary) return null;
     const now = new Date();
-    const diffToMonday = (now.getDay() + 6) % 7; // days since the most recent Monday (0 if today is Monday)
-    const monday = new Date(now);
-    monday.setHours(0, 0, 0, 0);
-    monday.setDate(monday.getDate() - diffToMonday);
+    const { monday } = computeWeekRange(now);
 
     const ownHistory = history
       .filter((h) => h.audited_domain === primary.audited_domain && h.market === primary.market)
@@ -376,7 +379,7 @@ const CommandCenter = ({
     const baseline = priorRows.length > 0 ? priorRows[priorRows.length - 1].total_score : ownHistory[0].total_score;
     const weekDelta = Math.round((primary.total_score - baseline) * 10) / 10;
 
-    const weekRangeLabel = `${monday.toLocaleDateString(undefined, { month: "short", day: "numeric" })} – ${now.toLocaleDateString(undefined, { month: "short", day: "numeric" })}`;
+    const weekRangeLabel = formatWeekRangeLabel(now);
 
     return { weekDelta, weekRangeLabel, topInsight: insights[0] ?? null };
   }, [primary, history, insights]);
@@ -486,9 +489,19 @@ const CommandCenter = ({
           </div>
           <div className="flex flex-col items-center gap-2">
             <div className="relative" data-coachmark="dashboard-score">
-              <ScoreRing score={primary.total_score} max={200} size={132} sublabel="Visibility Score" />
+              <ScoreRing
+                score={primary.total_score}
+                max={measured.isPartial ? measured.measuredMax : 200}
+                size={132}
+                sublabel="Visibility Score"
+              />
               {isPersonalBest && <ScoreBurst />}
             </div>
+            {measured.isPartial && (
+              <p className="text-[10px] text-muted-foreground font-body text-center max-w-[160px]">
+                {Math.round(primary.total_score)}/{measured.measuredMax} measured · {measured.excludedLabels.join(", ")} not yet scored
+              </p>
+            )}
             <button
               onClick={() => downloadScoreCard(primary)}
               className="inline-flex items-center gap-1.5 text-[11px] text-muted-foreground hover:text-primary font-body tap-scale"

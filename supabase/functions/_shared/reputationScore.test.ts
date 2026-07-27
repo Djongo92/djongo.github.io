@@ -67,6 +67,7 @@ describe("directoryScore", () => {
     const result = directoryScore(undefined, 7, 4, []);
     expect(result.points).toBe(0);
     expect(result.count).toBe(0);
+    expect(result.qualityStats).toBeNull();
   });
 
   it("caps the count/N breadth component at 10, even beyond N", () => {
@@ -75,15 +76,35 @@ describe("directoryScore", () => {
     expect(result.points).toBeLessThanOrEqual(15); // 10 (count cap) + 5 (quality cap)
   });
 
-  it("gives a firm at the peer-group's best quality the full 5-point quality bonus", () => {
-    // Ranked #1 in a single table (count=1 of N=7), and it IS the peer max.
+  it("gives a firm at the peer group's 90th percentile the full 5-point quality bonus", () => {
+    // Ranked #1 in a single table (count=1 of N=7), and it's at the top of a
+    // 2-value comparison set (itself + one peer at the same inverted average).
     const result = directoryScore({ BF: 1 }, 7, 4, [4]);
     expect(result.points).toBeCloseTo(10 * (1 / 7) + 5, 5);
+    expect(result.qualityStats?.p90Threshold).toBe(4);
   });
 
   it("never divides by zero when every peer (including self) has no ranked tables", () => {
     const result = directoryScore(undefined, 7, 4, [0, 0]);
     expect(Number.isFinite(result.points)).toBe(true);
+  });
+
+  it("a single dominant peer no longer crushes everyone else's quality score", () => {
+    // One peer with a perfect inverted average of 4, several solid-but-not-
+    // perfect peers at 2. Under the old divide-by-max approach, a firm at 2
+    // would score 5 * 2/4 = 2.5. Under p90 benchmarking, the 90th percentile
+    // of a set dominated by 2s is much closer to 2, so the same firm scores
+    // close to full marks instead of being crushed by the one outlier.
+    const peers = [4, 2, 2, 2, 2, 2, 2, 2];
+    const result = directoryScore({ BF: 2 }, 7, 4, peers); // avgRank=2, invertedAvg=3
+    const oldWayQuality = 5 * (3 / 4);
+    expect(result.points - (10 * (1 / 7))).toBeGreaterThan(oldWayQuality);
+  });
+
+  it("flags low confidence and passes through the widened flag when the sample is small", () => {
+    const result = directoryScore({ BF: 1 }, 7, 4, [], true);
+    expect(result.qualityStats?.widened).toBe(true);
+    expect(result.qualityStats?.lowConfidence).toBe(true); // only 1 value in the comparison set
   });
 });
 

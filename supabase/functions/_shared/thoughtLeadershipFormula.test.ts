@@ -64,25 +64,25 @@ describe("aggregateContentItems", () => {
 });
 
 describe("calculateThoughtLeadershipScore", () => {
-  it("scores the full 45 points when at peer-max and fully bylined", () => {
-    const score = calculateThoughtLeadershipScore(10, 5, 1, 10, 5);
+  it("scores the full 45 points at ratio 1 (at or above the 90th percentile) and fully bylined", () => {
+    const score = calculateThoughtLeadershipScore(1, 1, 1);
     expect(score).toBe(45);
   });
 
   it("scores 0 when there is no content and no byline", () => {
-    const score = calculateThoughtLeadershipScore(0, 0, 0, 10, 5);
+    const score = calculateThoughtLeadershipScore(0, 0, 0);
     expect(score).toBe(0);
   });
 
-  it("does not divide by zero when peer-max is 0", () => {
-    const score = calculateThoughtLeadershipScore(0, 0, 0, 0, 0);
+  it("does not divide by zero or blow up when ratios are 0", () => {
+    const score = calculateThoughtLeadershipScore(0, 0, 0);
     expect(Number.isFinite(score)).toBe(true);
     expect(score).toBe(0);
   });
 
   it("weights posts 25, byline 5, news 15", () => {
-    expect(calculateThoughtLeadershipScore(10, 0, 0, 10, 5)).toBeCloseTo(25, 5);
-    expect(calculateThoughtLeadershipScore(0, 0, 1, 10, 5)).toBeCloseTo(5, 5);
-    expect(calculateThoughtLeadershipScore(0, 5, 0, 10, 5)).toBeCloseTo(15, 5);
+    expect(calculateThoughtLeadershipScore(1, 0, 0)).toBeCloseTo(25, 5);
+    expect(calculateThoughtLeadershipScore(0, 1, 0)).toBeCloseTo(5, 5);
+    expect(calculateThoughtLeadershipScore(0, 0, 1)).toBeCloseTo(15, 5);
   });
 });

@@ -8,6 +8,7 @@ import { DMV_MARKETS, PEER_GROUPS } from "@/lib/marketVisibilityConfig";
 import { isDemoMode } from "@/lib/demoMode";
 import { DEMO_AUDIT, DEMO_VISIBILITY_SCORE, DEMO_DOMAIN, DEMO_DISPLAY_NAME } from "@/data/demoData";
 import { consumeAuditPrefill } from "@/lib/auditPrefill";
+import { computeMeasuredTotals } from "@/lib/measuredScore";
 
 // Demo mode never touches the real audit backend — running a live PageSpeed/
 // directory/thought-leadership audit against whatever the visitor happens to
@@ -61,6 +62,7 @@ const MarketVisibilityScore = () => {
   const { loading, publishing, result: liveResult, error, run, publish, verifyDomain, scheduleRerun, reset } = useMarketVisibility();
   const [demoResult, setDemoResult] = useState<AuditResult | null>(null);
   const result = demoMode ? demoResult : liveResult;
+  const measuredTotals = computeMeasuredTotals(result?.categories ?? null);
   const [confirmingPublish, setConfirmingPublish] = useState(false);
   const [confirmingUnpublish, setConfirmingUnpublish] = useState(false);
   const [step, setStep] = useState<1 | 2 | 3>(1);
@@ -477,11 +479,20 @@ const MarketVisibilityScore = () => {
                       <div className="inline-flex items-center justify-center w-24 h-24 rounded-full border-4 border-emerald-500/30 mb-3 relative">
                         <svg className="absolute inset-0 w-full h-full -rotate-90">
                           <circle cx="48" cy="48" r="44" fill="none" stroke="rgb(16 185 129)" strokeWidth="4"
-                            strokeDasharray={`${(result.totalScore / 200) * 276.4} 276.4`} strokeLinecap="round" />
+                            strokeDasharray={`${(result.totalScore / (measuredTotals.isPartial ? measuredTotals.measuredMax : 200)) * 276.4} 276.4`} strokeLinecap="round" />
                         </svg>
                         <span className="font-display text-2xl font-semibold text-foreground">{Math.round(result.totalScore)}</span>
                       </div>
-                      <p className="text-xs text-muted-foreground font-body mb-1">Score / 200 · {auditedDomain}</p>
+                      <p className="text-xs text-muted-foreground font-body mb-1">
+                        {measuredTotals.isPartial
+                          ? `Score / ${measuredTotals.measuredMax} measured · ${auditedDomain}`
+                          : `Score / 200 · ${auditedDomain}`}
+                      </p>
+                      {measuredTotals.isPartial && (
+                        <p className="text-[10px] text-muted-foreground font-body mb-1">
+                          {measuredTotals.excludedLabels.join(", ")} not yet scored — excluded from this percentage, not counted as a zero.
+                        </p>
+                      )}
                       {result.percentile !== null ? (
                         <p className="font-display text-base text-foreground italic flex items-center justify-center gap-1.5">
                           <TrendingUp className="w-4 h-4 text-emerald-500" />

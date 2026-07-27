@@ -1,20 +1,25 @@
 // Reputation category (55 pts): 10×GBP binary (self-reported) + Chambers +
 // IFLR1000 + Legal500, each worth 15 pts split as 10×(count/N) +
-// 5×(peer-group-normalized inverted band/tier average).
+// 5×(peer-group 90th-percentile-normalized inverted band/tier average).
 //
 // count/N uses the fixed per-market denominator N from marketVisibilityConfig
-// (breadth: how many of the market's tracked tables the firm appears in).
-// The band/tier average is peer-group-normalized: rank 1 = best is inverted,
-// then divided by the highest inverted average among firms of the same
-// firm_type in market_directory_data (the full 44-firm-style directory
-// harvest, not other users' audit runs — Reputation's quality signal comes
-// entirely from the static directory data, so it's fully computable on
-// audit #1 rather than waiting for peer audits to accumulate).
+// (breadth: how many of the market's tracked tables the firm appears in) —
+// not peer-relative, so it's untouched by the p90 methodology change below.
+// The band/tier average IS peer-relative: rank 1 = best is inverted, then
+// benchmarked against the 90th percentile of inverted averages among firms
+// of the same firm_type in market_directory_data (the full 44-firm-style
+// directory harvest, not other users' audit runs — Reputation's quality
+// signal comes entirely from the static directory data, so it's fully
+// computable on audit #1 rather than waiting for peer audits to accumulate).
+// Below MIN_PEER_SAMPLE firms in that firm_type, the comparison widens to
+// the whole market before falling back to a low-confidence flag — see
+// percentileFormula.ts for why this replaced dividing by the peer maximum.
 //
 // market_directory_data is service_role-only, so this must run inside an
 // edge function with the service-role client already created by the caller.
 import type { SupabaseClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
 import { DMV_MARKETS, FIRM_TYPE_TO_PEER_GROUP, type PeerGroup } from "./marketVisibilityConfig.ts";
+import { computePeerStats, p90Ratio, MIN_PEER_SAMPLE, type PeerStats } from "./percentileFormula.ts";
 
 export interface DirectoryRow {
   firm_name: string;
@@ -93,19 +98,20 @@ export function directoryScore(
   n: number,
   deepest: number,
   peerInvertedAvgs: number[],
-): { points: number; count: number; avgRank: number | null } {
+  widened = false,
+): { points: number; count: number; avgRank: number | null; qualityStats: PeerStats | null } {
   const entries = Object.entries(rankedTables ?? {});
   const count = entries.length;
   const countScore = Math.min(10, 10 * (count / n));
 
-  if (count === 0) return { points: countScore, count, avgRank: null };
+  if (count === 0) return { points: countScore, count, avgRank: null, qualityStats: null };
 
   const avgRank = entries.reduce((sum, [, rank]) => sum + rank, 0) / entries.length;
   const invertedAvg = deepest + 1 - avgRank;
-  const peerMax = Math.max(invertedAvg, ...peerInvertedAvgs);
-  const qualityScore = peerMax > 0 ? 5 * (invertedAvg / peerMax) : 0;
+  const qualityStats = computePeerStats([...peerInvertedAvgs, invertedAvg], invertedAvg, { widened });
+  const qualityScore = 5 * p90Ratio(qualityStats);
 
-  return { points: countScore + qualityScore, count, avgRank };
+  return { points: countScore + qualityScore, count, avgRank, qualityStats };
 }
 
 export function invertedAvgFor(rankedTables: Record<string, number> | undefined, deepest: number): number {
@@ -146,17 +152,29 @@ export async function computeReputationScore(
     return { score: gbpScore, raw: { gbpListed }, provenance: "missing", directory: "pending" };
   }
 
-  // Peer set: same firm_type when the harvest recorded one, else the whole market.
+  // Peer set: same firm_type when the harvest recorded one, else the whole
+  // market — excluding the matched firm itself, since directoryScore() adds
+  // its own inverted average back in separately; leaving it in `peers` here
+  // would double-count it and inflate the reported sample size. Minimum
+  // sample rule: below MIN_PEER_SAMPLE firms (including self) in that
+  // firm_type, widen to the whole market before the quality sub-score falls
+  // back to a low-confidence flag on whatever sample remains.
+  const others = rows.filter((r) => r !== matched);
   const peerGroup: PeerGroup | undefined = matched.firm_type ? FIRM_TYPE_TO_PEER_GROUP[matched.firm_type] : undefined;
-  const peers = peerGroup ? rows.filter((r) => r.firm_type && FIRM_TYPE_TO_PEER_GROUP[r.firm_type] === peerGroup) : rows;
+  let peers = peerGroup ? others.filter((r) => r.firm_type && FIRM_TYPE_TO_PEER_GROUP[r.firm_type] === peerGroup) : others;
+  let widened = false;
+  if (peers.length + 1 < MIN_PEER_SAMPLE && peers.length < others.length) {
+    peers = others;
+    widened = true;
+  }
 
   const chambersPeerAvgs = peers.map((r) => invertedAvgFor(r.chambers?.rankedTables, marketConfig.chambers.deepestBand));
   const legal500PeerAvgs = peers.map((r) => invertedAvgFor(r.legal500?.rankedTables, marketConfig.legal500.deepestTier));
   const iflrPeerAvgs = peers.map((r) => invertedAvgFor(r.iflr1000?.rankedTables, marketConfig.iflr1000.deepestTier));
 
-  const chambers = directoryScore(matched.chambers?.rankedTables, marketConfig.chambers.n, marketConfig.chambers.deepestBand, chambersPeerAvgs);
-  const legal500 = directoryScore(matched.legal500?.rankedTables, marketConfig.legal500.n, marketConfig.legal500.deepestTier, legal500PeerAvgs);
-  const iflr1000 = directoryScore(matched.iflr1000?.rankedTables, marketConfig.iflr1000.n, marketConfig.iflr1000.deepestTier, iflrPeerAvgs);
+  const chambers = directoryScore(matched.chambers?.rankedTables, marketConfig.chambers.n, marketConfig.chambers.deepestBand, chambersPeerAvgs, widened);
+  const legal500 = directoryScore(matched.legal500?.rankedTables, marketConfig.legal500.n, marketConfig.legal500.deepestTier, legal500PeerAvgs, widened);
+  const iflr1000 = directoryScore(matched.iflr1000?.rankedTables, marketConfig.iflr1000.n, marketConfig.iflr1000.deepestTier, iflrPeerAvgs, widened);
 
   const score = Math.round((gbpScore + chambers.points + legal500.points + iflr1000.points) * 100) / 100;
 

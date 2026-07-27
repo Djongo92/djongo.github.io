@@ -28,7 +28,32 @@ describe("computeDirectoryStandingIndex", () => {
     expect(result.every((r) => r.directoryPoints <= DIRECTORY_INDEX_MAX)).toBe(true);
   });
 
-  it("normalizes peer averages within the same firm_type, not the whole market", () => {
+  it("normalizes peer averages within the same firm_type, not the whole market, once each group meets the minimum sample", () => {
+    // 5 firms per firm_type — at MIN_PEER_SAMPLE, so this does NOT trigger
+    // the minimum-sample widen and genuinely exercises firm_type scoping.
+    const rows = [
+      row({ firm_name: "Intl A", firm_type: "I", chambers: { rankedTables: { BF: 1 } } }),
+      row({ firm_name: "Intl B", firm_type: "I", chambers: { rankedTables: { BF: 4 } } }),
+      row({ firm_name: "Intl C", firm_type: "I", chambers: { rankedTables: { BF: 4 } } }),
+      row({ firm_name: "Intl D", firm_type: "I", chambers: { rankedTables: { BF: 4 } } }),
+      row({ firm_name: "Intl E", firm_type: "I", chambers: { rankedTables: { BF: 4 } } }),
+      row({ firm_name: "Local A", firm_type: "L", chambers: { rankedTables: { BF: 1 } } }),
+      row({ firm_name: "Local B", firm_type: "L", chambers: { rankedTables: { BF: 4 } } }),
+      row({ firm_name: "Local C", firm_type: "L", chambers: { rankedTables: { BF: 4 } } }),
+      row({ firm_name: "Local D", firm_type: "L", chambers: { rankedTables: { BF: 4 } } }),
+      row({ firm_name: "Local E", firm_type: "L", chambers: { rankedTables: { BF: 4 } } }),
+    ];
+    const result = computeDirectoryStandingIndex("serbia", rows);
+    const intlA = result.find((r) => r.firmName === "Intl A")!;
+    const localA = result.find((r) => r.firmName === "Local A")!;
+    // Both are the best-ranked firm within their own firm_type peer group
+    // (5 peers each, meeting the minimum sample), so their quality
+    // sub-score should be identical.
+    expect(intlA.chambers.points).toBeCloseTo(localA.chambers.points, 5);
+    expect(intlA.chambers.qualityStats?.widened).toBe(false);
+  });
+
+  it("widens to the whole market when a firm_type peer group is too small (the §1.7 small-peer-group case)", () => {
     const rows = [
       row({ firm_name: "Intl A", firm_type: "I", chambers: { rankedTables: { BF: 1 } } }),
       row({ firm_name: "Intl B", firm_type: "I", chambers: { rankedTables: { BF: 4 } } }),
@@ -36,11 +61,8 @@ describe("computeDirectoryStandingIndex", () => {
     ];
     const result = computeDirectoryStandingIndex("serbia", rows);
     const intlA = result.find((r) => r.firmName === "Intl A")!;
-    const localA = result.find((r) => r.firmName === "Local A")!;
-    // Both are the best-ranked firm within their own firm_type peer group,
-    // so their quality sub-score should be identical even though "Intl B"
-    // (a much weaker peer) only shares a group with Intl A.
-    expect(intlA.chambers.points).toBeCloseTo(localA.chambers.points, 5);
+    expect(intlA.chambers.qualityStats?.widened).toBe(true);
+    expect(intlA.chambers.qualityStats?.sampleSize).toBe(rows.length);
   });
 
   it("sorts descending by total directory points", () => {

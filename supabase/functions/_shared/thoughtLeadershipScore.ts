@@ -15,18 +15,19 @@
 // excluded from the results — a source the firm doesn't control. See
 // pressMentionsFormula.ts for the exclusion logic.
 //
-// peer-max here means the live current maximum among OTHER published
-// audits sharing market+peer_group (raw_metrics.thoughtLeadership), per
-// CLAUDE.md's peer-group-normalized definition — unlike Reputation, this
-// signal has no static reference table, so it necessarily depends on
-// other firms having run the audit. Includes the firm's own just-computed
-// value in the max so a lone/first audit in a peer group normalizes to
-// itself rather than dividing by zero.
+// The peer comparison here is the live 90th percentile among OTHER
+// published audits sharing market+peer_group (raw_metrics.thoughtLeadership),
+// per percentileFormula.ts — unlike Reputation, this signal has no static
+// reference table, so it necessarily depends on other firms having run the
+// audit. Includes the firm's own just-computed value in the comparison set
+// so a lone/first audit in a peer group normalizes to itself rather than
+// dividing by zero.
 import type { SupabaseClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
 import { safeFetch, normalizeUrl } from "./safeFetch.ts";
 import { getCached, setCached } from "./cache.ts";
 import { DMV_MARKETS } from "./marketVisibilityConfig.ts";
-import { peerMaxFor } from "./peerMax.ts";
+import { peerStatsFor } from "./peerStats.ts";
+import { p90Ratio, type PeerStats } from "./percentileFormula.ts";
 import { filterToWindow, aggregateContentItems, calculateThoughtLeadershipScore, type ContentItem } from "./thoughtLeadershipFormula.ts";
 import { findPressMentions } from "./pressMentions.ts";
 import type { PressMention } from "./pressMentionsFormula.ts";
@@ -40,7 +41,7 @@ export interface ThoughtLeadershipResult {
   score: number;
   raw: {
     postsCount: number; newsCount: number; bylinePct: number; items: ContentItem[]; pressMentions: PressMention[];
-    postsPeerMax?: number; newsPeerMax?: number;
+    postsStats?: PeerStats; newsStats?: PeerStats;
   };
   provenance: "ai_classified" | "missing";
 }
@@ -83,7 +84,8 @@ export async function computeThoughtLeadershipScore(
   market: string,
   peerGroup: string,
   url: string,
-  displayName?: string | null,
+  displayName: string | null | undefined,
+  auditedDomain: string,
 ): Promise<ThoughtLeadershipResult> {
   const apiKey = Deno.env.get("ANTHROPIC_API_KEY");
   if (!apiKey) {
@@ -138,17 +140,20 @@ export async function computeThoughtLeadershipScore(
   });
   const newsCount = pressMentions.length;
 
-  const postsPeerMax = await peerMaxFor(serviceClient, market, peerGroup, "thoughtLeadership", "postsCount", postsCount);
-  const newsPeerMax = await peerMaxFor(serviceClient, market, peerGroup, "thoughtLeadership", "newsCount", newsCount);
+  const [postsStats, newsStats] = await Promise.all([
+    peerStatsFor(serviceClient, market, peerGroup, "thoughtLeadership", "postsCount", postsCount, auditedDomain),
+    peerStatsFor(serviceClient, market, peerGroup, "thoughtLeadership", "newsCount", newsCount, auditedDomain),
+  ]);
 
-  const score = calculateThoughtLeadershipScore(postsCount, newsCount, bylinePct, postsPeerMax, newsPeerMax);
+  const score = calculateThoughtLeadershipScore(p90Ratio(postsStats), bylinePct, p90Ratio(newsStats));
 
   return {
     score,
-    // postsPeerMax/newsPeerMax persisted alongside the inputs — same reasoning
-    // as socialScore.ts — so a client can re-derive this formula's output for
-    // a hypothetical input without a live peerMaxFor query it can't run.
-    raw: { postsCount, newsCount, bylinePct, items: inWindow, pressMentions, postsPeerMax, newsPeerMax },
+    // Full six-value peer stats persisted alongside the inputs — same
+    // reasoning as socialScore.ts — so a client can re-derive this formula's
+    // output for a hypothetical input without a live peerStatsFor query it
+    // can't run, and so the number is auditable, not just asserted.
+    raw: { postsCount, newsCount, bylinePct, items: inWindow, pressMentions, postsStats, newsStats },
     provenance: "ai_classified",
   };
 }

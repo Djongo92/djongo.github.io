@@ -22,6 +22,17 @@ interface FirmStanding {
 
 const PEER_GROUP_LABEL: Record<string, string> = Object.fromEntries(PEER_GROUPS.map((p) => [p.value, p.label]));
 
+interface FlatFirmRow {
+  [key: string]: unknown;
+  firmName: string;
+  firmDomain: string;
+  firmType: string;
+  chambersPoints: number;
+  legal500Points: number;
+  iflr1000Points?: number;
+  directoryPoints: number;
+}
+
 const RecognitionIndex = () => {
   const { market } = useParams();
   const navigate = useNavigate();
@@ -93,26 +104,32 @@ const RecognitionIndex = () => {
   const groupOrder = [...PEER_GROUPS.map((p) => p.value), "other"];
   const groupsWithData = groupOrder.filter((pg) => grouped[pg]?.length > 0);
 
+  // IFLR1000 isn't collected for every market yet — a 0 across every single
+  // firm means "not yet collected," not "none of these 44 firms are ranked."
+  // Hide the column rather than render an uncollected field as a real zero.
+  const hasIflr1000Data = (firms ?? []).some((f) => f.iflr1000.count > 0);
+
   const exportCsv = () => {
     if (!firms || firms.length === 0) return;
-    const flat = firms.map((f) => ({
+    const flat: FlatFirmRow[] = firms.map((f) => ({
       firmName: f.firmName,
       firmDomain: f.firmDomain ?? "",
       firmType: f.firmType ?? "",
       chambersPoints: Math.round(f.chambers.points * 10) / 10,
       legal500Points: Math.round(f.legal500.points * 10) / 10,
-      iflr1000Points: Math.round(f.iflr1000.points * 10) / 10,
+      ...(hasIflr1000Data ? { iflr1000Points: Math.round(f.iflr1000.points * 10) / 10 } : {}),
       directoryPoints: Math.round(f.directoryPoints * 10) / 10,
     }));
-    const csv = toCsv(flat, [
+    const columns: { key: keyof FlatFirmRow; header: string }[] = [
       { key: "firmName", header: "Firm" },
       { key: "firmDomain", header: "Domain" },
       { key: "firmType", header: "Type" },
       { key: "chambersPoints", header: "Chambers points" },
       { key: "legal500Points", header: "Legal 500 points" },
-      { key: "iflr1000Points", header: "IFLR1000 points" },
+      ...(hasIflr1000Data ? [{ key: "iflr1000Points" as const, header: "IFLR1000 points" }] : []),
       { key: "directoryPoints", header: `Directory points (/${max})` },
-    ]);
+    ];
+    const csv = toCsv(flat, columns);
     downloadCsv(`legalos-recognition-index-${market}.csv`, csv);
   };
 
@@ -142,10 +159,15 @@ const RecognitionIndex = () => {
           This covers directory breadth and depth only (max {max} pts) — it excludes Google Business Profile and the
           Performance/Social/Thought Leadership categories, which need a firm to run its own audit.
         </p>
-        <p className="text-xs text-muted-foreground font-body mb-10">
+        <p className={`text-xs text-muted-foreground font-body ${!loading && !hasIflr1000Data ? "mb-2" : "mb-10"}`}>
           This is the legal-directory slice of a firm's complete 200-point score. Firms that run and publish a full
           audit show their whole score, verified, on the Visibility Index instead.
         </p>
+        {!loading && !hasIflr1000Data && (
+          <p className="text-xs text-muted-foreground font-body mb-10">
+            IFLR1000 rankings haven't been collected for this market yet — omitted below rather than shown as a zero.
+          </p>
+        )}
 
         {loading && (
           <div className="flex justify-center py-16"><Loader2 className="w-5 h-5 animate-spin text-primary" /></div>
@@ -193,7 +215,8 @@ const RecognitionIndex = () => {
                     <div className="min-w-0">
                       <p className="text-sm text-foreground font-body truncate">{f.firmName}</p>
                       <p className="text-[10px] text-muted-foreground font-body">
-                        Chambers {Math.round(f.chambers.points * 10) / 10} · Legal 500 {Math.round(f.legal500.points * 10) / 10} · IFLR1000 {Math.round(f.iflr1000.points * 10) / 10}
+                        Chambers {Math.round(f.chambers.points * 10) / 10} · Legal 500 {Math.round(f.legal500.points * 10) / 10}
+                        {hasIflr1000Data && <> · IFLR1000 {Math.round(f.iflr1000.points * 10) / 10}</>}
                       </p>
                       {f.hasPublishedAudit ? (
                         market && (
@@ -291,8 +314,9 @@ const RecognitionIndex = () => {
             </Link>
           </div>
         </footer>
-        <p className="mt-6 text-[10px] tracking-[0.2em] uppercase text-muted-foreground font-body text-center">
-          For Authorized Use Only
+        <p className="mt-6 text-[10px] text-muted-foreground font-body text-center">
+          © {new Date().getFullYear()} LegalOS. Methodology: Chambers Europe and Legal 500 rankings, aggregated and
+          peer-normalized as described above.
         </p>
       </main>
     </div>

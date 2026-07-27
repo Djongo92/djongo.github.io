@@ -133,6 +133,8 @@ export type Database = {
           thought_leadership_score: number
           total_score: number
           updated_at: string
+          verification_token: string | null
+          verified_at: string | null
         }
         Insert: {
           audited_domain: string
@@ -153,6 +155,8 @@ export type Database = {
           thought_leadership_score?: number
           total_score?: never
           updated_at?: string
+          verification_token?: string | null
+          verified_at?: string | null
         }
         Update: {
           audited_domain?: string
@@ -173,6 +177,47 @@ export type Database = {
           thought_leadership_score?: number
           total_score?: never
           updated_at?: string
+          verification_token?: string | null
+          verified_at?: string | null
+        }
+        Relationships: []
+      }
+      firms: {
+        Row: {
+          id: string
+          name: string
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          name: string
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          name?: string
+          created_at?: string
+        }
+        Relationships: []
+      }
+      firm_members: {
+        Row: {
+          firm_id: string
+          user_id: string
+          role: string
+          created_at: string
+        }
+        Insert: {
+          firm_id: string
+          user_id: string
+          role?: string
+          created_at?: string
+        }
+        Update: {
+          firm_id?: string
+          user_id?: string
+          role?: string
+          created_at?: string
         }
         Relationships: []
       }

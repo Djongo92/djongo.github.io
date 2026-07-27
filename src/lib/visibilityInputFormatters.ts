@@ -27,6 +27,10 @@ export function formatSocialInputs(raw: any): string | null {
   if (s.posts30d != null) parts.push(`${s.posts30d} posts in the last 30 days`);
   if (s.engagementRate != null) parts.push(`${s.engagementRate}% engagement`);
   if (s.platformCount != null) parts.push(`${s.platformCount} of 4 platforms claimed`);
+  if (s.followersStats) {
+    const fs = s.followersStats;
+    parts.push(`benchmarked against the 90th percentile (${Math.round(fs.p90Threshold).toLocaleString()}) among ${fs.sampleSize} peer firms${fs.lowConfidence ? " — small sample, low confidence" : ""}`);
+  }
   return parts.length ? parts.join(" · ") : null;
 }
 
@@ -44,6 +48,10 @@ export function formatThoughtLeadershipInputs(raw: any): string | null {
   } else if (t.newsCount != null) {
     parts.push(`${t.newsCount} press mention${t.newsCount === 1 ? "" : "s"} found via Google News`);
   }
+  if (t.postsStats) {
+    const ps = t.postsStats;
+    parts.push(`posting cadence benchmarked against the 90th percentile (${Math.round(ps.p90Threshold)}) among ${ps.sampleSize} peer firms${ps.lowConfidence ? " — small sample, low confidence" : ""}`);
+  }
   return parts.length ? parts.join(" · ") : null;
 }
 
@@ -54,6 +62,10 @@ export function formatReputationInputs(raw: any): string | null {
   if (r.chambers?.count) parts.push(`Chambers: ${r.chambers.count} ranked table${r.chambers.count > 1 ? "s" : ""}, avg band ${r.chambers.avgRank}`);
   if (r.legal500?.count) parts.push(`Legal 500: ${r.legal500.count} ranked table${r.legal500.count > 1 ? "s" : ""}, avg tier ${r.legal500.avgRank}`);
   if (r.iflr1000?.count) parts.push(`IFLR1000: ${r.iflr1000.count} ranked table${r.iflr1000.count > 1 ? "s" : ""}, avg tier ${r.iflr1000.avgRank}`);
+  const qs = r.chambers?.qualityStats ?? r.legal500?.qualityStats;
+  if (qs) {
+    parts.push(`ranking depth benchmarked against the 90th percentile among ${qs.sampleSize} peer firms${qs.lowConfidence ? " — small sample, low confidence" : ""}`);
+  }
   return parts.join(" · ");
 }
 

@@ -1,6 +1,6 @@
 import { useMemo } from "react";
 import type { WorkshopToolId } from "@/lib/handoff";
-import { CATEGORY_TOOL_MAP } from "@/lib/categoryToolMap";
+import { CATEGORY_TOOL_MAP, findWeakestCategoryTool } from "@/lib/categoryToolMap";
 
 export interface CategoryScore {
   score: number;
@@ -64,22 +64,32 @@ export function useCommandCenterInsights({
       });
     }
 
+    // Exactly one "weakest category" insight — ranked by absolute points
+    // recoverable (max - score), not percentage. A category at 22/45 has
+    // more real upside (23 points) than one at 9.5/20 (10.5 points) even
+    // though the second one's percentage looks worse; percentage doesn't
+    // move the 200-point total, points do. Shared with the sidebar/Monday
+    // Brief "this week's move" via the same findWeakestCategoryTool() call
+    // so the two surfaces can never disagree on which category is weakest.
+    const weakest = findWeakestCategoryTool(categories);
+    if (weakest) {
+      insights.push({
+        id: `category-${weakest.categoryKey}`,
+        tone: "warning",
+        title: `${weakest.categoryLabel} is your highest-leverage category`,
+        body: `Scoring ${Math.round(weakest.score * 10) / 10} of ${weakest.max} points — ${Math.round(weakest.pointsRecoverable * 10) / 10} points still on the table, more than any other category.`,
+        actionLabel: "Work on it in the Workshop",
+        action: { kind: "workshop", toolId: weakest.toolId },
+      });
+    }
+
     if (categories) {
       for (const [key, cat] of Object.entries(categories)) {
         if (cat.provenance === "missing") continue;
         const meta = CATEGORY_META[key];
         if (!meta) continue;
         const pct = meta.max > 0 ? (cat.score / meta.max) * 100 : 0;
-        if (pct < 50) {
-          insights.push({
-            id: `category-${key}`,
-            tone: "warning",
-            title: `${meta.label} is your weakest category`,
-            body: `Scoring ${Math.round(cat.score * 10) / 10} of ${meta.max} points — below half. This is the highest-leverage place to improve your total score.`,
-            actionLabel: "Work on it in the Workshop",
-            action: { kind: "workshop", toolId: meta.toolId },
-          });
-        } else if (pct >= 90) {
+        if (pct >= 90) {
           insights.push({
             id: `category-${key}-strong`,
             tone: "positive",

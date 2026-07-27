@@ -18,27 +18,43 @@ export const CATEGORY_TOOL_MAP: Record<string, { label: string; max: number; too
 };
 
 export interface WeakestCategoryTool {
+  categoryKey: string;
   categoryLabel: string;
   toolId: WorkshopToolId;
+  score: number;
+  max: number;
+  /** max - score — the actual number of points on the table, not a percentage. This is what "highest-leverage" is ranked on. */
+  pointsRecoverable: number;
 }
 
-/** Below this, a category counts as "weak enough to recommend fixing" (matches useCommandCenterInsights). */
+/** Below this, a category counts as "weak enough to recommend fixing" at all. */
 const WEAK_THRESHOLD_PCT = 50;
 
-/** The single lowest-scoring tracked category below the weak threshold, or null if none qualifies. */
+/**
+ * The single highest-leverage category to work on — highest-leverage means
+ * the most absolute points still on the table (max - score), NOT the lowest
+ * percentage. A category at 22/45 (23 points recoverable) is a bigger
+ * opportunity than one at 9.5/20 (10.5 points recoverable) even though the
+ * second one's percentage looks worse — points are what actually move the
+ * 200-point total, percentages don't. Both useCommandCenterInsights (Key
+ * Insights) and the sidebar/Monday Brief "this week's move" call this same
+ * function so they can never recommend two different categories.
+ */
 export function findWeakestCategoryTool(
   categories: Record<string, { score: number; provenance: string }> | null | undefined,
 ): WeakestCategoryTool | null {
   if (!categories) return null;
-  let worst: { pct: number; categoryLabel: string; toolId: WorkshopToolId } | null = null;
+  let worst: WeakestCategoryTool | null = null;
   for (const [key, cat] of Object.entries(categories)) {
     if (cat.provenance === "missing") continue;
     const meta = CATEGORY_TOOL_MAP[key];
     if (!meta) continue;
     const pct = meta.max > 0 ? (cat.score / meta.max) * 100 : 0;
-    if (pct < WEAK_THRESHOLD_PCT && (!worst || pct < worst.pct)) {
-      worst = { pct, categoryLabel: meta.label, toolId: meta.toolId };
+    if (pct >= WEAK_THRESHOLD_PCT) continue;
+    const pointsRecoverable = meta.max - cat.score;
+    if (!worst || pointsRecoverable > worst.pointsRecoverable) {
+      worst = { categoryKey: key, categoryLabel: meta.label, toolId: meta.toolId, score: cat.score, max: meta.max, pointsRecoverable };
     }
   }
-  return worst ? { categoryLabel: worst.categoryLabel, toolId: worst.toolId } : null;
+  return worst;
 }
