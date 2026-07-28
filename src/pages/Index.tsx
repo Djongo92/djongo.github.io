@@ -505,6 +505,7 @@ const Index = () => {
                   audits={visibilityData?.audits ?? []}
                   history={visibilityData?.history ?? []}
                   onOpenDashboard={() => goToSection("dashboard")}
+                  onCorrected={fetchVisibility}
                 />
               </Suspense>
             )}

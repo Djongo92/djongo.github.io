@@ -201,6 +201,9 @@ export async function runVisibilityAudit(
       data_window_end: dataWindow.end,
       sample_size: sampleSize,
       confidence_score: confidenceScore,
+      raw_metrics,
+      provenance,
+      source: "run",
     });
   if (historyError) console.error("runVisibilityAudit history insert error:", historyError);
 

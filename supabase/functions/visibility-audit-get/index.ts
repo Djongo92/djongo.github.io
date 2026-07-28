@@ -64,7 +64,23 @@ Deno.serve(async (req) => {
       return { ...row, percentile: result?.percentile ?? null, peer_count: result?.peerCount ?? 0 };
     }));
 
-    return new Response(JSON.stringify({ audits, history: history ?? [] }), {
+    // §6 — evidence log: every accepted correction for this client's own
+    // audits, so the UI can show "corrected" badges and a per-metric
+    // history without a direct RLS read (this table has none — service
+    // role only, same posture as the audits themselves).
+    const auditIds = audits.map((a) => a.id);
+    let corrections: unknown[] = [];
+    if (auditIds.length > 0) {
+      const { data: correctionRows, error: correctionsError } = await serviceClient
+        .from("market_visibility_metric_corrections")
+        .select("id, audit_id, category, metric_path, previous_value, corrected_value, reason, corrected_by_label, previous_total_score, new_total_score, created_at")
+        .in("audit_id", auditIds)
+        .order("created_at", { ascending: false });
+      if (correctionsError) console.error("visibility-audit-get corrections error:", correctionsError);
+      corrections = correctionRows ?? [];
+    }
+
+    return new Response(JSON.stringify({ audits, history: history ?? [], corrections }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
   } catch (e) {

@@ -167,3 +167,6 @@ verify_jwt = false
 
 [functions.notifications-mark-read]
 verify_jwt = false
+
+[functions.visibility-audit-dispute]
+verify_jwt = false

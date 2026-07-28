@@ -8,16 +8,23 @@ import type {
 import { CATEGORY_META, CATEGORY_ORDER, CATEGORY_COLOR_CLASSES, type CategoryKey } from "@/lib/visibilityCategories";
 import { findWeakestCategoryTool } from "@/lib/categoryToolMap";
 import { CategoryExplainer, ProvenanceBadge } from "@/components/visibility/Explainers";
+import DisputeMetric, { type CorrectableMetric } from "@/components/visibility/DisputeMetric";
 import ScoreRing from "@/components/visibility/ScoreRing";
 import { useScoreGoals } from "@/hooks/useScoreGoals";
+import { useAuth } from "@/hooks/useAuth";
+import { useFirmTeam } from "@/hooks/useFirmTeam";
+import { can } from "@/lib/roles";
 import { exportCategoryPdf } from "@/lib/categoryPdf";
 import { practiceAreaLabel } from "@/lib/practiceAreas";
+import { DMV_MARKETS } from "@/lib/marketVisibilityConfig";
+import { isDemoMode } from "@/lib/demoMode";
 import type { PeerStats } from "../../../supabase/functions/_shared/percentileFormula";
 
 interface AnalyticsProps {
   audits: AuditRow[];
   history: HistoryRow[];
   onOpenDashboard?: () => void;
+  onCorrected?: () => void;
 }
 
 const HISTORY_KEY_FOR: Record<CategoryKey, keyof HistoryRow> = {
@@ -38,9 +45,16 @@ const SCORE_FIELD_FOR: Record<CategoryKey, keyof AuditRow> = {
 
 const formatPct = (n: number) => `${Math.round(n * 100)}%`;
 
-const Analytics = ({ audits, history, onOpenDashboard }: AnalyticsProps) => {
+const Analytics = ({ audits, history, onOpenDashboard, onCorrected }: AnalyticsProps) => {
   const primary = audits[0];
   const { goals } = useScoreGoals();
+  const { user } = useAuth();
+  const { team } = useFirmTeam();
+  const myRole = team?.members.find((m) => m.user_id === user?.id)?.role;
+  // No firm yet (solo account) → the audit is unambiguously theirs, no role
+  // nuance applies. In a firm, mirrors canEditFirmProfile — a read-only
+  // executive or partner contributor can see the evidence but not dispute it.
+  const canDispute = !!user && !isDemoMode() && (!team || can(myRole, "canEditFirmProfile"));
 
   const categories = useMemo(() => {
     if (!primary) return null;
@@ -243,19 +257,19 @@ const Analytics = ({ audits, history, onOpenDashboard }: AnalyticsProps) => {
               <p className="text-xs text-muted-foreground font-body mb-4 uppercase tracking-wide">Raw inputs</p>
 
               {selected === "performance" && (
-                <PerformanceBreakdown raw={raw.performance} />
+                <PerformanceBreakdown raw={raw.performance} auditId={canDispute ? primary.id : undefined} onCorrected={onCorrected} />
               )}
               {selected === "social" && (
-                <SocialBreakdown raw={raw.social} />
+                <SocialBreakdown raw={raw.social} auditId={canDispute ? primary.id : undefined} onCorrected={onCorrected} />
               )}
               {selected === "seoAuthority" && (
                 <SeoBreakdown />
               )}
               {selected === "thoughtLeadership" && (
-                <ThoughtLeadershipBreakdown raw={raw.thoughtLeadership} />
+                <ThoughtLeadershipBreakdown raw={raw.thoughtLeadership} auditId={canDispute ? primary.id : undefined} onCorrected={onCorrected} />
               )}
               {selected === "reputation" && (
-                <ReputationBreakdown raw={raw.reputation} />
+                <ReputationBreakdown raw={raw.reputation} market={primary.market} auditId={canDispute ? primary.id : undefined} onCorrected={onCorrected} />
               )}
             </div>
           </div>
@@ -327,10 +341,18 @@ const PeerStatsPanel = ({ label, stats }: { label: string; stats: PeerStats }) =
   </div>
 );
 
-const PerformanceBreakdown = ({ raw }: { raw?: PerformanceRaw }) => {
+const PerformanceBreakdown = ({ raw, auditId, onCorrected }: { raw?: PerformanceRaw; auditId?: string; onCorrected?: () => void }) => {
   if (!raw || !raw.desktop) {
     return <p className="text-sm text-muted-foreground font-body">Not scored yet — needs a PageSpeed Insights API key configured.</p>;
   }
+  const metrics: CorrectableMetric[] = raw.mobile ? [
+    { path: "performance.desktop.performance", label: "Desktop page speed", kind: "number", current: raw.desktop.performance },
+    { path: "performance.desktop.accessibility", label: "Desktop accessibility", kind: "number", current: raw.desktop.accessibility },
+    { path: "performance.desktop.seo", label: "Desktop technical SEO", kind: "number", current: raw.desktop.seo },
+    { path: "performance.mobile.performance", label: "Mobile page speed", kind: "number", current: raw.mobile.performance },
+    { path: "performance.mobile.accessibility", label: "Mobile accessibility", kind: "number", current: raw.mobile.accessibility },
+    { path: "performance.mobile.seo", label: "Mobile technical SEO", kind: "number", current: raw.mobile.seo },
+  ] : [];
   return (
     <div>
       <p className="text-xs text-muted-foreground font-body mb-2">Desktop</p>
@@ -341,15 +363,27 @@ const PerformanceBreakdown = ({ raw }: { raw?: PerformanceRaw }) => {
       <Row label="Page speed" value={`${raw.mobile?.performance ?? "—"}/100`} />
       <Row label="Accessibility" value={`${raw.mobile?.accessibility ?? "—"}/100`} />
       <Row label="Technical SEO" value={`${raw.mobile?.seo ?? "—"}/100`} />
+      {auditId && (
+        <DisputeMetric category="performance" auditId={auditId} metrics={metrics} onSubmitted={() => onCorrected?.()} />
+      )}
     </div>
   );
 };
 
-const SocialBreakdown = ({ raw }: { raw?: SocialRaw }) => {
+const SocialBreakdown = ({ raw, auditId, onCorrected }: { raw?: SocialRaw; auditId?: string; onCorrected?: () => void }) => {
   if (!raw || raw.followers === undefined) {
     return <p className="text-sm text-muted-foreground font-body">No social self-report submitted yet.</p>;
   }
   const platforms = raw.platforms ?? { linkedin: false, instagram: false, twitter: false, facebook: false };
+  const metrics: CorrectableMetric[] = [
+    { path: "social.followers", label: "LinkedIn followers", kind: "number", current: raw.followers ?? 0 },
+    { path: "social.posts30d", label: "Posts (last 30 days)", kind: "number", current: raw.posts30d ?? 0 },
+    ...(raw.engagementRate != null ? [{ path: "social.engagementRate", label: "Engagement rate", kind: "percent" as const, current: raw.engagementRate }] : []),
+    { path: "social.platforms.linkedin", label: "LinkedIn presence", kind: "boolean", current: platforms.linkedin },
+    { path: "social.platforms.instagram", label: "Instagram presence", kind: "boolean", current: platforms.instagram },
+    { path: "social.platforms.twitter", label: "Twitter/X presence", kind: "boolean", current: platforms.twitter },
+    { path: "social.platforms.facebook", label: "Facebook presence", kind: "boolean", current: platforms.facebook },
+  ];
   return (
     <div>
       <Row label="LinkedIn followers" value={raw.followers ?? 0} />
@@ -371,6 +405,9 @@ const SocialBreakdown = ({ raw }: { raw?: SocialRaw }) => {
           </div>
         ))}
       </div>
+      {auditId && (
+        <DisputeMetric category="social" auditId={auditId} metrics={metrics} onSubmitted={() => onCorrected?.()} />
+      )}
     </div>
   );
 };
@@ -383,17 +420,22 @@ const SeoBreakdown = () => (
   </p>
 );
 
-const ThoughtLeadershipBreakdown = ({ raw }: { raw?: ThoughtLeadershipRaw }) => {
+const ThoughtLeadershipBreakdown = ({ raw, auditId, onCorrected }: { raw?: ThoughtLeadershipRaw; auditId?: string; onCorrected?: () => void }) => {
   if (!raw || !raw.items) {
     return <p className="text-sm text-muted-foreground font-body">Not scored yet — needs ANTHROPIC_API_KEY configured.</p>;
   }
+  const metrics: CorrectableMetric[] = [
+    { path: "thoughtLeadership.postsCount", label: "Original posts (in window)", kind: "number", current: raw.postsCount ?? 0 },
+    { path: "thoughtLeadership.newsCount", label: "News mentions (in window)", kind: "number", current: raw.newsCount ?? 0 },
+    { path: "thoughtLeadership.bylinePct", label: "Byline rate", kind: "percent", current: Math.round((raw.bylinePct ?? 0) * 100) },
+  ];
   return (
     <div>
       <Row label="Original posts (in window)" value={raw.postsCount ?? 0} />
       {raw.postsStats && <PeerStatsPanel label="Posts" stats={raw.postsStats} />}
       <Row label="News mentions (in window)" value={raw.newsCount ?? 0} />
       {raw.newsStats && <PeerStatsPanel label="News mentions" stats={raw.newsStats} />}
-      <Row label="Byline rate" value={`${Math.round(raw.bylinePct ?? 0)}%`} />
+      <Row label="Byline rate" value={`${Math.round((raw.bylinePct ?? 0) * 100)}%`} />
       {raw.items.length > 0 && (
         <>
           <p className="text-xs text-muted-foreground font-body mt-4 mb-2">Detected content</p>
@@ -418,11 +460,14 @@ const ThoughtLeadershipBreakdown = ({ raw }: { raw?: ThoughtLeadershipRaw }) => 
           </div>
         </>
       )}
+      {auditId && (
+        <DisputeMetric category="thoughtLeadership" auditId={auditId} metrics={metrics} onSubmitted={() => onCorrected?.()} />
+      )}
     </div>
   );
 };
 
-const ReputationBreakdown = ({ raw }: { raw?: ReputationRaw }) => {
+const ReputationBreakdown = ({ raw, market, auditId, onCorrected }: { raw?: ReputationRaw; market?: string; auditId?: string; onCorrected?: () => void }) => {
   if (!raw) return <p className="text-sm text-muted-foreground font-body">Not scored yet.</p>;
 
   const practiceAreaCodes = Array.from(new Set([
@@ -430,6 +475,24 @@ const ReputationBreakdown = ({ raw }: { raw?: ReputationRaw }) => {
     ...Object.keys(raw.legal500RankedTables ?? {}),
     ...Object.keys(raw.iflr1000RankedTables ?? {}),
   ])).sort();
+
+  const marketConfig = market ? DMV_MARKETS[market] : undefined;
+  const metrics: CorrectableMetric[] = [
+    { path: "reputation.gbpListed", label: "Google Business Profile listed", kind: "boolean", current: raw.gbpListed ?? false },
+    ...practiceAreaCodes.flatMap((code): CorrectableMetric[] => {
+      const rows: CorrectableMetric[] = [];
+      if (raw.chambersRankedTables?.[code] !== undefined) {
+        rows.push({ path: `reputation.chambersRankedTables.${code}`, label: `Chambers ${practiceAreaLabel(code)} band`, kind: "rank", current: raw.chambersRankedTables[code], max: marketConfig?.chambers.deepestBand ?? 4 });
+      }
+      if (raw.legal500RankedTables?.[code] !== undefined) {
+        rows.push({ path: `reputation.legal500RankedTables.${code}`, label: `Legal 500 ${practiceAreaLabel(code)} tier`, kind: "rank", current: raw.legal500RankedTables[code], max: marketConfig?.legal500.deepestTier ?? 4 });
+      }
+      if (raw.iflr1000RankedTables?.[code] !== undefined) {
+        rows.push({ path: `reputation.iflr1000RankedTables.${code}`, label: `IFLR1000 ${practiceAreaLabel(code)} tier`, kind: "rank", current: raw.iflr1000RankedTables[code], max: marketConfig?.iflr1000.deepestTier ?? 3 });
+      }
+      return rows;
+    }),
+  ];
 
   return (
     <div>
@@ -469,6 +532,9 @@ const ReputationBreakdown = ({ raw }: { raw?: ReputationRaw }) => {
         <p className="text-sm text-muted-foreground font-body mt-2">
           No directory match found yet — your firm's been queued for a manual lookup pass.
         </p>
+      )}
+      {auditId && (
+        <DisputeMetric category="reputation" auditId={auditId} metrics={metrics} onSubmitted={() => onCorrected?.()} />
       )}
     </div>
   );
