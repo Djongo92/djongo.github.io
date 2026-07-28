@@ -24,6 +24,7 @@ import type { SupabaseClient } from "https://esm.sh/@supabase/supabase-js@2.45.0
 import { peerStatsFor } from "./peerStats.ts";
 import { p90Ratio, type PeerStats } from "./percentileFormula.ts";
 import { calculateSocialScore, clamp, MAX_FOLLOWERS, MAX_POSTS_30D, MAX_ENGAGEMENT_RATE } from "./socialFormula.ts";
+import type { FirmSize } from "./peerDimensions.ts";
 
 export interface SocialInput {
   followers: number;
@@ -48,6 +49,7 @@ export async function computeSocialScore(
   peerGroup: string,
   input: SocialInput | null,
   auditedDomain: string,
+  firmSize?: FirmSize | null,
 ): Promise<SocialResult> {
   if (!input) return { score: 0, raw: {}, provenance: "missing" };
 
@@ -58,9 +60,9 @@ export async function computeSocialScore(
     : null;
 
   const [followersStats, postsStats, erStats] = await Promise.all([
-    peerStatsFor(serviceClient, market, peerGroup, "social", "followers", followers, auditedDomain),
-    peerStatsFor(serviceClient, market, peerGroup, "social", "posts30d", posts30d, auditedDomain),
-    engagementRate !== null ? peerStatsFor(serviceClient, market, peerGroup, "social", "engagementRate", engagementRate, auditedDomain) : Promise.resolve(null as PeerStats | null),
+    peerStatsFor(serviceClient, market, peerGroup, "social", "followers", followers, auditedDomain, firmSize),
+    peerStatsFor(serviceClient, market, peerGroup, "social", "posts30d", posts30d, auditedDomain, firmSize),
+    engagementRate !== null ? peerStatsFor(serviceClient, market, peerGroup, "social", "engagementRate", engagementRate, auditedDomain, firmSize) : Promise.resolve(null as PeerStats | null),
   ]);
 
   const score = calculateSocialScore(

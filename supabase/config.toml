@@ -153,6 +153,12 @@ verify_jwt = false
 [functions.firm-invite]
 verify_jwt = false
 
+[functions.firm-members-manage]
+verify_jwt = false
+
+[functions.firm-profile]
+verify_jwt = false
+
 [functions.visibility-audit-share-with-firm]
 verify_jwt = false
 
@@ -160,4 +166,25 @@ verify_jwt = false
 verify_jwt = false
 
 [functions.notifications-mark-read]
+verify_jwt = false
+
+[functions.visibility-audit-dispute]
+verify_jwt = false
+
+[functions.workflow-items-manage]
+verify_jwt = false
+
+[functions.workflow-comment-add]
+verify_jwt = false
+
+[functions.workflow-partner-link]
+verify_jwt = false
+
+[functions.executive-report-schedule]
+verify_jwt = false
+
+[functions.executive-report-monthly]
+verify_jwt = false
+
+[functions.audit-snapshot-save]
 verify_jwt = false

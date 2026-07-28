@@ -16,7 +16,7 @@ Deno.serve(async (req) => {
   if (unauthorized) return unauthorized;
 
   try {
-    const { clientId: rawClientId, accessToken } = await req.json();
+    const { clientId: rawClientId, accessToken, activeFirmId } = await req.json();
     if (!rawClientId || typeof rawClientId !== "string") {
       return new Response(JSON.stringify({ error: "clientId is required" }), {
         status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" },
@@ -31,7 +31,9 @@ Deno.serve(async (req) => {
 
     // A real access token — never a client-asserted clientId — decides
     // identity when one is present (see _shared/verifiedClientId.ts).
-    const clientId = await resolveClientId(serviceClient, rawClientId, accessToken);
+    // §11 — activeFirmId lets a consultant belonging to several client
+    // firms pick which workspace's data this call should return.
+    const clientId = await resolveClientId(serviceClient, rawClientId, accessToken, typeof activeFirmId === "string" ? activeFirmId : undefined);
 
     const { data, error } = await serviceClient
       .from("market_visibility_audits")
@@ -64,7 +66,31 @@ Deno.serve(async (req) => {
       return { ...row, percentile: result?.percentile ?? null, peer_count: result?.peerCount ?? 0 };
     }));
 
-    return new Response(JSON.stringify({ audits, history: history ?? [] }), {
+    // §6 — evidence log: every accepted correction for this client's own
+    // audits, so the UI can show "corrected" badges and a per-metric
+    // history without a direct RLS read (this table has none — service
+    // role only, same posture as the audits themselves).
+    const auditIds = audits.map((a) => a.id);
+    let corrections: unknown[] = [];
+    if (auditIds.length > 0) {
+      const { data: correctionRows, error: correctionsError } = await serviceClient
+        .from("market_visibility_metric_corrections")
+        .select("id, audit_id, category, metric_path, previous_value, corrected_value, reason, corrected_by_label, previous_total_score, new_total_score, created_at")
+        .in("audit_id", auditIds)
+        .order("created_at", { ascending: false });
+      if (correctionsError) console.error("visibility-audit-get corrections error:", correctionsError);
+      corrections = correctionRows ?? [];
+    }
+
+    // §11 — saved before/after snapshots for this client, newest first.
+    const { data: snapshots, error: snapshotsError } = await serviceClient
+      .from("audit_snapshots")
+      .select("*")
+      .eq("client_id", clientId)
+      .order("created_at", { ascending: false });
+    if (snapshotsError) console.error("visibility-audit-get snapshots error:", snapshotsError);
+
+    return new Response(JSON.stringify({ audits, history: history ?? [], corrections, snapshots: snapshots ?? [] }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
   } catch (e) {

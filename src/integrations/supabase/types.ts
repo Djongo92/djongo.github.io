@@ -206,18 +206,21 @@ export type Database = {
           user_id: string
           role: string
           created_at: string
+          access_expires_at: string | null
         }
         Insert: {
           firm_id: string
           user_id: string
           role?: string
           created_at?: string
+          access_expires_at?: string | null
         }
         Update: {
           firm_id?: string
           user_id?: string
           role?: string
           created_at?: string
+          access_expires_at?: string | null
         }
         Relationships: []
       }

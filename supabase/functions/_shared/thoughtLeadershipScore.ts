@@ -32,6 +32,7 @@ import { filterToWindow, aggregateContentItems, calculateThoughtLeadershipScore,
 import { findPressMentions } from "./pressMentions.ts";
 import type { PressMention } from "./pressMentionsFormula.ts";
 import { callClaudeTool } from "./anthropic.ts";
+import type { FirmSize } from "./peerDimensions.ts";
 
 const SEVEN_DAYS_MS = 7 * 24 * 60 * 60 * 1000;
 
@@ -86,6 +87,7 @@ export async function computeThoughtLeadershipScore(
   url: string,
   displayName: string | null | undefined,
   auditedDomain: string,
+  firmSize?: FirmSize | null,
 ): Promise<ThoughtLeadershipResult> {
   const apiKey = Deno.env.get("ANTHROPIC_API_KEY");
   if (!apiKey) {
@@ -141,8 +143,8 @@ export async function computeThoughtLeadershipScore(
   const newsCount = pressMentions.length;
 
   const [postsStats, newsStats] = await Promise.all([
-    peerStatsFor(serviceClient, market, peerGroup, "thoughtLeadership", "postsCount", postsCount, auditedDomain),
-    peerStatsFor(serviceClient, market, peerGroup, "thoughtLeadership", "newsCount", newsCount, auditedDomain),
+    peerStatsFor(serviceClient, market, peerGroup, "thoughtLeadership", "postsCount", postsCount, auditedDomain, firmSize),
+    peerStatsFor(serviceClient, market, peerGroup, "thoughtLeadership", "newsCount", newsCount, auditedDomain, firmSize),
   ]);
 
   const score = calculateThoughtLeadershipScore(p90Ratio(postsStats), bylinePct, p90Ratio(newsStats));

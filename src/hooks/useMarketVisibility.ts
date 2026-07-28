@@ -2,6 +2,7 @@ import { useCallback, useState } from "react";
 import { edgeHeaders } from "@/lib/edgeAuth";
 import { getOrCreateClientId } from "@/lib/clientId";
 import { useAuth } from "@/hooks/useAuth";
+import { useActiveWorkspace } from "@/hooks/useActiveWorkspace";
 
 const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL;
 
@@ -40,10 +41,20 @@ export interface RunAuditInput {
   peerGroup: string;
   gbpListed: boolean;
   social?: SocialSelfReport;
+  // §7 — optional peer-group refinement, self-reported like everything else
+  // at intake (see peerDimensions.ts). Omitting these scores exactly as
+  // before; they only narrow the live Social/Thought Leadership peer
+  // comparison further when there's enough sample to do so meaningfully.
+  firmSize?: string;
+  officeCount?: string;
+  serviceModel?: string;
+  specialization?: string;
+  marketTier?: string;
 }
 
 export const useMarketVisibility = () => {
   const { user, session } = useAuth();
+  const { activeFirmId } = useActiveWorkspace();
   const [loading, setLoading] = useState(false);
   const [publishing, setPublishing] = useState(false);
   const [result, setResult] = useState<AuditResult | null>(null);
@@ -57,7 +68,7 @@ export const useMarketVisibility = () => {
       const resp = await fetch(`${SUPABASE_URL}/functions/v1/visibility-audit-run`, {
         method: "POST",
         headers: edgeHeaders("benchmark"),
-        body: JSON.stringify({ clientId, accessToken: session?.access_token, ...input }),
+        body: JSON.stringify({ clientId, accessToken: session?.access_token, activeFirmId, ...input }),
       });
       const data = await resp.json();
       if (!resp.ok) {
@@ -72,7 +83,7 @@ export const useMarketVisibility = () => {
     } finally {
       setLoading(false);
     }
-  }, [user?.id, session?.access_token]);
+  }, [user?.id, session?.access_token, activeFirmId]);
 
   const publish = useCallback(async (auditId: string, isPublic = true): Promise<{ ok: boolean; code?: string }> => {
     setPublishing(true);
@@ -81,7 +92,7 @@ export const useMarketVisibility = () => {
       const resp = await fetch(`${SUPABASE_URL}/functions/v1/visibility-audit-publish`, {
         method: "POST",
         headers: edgeHeaders("benchmark"),
-        body: JSON.stringify({ clientId, accessToken: session?.access_token, auditId, isPublic }),
+        body: JSON.stringify({ clientId, accessToken: session?.access_token, activeFirmId, auditId, isPublic }),
       });
       const data = await resp.json();
       if (!resp.ok) {
@@ -96,7 +107,7 @@ export const useMarketVisibility = () => {
     } finally {
       setPublishing(false);
     }
-  }, [user?.id, session?.access_token]);
+  }, [user?.id, session?.access_token, activeFirmId]);
 
   const verifyDomain = useCallback(async (auditId: string, action: "start" | "check") => {
     const clientId = user?.id ?? getOrCreateClientId();

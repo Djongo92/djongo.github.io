@@ -25,6 +25,8 @@ import { useAnnotations } from "@/hooks/useAnnotations";
 import { useImplementation } from "@/hooks/useImplementation";
 import { useFirmContext } from "@/hooks/useFirmContext";
 import { useFirmLogo } from "@/hooks/useFirmLogo";
+import { useFirmProfile } from "@/hooks/useFirmProfile";
+import type { AuditSnapshot } from "@/hooks/useAuditSnapshots";
 import { useScrollVelocity } from "@/hooks/useAmbientMode";
 import { useAuth } from "@/hooks/useAuth";
 import { useWorkshopHistory } from "@/hooks/useWorkshopHistory";
@@ -44,6 +46,7 @@ import type { WorkshopToolId } from "@/lib/handoff";
 import type { AuditRow, HistoryRow } from "@/components/dashboard/CommandCenter";
 import { findWeakestCategoryTool } from "@/lib/categoryToolMap";
 import { computeScoreDelta } from "@/lib/scoreTrend";
+import { useActiveWorkspace } from "@/hooks/useActiveWorkspace";
 
 // Pulls in recharts — lazy-load so it's only fetched when the Dashboard
 // or Analytics section is actually visited, not on every page load.
@@ -111,7 +114,7 @@ const Index = () => {
   const [section, setSection] = useState<Section>("dashboard");
   const [guidebookView, setGuidebookView] = useState<GuidebookView>("toc");
   const [currentChapterId, setCurrentChapterId] = useState<string | null>(null);
-  const [visibilityData, setVisibilityData] = useState<{ audits: AuditRow[]; history: HistoryRow[] } | null>(null);
+  const [visibilityData, setVisibilityData] = useState<{ audits: AuditRow[]; history: HistoryRow[]; snapshots?: AuditSnapshot[] } | null>(null);
   const [pendingWorkshopTool, setPendingWorkshopTool] = useState<WorkshopToolId | null>(null);
 
   const { bookmarks, toggleBookmark, isBookmarked } = useBookmarks();
@@ -120,7 +123,12 @@ const Index = () => {
   const annotationState = useAnnotations();
   const implementationState = useImplementation();
   const { hasContext } = useFirmContext();
-  const { logo: firmLogo } = useFirmLogo();
+  const { logo: personalLogo } = useFirmLogo();
+  // §11 — white-label: a workspace's own uploaded logo (firm_profiles)
+  // takes priority over the personal-browser one, so switching into a
+  // client's workspace shows that client's branding, not the consultant's.
+  const { profile: firmProfile } = useFirmProfile();
+  const firmLogo = firmProfile?.logo_data_url ?? personalLogo;
   const [personalizeOpen, setPersonalizeOpen] = useState(false);
   const [maturityOpen, setMaturityOpen] = useState(false);
   const [competitorsOpen, setCompetitorsOpen] = useState(false);
@@ -132,6 +140,7 @@ const Index = () => {
   // anonymous browser has always used (see visibility-audit-claim) — once
   // signed in, that's auth.uid() instead of the local random id.
   const realUserId = authSession?.user?.id;
+  const { activeFirmId } = useActiveWorkspace();
 
   const fetchVisibility = useCallback(async () => {
     if (isDemoMode()) {
@@ -143,7 +152,7 @@ const Index = () => {
       const resp = await fetch(`${SUPABASE_URL}/functions/v1/visibility-audit-get`, {
         method: "POST",
         headers: edgeHeaders("benchmark"),
-        body: JSON.stringify({ clientId, accessToken: authSession?.access_token }),
+        body: JSON.stringify({ clientId, accessToken: authSession?.access_token, activeFirmId }),
       });
       const data = await resp.json();
       if (!resp.ok) return;
@@ -151,7 +160,7 @@ const Index = () => {
     } catch {
       // No audit yet (or the fetch failed) — Dashboard's empty state covers this.
     }
-  }, [realUserId, authSession?.access_token]);
+  }, [realUserId, authSession?.access_token, activeFirmId]);
 
   // Fetch the firm's own visibility data once authenticated — the
   // Dashboard section renders its own empty state if there isn't any yet,
@@ -504,7 +513,9 @@ const Index = () => {
                 <Analytics
                   audits={visibilityData?.audits ?? []}
                   history={visibilityData?.history ?? []}
+                  snapshots={visibilityData?.snapshots ?? []}
                   onOpenDashboard={() => goToSection("dashboard")}
+                  onCorrected={fetchVisibility}
                 />
               </Suspense>
             )}

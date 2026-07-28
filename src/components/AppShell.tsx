@@ -7,6 +7,7 @@ import {
 } from "lucide-react";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import FirmCrest from "@/components/FirmCrest";
+import WorkspaceSwitcher from "@/components/consultant/WorkspaceSwitcher";
 
 export type Section = "dashboard" | "analytics" | "workshop" | "progress" | "guidebook" | "settings";
 
@@ -62,11 +63,16 @@ interface AppShellProps {
   recognitionIndexHref?: string;
 }
 
-const NAV_ITEMS: { id: Section; label: string; icon: typeof LayoutDashboard }[] = [
+const NAV_ITEMS: { id: Section; label: string; mobileLabel?: string; icon: typeof LayoutDashboard }[] = [
   { id: "dashboard", label: "Dashboard", icon: LayoutDashboard },
   { id: "analytics", label: "Analytics", icon: BarChart3 },
   { id: "workshop", label: "Workshop", icon: Hammer },
-  { id: "progress", label: "My Progress", icon: Award },
+  // "My Progress" wraps onto two lines in the cramped mobile bottom nav
+  // (5 items + More in one row), sitting lower than its single-line
+  // neighbors and crowding the tab right next to it (Guidebook) — the
+  // shorter "Progress" fits on one line there; the desktop sidebar has
+  // room for the full label and keeps it.
+  { id: "progress", label: "My Progress", mobileLabel: "Progress", icon: Award },
   { id: "guidebook", label: "Guidebook", icon: BookOpen },
 ];
 
@@ -169,6 +175,11 @@ const AppShell = ({
                   {firmName}
                 </p>
               )}
+            </div>
+          )}
+          {!collapsed && (
+            <div className="mt-2">
+              <WorkspaceSwitcher />
             </div>
           )}
           {scoreLabel && !collapsed && (
@@ -430,11 +441,11 @@ const AppShell = ({
         </div>
       )}
 
-      {/* Mobile bottom nav — four primary sections + a "More" sheet holding
+      {/* Mobile bottom nav — five primary sections + a "More" sheet holding
           everything the desktop Tools/Account groups have. */}
       <nav className="fixed bottom-0 left-0 right-0 z-40 md:hidden material-thick border-t hairline safe-area-pb">
         <div className="flex items-center justify-around py-2 px-1">
-          {NAV_ITEMS.map(({ id, label, icon: Icon }) => {
+          {NAV_ITEMS.map(({ id, label, mobileLabel, icon: Icon }) => {
             const isActive = active === id;
             const showAlertDot = id === "dashboard" && hasUnread;
             return (
@@ -442,7 +453,7 @@ const AppShell = ({
                 key={id}
                 onClick={() => onNavigate(id)}
                 data-coachmark={`nav-${id}`}
-                className={`flex flex-col items-center gap-0.5 px-3 py-1.5 rounded-xl transition-colors relative tap-scale ${
+                className={`flex flex-col items-center gap-0.5 px-2 py-1.5 rounded-xl transition-colors relative tap-scale ${
                   isActive ? "text-primary" : "text-muted-foreground"
                 }`}
               >
@@ -454,7 +465,7 @@ const AppShell = ({
                   />
                 )}
                 <Icon className="w-5 h-5 relative z-10" />
-                <span className="text-[9px] font-body tracking-wide relative z-10">{label}</span>
+                <span className="text-[9px] font-body tracking-wide relative z-10 whitespace-nowrap">{mobileLabel ?? label}</span>
                 {showAlertDot && (
                   <Circle className="w-1.5 h-1.5 fill-amber-500 text-amber-500 absolute top-1 right-2 z-10" />
                 )}

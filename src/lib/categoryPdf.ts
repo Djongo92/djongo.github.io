@@ -40,7 +40,7 @@ function buildRows(categoryKey: CategoryKey, raw: ExportParams["raw"]): string[]
   }
   if (categoryKey === "thoughtLeadership" && raw.thoughtLeadership?.items) {
     const t = raw.thoughtLeadership;
-    const rows = [`Original posts: ${t.postsCount} · News mentions: ${t.newsCount} · Byline rate: ${Math.round(t.bylinePct ?? 0)}%`];
+    const rows = [`Original posts: ${t.postsCount} · News mentions: ${t.newsCount} · Byline rate: ${Math.round((t.bylinePct ?? 0) * 100)}%`];
     [...t.items]
       .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
       .slice(0, 8)

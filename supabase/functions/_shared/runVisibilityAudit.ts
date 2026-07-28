@@ -20,6 +20,7 @@ import { checkBenchmarkRateLimit } from "./rateLimit.ts";
 import { DMV_MARKETS } from "./marketVisibilityConfig.ts";
 import type { PeerStats } from "./percentileFormula.ts";
 import { METHODOLOGY_VERSION, computeAuditConfidence, computeDataWindow } from "./auditMetadata.ts";
+import { parsePeerRefinement, type PeerRefinementInput } from "./peerDimensions.ts";
 
 export const VALID_PEER_GROUPS = new Set(["international", "regional", "local", "localized_page", "consultancy"]);
 
@@ -31,6 +32,14 @@ export interface RunVisibilityAuditParams {
   peerGroup: string;
   gbpListed: boolean;
   social?: unknown;
+  // §7 — optional peer-group refinement dimensions, self-reported at intake
+  // (see the peer_dimensions migration for why these are separate from
+  // peer_group). All optional — omitting them scores exactly as before.
+  firmSize?: unknown;
+  officeCount?: unknown;
+  serviceModel?: unknown;
+  specialization?: unknown;
+  marketTier?: unknown;
 }
 
 export interface RunVisibilityAuditResult {
@@ -72,8 +81,10 @@ export async function computePercentile(
 export async function runVisibilityAudit(
   // deno-lint-ignore no-explicit-any
   serviceClient: any,
-  { clientId, auditedDomain, displayName, market, peerGroup, gbpListed, social: socialRaw }: RunVisibilityAuditParams,
+  params: RunVisibilityAuditParams,
 ): Promise<RunVisibilityAuditResult> {
+  const { clientId, auditedDomain, displayName, market, peerGroup, gbpListed, social: socialRaw } = params;
+  const refinement = parsePeerRefinement(params as PeerRefinementInput);
   // Caps how often a single client can trigger the PSI/Gemini-backed audit —
   // applies to scheduled re-runs too, so a bug in the scheduler can't turn
   // into runaway spend.
@@ -103,8 +114,8 @@ export async function runVisibilityAudit(
   const [performance, reputation, thoughtLeadership, social, siteHealth] = await Promise.all([
     computePerformanceScore(normalizedUrl),
     computeReputationScore(serviceClient, market, auditedDomain, gbpListed === true),
-    computeThoughtLeadershipScore(serviceClient, market, peerGroup, normalizedUrl, displayName, auditedDomain),
-    computeSocialScore(serviceClient, market, peerGroup, socialInput, auditedDomain),
+    computeThoughtLeadershipScore(serviceClient, market, peerGroup, normalizedUrl, displayName, auditedDomain, refinement.firmSize),
+    computeSocialScore(serviceClient, market, peerGroup, socialInput, auditedDomain, refinement.firmSize),
     checkSiteHealth(normalizedUrl),
   ]);
   const seoAuthority = computeSeoAuthorityScore();
@@ -167,6 +178,11 @@ export async function runVisibilityAudit(
       data_window_end: dataWindow.end,
       sample_size: sampleSize,
       confidence_score: confidenceScore,
+      firm_size: refinement.firmSize,
+      office_count: refinement.officeCount,
+      service_model: refinement.serviceModel,
+      specialization: refinement.specialization,
+      market_tier: refinement.marketTier,
     }, { onConflict: "client_id,audited_domain,market" })
     .select("id, total_score, is_public")
     .single();
@@ -201,6 +217,9 @@ export async function runVisibilityAudit(
       data_window_end: dataWindow.end,
       sample_size: sampleSize,
       confidence_score: confidenceScore,
+      raw_metrics,
+      provenance,
+      source: "run",
     });
   if (historyError) console.error("runVisibilityAudit history insert error:", historyError);
 

@@ -22,7 +22,7 @@ const titleCase = (s: string) => s.length ? s[0].toUpperCase() + s.slice(1) : s;
 const SERIF = "PDFSerif";
 const SANS = "PDFSans";
 
-function registerFonts(doc: jsPDF) {
+export function registerFonts(doc: jsPDF) {
   doc.addFileToVFS("CormorantGaramond-Regular.ttf", SERIF_REGULAR);
   doc.addFont("CormorantGaramond-Regular.ttf", SERIF, "normal");
   doc.addFileToVFS("CormorantGaramond-Bold.ttf", SERIF_BOLD);
