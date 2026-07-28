@@ -22,6 +22,7 @@ const SignInGate = ({ onDemo, sessionExpired, onDismissSessionExpired }: SignInG
   const [stage, setStage] = useState<Stage>("idle");
   const [error, setError] = useState<string | null>(null);
   const [authOpen, setAuthOpen] = useState(!!sessionExpired);
+  const [teaserFirmName, setTeaserFirmName] = useState<string | null>(null);
 
   const emailLooksValid = /\S+@\S+\.\S+/.test(email);
 
@@ -97,12 +98,18 @@ const SignInGate = ({ onDemo, sessionExpired, onDismissSessionExpired }: SignInG
             </p>
           </div>
 
-          <LiveScoreTeaser variant="hero" onGetFullScore={() => setAuthOpen(true)} />
+          <LiveScoreTeaser
+            variant="hero"
+            onGetFullScore={(matchedFirmName) => {
+              setTeaserFirmName(matchedFirmName ?? null);
+              setAuthOpen(true);
+            }}
+          />
 
           <div className="mt-10 flex items-center gap-4">
             <div className="h-px flex-1 bg-border" />
             <span className="text-[10px] text-muted-foreground tracking-[0.2em] uppercase font-body">
-              Want the full 200-point score?
+              {teaserFirmName ? `Unlock ${teaserFirmName}'s full score` : "Want the full 200-point score?"}
             </span>
             <div className="h-px flex-1 bg-border" />
           </div>
@@ -219,6 +226,13 @@ const SignInGate = ({ onDemo, sessionExpired, onDismissSessionExpired }: SignInG
                             </button>
                           )}
                         </div>
+                      )}
+
+                      {teaserFirmName && mode !== "reset" && (
+                        <p className="text-[11px] text-muted-foreground/80 font-body text-center leading-relaxed">
+                          {teaserFirmName}'s domain and market are already filled in — create an account and your
+                          first full audit picks up right where the teaser left off.
+                        </p>
                       )}
 
                       <form onSubmit={handleSubmit} className="space-y-3">

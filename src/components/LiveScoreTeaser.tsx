@@ -1,8 +1,11 @@
 import { useState } from "react";
+import { Link } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
-import { Loader2, ArrowRight, ShieldCheck } from "lucide-react";
+import { Loader2, ArrowRight, ShieldCheck, Trophy } from "lucide-react";
 import { edgeHeaders } from "@/lib/edgeAuth";
 import { DMV_MARKETS } from "@/lib/marketVisibilityConfig";
+import { setAuditPrefill } from "@/lib/auditPrefill";
+import { computePeerRank, type DirectoryFirmEntry, type PeerRank } from "@/lib/peerRank";
 
 const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL;
 
@@ -14,10 +17,34 @@ interface TeaserResult {
   teaserMax: number;
 }
 
+/**
+ * Reuses the public, already-real directory-standing-index (same data that
+ * powers the Recognition Index leaderboard) purely client-side to find where
+ * a matched firm sits within its own peer group — no new backend endpoint,
+ * no write, just a second read of data that's already public.
+ */
+async function fetchPeerRank(market: string, matchedFirmName: string): Promise<PeerRank | null> {
+  try {
+    const resp = await fetch(`${SUPABASE_URL}/functions/v1/directory-standing-index`, {
+      method: "POST",
+      headers: edgeHeaders(),
+      body: JSON.stringify({ market }),
+    });
+    if (!resp.ok) return null;
+    const data = await resp.json();
+    const firms = (data.firms ?? []) as DirectoryFirmEntry[];
+    return computePeerRank(firms, matchedFirmName);
+  } catch {
+    return null;
+  }
+}
+
 interface LiveScoreTeaserProps {
   /** Hero: bigger type, built to be the first thing a visitor sees. Compact: for reuse on a dedicated page. */
   variant?: "hero" | "compact";
-  onGetFullScore?: () => void;
+  /** Called with the real firm name (if directory-matched) so the caller can
+   * personalize whatever comes next instead of falling back to generic copy. */
+  onGetFullScore?: (matchedFirmName?: string) => void;
 }
 
 /**
@@ -35,6 +62,7 @@ const LiveScoreTeaser = ({ variant = "compact", onGetFullScore }: LiveScoreTease
   const [showMore, setShowMore] = useState(false);
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState<TeaserResult | null>(null);
+  const [peerRank, setPeerRank] = useState<PeerRank | null>(null);
   const [error, setError] = useState<string | null>(null);
 
   const isHero = variant === "hero";
@@ -45,6 +73,7 @@ const LiveScoreTeaser = ({ variant = "compact", onGetFullScore }: LiveScoreTease
     setLoading(true);
     setError(null);
     setResult(null);
+    setPeerRank(null);
     try {
       const resp = await fetch(`${SUPABASE_URL}/functions/v1/visibility-teaser`, {
         method: "POST",
@@ -57,6 +86,11 @@ const LiveScoreTeaser = ({ variant = "compact", onGetFullScore }: LiveScoreTease
         return;
       }
       setResult(data);
+      if (data.reputation?.directory === "matched" && data.reputation?.matchedFirmName) {
+        // Fire-and-forget: a second, independent public read, not on the
+        // critical path for showing the score itself.
+        fetchPeerRank(market, data.reputation.matchedFirmName).then(setPeerRank);
+      }
     } catch {
       setError("Couldn't reach the audit service");
     } finally {
@@ -155,6 +189,7 @@ const LiveScoreTeaser = ({ variant = "compact", onGetFullScore }: LiveScoreTease
             animate={{ opacity: 1, y: 0 }}
             className="bg-card border border-border/50 rounded-xl p-6"
           >
+            {/* Beat 1: the number itself, the payoff of hitting submit. */}
             <div className="text-center mb-5">
               <motion.div
                 initial={{ opacity: 0, scale: 0.7 }}
@@ -166,6 +201,27 @@ const LiveScoreTeaser = ({ variant = "compact", onGetFullScore }: LiveScoreTease
               </motion.div>
               <p className="text-xs text-muted-foreground font-body mt-1">Teaser score · {result.url}</p>
             </div>
+
+            {/* Beat 2: real peer standing, once the second read resolves — the
+                specific, personal detail a generic score can't give you. */}
+            <AnimatePresence>
+              {peerRank && (
+                <motion.div
+                  initial={{ opacity: 0, y: 8, height: 0 }}
+                  animate={{ opacity: 1, y: 0, height: "auto" }}
+                  transition={{ duration: 0.4 }}
+                  className="mb-4 bg-primary/5 border border-primary/20 rounded-lg px-4 py-3 flex items-center gap-3"
+                >
+                  <Trophy className="w-4 h-4 text-primary shrink-0" />
+                  <p className="text-xs font-body text-foreground">
+                    <strong>#{peerRank.rank} of {peerRank.peerGroupSize}</strong> {peerRank.peerGroupLabel.toLowerCase()} firms
+                    tracked in {market[0].toUpperCase() + market.slice(1)} — ahead of {Math.max(0, peerRank.percentile)}% of your peer
+                    group, out of {peerRank.marketSize} firms in the directory overall.
+                  </p>
+                </motion.div>
+              )}
+            </AnimatePresence>
+
             <div className="space-y-2 text-sm font-body">
               <div className="flex items-center justify-between">
                 <span className="text-foreground">Performance (PageSpeed)</span>
@@ -190,6 +246,31 @@ const LiveScoreTeaser = ({ variant = "compact", onGetFullScore }: LiveScoreTease
                 </p>
               )}
             </div>
+
+            {/* Beat 3: the one sentence that turns two numbers into a reason to act. */}
+            {(() => {
+              if (result.performance.provenance === "missing") return null;
+              const reputationMax = result.reputation.directory === "matched" ? 55 : 10;
+              const perfRatio = result.performance.score / 20;
+              const repRatio = result.reputation.score / reputationMax;
+              const weaker = perfRatio <= repRatio ? "performance" : "reputation";
+              const message =
+                weaker === "performance"
+                  ? "Your site's real-world speed is the softer of the two — that's costing you visibility before a single click happens."
+                  : "Your legal-directory standing is the softer of the two — Chambers and Legal 500 recognition is usually the fastest lever available to close that gap.";
+              return (
+                <motion.p
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  transition={{ delay: 0.5 }}
+                  className="mt-4 text-xs text-muted-foreground font-body italic"
+                >
+                  {message}
+                </motion.p>
+              );
+            })()}
+
+            {/* Beat 4: the ask. */}
             <div className="mt-5 pt-5 border-t border-border/40 text-center space-y-3">
               <p className="text-xs text-muted-foreground font-body">
                 This is 2 of 5 categories. The full Market Visibility Score adds Social Media, SEO &amp; Authority,
@@ -197,18 +278,37 @@ const LiveScoreTeaser = ({ variant = "compact", onGetFullScore }: LiveScoreTease
               </p>
               {onGetFullScore ? (
                 <button
-                  onClick={onGetFullScore}
+                  onClick={() => {
+                    // Carries this exact result forward into the real intake
+                    // form (MarketVisibilityScore.tsx already consumes this
+                    // on mount) so signing up doesn't mean retyping the same
+                    // domain/firm name that was just measured.
+                    setAuditPrefill({
+                      displayName: result.reputation.matchedFirmName || firmName || undefined,
+                      auditedDomain: result.url,
+                      market,
+                    });
+                    onGetFullScore(result.reputation.matchedFirmName);
+                  }}
                   className="inline-flex items-center gap-1.5 text-sm text-primary hover:text-gold-light font-body font-medium"
                 >
-                  Get the full score <ArrowRight className="w-3.5 h-3.5" />
+                  Get the full score + a concrete 30-day plan <ArrowRight className="w-3.5 h-3.5" />
                 </button>
               ) : null}
-              <button
-                onClick={() => { setResult(null); setUrl(""); }}
-                className="block mx-auto text-xs text-muted-foreground hover:text-foreground font-body"
-              >
-                Try another domain
-              </button>
+              <div className="flex items-center justify-center gap-4">
+                <button
+                  onClick={() => { setResult(null); setPeerRank(null); setUrl(""); }}
+                  className="text-xs text-muted-foreground hover:text-foreground font-body"
+                >
+                  Try another domain
+                </button>
+                <Link
+                  to={`/recognition-index/${market}`}
+                  className="text-xs text-muted-foreground hover:text-foreground font-body"
+                >
+                  See the full {market[0].toUpperCase() + market.slice(1)} index →
+                </Link>
+              </div>
             </div>
           </motion.div>
         )}
