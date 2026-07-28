@@ -1,4 +1,4 @@
-import { ReactNode, useState } from "react";
+import { ReactNode, useEffect, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import {
   LayoutDashboard, Hammer, BookOpen, BarChart3, FlaskConical, Settings, Circle, LogOut,
@@ -103,6 +103,14 @@ const AppShell = ({
   const hasTools = Boolean(onOpenMaturity || onOpenBattlePlan || onOpenCompetitors || onOpenWorkshopHistory);
   const notificationList = notifications ?? [];
   const hasUnread = (unreadCount ?? 0) > 0;
+
+  // Exposes the desktop sidebar's current width so viewport-fixed content
+  // rendered inside it (e.g. ChapterView's in-page SectionNav) can offset
+  // past it instead of overlapping — the sidebar itself is `md:sticky`, not
+  // `fixed`, so its width isn't otherwise visible to fixed-position children.
+  useEffect(() => {
+    document.documentElement.style.setProperty("--legalos-sidebar-w", collapsed ? "4rem" : "14rem");
+  }, [collapsed]);
 
   const closeMore = () => setMoreOpen(false);
   const toggleCollapsed = () => {
