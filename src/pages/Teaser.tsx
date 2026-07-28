@@ -1,8 +1,9 @@
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { ShieldCheck } from "lucide-react";
 import LiveScoreTeaser from "@/components/LiveScoreTeaser";
 
 const Teaser = () => {
+  const navigate = useNavigate();
   return (
     <div className="min-h-screen bg-background">
       <header className="border-b border-border/50">
@@ -22,7 +23,7 @@ const Teaser = () => {
           Business Profile). No password, no account — just real data.
         </p>
 
-        <LiveScoreTeaser variant="compact" />
+        <LiveScoreTeaser variant="compact" onGetFullScore={() => navigate("/")} />
 
         <div className="mt-10 text-center">
           <Link to="/" className="inline-flex items-center gap-1 text-xs text-emerald-600 hover:text-emerald-500 font-body">
