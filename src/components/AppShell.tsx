@@ -105,11 +105,22 @@ const AppShell = ({
   const hasUnread = (unreadCount ?? 0) > 0;
 
   // Exposes the desktop sidebar's current width so viewport-fixed content
-  // rendered inside it (e.g. ChapterView's in-page SectionNav) can offset
-  // past it instead of overlapping — the sidebar itself is `md:sticky`, not
-  // `fixed`, so its width isn't otherwise visible to fixed-position children.
+  // rendered inside it (e.g. ChapterView's SectionNav and ReadingProgress
+  // bar) can offset past it instead of overlapping — the sidebar itself is
+  // `md:sticky`, not `fixed`, so its width isn't otherwise visible to
+  // fixed-position children. The aside only exists at `md:` and up
+  // (`hidden md:flex`), so below that breakpoint the exposed width is 0 —
+  // tracked live via matchMedia rather than a one-time check, since a
+  // resize can cross the breakpoint without a remount.
   useEffect(() => {
-    document.documentElement.style.setProperty("--legalos-sidebar-w", collapsed ? "4rem" : "14rem");
+    const desktopQuery = window.matchMedia("(min-width: 768px)");
+    const update = () => {
+      const width = desktopQuery.matches ? (collapsed ? "4rem" : "14rem") : "0px";
+      document.documentElement.style.setProperty("--legalos-sidebar-w", width);
+    };
+    update();
+    desktopQuery.addEventListener("change", update);
+    return () => desktopQuery.removeEventListener("change", update);
   }, [collapsed]);
 
   const closeMore = () => setMoreOpen(false);
