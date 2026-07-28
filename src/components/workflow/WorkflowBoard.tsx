@@ -40,6 +40,7 @@ const WorkflowBoard = ({ roadmapActions = [] }: Props) => {
   const myRole = team?.members.find((m) => m.user_id === user?.id)?.role;
   const canComment = !team || can(myRole, "canComment");
   const canApprove = !team || can(myRole, "canApproveWorkflow");
+  const isConsultant = myRole === "consultant";
   const demoMode = isDemoMode();
 
   const { items, comments, loading, create, update, remove, addComment, createPartnerLink } = useWorkflowItems();
@@ -50,6 +51,7 @@ const WorkflowBoard = ({ roadmapActions = [] }: Props) => {
   const [commentDraft, setCommentDraft] = useState("");
   const [commentVoice, setCommentVoice] = useState<string | null>(null);
   const [evidenceUrl, setEvidenceUrl] = useState("");
+  const [internalNote, setInternalNote] = useState(false);
   const [submittingComment, setSubmittingComment] = useState(false);
   const [selected, setSelected] = useState<Set<string>>(new Set());
   const [creatingLink, setCreatingLink] = useState(false);
@@ -100,13 +102,17 @@ const WorkflowBoard = ({ roadmapActions = [] }: Props) => {
   const handleAddComment = async (itemId: string) => {
     if (!commentDraft.trim() && !commentVoice) return;
     setSubmittingComment(true);
-    const result = await addComment(itemId, commentDraft.trim() || undefined, commentVoice ?? undefined, evidenceUrl.trim() || undefined);
+    const result = await addComment(
+      itemId, commentDraft.trim() || undefined, commentVoice ?? undefined, evidenceUrl.trim() || undefined,
+      internalNote ? "internal" : "client",
+    );
     setSubmittingComment(false);
     if ("error" in result) toast.error(result.error);
     else {
       setCommentDraft("");
       setCommentVoice(null);
       setEvidenceUrl("");
+      setInternalNote(false);
     }
   };
 
@@ -248,8 +254,11 @@ const WorkflowBoard = ({ roadmapActions = [] }: Props) => {
                     {isExpanded && (
                       <div className="mt-3 pt-3 border-t border-border/30 space-y-2">
                         {itemComments.map((c) => (
-                          <div key={c.id} className="text-xs font-body bg-secondary/30 rounded-sm px-2.5 py-2">
-                            <p className="text-[10px] text-muted-foreground mb-1">{c.author_label} · {new Date(c.created_at).toLocaleString()}</p>
+                          <div key={c.id} className={`text-xs font-body rounded-sm px-2.5 py-2 ${c.visibility === "internal" ? "bg-amber-500/10 border border-amber-500/30" : "bg-secondary/30"}`}>
+                            <p className="text-[10px] text-muted-foreground mb-1">
+                              {c.author_label} · {new Date(c.created_at).toLocaleString()}
+                              {c.visibility === "internal" && <span className="ml-1.5 text-amber-500 uppercase tracking-wide">Internal only</span>}
+                            </p>
                             {c.body && <p className="text-foreground">{c.body}</p>}
                             {c.voice_note_data_url && <audio controls src={c.voice_note_data_url} className="mt-1 h-8 w-full" />}
                             {c.evidence_url && (
@@ -277,6 +286,12 @@ const WorkflowBoard = ({ roadmapActions = [] }: Props) => {
                                 className={`${inputClass} flex-1 min-w-[140px]`}
                               />
                             </div>
+                            {isConsultant && (
+                              <label className="flex items-center gap-1.5 text-[11px] font-body text-amber-500 cursor-pointer">
+                                <input type="checkbox" checked={internalNote} onChange={(e) => setInternalNote(e.target.checked)} />
+                                Internal note (hidden from the client)
+                              </label>
+                            )}
                             <button
                               onClick={() => handleAddComment(item.id)}
                               disabled={submittingComment || (!commentDraft.trim() && !commentVoice)}

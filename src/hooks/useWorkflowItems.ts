@@ -5,6 +5,7 @@ import { useCallback, useEffect, useState } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import { edgeHeaders } from "@/lib/edgeAuth";
 import { getOrCreateClientId } from "@/lib/clientId";
+import { useActiveWorkspace } from "@/hooks/useActiveWorkspace";
 
 const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL as string;
 
@@ -31,6 +32,7 @@ export interface WorkflowComment {
   body: string | null;
   voice_note_data_url: string | null;
   evidence_url: string | null;
+  visibility: "internal" | "client";
   created_at: string;
 }
 
@@ -45,6 +47,7 @@ export interface WorkflowItemPatch {
 
 export const useWorkflowItems = () => {
   const { user, session } = useAuth();
+  const { activeFirmId } = useActiveWorkspace();
   const [items, setItems] = useState<WorkflowItem[]>([]);
   const [comments, setComments] = useState<WorkflowComment[]>([]);
   const [loading, setLoading] = useState(true);
@@ -56,7 +59,7 @@ export const useWorkflowItems = () => {
       const resp = await fetch(`${SUPABASE_URL}/functions/v1/workflow-items-manage`, {
         method: "POST",
         headers: edgeHeaders(),
-        body: JSON.stringify({ clientId, accessToken: session?.access_token, action: "list" }),
+        body: JSON.stringify({ clientId, accessToken: session?.access_token, activeFirmId, action: "list" }),
       });
       const data = await resp.json();
       if (resp.ok) {
@@ -68,7 +71,7 @@ export const useWorkflowItems = () => {
     } finally {
       setLoading(false);
     }
-  }, [user?.id, session?.access_token]);
+  }, [user?.id, session?.access_token, activeFirmId]);
 
   useEffect(() => { reload(); }, [reload]);
 
@@ -80,54 +83,54 @@ export const useWorkflowItems = () => {
     const resp = await fetch(`${SUPABASE_URL}/functions/v1/workflow-items-manage`, {
       method: "POST",
       headers: edgeHeaders(),
-      body: JSON.stringify({ clientId, accessToken: session?.access_token, action: "create", ...input }),
+      body: JSON.stringify({ clientId, accessToken: session?.access_token, activeFirmId, action: "create", ...input }),
     });
     const data = await resp.json();
     if (!resp.ok) return { error: data.error || "Couldn't create the workflow item" };
     await reload();
     return { ok: true };
-  }, [user?.id, session?.access_token, reload]);
+  }, [user?.id, session?.access_token, activeFirmId, reload]);
 
   const update = useCallback(async (id: string, patch: WorkflowItemPatch): Promise<{ ok: true } | { error: string }> => {
     const clientId = user?.id ?? getOrCreateClientId();
     const resp = await fetch(`${SUPABASE_URL}/functions/v1/workflow-items-manage`, {
       method: "POST",
       headers: edgeHeaders(),
-      body: JSON.stringify({ clientId, accessToken: session?.access_token, action: "update", id, patch }),
+      body: JSON.stringify({ clientId, accessToken: session?.access_token, activeFirmId, action: "update", id, patch }),
     });
     const data = await resp.json();
     if (!resp.ok) return { error: data.error || "Couldn't update the workflow item" };
     await reload();
     return { ok: true };
-  }, [user?.id, session?.access_token, reload]);
+  }, [user?.id, session?.access_token, activeFirmId, reload]);
 
   const remove = useCallback(async (id: string): Promise<{ ok: true } | { error: string }> => {
     const clientId = user?.id ?? getOrCreateClientId();
     const resp = await fetch(`${SUPABASE_URL}/functions/v1/workflow-items-manage`, {
       method: "POST",
       headers: edgeHeaders(),
-      body: JSON.stringify({ clientId, accessToken: session?.access_token, action: "delete", id }),
+      body: JSON.stringify({ clientId, accessToken: session?.access_token, activeFirmId, action: "delete", id }),
     });
     const data = await resp.json();
     if (!resp.ok) return { error: data.error || "Couldn't delete the workflow item" };
     await reload();
     return { ok: true };
-  }, [user?.id, session?.access_token, reload]);
+  }, [user?.id, session?.access_token, activeFirmId, reload]);
 
   const addComment = useCallback(async (
-    itemId: string, body?: string, voiceNoteDataUrl?: string, evidenceUrl?: string,
+    itemId: string, body?: string, voiceNoteDataUrl?: string, evidenceUrl?: string, visibility?: "internal" | "client",
   ): Promise<{ ok: true } | { error: string }> => {
     const clientId = user?.id ?? getOrCreateClientId();
     const resp = await fetch(`${SUPABASE_URL}/functions/v1/workflow-comment-add`, {
       method: "POST",
       headers: edgeHeaders(),
-      body: JSON.stringify({ clientId, accessToken: session?.access_token, itemId, body, voiceNoteDataUrl, evidenceUrl }),
+      body: JSON.stringify({ clientId, accessToken: session?.access_token, activeFirmId, itemId, body, voiceNoteDataUrl, evidenceUrl, visibility }),
     });
     const data = await resp.json();
     if (!resp.ok) return { error: data.error || "Couldn't add the comment" };
     await reload();
     return { ok: true };
-  }, [user?.id, session?.access_token, reload]);
+  }, [user?.id, session?.access_token, activeFirmId, reload]);
 
   const createPartnerLink = useCallback(async (
     itemIds: string[], recipientLabel?: string, expiresInDays?: number,
@@ -136,12 +139,12 @@ export const useWorkflowItems = () => {
     const resp = await fetch(`${SUPABASE_URL}/functions/v1/workflow-partner-link`, {
       method: "POST",
       headers: edgeHeaders(),
-      body: JSON.stringify({ clientId, accessToken: session?.access_token, action: "create", itemIds, recipientLabel, expiresInDays }),
+      body: JSON.stringify({ clientId, accessToken: session?.access_token, activeFirmId, action: "create", itemIds, recipientLabel, expiresInDays }),
     });
     const data = await resp.json();
     if (!resp.ok) return { error: data.error || "Couldn't create the review link" };
     return { linkId: data.linkId, expiresAt: data.expiresAt };
-  }, [user?.id, session?.access_token]);
+  }, [user?.id, session?.access_token, activeFirmId]);
 
   return { items, comments, loading, reload, create, update, remove, addComment, createPartnerLink };
 };

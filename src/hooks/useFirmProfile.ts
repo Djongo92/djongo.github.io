@@ -8,6 +8,7 @@
 import { useCallback, useEffect, useState } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import { edgeHeaders } from "@/lib/edgeAuth";
+import { useActiveWorkspace } from "@/hooks/useActiveWorkspace";
 
 const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL as string;
 
@@ -31,6 +32,9 @@ export interface FirmProfile {
   brand_rules: string | null;
   client_restrictions: string | null;
   approved_content: ApprovedContentEntry[];
+  /** §11 — white-label branding: shown in the app chrome instead of the
+   *  personal-browser useFirmLogo when a workspace has one set. */
+  logo_data_url: string | null;
   updated_at: string;
   updated_by: string | null;
 }
@@ -39,6 +43,7 @@ export type FirmProfilePatch = Partial<Omit<FirmProfile, "firm_id" | "updated_at
 
 export const useFirmProfile = () => {
   const { user, session } = useAuth();
+  const { activeFirmId } = useActiveWorkspace();
   const [profile, setProfile] = useState<FirmProfile | null>(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -54,7 +59,7 @@ export const useFirmProfile = () => {
       const resp = await fetch(`${SUPABASE_URL}/functions/v1/firm-profile`, {
         method: "POST",
         headers: edgeHeaders(),
-        body: JSON.stringify({ accessToken: session.access_token, action: "get" }),
+        body: JSON.stringify({ accessToken: session.access_token, action: "get", activeFirmId }),
       });
       const data = await resp.json();
       setProfile(resp.ok ? data.profile ?? null : null);
@@ -63,7 +68,7 @@ export const useFirmProfile = () => {
     } finally {
       setLoading(false);
     }
-  }, [user, session?.access_token]);
+  }, [user, session?.access_token, activeFirmId]);
 
   useEffect(() => {
     reload();
@@ -76,7 +81,7 @@ export const useFirmProfile = () => {
       const resp = await fetch(`${SUPABASE_URL}/functions/v1/firm-profile`, {
         method: "POST",
         headers: edgeHeaders(),
-        body: JSON.stringify({ accessToken: session.access_token, action: "save", ...patch }),
+        body: JSON.stringify({ accessToken: session.access_token, action: "save", activeFirmId, ...patch }),
       });
       const data = await resp.json();
       if (!resp.ok) return { error: data.error || "Couldn't save the firm profile" };
@@ -87,7 +92,7 @@ export const useFirmProfile = () => {
     } finally {
       setSaving(false);
     }
-  }, [session?.access_token]);
+  }, [session?.access_token, activeFirmId]);
 
   return { profile, loading, saving, save, reload };
 };

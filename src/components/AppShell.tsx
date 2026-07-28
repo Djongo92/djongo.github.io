@@ -7,6 +7,7 @@ import {
 } from "lucide-react";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import FirmCrest from "@/components/FirmCrest";
+import WorkspaceSwitcher from "@/components/consultant/WorkspaceSwitcher";
 
 export type Section = "dashboard" | "analytics" | "workshop" | "progress" | "guidebook" | "settings";
 
@@ -169,6 +170,11 @@ const AppShell = ({
                   {firmName}
                 </p>
               )}
+            </div>
+          )}
+          {!collapsed && (
+            <div className="mt-2">
+              <WorkspaceSwitcher />
             </div>
           )}
           {scoreLabel && !collapsed && (

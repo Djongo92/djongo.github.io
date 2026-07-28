@@ -5,14 +5,15 @@
 // PersonalizeOnboarding wizard (practice area / firm size / primary goal,
 // still localStorage-only): that one is a fast first-run nudge, this is
 // the exhaustive profile every tool/audit should read from.
-import { useEffect, useState } from "react";
-import { Briefcase, Plus, X } from "lucide-react";
+import { useEffect, useRef, useState } from "react";
+import { Briefcase, Plus, X, Upload } from "lucide-react";
 import { toast } from "sonner";
 import { useFirmProfile, type CompetitorEntry, type OfficeEntry, type LawyerEntry } from "@/hooks/useFirmProfile";
 import { useFirmTeam } from "@/hooks/useFirmTeam";
 import { useAuth } from "@/hooks/useAuth";
 import { can } from "@/lib/roles";
 import { PRACTICE_AREAS } from "@/components/PersonalizeOnboarding";
+import { resizeImageFile } from "@/lib/imageResize";
 
 const inputClass = "w-full bg-secondary/80 border border-border text-foreground text-sm font-body px-3 py-2 rounded-sm focus:outline-none focus:border-primary disabled:opacity-60";
 const labelClass = "block text-xs text-muted-foreground font-body mb-1";
@@ -79,6 +80,9 @@ const FirmProfileSettings = () => {
   const [iflr1000Url, setIflr1000Url] = useState("");
   const [brandRules, setBrandRules] = useState("");
   const [clientRestrictions, setClientRestrictions] = useState("");
+  const [logoDataUrl, setLogoDataUrl] = useState<string | null>(null);
+  const [uploadingLogo, setUploadingLogo] = useState(false);
+  const logoInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     if (!profile) return;
@@ -97,10 +101,37 @@ const FirmProfileSettings = () => {
     setIflr1000Url(profile.directory_profiles?.iflr1000 ?? "");
     setBrandRules(profile.brand_rules ?? "");
     setClientRestrictions(profile.client_restrictions ?? "");
+    setLogoDataUrl(profile.logo_data_url ?? null);
   }, [profile]);
 
   const togglePracticeArea = (area: string) => {
     setPracticeAreas((prev) => (prev.includes(area) ? prev.filter((a) => a !== area) : [...prev, area]));
+  };
+
+  const handleLogoFile = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    e.target.value = "";
+    if (!file) return;
+    if (!file.type.startsWith("image/")) {
+      toast.error("Please choose an image file.");
+      return;
+    }
+    setUploadingLogo(true);
+    try {
+      const dataUrl = await resizeImageFile(file);
+      const result = await save({ logo_data_url: dataUrl });
+      if ("error" in result) toast.error(result.error);
+      else toast.success("Workspace logo saved — shown in the app chrome for this workspace.");
+    } catch {
+      toast.error("Couldn't read that image.");
+    } finally {
+      setUploadingLogo(false);
+    }
+  };
+
+  const handleRemoveLogo = async () => {
+    const result = await save({ logo_data_url: null });
+    if ("error" in result) toast.error(result.error);
   };
 
   const handleSave = async () => {
@@ -150,6 +181,46 @@ const FirmProfileSettings = () => {
         <p className="text-xs text-muted-foreground font-body">Loading…</p>
       ) : (
         <div className="space-y-4">
+          <div>
+            <label className={labelClass}>Workspace logo (white-label)</label>
+            <p className="text-[11px] text-muted-foreground font-body mb-2">
+              Shown in the app chrome for anyone in this workspace — including a consultant who's switched into it —
+              instead of their own personal browser logo.
+            </p>
+            <div className="flex items-center gap-3">
+              {logoDataUrl ? (
+                <div className="relative">
+                  <img src={logoDataUrl} alt="Workspace logo" className="w-14 h-14 rounded-sm object-cover border border-border/50" />
+                  {canEdit && (
+                    <button
+                      onClick={handleRemoveLogo}
+                      aria-label="Remove logo"
+                      className="absolute -top-1.5 -right-1.5 bg-background border border-border rounded-full p-0.5 text-muted-foreground hover:text-destructive"
+                    >
+                      <X className="w-3 h-3" />
+                    </button>
+                  )}
+                </div>
+              ) : (
+                <div className="w-14 h-14 rounded-sm border border-dashed border-border/60 flex items-center justify-center text-muted-foreground">
+                  <Briefcase className="w-5 h-5" />
+                </div>
+              )}
+              {canEdit && (
+                <>
+                  <input ref={logoInputRef} type="file" accept="image/*" onChange={handleLogoFile} className="hidden" />
+                  <button
+                    onClick={() => logoInputRef.current?.click()}
+                    disabled={uploadingLogo}
+                    className="inline-flex items-center gap-2 px-3 py-1.5 rounded-sm text-xs font-body border border-border/50 text-foreground hover:border-primary/40 transition-colors disabled:opacity-50"
+                  >
+                    <Upload className="w-3.5 h-3.5" /> {uploadingLogo ? "Uploading…" : logoDataUrl ? "Replace logo" : "Upload logo"}
+                  </button>
+                </>
+              )}
+            </div>
+          </div>
+
           <div className="grid grid-cols-2 gap-3">
             <div>
               <label className={labelClass}>Website</label>

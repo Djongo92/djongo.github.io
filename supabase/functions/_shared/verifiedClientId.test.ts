@@ -7,8 +7,9 @@ function makeMockClient(opts: {
   getUserResult: GetUserResult;
   userFirms?: string[];
   memberCounts?: Record<string, number>;
+  expiresAt?: Record<string, string>;
 }) {
-  const { getUserResult, userFirms = [], memberCounts = {} } = opts;
+  const { getUserResult, userFirms = [], memberCounts = {}, expiresAt = {} } = opts;
   const getUser = vi.fn().mockResolvedValue(getUserResult);
 
   const from = vi.fn((table: string) => {
@@ -17,7 +18,7 @@ function makeMockClient(opts: {
       select: (_cols: string, selectOpts?: { count?: string; head?: boolean }) => ({
         eq: (column: string, value: string) => {
           if (column === "user_id") {
-            return Promise.resolve({ data: userFirms.map((firm_id) => ({ firm_id })) });
+            return Promise.resolve({ data: userFirms.map((firm_id) => ({ firm_id, access_expires_at: expiresAt[firm_id] ?? null })) });
           }
           if (column === "firm_id" && selectOpts?.count) {
             return Promise.resolve({ count: memberCounts[value] ?? 0 });
@@ -95,5 +96,47 @@ describe("resolveClientId", () => {
     });
     const result = await resolveClientId(client, "real-user-id", "valid-token");
     expect(result).toBe("firm-shared");
+  });
+
+  it("§11: honors an explicit requestedFirmId when the user has a live membership there", async () => {
+    const { client } = makeMockClient({
+      getUserResult: { data: { user: { id: "consultant-id" } }, error: null },
+      userFirms: ["client-firm-a", "client-firm-b"],
+      memberCounts: { "client-firm-a": 2, "client-firm-b": 2 },
+    });
+    const result = await resolveClientId(client, "consultant-id", "valid-token", "client-firm-b");
+    expect(result).toBe("client-firm-b");
+  });
+
+  it("§11: ignores a requestedFirmId the caller isn't actually a member of", async () => {
+    const { client } = makeMockClient({
+      getUserResult: { data: { user: { id: "consultant-id" } }, error: null },
+      userFirms: ["client-firm-a"],
+      memberCounts: { "client-firm-a": 2 },
+    });
+    const result = await resolveClientId(client, "consultant-id", "valid-token", "someone-elses-firm");
+    expect(result).toBe("client-firm-a");
+  });
+
+  it("§11: ignores a requestedFirmId whose membership has expired", async () => {
+    const { client } = makeMockClient({
+      getUserResult: { data: { user: { id: "consultant-id" } }, error: null },
+      userFirms: ["client-firm-a"],
+      memberCounts: { "client-firm-a": 2 },
+      expiresAt: { "client-firm-a": "2020-01-01T00:00:00.000Z" },
+    });
+    const result = await resolveClientId(client, "consultant-id", "valid-token", "client-firm-a");
+    expect(result).toBe("consultant-id");
+  });
+
+  it("§11: skips an expired membership entirely in the auto-detected fallback too", async () => {
+    const { client } = makeMockClient({
+      getUserResult: { data: { user: { id: "consultant-id" } }, error: null },
+      userFirms: ["expired-firm", "active-firm"],
+      memberCounts: { "expired-firm": 5, "active-firm": 2 },
+      expiresAt: { "expired-firm": "2020-01-01T00:00:00.000Z" },
+    });
+    const result = await resolveClientId(client, "consultant-id", "valid-token");
+    expect(result).toBe("active-firm");
   });
 });

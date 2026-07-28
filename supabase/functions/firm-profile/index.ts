@@ -19,7 +19,7 @@ const CAN_EDIT_ROLES = new Set(["owner", "admin", "marketing", "consultant", "me
 const EDITABLE_FIELDS = [
   "jurisdictions", "offices", "practice_areas", "tone_of_voice", "preferred_terminology",
   "competitor_set", "website", "linkedin_url", "directory_profiles", "lawyer_roster",
-  "brand_rules", "client_restrictions", "approved_content",
+  "brand_rules", "client_restrictions", "approved_content", "logo_data_url",
 ] as const;
 
 Deno.serve(async (req) => {
@@ -30,7 +30,7 @@ Deno.serve(async (req) => {
 
   try {
     const body = await req.json();
-    const { accessToken, action } = body;
+    const { accessToken, action, activeFirmId } = body;
 
     if (!accessToken || typeof accessToken !== "string") {
       return new Response(JSON.stringify({ error: "accessToken is required" }), {
@@ -57,11 +57,22 @@ Deno.serve(async (req) => {
     }
     const userId = userData.user.id;
 
-    const { data: membership } = await serviceClient
+    // §11 — a consultant can belong to several firms at once, so this can
+    // no longer assume exactly one membership row per user. When the
+    // caller's workspace switcher names a specific firm, honor it (only if
+    // the user is actually, currently a live member there); otherwise fall
+    // back to the first membership found — unchanged behavior for every
+    // solo/single-firm account.
+    const { data: memberships } = await serviceClient
       .from("firm_members")
-      .select("firm_id, role")
-      .eq("user_id", userId)
-      .maybeSingle();
+      .select("firm_id, role, access_expires_at")
+      .eq("user_id", userId);
+
+    const isLive = (m: { access_expires_at?: string | null }) =>
+      !m.access_expires_at || new Date(m.access_expires_at).getTime() > Date.now();
+    const liveMemberships = (memberships ?? []).filter(isLive);
+    const membership = (typeof activeFirmId === "string" ? liveMemberships.find((m) => m.firm_id === activeFirmId) : undefined)
+      ?? liveMemberships[0];
 
     if (!membership) {
       return new Response(JSON.stringify({ error: "You're not a member of a firm yet" }), {

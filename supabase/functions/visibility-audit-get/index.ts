@@ -16,7 +16,7 @@ Deno.serve(async (req) => {
   if (unauthorized) return unauthorized;
 
   try {
-    const { clientId: rawClientId, accessToken } = await req.json();
+    const { clientId: rawClientId, accessToken, activeFirmId } = await req.json();
     if (!rawClientId || typeof rawClientId !== "string") {
       return new Response(JSON.stringify({ error: "clientId is required" }), {
         status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" },
@@ -31,7 +31,9 @@ Deno.serve(async (req) => {
 
     // A real access token — never a client-asserted clientId — decides
     // identity when one is present (see _shared/verifiedClientId.ts).
-    const clientId = await resolveClientId(serviceClient, rawClientId, accessToken);
+    // §11 — activeFirmId lets a consultant belonging to several client
+    // firms pick which workspace's data this call should return.
+    const clientId = await resolveClientId(serviceClient, rawClientId, accessToken, typeof activeFirmId === "string" ? activeFirmId : undefined);
 
     const { data, error } = await serviceClient
       .from("market_visibility_audits")
@@ -80,7 +82,15 @@ Deno.serve(async (req) => {
       corrections = correctionRows ?? [];
     }
 
-    return new Response(JSON.stringify({ audits, history: history ?? [], corrections }), {
+    // §11 — saved before/after snapshots for this client, newest first.
+    const { data: snapshots, error: snapshotsError } = await serviceClient
+      .from("audit_snapshots")
+      .select("*")
+      .eq("client_id", clientId)
+      .order("created_at", { ascending: false });
+    if (snapshotsError) console.error("visibility-audit-get snapshots error:", snapshotsError);
+
+    return new Response(JSON.stringify({ audits, history: history ?? [], corrections, snapshots: snapshots ?? [] }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
   } catch (e) {

@@ -16,7 +16,7 @@ Deno.serve(async (req) => {
   if (unauthorized) return unauthorized;
 
   try {
-    const { clientId: rawClientId, accessToken, auditedDomain, displayName, market, peerGroup, gbpListed, social } = await req.json();
+    const { clientId: rawClientId, accessToken, activeFirmId, auditedDomain, displayName, market, peerGroup, gbpListed, social, firmSize, officeCount, serviceModel, specialization, marketTier } = await req.json();
 
     if (!rawClientId || typeof rawClientId !== "string") {
       return new Response(JSON.stringify({ error: "clientId is required" }), {
@@ -47,9 +47,14 @@ Deno.serve(async (req) => {
 
     // A real access token — never a client-asserted clientId — decides
     // identity when one is present (see _shared/verifiedClientId.ts).
-    const clientId = await resolveClientId(serviceClient, rawClientId, accessToken);
+    // §11 — activeFirmId lets a consultant pick which client workspace
+    // this run is for.
+    const clientId = await resolveClientId(serviceClient, rawClientId, accessToken, typeof activeFirmId === "string" ? activeFirmId : undefined);
 
-    const result = await runVisibilityAudit(serviceClient, { clientId, auditedDomain, displayName, market, peerGroup, gbpListed, social });
+    const result = await runVisibilityAudit(serviceClient, {
+      clientId, auditedDomain, displayName, market, peerGroup, gbpListed, social,
+      firmSize, officeCount, serviceModel, specialization, marketTier,
+    });
     if (!result.ok) {
       return new Response(JSON.stringify({ error: result.error }), {
         status: result.status, headers: { ...corsHeaders, "Content-Type": "application/json" },

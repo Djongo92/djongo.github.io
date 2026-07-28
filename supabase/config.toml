@@ -185,3 +185,6 @@ verify_jwt = false
 
 [functions.executive-report-monthly]
 verify_jwt = false
+
+[functions.audit-snapshot-save]
+verify_jwt = false

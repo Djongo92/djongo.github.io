@@ -28,7 +28,7 @@ Deno.serve(async (req) => {
 
   try {
     const body = await req.json();
-    const { clientId: rawClientId, accessToken, action } = body;
+    const { clientId: rawClientId, accessToken, activeFirmId, action } = body;
 
     if (!rawClientId || typeof rawClientId !== "string") {
       return new Response(JSON.stringify({ error: "clientId is required" }), {
@@ -47,7 +47,7 @@ Deno.serve(async (req) => {
       { auth: { persistSession: false } },
     );
 
-    const clientId = await resolveClientId(serviceClient, rawClientId, accessToken);
+    const clientId = await resolveClientId(serviceClient, rawClientId, accessToken, typeof activeFirmId === "string" ? activeFirmId : undefined);
 
     let userId: string | null = null;
     let role: string | null = null;
@@ -78,7 +78,7 @@ Deno.serve(async (req) => {
         });
       }
       const itemIds = (items ?? []).map((i) => i.id);
-      let comments: unknown[] = [];
+      let comments: { visibility?: string }[] = [];
       if (itemIds.length > 0) {
         const { data: commentRows } = await serviceClient
           .from("battle_plan_workflow_comments")
@@ -87,6 +87,10 @@ Deno.serve(async (req) => {
           .order("created_at", { ascending: true });
         comments = commentRows ?? [];
       }
+      // §11 — internal notes are only visible to a consultant; every other
+      // role (including the client firm's own owner/admin) sees only
+      // client-visible comments, same as the client would.
+      if (role !== "consultant") comments = comments.filter((c) => c.visibility !== "internal");
       return new Response(JSON.stringify({ items: items ?? [], comments }), {
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });

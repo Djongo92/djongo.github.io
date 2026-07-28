@@ -18,11 +18,15 @@ import { exportCategoryPdf } from "@/lib/categoryPdf";
 import { practiceAreaLabel } from "@/lib/practiceAreas";
 import { DMV_MARKETS } from "@/lib/marketVisibilityConfig";
 import { isDemoMode } from "@/lib/demoMode";
+import { useAuditSnapshots, type AuditSnapshot } from "@/hooks/useAuditSnapshots";
+import BeforeAfterComparison from "@/components/consultant/BeforeAfterComparison";
+import { toast } from "sonner";
 import type { PeerStats } from "../../../supabase/functions/_shared/percentileFormula";
 
 interface AnalyticsProps {
   audits: AuditRow[];
   history: HistoryRow[];
+  snapshots?: AuditSnapshot[];
   onOpenDashboard?: () => void;
   onCorrected?: () => void;
 }
@@ -45,7 +49,7 @@ const SCORE_FIELD_FOR: Record<CategoryKey, keyof AuditRow> = {
 
 const formatPct = (n: number) => `${Math.round(n * 100)}%`;
 
-const Analytics = ({ audits, history, onOpenDashboard, onCorrected }: AnalyticsProps) => {
+const Analytics = ({ audits, history, snapshots = [], onOpenDashboard, onCorrected }: AnalyticsProps) => {
   const primary = audits[0];
   const { goals } = useScoreGoals();
   const { user } = useAuth();
@@ -55,6 +59,19 @@ const Analytics = ({ audits, history, onOpenDashboard, onCorrected }: AnalyticsP
   // nuance applies. In a firm, mirrors canEditFirmProfile — a read-only
   // executive or partner contributor can see the evidence but not dispute it.
   const canDispute = !!user && !isDemoMode() && (!team || can(myRole, "canEditFirmProfile"));
+  const { saveSnapshot, saving: savingSnapshot } = useAuditSnapshots();
+
+  const handleSaveSnapshot = async () => {
+    if (!primary) return;
+    const label = window.prompt("Name this snapshot (e.g. \"Before engagement\", \"End of Q1\")");
+    if (!label?.trim()) return;
+    const result = await saveSnapshot(primary.id, label.trim());
+    if ("error" in result) toast.error(result.error);
+    else {
+      toast.success("Snapshot saved");
+      onCorrected?.();
+    }
+  };
 
   const categories = useMemo(() => {
     if (!primary) return null;
@@ -165,9 +182,23 @@ const Analytics = ({ audits, history, onOpenDashboard, onCorrected }: AnalyticsP
             metrics met the minimum sample size{primary.sample_size != null ? ` (smallest sample: ${primary.sample_size} firms)` : ""}.
           </p>
         )}
+        {!isDemoMode() && (
+          <button
+            onClick={handleSaveSnapshot}
+            disabled={savingSnapshot}
+            className="inline-flex items-center gap-1.5 mt-3 text-xs font-body text-muted-foreground hover:text-primary transition-colors disabled:opacity-50"
+          >
+            {savingSnapshot ? "Saving…" : "Save as a named snapshot (before/after)"}
+          </button>
+        )}
       </header>
 
       <div className="max-w-5xl mx-auto px-6">
+        {snapshots.length > 0 && (
+          <div className="mb-6">
+            <BeforeAfterComparison snapshots={snapshots} currentTotalScore={primary.total_score} currentCategories={categories} />
+          </div>
+        )}
         {/* Category tabs */}
         <div className="flex flex-wrap gap-2 mb-6">
           {CATEGORY_ORDER.map((key) => {

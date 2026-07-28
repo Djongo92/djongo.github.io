@@ -20,7 +20,7 @@ Deno.serve(async (req) => {
   if (unauthorized) return unauthorized;
 
   try {
-    const { clientId: rawClientId, accessToken, auditId, isPublic } = await req.json();
+    const { clientId: rawClientId, accessToken, activeFirmId, auditId, isPublic } = await req.json();
 
     if (!rawClientId || typeof rawClientId !== "string") {
       return new Response(JSON.stringify({ error: "clientId is required" }), {
@@ -43,7 +43,7 @@ Deno.serve(async (req) => {
 
     // A real access token — never a client-asserted clientId — decides
     // identity when one is present (see _shared/verifiedClientId.ts).
-    const clientId = await resolveClientId(serviceClient, rawClientId, accessToken);
+    const clientId = await resolveClientId(serviceClient, rawClientId, accessToken, typeof activeFirmId === "string" ? activeFirmId : undefined);
 
     if (publish) {
       const { data: existing, error: existingError } = await serviceClient

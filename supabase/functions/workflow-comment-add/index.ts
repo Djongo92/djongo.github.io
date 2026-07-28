@@ -22,7 +22,8 @@ Deno.serve(async (req) => {
   if (unauthorized) return unauthorized;
 
   try {
-    const { clientId: rawClientId, accessToken, itemId, body: commentBody, voiceNoteDataUrl, evidenceUrl } = await req.json();
+    const { clientId: rawClientId, accessToken, activeFirmId, itemId, body: commentBody, voiceNoteDataUrl, evidenceUrl, visibility } = await req.json();
+    const commentVisibility = visibility === "internal" ? "internal" : "client";
 
     if (!rawClientId || typeof rawClientId !== "string") {
       return new Response(JSON.stringify({ error: "clientId is required" }), {
@@ -53,10 +54,11 @@ Deno.serve(async (req) => {
       { auth: { persistSession: false } },
     );
 
-    const clientId = await resolveClientId(serviceClient, rawClientId, accessToken);
+    const clientId = await resolveClientId(serviceClient, rawClientId, accessToken, typeof activeFirmId === "string" ? activeFirmId : undefined);
 
     let userId: string | null = null;
     let authorLabel = "Team member";
+    let finalVisibility = commentVisibility;
     if (accessToken && typeof accessToken === "string") {
       const { data: userData } = await serviceClient.auth.getUser(accessToken);
       if (userData?.user) {
@@ -67,6 +69,13 @@ Deno.serve(async (req) => {
           return new Response(JSON.stringify({ error: "Your role can't comment on workflow items" }), {
             status: 403, headers: { ...corsHeaders, "Content-Type": "application/json" },
           });
+        }
+        // §11 — only a consultant can mark a note "internal" (hidden from
+        // the client firm's own team); anyone else's attempt is silently
+        // downgraded to client-visible rather than erroring, since it's a
+        // sensible default, not a real mistake worth blocking on.
+        if (finalVisibility === "internal" && membership?.role !== "consultant") {
+          finalVisibility = "client";
         }
       }
     }
@@ -94,6 +103,7 @@ Deno.serve(async (req) => {
         body: hasBody ? commentBody.trim() : null,
         voice_note_data_url: hasVoice ? voiceNoteDataUrl : null,
         evidence_url: typeof evidenceUrl === "string" && evidenceUrl.trim() ? evidenceUrl.trim() : null,
+        visibility: finalVisibility,
       })
       .select("*")
       .single();

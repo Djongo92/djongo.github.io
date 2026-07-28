@@ -33,7 +33,7 @@ Deno.serve(async (req) => {
     );
 
     if (action === "create") {
-      const { clientId: rawClientId, accessToken, itemIds, recipientLabel, expiresInDays } = body;
+      const { clientId: rawClientId, accessToken, activeFirmId, itemIds, recipientLabel, expiresInDays } = body;
       if (!rawClientId || typeof rawClientId !== "string") {
         return new Response(JSON.stringify({ error: "clientId is required" }), {
           status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" },
@@ -45,7 +45,7 @@ Deno.serve(async (req) => {
         });
       }
 
-      const clientId = await resolveClientId(serviceClient, rawClientId, accessToken);
+      const clientId = await resolveClientId(serviceClient, rawClientId, accessToken, typeof activeFirmId === "string" ? activeFirmId : undefined);
 
       if (accessToken && typeof accessToken === "string") {
         const { data: userData } = await serviceClient.auth.getUser(accessToken);
@@ -131,11 +131,16 @@ Deno.serve(async (req) => {
         .from("battle_plan_workflow_items")
         .select("id, title, description, status, due_date, source, source_ref")
         .in("id", scopedItemIds);
+      // §11 — an external partner must never see a consultant's internal
+      // notes, so this filters to client-visible comments only, unlike the
+      // in-app workflow-items-manage list (which the consultant themselves
+      // can see everything through).
       const { data: comments } = scopedItemIds.length > 0
         ? await serviceClient
           .from("battle_plan_workflow_comments")
           .select("id, item_id, author_label, body, voice_note_data_url, evidence_url, created_at")
           .in("item_id", scopedItemIds)
+          .eq("visibility", "client")
           .order("created_at", { ascending: true })
         : { data: [] };
 
