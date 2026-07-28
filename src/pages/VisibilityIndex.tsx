@@ -7,6 +7,8 @@ import { toCsv, downloadCsv } from "@/lib/csv";
 import { setPageMeta } from "@/lib/pageMeta";
 import { isDemoMode } from "@/lib/demoMode";
 import { DEMO_RANKINGS, DEMO_DOMAIN } from "@/data/demoData";
+import { computeMeasuredTotals } from "@/lib/measuredScore";
+import type { CategoryKey } from "@/lib/visibilityCategories";
 
 const EMPTY_STEPS = [
   { n: 1, label: "Run a full Market Visibility audit of your firm", icon: Gauge },
@@ -14,7 +16,7 @@ const EMPTY_STEPS = [
   { n: 3, label: "Publish it — your firm appears here, ranked", icon: Eye },
 ] as const;
 
-interface AuditRow {
+export interface AuditRow {
   [key: string]: unknown;
   audited_domain: string;
   display_name: string | null;
@@ -22,6 +24,35 @@ interface AuditRow {
   total_score: number;
   published_at: string | null;
   verified_at: string | null;
+  // Present on real rows only — demo rows are illustrative flat numbers with
+  // no per-category breakdown to compute a measured-only percentage from.
+  performance_score?: number;
+  social_score?: number;
+  seo_authority_score?: number;
+  thought_leadership_score?: number;
+  reputation_score?: number;
+  provenance?: Record<string, string>;
+}
+
+/**
+ * Percentage headline for a leaderboard row: real rows use the same
+ * measured-categories-only denominator the private dashboard already
+ * applies (a firm with SEO & Authority not yet configured shouldn't read as
+ * artificially low just because that category is an unmeasured 0, not an
+ * earned one) — demo rows fall back to a flat /200 since there's no
+ * per-category provenance to fabricate for illustrative fictional firms.
+ */
+export function measuredPercentage(row: AuditRow): number {
+  if (row.provenance === undefined) return Math.round((row.total_score / 200) * 100);
+  const categories: Record<CategoryKey, { score: number; provenance: string }> = {
+    performance: { score: row.performance_score ?? 0, provenance: row.provenance?.performance ?? "missing" },
+    social: { score: row.social_score ?? 0, provenance: row.provenance?.social ?? "missing" },
+    seoAuthority: { score: row.seo_authority_score ?? 0, provenance: row.provenance?.seoAuthority ?? "missing" },
+    thoughtLeadership: { score: row.thought_leadership_score ?? 0, provenance: row.provenance?.thoughtLeadership ?? "missing" },
+    reputation: { score: row.reputation_score ?? 0, provenance: row.provenance?.reputation ?? "missing" },
+  };
+  const measured = computeMeasuredTotals(categories);
+  return measured.measuredMax > 0 ? Math.round((measured.score / measured.measuredMax) * 100) : 0;
 }
 
 const PEER_GROUP_LABEL: Record<string, string> = Object.fromEntries(PEER_GROUPS.map((p) => [p.value, p.label]));
@@ -58,7 +89,7 @@ const VisibilityIndex = () => {
       }
       const { data, error } = await supabase
         .from("market_visibility_audits")
-        .select("audited_domain, display_name, peer_group, total_score, published_at, verified_at")
+        .select("audited_domain, display_name, peer_group, total_score, published_at, verified_at, performance_score, social_score, seo_authority_score, thought_leadership_score, reputation_score, provenance")
         .eq("market", market)
         .eq("is_public", true)
         .order("total_score", { ascending: false });
@@ -184,7 +215,10 @@ const VisibilityIndex = () => {
                       {r.display_name && <p className="text-[10px] text-muted-foreground font-body">{r.audited_domain}</p>}
                     </div>
                   </div>
-                  <span className="font-display text-base text-emerald-500 font-semibold">{Math.round(r.total_score)} <span className="text-xs text-muted-foreground">/200</span></span>
+                  <span className="text-right">
+                    <span className="font-display text-base text-emerald-500 font-semibold block">{measuredPercentage(r)}%</span>
+                    <span className="text-[10px] text-muted-foreground font-body">{Math.round(r.total_score)}/200</span>
+                  </span>
                 </div>
               ))}
             </div>
