@@ -13,6 +13,7 @@ import RecognitionIndex from "./pages/RecognitionIndex.tsx";
 import OpsDirectoryQueue from "./pages/OpsDirectoryQueue.tsx";
 import OpsRateLimits from "./pages/OpsRateLimits.tsx";
 import JoinFirm from "./pages/JoinFirm.tsx";
+import PartnerReview from "./pages/PartnerReview.tsx";
 
 const queryClient = new QueryClient();
 
@@ -41,6 +42,7 @@ const App = () => {
           <Route path="/recognition-index/:market" element={<RecognitionIndex />} />
           <Route path="/teaser" element={<Teaser />} />
           <Route path="/join/:token" element={<JoinFirm />} />
+          <Route path="/partner-review/:linkId" element={<PartnerReview />} />
           <Route path="/ops/directory-queue" element={<OpsDirectoryQueue />} />
           <Route path="/ops/rate-limits" element={<OpsRateLimits />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}

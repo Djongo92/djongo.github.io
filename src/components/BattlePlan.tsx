@@ -1,12 +1,13 @@
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Swords, X, Download, CheckCircle2, Circle, Loader2, Flame, Map, Target, Gauge, Trophy, UserSquare, ShieldCheck } from "lucide-react";
+import { Swords, X, Download, CheckCircle2, Circle, Loader2, Flame, Map, Target, Gauge, Trophy, UserSquare, ShieldCheck, ListChecks } from "lucide-react";
 import { useBattlePlanCache } from "@/hooks/useBattlePlanCache";
 import { useFirmContext } from "@/hooks/useFirmContext";
 import { useFirmLogo } from "@/hooks/useFirmLogo";
 import { useBattlePlanMilestones } from "@/hooks/useBattlePlanMilestones";
 import ScoreRing from "@/components/visibility/ScoreRing";
 import MilestoneCelebration from "@/components/visibility/MilestoneCelebration";
+import WorkflowBoard from "@/components/workflow/WorkflowBoard";
 import { toast } from "sonner";
 
 interface Props {
@@ -34,7 +35,11 @@ const BADGES = [
 const BattlePlan = ({ readChaptersCount, totalChapters, implementationScore }: Props) => {
   const [open, setOpen] = useState(false);
   const [generating, setGenerating] = useState(false);
+  const [tab, setTab] = useState<"checklist" | "workflow">("checklist");
   const { roast, competitor, roadmap, maturity, headline, bio, visibilityScore } = useBattlePlanCache();
+  const roadmapActionSeeds = (roadmap?.phases ?? []).flatMap((phase) =>
+    phase.actions.map((a) => ({ title: a.title, description: a.why, phaseLabel: phase.label, chapterRef: a.chapterRef })),
+  );
   const { context } = useFirmContext();
   const { logo: logoDataUrl } = useFirmLogo();
 
@@ -174,6 +179,31 @@ const BattlePlan = ({ readChaptersCount, totalChapters, implementationScore }: P
                   })}
                 </div>
 
+                <div className="flex gap-2 mb-6 border-b border-border/40">
+                  {(["checklist", "workflow"] as const).map((t) => (
+                    <button
+                      key={t}
+                      onClick={() => setTab(t)}
+                      className={`px-3 py-2 text-xs font-body border-b-2 -mb-px transition-colors ${
+                        tab === t ? "border-gold text-foreground" : "border-transparent text-muted-foreground hover:text-foreground"
+                      }`}
+                    >
+                      {t === "checklist" ? "Checklist" : "Workflow"}
+                    </button>
+                  ))}
+                </div>
+
+                {tab === "workflow" && (
+                  <div className="mb-6">
+                    <div className="flex items-center gap-2 mb-3">
+                      <ListChecks className="w-4 h-4 text-gold-light" />
+                      <p className="text-sm text-foreground font-body">Assign, comment, approve, and re-measure</p>
+                    </div>
+                    <WorkflowBoard roadmapActions={roadmapActionSeeds} />
+                  </div>
+                )}
+
+                {tab === "checklist" && (
                 <div className="space-y-2 mb-6">
                   <p className="text-[10px] tracking-[0.2em] uppercase text-muted-foreground font-body mb-1">Core inputs</p>
                   {coreSteps.map((s) => (
@@ -231,6 +261,7 @@ const BattlePlan = ({ readChaptersCount, totalChapters, implementationScore }: P
                     </div>
                   ))}
                 </div>
+                )}
 
                 <div className="bg-gold/5 border-l-4 border-gold/60 p-4 rounded-r-sm mb-6">
                   <p className="text-[10px] tracking-[0.2em] uppercase text-gold-light font-body mb-1">Included automatically</p>

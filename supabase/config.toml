@@ -170,3 +170,12 @@ verify_jwt = false
 
 [functions.visibility-audit-dispute]
 verify_jwt = false
+
+[functions.workflow-items-manage]
+verify_jwt = false
+
+[functions.workflow-comment-add]
+verify_jwt = false
+
+[functions.workflow-partner-link]
+verify_jwt = false
