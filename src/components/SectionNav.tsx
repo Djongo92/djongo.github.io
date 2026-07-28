@@ -36,7 +36,13 @@ const SectionNav = ({ chapter }: SectionNavProps) => {
   if (headings.length < 2) return null;
 
   return (
-    <nav className="hidden xl:block fixed left-8 top-1/2 -translate-y-1/2 z-20 print:hidden">
+    // Offsets past the desktop app sidebar (width exposed via --legalos-sidebar-w
+    // by AppShell) rather than a raw viewport-left offset, which used to land
+    // this rail directly on top of the sidebar's own nav items.
+    <nav
+      className="hidden xl:block fixed top-1/2 -translate-y-1/2 z-20 print:hidden"
+      style={{ left: "calc(var(--legalos-sidebar-w, 14rem) + 2rem)" }}
+    >
       <ul className="space-y-2 max-w-[180px]">
         {headings.map((h, i) => (
           <li key={h.index}>
