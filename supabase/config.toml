@@ -179,3 +179,9 @@ verify_jwt = false
 
 [functions.workflow-partner-link]
 verify_jwt = false
+
+[functions.executive-report-schedule]
+verify_jwt = false
+
+[functions.executive-report-monthly]
+verify_jwt = false

@@ -28,6 +28,7 @@ import Campaigns from "@/components/dashboard/Campaigns";
 import PeerPositionBar from "@/components/visibility/PeerPositionBar";
 import PeerScatterMap from "@/components/visibility/PeerScatterMap";
 import MarketVisibilityScore from "@/components/MarketVisibilityScore";
+import ExecutiveReport from "@/components/ExecutiveReport";
 import WhatIfSimulator from "@/components/visibility/WhatIfSimulator";
 import type { WorkshopToolId } from "@/lib/handoff";
 import { computeScoreDelta } from "@/lib/scoreTrend";
@@ -692,6 +693,11 @@ const CommandCenter = ({
                 );
               })}
             </div>
+          </div>
+
+          {/* Executive Report — its own artifact, not a shortened dashboard */}
+          <div className="mb-8">
+            <ExecutiveReport primaryAudit={primary} history={history} />
           </div>
 
           {/* Quick Actions */}
