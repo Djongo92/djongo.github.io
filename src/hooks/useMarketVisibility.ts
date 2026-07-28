@@ -40,6 +40,15 @@ export interface RunAuditInput {
   peerGroup: string;
   gbpListed: boolean;
   social?: SocialSelfReport;
+  // §7 — optional peer-group refinement, self-reported like everything else
+  // at intake (see peerDimensions.ts). Omitting these scores exactly as
+  // before; they only narrow the live Social/Thought Leadership peer
+  // comparison further when there's enough sample to do so meaningfully.
+  firmSize?: string;
+  officeCount?: string;
+  serviceModel?: string;
+  specialization?: string;
+  marketTier?: string;
 }
 
 export const useMarketVisibility = () => {

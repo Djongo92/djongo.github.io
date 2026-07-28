@@ -181,6 +181,14 @@ export interface AuditRow {
   reviewed_by?: string | null;
   manual_override?: boolean;
   manual_override_reason?: string | null;
+  /** §7 — optional peer-group refinement, self-reported at intake. Only
+   *  firm_size narrows the live Social/Thought Leadership peer comparison
+   *  today; the rest are captured for future use. */
+  firm_size?: string | null;
+  office_count?: string | null;
+  service_model?: string | null;
+  specialization?: string | null;
+  market_tier?: string | null;
 }
 
 export interface HistoryRow {

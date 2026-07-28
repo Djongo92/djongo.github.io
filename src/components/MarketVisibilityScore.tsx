@@ -5,6 +5,7 @@ import { toast } from "sonner";
 import { useMarketVisibility, type AuditResult } from "@/hooks/useMarketVisibility";
 import { saveVisibilityScore } from "@/hooks/useBattlePlanCache";
 import { DMV_MARKETS, PEER_GROUPS } from "@/lib/marketVisibilityConfig";
+import { FIRM_SIZE_OPTIONS, SERVICE_MODEL_OPTIONS } from "@/lib/peerDimensions";
 import { isDemoMode } from "@/lib/demoMode";
 import { DEMO_AUDIT, DEMO_VISIBILITY_SCORE, DEMO_DOMAIN, DEMO_DISPLAY_NAME } from "@/data/demoData";
 import { consumeAuditPrefill } from "@/lib/auditPrefill";
@@ -54,6 +55,8 @@ const MarketVisibilityScore = () => {
   const [displayName, setDisplayName] = useState(demoMode ? DEMO_DISPLAY_NAME : (prefill?.displayName ?? ""));
   const [market, setMarket] = useState(demoMode ? DEMO_VISIBILITY_SCORE.market : (prefill?.market ?? "serbia"));
   const [peerGroup, setPeerGroup] = useState(demoMode ? DEMO_VISIBILITY_SCORE.peerGroup : "regional");
+  const [firmSize, setFirmSize] = useState("");
+  const [serviceModel, setServiceModel] = useState("");
   const [gbpListed, setGbpListed] = useState(demoMode);
   const [followers, setFollowers] = useState("");
   const [posts30d, setPosts30d] = useState("");
@@ -93,6 +96,8 @@ const MarketVisibilityScore = () => {
       market,
       peerGroup,
       gbpListed,
+      firmSize: firmSize || undefined,
+      serviceModel: serviceModel || undefined,
       social: hasSocialInput
         ? {
           followers: Number(followers) || 0,
@@ -363,6 +368,46 @@ const MarketVisibilityScore = () => {
                           />
                           We have a claimed, active Google Business Profile
                         </label>
+
+                        <div>
+                          <p className="text-[10px] tracking-[0.2em] uppercase text-muted-foreground font-body mb-2">
+                            Peer refinement (optional)
+                          </p>
+                          <div className="grid grid-cols-2 gap-3">
+                            <div>
+                              <label className="block text-xs text-muted-foreground font-body mb-1.5">Firm size</label>
+                              <select
+                                value={firmSize}
+                                onChange={(e) => setFirmSize(e.target.value)}
+                                disabled={demoMode}
+                                className="w-full bg-background border border-border rounded-sm px-3 py-2.5 text-sm font-body focus:outline-none focus:border-emerald-500/50 disabled:opacity-60"
+                              >
+                                <option value="">Not specified</option>
+                                {FIRM_SIZE_OPTIONS.map((o) => (
+                                  <option key={o.value} value={o.value}>{o.label}</option>
+                                ))}
+                              </select>
+                            </div>
+                            <div>
+                              <label className="block text-xs text-muted-foreground font-body mb-1.5">Service model</label>
+                              <select
+                                value={serviceModel}
+                                onChange={(e) => setServiceModel(e.target.value)}
+                                disabled={demoMode}
+                                className="w-full bg-background border border-border rounded-sm px-3 py-2.5 text-sm font-body focus:outline-none focus:border-emerald-500/50 disabled:opacity-60"
+                              >
+                                <option value="">Not specified</option>
+                                {SERVICE_MODEL_OPTIONS.map((o) => (
+                                  <option key={o.value} value={o.value}>{o.label}</option>
+                                ))}
+                              </select>
+                            </div>
+                          </div>
+                          <p className="text-[11px] text-muted-foreground font-body mt-1.5">
+                            Narrows your Social and Thought Leadership peer comparison to firms of a similar size, once there
+                            are enough of them — otherwise it falls back to your peer group as a whole.
+                          </p>
+                        </div>
 
                         <div className="flex gap-2">
                           <button
