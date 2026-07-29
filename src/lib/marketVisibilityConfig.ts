@@ -33,13 +33,12 @@ export interface MarketConfig {
 
 // Serbia's numbers are independently verified table-by-table against the
 // live Chambers Europe 2026 / Legal 500 EMEA 2026 sites (see the
-// market_directory_data seed migration). Hungary and Romania are as
-// published by a third party, not re-verified — treat them as reference
-// values only until independently checked.
+// market_directory_data seed migration). Serbia-only for now by deliberate
+// scope decision — Hungary/Romania configs existed as unverified
+// third-party reference values with no seed data behind them and were
+// removed rather than left half-supported.
 export const DMV_MARKETS: Record<string, MarketConfig> = {
   serbia: { chambers: { n: 7, deepestBand: 4 }, legal500: { n: 8, deepestTier: 4 }, iflr1000: { n: 2, deepestTier: 3 }, contentWindowDays: 60 },
-  hungary: { chambers: { n: 13, deepestBand: 4 }, legal500: { n: 11, deepestTier: 4 }, iflr1000: { n: 4, deepestTier: 3 }, contentWindowDays: 60 },
-  romania: { chambers: { n: 10, deepestBand: 4 }, legal500: { n: 15, deepestTier: 4 }, iflr1000: { n: 5, deepestTier: 3 }, contentWindowDays: 60 },
 };
 
 export const getMarketConfig = (market: string): MarketConfig | null => DMV_MARKETS[market] ?? null;
