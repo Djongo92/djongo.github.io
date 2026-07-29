@@ -5,7 +5,6 @@ import ChapterView from "@/components/ChapterView";
 import AppShell, { Section } from "@/components/AppShell";
 import GlobalAdvisor from "@/components/GlobalAdvisor";
 import PersonalizeOnboarding from "@/components/PersonalizeOnboarding";
-import DemoOnboardingWizard from "@/components/DemoOnboardingWizard";
 import CoachMarks from "@/components/CoachMarks";
 import CommandPalette, { type PaletteItem } from "@/components/CommandPalette";
 import {
@@ -39,7 +38,7 @@ import { edgeHeaders } from "@/lib/edgeAuth";
 import { getOrCreateClientId } from "@/lib/clientId";
 import { isDemoMode, disableDemoMode, enableDemoMode, consumeDemoWizardPending } from "@/lib/demoMode";
 import { clearSession } from "@/lib/session";
-import { DEMO_AUDIT, DEMO_HISTORY } from "@/data/demoData";
+import { DEMO_AUDIT, DEMO_HISTORY, DEMO_DISPLAY_NAME } from "@/data/demoData";
 import ClaimDataBanner from "@/components/ClaimDataBanner";
 import { DashboardSkeleton, AnalyticsSkeleton, SettingsSkeleton, ProgressSkeleton, WorkshopSkeleton } from "@/components/SectionSkeletons";
 import type { WorkshopToolId } from "@/lib/handoff";
@@ -69,33 +68,56 @@ const WorkshopHistoryModal = lazy(() => import("@/components/WorkshopHistoryModa
 
 const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL as string;
 
-const COACH_MARK_STEPS: CoachMarkStep[] = [
-  {
-    target: "dashboard-score",
-    title: "Your Visibility Score",
-    body: "A real, externally-verified score out of 200 — performance, reputation, thought leadership, and more — compared against firms in your market.",
-  },
-  {
-    target: "nav-workshop",
-    title: "Eleven AI tools live here",
-    body: "Headline testing, competitor teardowns, practice-page audits, and more — each one grounded in your own firm's context, and each one now remembers your firm's voice the more you use it.",
-  },
-  {
-    target: "what-if-simulator",
-    title: "See a move before you make it",
-    body: "Drag real inputs — PageSpeed scores, LinkedIn followers, posting cadence — and watch your actual score recompute live, using the same formula the audit uses.",
-  },
-  {
-    target: "nav-progress",
-    title: "It all rolls into a living Battle Plan",
-    body: "My Progress isn't just a PDF export anymore — it's a plan you build over time, with real previews of every section, badges for real milestones, and campaigns to track what you're actually working on right now.",
-  },
-  {
-    target: "category-methodology",
-    title: "Every number shows its work",
-    body: "Click the ⓘ on any category for the exact formula and this firm's actual measured inputs — not just an asserted score. The same evidence appears in the Battle Plan.",
-  },
-];
+// A single sequenced tour, shared by demo and real accounts, that actually
+// walks Dashboard → Workshop → Progress (via each step's `section`) instead
+// of only annotating whichever screen happened to be open — previously a
+// text-only DemoOnboardingWizard modal covered Workshop/Battle Plan in the
+// abstract while CoachMarks separately pointed at dashboard-only elements,
+// two disconnected onboarding moments for a demo visitor to sit through.
+// Demo gets one extra framing slide up front; everything after that is
+// identical, so a real account's first-open tour is exactly as thorough.
+function buildTourSteps(includeIntro: boolean): CoachMarkStep[] {
+  const steps: CoachMarkStep[] = [];
+  if (includeIntro) {
+    steps.push({
+      title: `Meet ${DEMO_DISPLAY_NAME}`,
+      body: "A fictional firm, invented for this tour. Every score, chart, and workshop run you'll see is synthetic — nothing here is a real business, and nothing you do touches a real account. This is a real walkthrough of the actual product, not a mockup.",
+    });
+  }
+  steps.push(
+    {
+      section: "dashboard",
+      target: "dashboard-score",
+      title: "Your Visibility Score",
+      body: "A real, externally-verified score out of 200 — performance, reputation, thought leadership, and more — compared against firms in your market.",
+    },
+    {
+      section: "dashboard",
+      target: "category-methodology",
+      title: "Every number shows its work",
+      body: "Click the ⓘ on any category for the exact formula and this firm's actual measured inputs — not just an asserted score. The same evidence appears in the Battle Plan.",
+    },
+    {
+      section: "dashboard",
+      target: "what-if-simulator",
+      title: "See a move before you make it",
+      body: "Drag real inputs — PageSpeed scores, LinkedIn followers, posting cadence — and watch your actual score recompute live, using the same formula the audit uses.",
+    },
+    {
+      section: "workshop",
+      target: "workshop-tools-grid",
+      title: "Eleven AI tools live here",
+      body: "Headline testing, competitor teardowns, practice-page audits, and more — each one grounded in your own firm's context, and each one remembers your firm's voice the more you use it.",
+    },
+    {
+      section: "progress",
+      target: "battle-plan",
+      title: "It all rolls into a living Battle Plan",
+      body: "My Progress isn't just a PDF export — it's a plan you build over time, with real previews of every section, badges for real milestones, and campaigns to track what you're actually working on right now.",
+    },
+  );
+  return steps;
+}
 
 type GuidebookView = "toc" | "chapter" | "bookmarks";
 
@@ -133,7 +155,6 @@ const Index = () => {
   const [maturityOpen, setMaturityOpen] = useState(false);
   const [competitorsOpen, setCompetitorsOpen] = useState(false);
   const [workshopHistoryOpen, setWorkshopHistoryOpen] = useState(false);
-  const [demoWizardOpen, setDemoWizardOpen] = useState(false);
   const coachMarks = useCoachMarks();
 
   // A real account's identity key is the same client_id column an
@@ -187,33 +208,31 @@ const Index = () => {
     }
   }, [authenticated, hasContext]);
 
-  // Greet a freshly-entered demo session with a short orientation tour —
+  // Greet a freshly-entered demo session with the full sequenced tour —
   // consumeDemoWizardPending is a one-shot flag set only by enableDemoMode,
-  // so this never re-fires on an ordinary reload of an already-open demo tab.
+  // so this never re-fires on an ordinary reload of an already-open demo
+  // tab. Still gated on hasSeen() (shared with the real-account path below)
+  // so re-entering demo mode after already sitting through the tour once
+  // — in demo or on a real account — doesn't repeat it.
   useEffect(() => {
-    if (demoActive && consumeDemoWizardPending()) {
-      const t = setTimeout(() => setDemoWizardOpen(true), 600);
+    const freshEntry = demoActive && consumeDemoWizardPending();
+    if (freshEntry && !coachMarks.hasSeen()) {
+      const t = setTimeout(() => coachMarks.start(), 600);
       return () => clearTimeout(t);
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [demoActive]);
 
-  // First-open coach marks point at real, live UI (score ring, Workshop
-  // nav, My Progress nav) rather than a mockup, so they only make sense on
-  // the Dashboard. Demo visitors get them right after the wizard closes;
-  // real accounts get them on their first Dashboard view, once, ever.
+  // Real accounts get the same tour (minus the demo's fictional-firm
+  // framing slide) on their first Dashboard view, once, ever. The tour
+  // itself walks on to Workshop/Progress from there — this only needs to
+  // catch the starting point.
   useEffect(() => {
     if (!authenticated || demoActive || coachMarks.hasSeen() || section !== "dashboard") return;
     const t = setTimeout(() => coachMarks.start(), 1500);
     return () => clearTimeout(t);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [authenticated, demoActive, section]);
-
-  const closeDemoWizard = () => {
-    setDemoWizardOpen(false);
-    if (!coachMarks.hasSeen()) {
-      setTimeout(() => coachMarks.start(), 300);
-    }
-  };
 
   const handleDemo = () => {
     // enableDemoMode always ends in a full page reload, which remounts
@@ -406,8 +425,12 @@ const Index = () => {
         <CompetitorTracker open={competitorsOpen} onClose={() => setCompetitorsOpen(false)} primaryAudit={primaryAudit} />
         <WorkshopHistoryModal open={workshopHistoryOpen} onClose={() => setWorkshopHistoryOpen(false)} onOpenWorkshopTool={openWorkshopTool} />
       </Suspense>
-      <DemoOnboardingWizard open={demoWizardOpen} onClose={closeDemoWizard} />
-      <CoachMarks steps={COACH_MARK_STEPS} active={coachMarks.active} onDone={coachMarks.finish} />
+      <CoachMarks
+        steps={buildTourSteps(demoActive)}
+        active={coachMarks.active}
+        onDone={coachMarks.finish}
+        onNavigate={setSection}
+      />
       <CommandPalette items={paletteItems} open={paletteOpen} onOpenChange={setPaletteOpen} />
     </>
   );

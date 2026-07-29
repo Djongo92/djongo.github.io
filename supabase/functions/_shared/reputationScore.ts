@@ -28,6 +28,9 @@ export interface DirectoryRow {
   chambers: { rankedTables?: Record<string, number> } | null;
   legal500: { rankedTables?: Record<string, number> } | null;
   iflr1000: { rankedTables?: Record<string, number> } | null;
+  /** Only used by directoryStandingIndex.ts's public passthrough — not read
+   * for the fuzzy-match/scoring path in this file. */
+  last_verified_at?: string | null;
 }
 
 export interface ReputationResult {

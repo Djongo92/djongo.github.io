@@ -39,7 +39,7 @@ Deno.serve(async (req) => {
 
     const { data, error } = await serviceClient
       .from("market_directory_data")
-      .select("firm_name, firm_domain, firm_type, chambers, legal500, iflr1000")
+      .select("firm_name, firm_domain, firm_type, chambers, legal500, iflr1000, last_verified_at")
       .eq("market", market);
 
     if (error || !data) {

@@ -183,7 +183,7 @@ const Workshop = ({ onBack, initialToolId }: Props) => {
       <div className="max-w-5xl mx-auto px-6 py-10">
         <AnimatePresence mode="wait">
           {!active ? (
-            <motion.div key="grid" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <motion.div key="grid" data-coachmark="workshop-tools-grid" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="grid grid-cols-1 md:grid-cols-2 gap-4">
               {TOOLS.map((t, i) => (
                 <motion.button
                   key={t.id}

@@ -65,6 +65,13 @@ describe("computeDirectoryStandingIndex", () => {
     expect(intlA.chambers.qualityStats?.sampleSize).toBe(rows.length);
   });
 
+  it("passes last_verified_at through as lastVerifiedAt", () => {
+    const rows = [row({ firm_name: "A", last_verified_at: "2026-01-01T00:00:00Z" }), row({ firm_name: "B" })];
+    const result = computeDirectoryStandingIndex("serbia", rows);
+    expect(result.find((r) => r.firmName === "A")?.lastVerifiedAt).toBe("2026-01-01T00:00:00Z");
+    expect(result.find((r) => r.firmName === "B")?.lastVerifiedAt).toBeNull();
+  });
+
   it("sorts descending by total directory points", () => {
     const rows = [
       row({ firm_name: "Low", chambers: { rankedTables: { BF: 4 } } }),

@@ -3,6 +3,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { ArrowRight, Sparkles, ShieldCheck, Loader2 } from "lucide-react";
 import GoldParticles from "./GoldParticles";
 import LiveScoreTeaser from "./LiveScoreTeaser";
+import DemoScoreTeaser from "./DemoScoreTeaser";
 import { useAuth } from "@/hooks/useAuth";
 
 interface SignInGateProps {
@@ -23,6 +24,10 @@ const SignInGate = ({ onDemo, sessionExpired, onDismissSessionExpired }: SignInG
   const [error, setError] = useState<string | null>(null);
   const [authOpen, setAuthOpen] = useState(!!sessionExpired);
   const [teaserFirmName, setTeaserFirmName] = useState<string | null>(null);
+  // A parallel path to the real signup flow, walkable with zero dependency
+  // on real auth (which needs a confirmation email to actually arrive) —
+  // same teaser → reveal → unlock beats, canned sample data, guaranteed to work.
+  const [demoTeaserOpen, setDemoTeaserOpen] = useState(false);
 
   const emailLooksValid = /\S+@\S+\.\S+/.test(email);
 
@@ -115,7 +120,17 @@ const SignInGate = ({ onDemo, sessionExpired, onDismissSessionExpired }: SignInG
           </div>
 
           <AnimatePresence initial={false}>
-            {!authOpen ? (
+            {demoTeaserOpen ? (
+              <motion.div
+                key="demo-teaser"
+                initial={{ opacity: 0, y: -8 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -8 }}
+                className="mt-6 mx-auto w-full"
+              >
+                <DemoScoreTeaser onUnlock={onDemo} onBack={() => setDemoTeaserOpen(false)} />
+              </motion.div>
+            ) : !authOpen ? (
               <motion.div
                 key="collapsed"
                 initial={{ opacity: 0 }}
@@ -124,7 +139,7 @@ const SignInGate = ({ onDemo, sessionExpired, onDismissSessionExpired }: SignInG
                 className="mt-6 flex flex-col sm:flex-row items-center justify-center gap-3"
               >
                 <button
-                  onClick={onDemo}
+                  onClick={() => setDemoTeaserOpen(true)}
                   className="w-full sm:w-auto bg-primary text-primary-foreground py-3 px-6 text-sm font-body font-medium tracking-wide rounded-xl hover:bg-gold-light transition-all relative overflow-hidden group flex items-center justify-center gap-2 tap-scale"
                 >
                   <Sparkles className="w-4 h-4" />
@@ -151,7 +166,7 @@ const SignInGate = ({ onDemo, sessionExpired, onDismissSessionExpired }: SignInG
                   No signup, nothing saved to a real account, exit anytime.
                 </p>
                 <button
-                  onClick={onDemo}
+                  onClick={() => { setAuthOpen(false); setDemoTeaserOpen(true); }}
                   className="w-full bg-primary text-primary-foreground py-3.5 text-sm font-body font-medium tracking-wide rounded-xl hover:bg-gold-light transition-all relative overflow-hidden group flex items-center justify-center gap-2 tap-scale mb-5"
                 >
                   <Sparkles className="w-4 h-4" />
