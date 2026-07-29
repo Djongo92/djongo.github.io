@@ -10,7 +10,7 @@ import CoachMarks from "@/components/CoachMarks";
 import CommandPalette, { type PaletteItem } from "@/components/CommandPalette";
 import {
   LayoutDashboard, BarChart3, Hammer, Award, BookOpen, Settings as SettingsIcon,
-  Gauge, FileText, Users, History, Eye, Landmark,
+  Gauge, FileText, Users, History, Eye,
 } from "lucide-react";
 import {
   SwipeIcon, CopywriterIcon, RewriteIcon, AutopsyIcon, AuditIcon,
@@ -288,8 +288,10 @@ const Index = () => {
     visibilityData?.history ?? [],
     primaryAudit ? { audited_domain: primaryAudit.audited_domain, market: primaryAudit.market } : null,
   );
-  const visibilityIndexHref = primaryAudit ? `${import.meta.env.BASE_URL}visibility-index/${primaryAudit.market}` : undefined;
-  const recognitionIndexHref = primaryAudit ? `${import.meta.env.BASE_URL}recognition-index/${primaryAudit.market}` : undefined;
+  // Full-score and directory-only leaderboards are one merged page with a
+  // toggle now (MarketIndex.tsx) — this opens on the Full Score tab by
+  // default since visibility-index is the more complete of its two URLs.
+  const rankingsHref = primaryAudit ? `${import.meta.env.BASE_URL}visibility-index/${primaryAudit.market}` : undefined;
 
   // The sidebar's "Workshop" shortcut deep-links to a concrete next step
   // instead of just duplicating the plain "Workshop" nav item above it
@@ -346,11 +348,8 @@ const Index = () => {
       icon: WORKSHOP_TOOL_ICONS[toolId],
       onSelect: () => openWorkshopTool(toolId),
     })),
-    ...(visibilityIndexHref
-      ? [{ id: "public-visibility", label: "Visibility Index", group: "Public pages", icon: <Eye className="w-4 h-4" />, onSelect: () => window.open(visibilityIndexHref, "_blank") }]
-      : []),
-    ...(recognitionIndexHref
-      ? [{ id: "public-recognition", label: "Recognition Index", group: "Public pages", icon: <Landmark className="w-4 h-4" />, onSelect: () => window.open(recognitionIndexHref, "_blank") }]
+    ...(rankingsHref
+      ? [{ id: "public-rankings", label: "Rankings", group: "Public pages", icon: <Eye className="w-4 h-4" />, onSelect: () => window.open(rankingsHref, "_blank") }]
       : []),
   ];
 
@@ -481,8 +480,7 @@ const Index = () => {
         onOpenWorkshopHistory={() => setWorkshopHistoryOpen(true)}
         onOpenWorkshop={() => goToSection("workshop")}
         workshopRecommendation={workshopRecommendation}
-        visibilityIndexHref={visibilityIndexHref}
-        recognitionIndexHref={recognitionIndexHref}
+        rankingsHref={rankingsHref}
       >
         <AnimatePresence mode="wait">
           <motion.div

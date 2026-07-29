@@ -2,7 +2,7 @@ import { ReactNode, useEffect, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import {
   LayoutDashboard, Hammer, BookOpen, BarChart3, FlaskConical, Settings, Circle, LogOut,
-  Gauge, FileText, Eye, Users, History, Bell, Landmark, MoreHorizontal, X, Award,
+  Gauge, FileText, Eye, Users, History, Bell, MoreHorizontal, X, Award,
   ArrowRight, ExternalLink, TrendingUp, TrendingDown, ChevronsLeft, ChevronsRight, Search,
 } from "lucide-react";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
@@ -59,8 +59,11 @@ interface AppShellProps {
    * generic "More in Workshop" shortcut that duplicated the plain "Workshop" nav item above it
    * with an identical destination. Label is rendered as-is (already includes its own prefix). */
   workshopRecommendation?: { label: string; onClick: () => void };
-  visibilityIndexHref?: string;
-  recognitionIndexHref?: string;
+  /** The full-score and directory-only leaderboards are one merged page
+   *  with a toggle now (MarketIndex.tsx), reachable via either of two
+   *  URLs — so this is a single sidebar entry, not two, even though it
+   *  used to point at two separate pages. */
+  rankingsHref?: string;
 }
 
 const NAV_ITEMS: { id: Section; label: string; mobileLabel?: string; icon: typeof LayoutDashboard }[] = [
@@ -96,7 +99,7 @@ const SIDEBAR_COLLAPSED_KEY = "legalos_sidebar_collapsed";
 const AppShell = ({
   active, onNavigate, children, demoMode, onExitDemo, onSignOut, firmName, firmLogo, scoreLabel, scoreDelta, notifications, unreadCount, onOpenNotifications,
   onOpenSettings, onOpenPalette, onOpenMaturity, onOpenBattlePlan, onOpenCompetitors, onOpenWorkshopHistory, onOpenWorkshop, workshopRecommendation,
-  visibilityIndexHref, recognitionIndexHref,
+  rankingsHref,
 }: AppShellProps) => {
   const [moreOpen, setMoreOpen] = useState(false);
   const [collapsed, setCollapsed] = useState(() => localStorage.getItem(SIDEBAR_COLLAPSED_KEY) === "1");
@@ -327,44 +330,25 @@ const AppShell = ({
             </>
           )}
 
-          {(visibilityIndexHref || recognitionIndexHref) && (
+          {rankingsHref && (
             <>
               {!collapsed && <NavGroupLabel>Public pages</NavGroupLabel>}
               <nav className={`px-3 space-y-1 ${collapsed ? "mt-4" : ""}`}>
-                {visibilityIndexHref && (
-                  <a
-                    href={visibilityIndexHref}
-                    target="_blank"
-                    rel="noreferrer"
-                    title={collapsed ? "Visibility Index" : undefined}
-                    className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-body text-muted-foreground hover:text-foreground hover:bg-secondary/50 transition-colors tap-scale ${collapsed ? "justify-center" : ""}`}
-                  >
-                    <Eye className="w-4 h-4 shrink-0" />
-                    {!collapsed && (
-                      <>
-                        Visibility Index
-                        <ExternalLink className="w-3 h-3 ml-auto opacity-40" />
-                      </>
-                    )}
-                  </a>
-                )}
-                {recognitionIndexHref && (
-                  <a
-                    href={recognitionIndexHref}
-                    target="_blank"
-                    rel="noreferrer"
-                    title={collapsed ? "Recognition Index" : undefined}
-                    className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-body text-muted-foreground hover:text-foreground hover:bg-secondary/50 transition-colors tap-scale ${collapsed ? "justify-center" : ""}`}
-                  >
-                    <Landmark className="w-4 h-4 shrink-0" />
-                    {!collapsed && (
-                      <>
-                        Recognition Index
-                        <ExternalLink className="w-3 h-3 ml-auto opacity-40" />
-                      </>
-                    )}
-                  </a>
-                )}
+                <a
+                  href={rankingsHref}
+                  target="_blank"
+                  rel="noreferrer"
+                  title={collapsed ? "Rankings" : undefined}
+                  className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-body text-muted-foreground hover:text-foreground hover:bg-secondary/50 transition-colors tap-scale ${collapsed ? "justify-center" : ""}`}
+                >
+                  <Eye className="w-4 h-4 shrink-0" />
+                  {!collapsed && (
+                    <>
+                      Rankings
+                      <ExternalLink className="w-3 h-3 ml-auto opacity-40" />
+                    </>
+                  )}
+                </a>
               </nav>
             </>
           )}
@@ -589,20 +573,13 @@ const AppShell = ({
                 </>
               )}
 
-              {(visibilityIndexHref || recognitionIndexHref) && (
+              {rankingsHref && (
                 <>
                   <p className="px-5 pt-2 pb-1.5 text-[10px] tracking-[0.15em] uppercase text-muted-foreground font-body">Public pages</p>
                   <div className="px-3 pb-2">
-                    {visibilityIndexHref && (
-                      <a href={visibilityIndexHref} target="_blank" rel="noreferrer" className="w-full flex items-center gap-3 px-3 py-3 rounded-xl text-sm font-body text-foreground hover:bg-secondary/50 transition-colors tap-scale">
-                        <Eye className="w-4 h-4 text-primary" /> Visibility Index <ExternalLink className="w-3.5 h-3.5 ml-auto opacity-40" />
-                      </a>
-                    )}
-                    {recognitionIndexHref && (
-                      <a href={recognitionIndexHref} target="_blank" rel="noreferrer" className="w-full flex items-center gap-3 px-3 py-3 rounded-xl text-sm font-body text-foreground hover:bg-secondary/50 transition-colors tap-scale">
-                        <Landmark className="w-4 h-4 text-primary" /> Recognition Index <ExternalLink className="w-3.5 h-3.5 ml-auto opacity-40" />
-                      </a>
-                    )}
+                    <a href={rankingsHref} target="_blank" rel="noreferrer" className="w-full flex items-center gap-3 px-3 py-3 rounded-xl text-sm font-body text-foreground hover:bg-secondary/50 transition-colors tap-scale">
+                      <Eye className="w-4 h-4 text-primary" /> Rankings <ExternalLink className="w-3.5 h-3.5 ml-auto opacity-40" />
+                    </a>
                   </div>
                 </>
               )}

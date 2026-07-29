@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { measuredPercentage, type AuditRow } from "./VisibilityIndex";
+import { measuredPercentage, type AuditRow } from "./MarketIndex";
 
 const baseRow: AuditRow = {
   audited_domain: "example.com",
