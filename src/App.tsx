@@ -7,9 +7,8 @@ import { useReadingTheme } from "@/hooks/useReadingTheme";
 import Index from "./pages/Index.tsx";
 import NotFound from "./pages/NotFound.tsx";
 import Share from "./pages/Share.tsx";
-import VisibilityIndex from "./pages/VisibilityIndex.tsx";
+import MarketIndex from "./pages/MarketIndex.tsx";
 import Teaser from "./pages/Teaser.tsx";
-import RecognitionIndex from "./pages/RecognitionIndex.tsx";
 import OpsDirectoryQueue from "./pages/OpsDirectoryQueue.tsx";
 import OpsRateLimits from "./pages/OpsRateLimits.tsx";
 import JoinFirm from "./pages/JoinFirm.tsx";
@@ -38,8 +37,9 @@ const App = () => {
         <Routes>
           <Route path="/" element={<Index />} />
           <Route path="/share/:id" element={<Share />} />
-          <Route path="/visibility-index/:market" element={<VisibilityIndex />} />
-          <Route path="/recognition-index/:market" element={<RecognitionIndex />} />
+          {/* Same page, two entry URLs — see MarketIndex.tsx's header comment. */}
+          <Route path="/visibility-index/:market" element={<MarketIndex />} />
+          <Route path="/recognition-index/:market" element={<MarketIndex />} />
           <Route path="/teaser" element={<Teaser />} />
           <Route path="/join/:token" element={<JoinFirm />} />
           <Route path="/partner-review/:linkId" element={<PartnerReview />} />

@@ -8,7 +8,7 @@
 //
 // Individual peer scores DO become fair to show once a firm has actually
 // published — that's the same already-public data the Visibility Index
-// leaderboard renders as a ranked list (see VisibilityIndex.tsx) and
+// leaderboard renders as a ranked list (see MarketIndex.tsx) and
 // PeerScatterMap.tsx renders as a 2D competitive map. This bar stays as
 // the compact single-number summary; the scatter map is the richer view
 // built from that same opted-in dataset, not a new exposure of it.

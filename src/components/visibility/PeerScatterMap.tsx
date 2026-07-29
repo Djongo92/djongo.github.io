@@ -3,7 +3,7 @@
 // plotted against every OTHER firm that has opted to publish an audit in
 // the same market + peer group. This is not a new privacy exposure — it
 // reads the exact same `is_public = true` rows the Visibility Index
-// leaderboard already displays (see VisibilityIndex.tsx), just as a richer
+// leaderboard already displays (see MarketIndex.tsx), just as a richer
 // 2D view of that same already-public dataset instead of a single ranked
 // list. Firms that haven't published stay invisible here, same as they're
 // invisible on that leaderboard.
