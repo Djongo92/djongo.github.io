@@ -13,7 +13,7 @@ import { useEffect, useState } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import {
-  Loader2, ArrowRight, Eye, Download, ShieldCheck, Flag, Sparkles, TrendingUp,
+  Loader2, ArrowRight, Eye, Download, ShieldCheck, Flag, Sparkles, TrendingUp, Clock, Users,
 } from "lucide-react";
 import { PEER_GROUPS } from "@/lib/marketVisibilityConfig";
 import { toCsv, downloadCsv } from "@/lib/csv";
@@ -44,6 +44,8 @@ interface FlatExportRow {
   measuredMax: number;
   categoriesMeasured: string;
   weakestCategory: string;
+  needsRefresh: string;
+  thinPeerGroup: string;
 }
 
 const MarketIndex = () => {
@@ -84,6 +86,9 @@ const MarketIndex = () => {
             visibilityPercent: Math.round((r.score / 200) * 100),
             measuredCategoryCount: 5,
             weakestCategoryLabel: null,
+            isStale: false,
+            isLowConfidence: false,
+            peerGroupSampleSize: DEMO_RANKINGS.length,
           })),
         );
         setLoading(false);
@@ -148,6 +153,8 @@ const MarketIndex = () => {
       measuredMax: r.measuredMax,
       categoriesMeasured: `${r.measuredCategoryCount} of 5`,
       weakestCategory: r.weakestCategoryLabel ?? "",
+      needsRefresh: r.isStale ? "Yes" : "No",
+      thinPeerGroup: r.isLowConfidence ? `Yes (n=${r.peerGroupSampleSize})` : "No",
     }));
     const csv = toCsv(flat, [
       { key: "firmName", header: "Firm" },
@@ -160,6 +167,8 @@ const MarketIndex = () => {
       { key: "measuredMax", header: "Measured max" },
       { key: "categoriesMeasured", header: "Categories measured" },
       { key: "weakestCategory", header: "Highest-leverage next step" },
+      { key: "needsRefresh", header: "Needs refresh" },
+      { key: "thinPeerGroup", header: "Thin peer group" },
     ]);
     downloadCsv(`legalos-visibility-index-${market}.csv`, csv);
   };
@@ -261,6 +270,22 @@ const MarketIndex = () => {
                       {r.firmName}
                       {r.verified && <ShieldCheck className="w-3 h-3 text-emerald-500 shrink-0" aria-label="Domain verified" />}
                       <span className="text-[10px] text-muted-foreground font-body">{PEER_GROUP_LABEL[r.peerGroup] ?? "Firm"}</span>
+                      {r.isStale && (
+                        <span
+                          className="inline-flex items-center gap-1 text-[10px] text-amber-500 font-body"
+                          title={r.hasFullAudit ? "This audit hasn't been re-verified in over 90 days" : "This directory data hasn't been re-reviewed in over 120 days"}
+                        >
+                          <Clock className="w-2.5 h-2.5" /> Needs refresh
+                        </span>
+                      )}
+                      {r.isLowConfidence && (
+                        <span
+                          className="inline-flex items-center gap-1 text-[10px] text-muted-foreground/70 font-body"
+                          title="Fewer than 5 firms share this peer group so far — treat the percentage as approximate"
+                        >
+                          <Users className="w-2.5 h-2.5" /> Thin peer group (n={r.peerGroupSampleSize})
+                        </span>
+                      )}
                     </p>
                     {r.hasFullAudit ? (
                       <p className="text-[10px] text-muted-foreground font-body mt-0.5">

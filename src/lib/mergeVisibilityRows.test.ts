@@ -87,4 +87,39 @@ describe("mergeVisibilityRows", () => {
     expect(rows).toHaveLength(1);
     expect(rows[0].peerGroup).toBe("other");
   });
+
+  const NOW = new Date("2026-07-29T00:00:00.000Z").getTime();
+
+  it("flags an audited firm as stale past AUDIT_STALE_AFTER_DAYS since verified_at", () => {
+    const stale: MergeAuditRow = { ...fullyMeasuredAudit, verified_at: "2026-01-01T00:00:00Z" };
+    const fresh: MergeAuditRow = { ...fullyMeasuredAudit, audited_domain: "fresh.com", verified_at: "2026-07-20T00:00:00Z" };
+    const rows = mergeVisibilityRows([stale, fresh], [], 45, NOW);
+    expect(rows.find((r) => r.firmDomain === "bdk-advokati.com")?.isStale).toBe(true);
+    expect(rows.find((r) => r.firmDomain === "fresh.com")?.isStale).toBe(false);
+  });
+
+  it("flags a directory-only firm as stale past DIRECTORY_STALE_AFTER_DAYS since lastVerifiedAt", () => {
+    const staleDirectory: MergeDirectoryFirm = {
+      firmName: "Old Data Firm", firmDomain: "old.com", firmType: "L", directoryPoints: 10, lastVerifiedAt: "2026-01-01T00:00:00Z",
+    };
+    const rows = mergeVisibilityRows([], [staleDirectory], 45, NOW);
+    expect(rows[0].isStale).toBe(true);
+  });
+
+  it("computes peer-group sample size and flags low confidence below the threshold", () => {
+    const localFirms: MergeDirectoryFirm[] = Array.from({ length: 3 }, (_, i) => ({
+      firmName: `Local Firm ${i}`, firmDomain: `local${i}.com`, firmType: "L", directoryPoints: 5,
+    }));
+    const rows = mergeVisibilityRows([], localFirms, 45, NOW);
+    expect(rows.every((r) => r.peerGroupSampleSize === 3)).toBe(true);
+    expect(rows.every((r) => r.isLowConfidence)).toBe(true);
+  });
+
+  it("does not flag low confidence once the peer group reaches the sample threshold", () => {
+    const localFirms: MergeDirectoryFirm[] = Array.from({ length: 6 }, (_, i) => ({
+      firmName: `Local Firm ${i}`, firmDomain: `local${i}.com`, firmType: "L", directoryPoints: 5,
+    }));
+    const rows = mergeVisibilityRows([], localFirms, 45, NOW);
+    expect(rows.every((r) => !r.isLowConfidence)).toBe(true);
+  });
 });

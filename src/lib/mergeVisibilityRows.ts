@@ -14,6 +14,8 @@
 import { computeMeasuredTotals } from "./measuredScore";
 import { findWeakestCategoryTool } from "./categoryToolMap";
 import { FIRM_TYPE_TO_PEER_GROUP } from "./marketVisibilityConfig";
+import { isStale, AUDIT_STALE_AFTER_DAYS, DIRECTORY_STALE_AFTER_DAYS } from "./scoreFreshness";
+import { isLowConfidenceSample } from "./confidenceBand";
 
 export interface MergeAuditRow {
   audited_domain: string;
@@ -33,6 +35,10 @@ export interface MergeDirectoryFirm {
   firmDomain: string | null;
   firmType: string | null;
   directoryPoints: number;
+  /** Reflects market_directory_data.last_verified_at — reviewed quarterly by
+   * design (CLAUDE.md's Decided #3), so this ages on a longer clock than an
+   * audit's own verified_at. */
+  lastVerifiedAt?: string | null;
 }
 
 export interface CombinedVisibilityRow {
@@ -46,11 +52,20 @@ export interface CombinedVisibilityRow {
   visibilityPercent: number;
   measuredCategoryCount: number;
   weakestCategoryLabel: string | null;
+  /** Past AUDIT_STALE_AFTER_DAYS since verified_at (audited firms) or
+   * DIRECTORY_STALE_AFTER_DAYS since last_verified_at (directory-only firms). */
+  isStale: boolean;
+  /** True once this row's peer group has fewer than LOW_SAMPLE_THRESHOLD
+   * firms in this same merged list — a percentile-shaped stat computed
+   * from a handful of firms shouldn't read as precise. Filled in after
+   * merging, once every row's final peer group is known. */
+  isLowConfidence: boolean;
+  peerGroupSampleSize: number;
 }
 
 const normalizeDomain = (d: string | null | undefined): string | null => (d ? d.trim().toLowerCase() : null);
 
-function fromAuditRow(row: MergeAuditRow): CombinedVisibilityRow {
+function fromAuditRow(row: MergeAuditRow, now: number): Omit<CombinedVisibilityRow, "isLowConfidence" | "peerGroupSampleSize"> {
   const categories = {
     performance: { score: row.performance_score ?? 0, provenance: row.provenance?.performance ?? "missing" },
     social: { score: row.social_score ?? 0, provenance: row.provenance?.social ?? "missing" },
@@ -73,10 +88,15 @@ function fromAuditRow(row: MergeAuditRow): CombinedVisibilityRow {
     visibilityPercent: measured.measuredMax > 0 ? Math.round((measured.score / measured.measuredMax) * 100) : 0,
     measuredCategoryCount,
     weakestCategoryLabel: weakest?.categoryLabel ?? null,
+    isStale: isStale(row.verified_at, AUDIT_STALE_AFTER_DAYS, now),
   };
 }
 
-function fromDirectoryFirm(firm: MergeDirectoryFirm, directoryMax: number): CombinedVisibilityRow {
+function fromDirectoryFirm(
+  firm: MergeDirectoryFirm,
+  directoryMax: number,
+  now: number,
+): Omit<CombinedVisibilityRow, "isLowConfidence" | "peerGroupSampleSize"> {
   return {
     firmName: firm.firmName,
     firmDomain: firm.firmDomain,
@@ -88,6 +108,7 @@ function fromDirectoryFirm(firm: MergeDirectoryFirm, directoryMax: number): Comb
     visibilityPercent: directoryMax > 0 ? Math.round((firm.directoryPoints / directoryMax) * 100) : 0,
     measuredCategoryCount: 1,
     weakestCategoryLabel: null,
+    isStale: isStale(firm.lastVerifiedAt, DIRECTORY_STALE_AFTER_DAYS, now),
   };
 }
 
@@ -95,16 +116,33 @@ export function mergeVisibilityRows(
   auditRows: MergeAuditRow[],
   directoryFirms: MergeDirectoryFirm[],
   directoryMax: number,
+  now: number = Date.now(),
 ): CombinedVisibilityRow[] {
   const auditedDomains = new Set(auditRows.map((r) => normalizeDomain(r.audited_domain)).filter(Boolean));
 
-  const auditedResults = auditRows.map(fromAuditRow);
+  const auditedResults = auditRows.map((r) => fromAuditRow(r, now));
   const directoryOnlyResults = directoryFirms
     .filter((f) => {
       const d = normalizeDomain(f.firmDomain);
       return !d || !auditedDomains.has(d);
     })
-    .map((f) => fromDirectoryFirm(f, directoryMax));
+    .map((f) => fromDirectoryFirm(f, directoryMax, now));
 
-  return [...auditedResults, ...directoryOnlyResults].sort((a, b) => b.visibilityPercent - a.visibilityPercent);
+  const combined = [...auditedResults, ...directoryOnlyResults];
+
+  // Peer-group sample size is only knowable once every row's final peer
+  // group has been resolved (directory-only rows derive theirs from
+  // firmType above) — computed here, not per-row above, for exactly that
+  // reason.
+  const groupCounts = new Map<string, number>();
+  for (const row of combined) {
+    groupCounts.set(row.peerGroup, (groupCounts.get(row.peerGroup) ?? 0) + 1);
+  }
+
+  return combined
+    .map((row) => {
+      const peerGroupSampleSize = groupCounts.get(row.peerGroup) ?? 0;
+      return { ...row, peerGroupSampleSize, isLowConfidence: isLowConfidenceSample(peerGroupSampleSize) };
+    })
+    .sort((a, b) => b.visibilityPercent - a.visibilityPercent);
 }

@@ -26,6 +26,7 @@ export interface FirmDirectoryStanding {
   legal500: DirectorySubScore;
   iflr1000: DirectorySubScore;
   directoryPoints: number;
+  lastVerifiedAt: string | null;
 }
 
 export const DIRECTORY_INDEX_MAX = 45;
@@ -69,6 +70,7 @@ export function computeDirectoryStandingIndex(market: string, rows: DirectoryRow
         legal500,
         iflr1000,
         directoryPoints: Math.round((chambers.points + legal500.points + iflr1000.points) * 100) / 100,
+        lastVerifiedAt: firm.last_verified_at ?? null,
       };
     })
     .sort((a, b) => b.directoryPoints - a.directoryPoints);

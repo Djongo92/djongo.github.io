@@ -12,6 +12,8 @@
 // PeerScatterMap.tsx renders as a 2D competitive map. This bar stays as
 // the compact single-number summary; the scatter map is the richer view
 // built from that same opted-in dataset, not a new exposure of it.
+import { isLowConfidenceSample, LOW_SAMPLE_THRESHOLD } from "@/lib/confidenceBand";
+
 interface PeerPositionBarProps {
   percentile: number;
   peerCount: number;
@@ -19,6 +21,7 @@ interface PeerPositionBarProps {
 
 const PeerPositionBar = ({ percentile, peerCount }: PeerPositionBarProps) => {
   const pct = Math.max(0, Math.min(100, percentile));
+  const lowConfidence = isLowConfidenceSample(peerCount);
 
   return (
     <div>
@@ -35,6 +38,11 @@ const PeerPositionBar = ({ percentile, peerCount }: PeerPositionBarProps) => {
           aria-hidden
         />
       </div>
+      {lowConfidence && (
+        <p className="mt-1.5 text-[10px] text-amber-500 font-body">
+          Based on a small peer sample ({peerCount} firm{peerCount === 1 ? "" : "s"}, fewer than {LOW_SAMPLE_THRESHOLD}) — treat this percentile as approximate.
+        </p>
+      )}
     </div>
   );
 };
