@@ -38,9 +38,9 @@ export const CATEGORY_META: Record<CategoryKey, CategoryMeta> = {
   seoAuthority: {
     label: "SEO & Authority",
     max: 60,
-    what: "Six authority metrics — domain rating, referring domains, organic traffic and similar — from Ahrefs/Moz.",
+    what: "Six authority metrics — domain authority, referring domains, backlinks, organic traffic, organic keywords, and homepage-level authority — from Ahrefs, Moz, DataForSEO, or Open PageRank.",
     why: "This determines whether you show up when someone searches for a lawyer in your practice area, independent of your reputation offline.",
-    how: "Each of six metrics scored 10 pts × (your value ÷ your peer group's current best). Requires a paid Ahrefs/Moz subscription — not yet configured.",
+    how: "Each available metric scored up to 10 pts, peer-normalized against your peer group's 90th percentile — not a fixed API subscription is configured for this yet, so this category isn't measured today.",
     color: "emerald",
   },
   thoughtLeadership: {

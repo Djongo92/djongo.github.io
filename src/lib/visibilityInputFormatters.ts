@@ -34,6 +34,31 @@ export function formatSocialInputs(raw: any): string | null {
   return parts.length ? parts.join(" · ") : null;
 }
 
+const SEO_METRIC_LABELS: Record<string, string> = {
+  domainAuthority: "domain authority",
+  referringDomains: "referring domains",
+  backlinks: "backlinks",
+  organicTraffic: "organic traffic",
+  organicKeywords: "organic keywords",
+  pageAuthority: "homepage authority",
+};
+
+export function formatSeoInputs(raw: any): string | null {
+  const s = raw?.seoAuthority;
+  if (!s || !s.provider) return null;
+  const parts: string[] = [`Sourced from ${s.provider}`];
+  if (s.metricsAvailable != null && s.metricsTotal != null) {
+    parts.push(`${s.metricsAvailable} of ${s.metricsTotal} metrics available from this provider`);
+  }
+  for (const [key, label] of Object.entries(SEO_METRIC_LABELS)) {
+    const stats = s[key];
+    if (stats?.value != null) {
+      parts.push(`${label} ${Math.round(stats.value * 100) / 100} (peer 90th percentile ${Math.round(stats.p90Threshold * 100) / 100}, ${stats.sampleSize} firms${stats.lowConfidence ? ", low confidence" : ""})`);
+    }
+  }
+  return parts.length ? parts.join(" · ") : null;
+}
+
 export function formatThoughtLeadershipInputs(raw: any): string | null {
   const t = raw?.thoughtLeadership;
   if (!t) return null;
@@ -72,7 +97,7 @@ export function formatReputationInputs(raw: any): string | null {
 export const CATEGORY_INPUT_FORMATTERS: Record<CategoryKey, (raw: any) => string | null> = {
   performance: formatPerformanceInputs,
   social: formatSocialInputs,
-  seoAuthority: () => null,
+  seoAuthority: formatSeoInputs,
   thoughtLeadership: formatThoughtLeadershipInputs,
   reputation: formatReputationInputs,
 };

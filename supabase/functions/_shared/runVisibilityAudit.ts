@@ -111,14 +111,14 @@ export async function runVisibilityAudit(
     }
     : null;
 
-  const [performance, reputation, thoughtLeadership, social, siteHealth] = await Promise.all([
+  const [performance, reputation, thoughtLeadership, social, seoAuthority, siteHealth] = await Promise.all([
     computePerformanceScore(normalizedUrl),
     computeReputationScore(serviceClient, market, auditedDomain, gbpListed === true),
     computeThoughtLeadershipScore(serviceClient, market, peerGroup, normalizedUrl, displayName, auditedDomain, refinement.firmSize),
     computeSocialScore(serviceClient, market, peerGroup, socialInput, auditedDomain, refinement.firmSize),
+    computeSeoAuthorityScore(serviceClient, market, peerGroup, auditedDomain, refinement.firmSize),
     checkSiteHealth(normalizedUrl),
   ]);
-  const seoAuthority = computeSeoAuthorityScore();
 
   // siteHealth is informational only — not peer-normalized, not part of the
   // 200-pt score, never blocks the audit if the crawl fails (null).
