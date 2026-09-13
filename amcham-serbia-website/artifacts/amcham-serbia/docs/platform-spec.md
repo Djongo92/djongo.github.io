@@ -1,0 +1,47 @@
+# AmCham Member Platform — Rebuild Spec
+# Rebuilt natively from the bundled prototype. Same surfaces, flows, and features — our design system.
+# Demo member company throughout: Adriatica Grupa (manufacturing, Kragujevac & Belgrade, 1,240 employees, exporter, Patron tier).
+
+## ARCHITECTURE
+- New route family /platform in the amcham-serbia artifact. Linked from: header (a distinct "Platform" entry styled like a member sign-in area), the /members page, and the footer.
+- /platform — hub: what the platform is (one confident paragraph), two large surface cards (Staff Console / Member Portal), the seam explained in one line, a "first time here" tip strip.
+- /platform/console — staff console, left-nav shell
+- /platform/portal — member portal, mobile-app-style shell (bottom tab bar on desktop render inside a max-width frame is fine — it was phone-first in the original; make it responsive, not an actual phone mockup)
+- /platform/seam — the data & visibility page (shared, linked from both surfaces)
+- All EN+SR via useI18n. Local state interactions must WORK (this is a clickable prototype): buttons change state, queues advance, toggles toggle, toasts confirm. No dead controls. Mock data in src/data/platform.ts.
+
+## STAFF CONSOLE SCREENS (left nav, in this order)
+1. Ritual — "Your three decisions this week" / "30 minutes · Monday". One decision card at a time (company, tag, text, Approve / Snooze / Deprioritize). Progress label, streak ("Weeks in a row, cleared"), done state: "Done for this week. See you next Monday." + pointer to heatmap/outreach. Core philosophy line: "There is no item four. When these are done, the console is finished until next Monday."
+2. Heatmap — "Relationship heatmap": 270 member companies as a tile grid, engagement score refreshed today 06:00, 9 staff owners. Bands: ENGAGED 65+ / Cooling 40–64 / COLD <40 with counts. Sort + filter controls. Tiles: abbreviation, score, ▲/▼ quarterly movement, outlined = Patron tier. Legend explaining marks.
+3. Cold & valuable — "Patron and Corporate members with falling engagement. The highest-priority list in the system." Rows: name, meta, delta, "not now" dismiss.
+4. Today's five — "AI — today's five": five suggested actions with confidence %, source citation, and CTA each.
+5. Accounts — searchable account list (score, name, sector · owner) opening a COMPANY DOSSIER: engagement score + trend vs Q2 with narrative ("Highly engaged but cooling for a third straight quarter…"), "What's moving the score" factors each with a privacy label, "Who you know there" (initials, link strength, recommendation), unified relationship timeline (email, events, committees, portal, calls — each entry dated, kind, seam source, text), "What we're watching" with relevance filter ("suppressed 11 low-signal items", confidence per item, "not relevant" dismiss), open commitments with owners, "Log a touchpoint" action.
+6. Meeting brief — "Generate meeting brief" from a dossier: brief card "Generated in 1.4s from 412 records", PRINT / SHARE, header (Thu 11 Sep, 10:00 · Aleksandar Vasić, CEO · renewal conversation · 45 min), stat chips (SCORE ▼9 · 22y member since 2004 · €18k annual patron fee · 71d since last contact), marked talking points, "The one ask" with rationale paragraph.
+7. Retention — "Renewal and churn risk": 94% retention held, 14 members flagged, health index up 3, €4.9m annual membership revenue, monthly renewals mini-chart, risk table (COMPANY / Tier+renews / SCORE / RISK / EVIDENCE / INTERVENTION) with cross-tags.
+8. Outreach — "Outreach orchestration": cadence by tier (Patron 45 days · Corporate 90 · SME 180 — below threshold queues automatically), stats (In queue 12 · On cadence 247 · 31m per person/week), queue list (name, tier, days overdue, last touch, owner, reason, action).
+9. Ask — natural-language box "Ask anything about 270 members": canned matching against mock data (score keywords: sector, tier, cold, cooling, belgrade, export etc.), results with name/detail/score, "Create outreach list" + "Export" actions on results.
+10. Matchmaking — "Needs and matchmaking": inferred from 412 survey responses, 61 committee minutes, feedback on 38 events, portal search behaviour. Unmet needs by sector (theme, count, detail, gap). "Suggested introductions — ranked by strength of reason. Staff approve rather than compose." (pairs with why + approve). Membership gap analysis list.
+11. Flags — "Score flags — member-initiated": tabs All / Awaiting response / Responded, sort control, flag rows (name, when, status, note), expanded shows owner reply, "Respond" inline reply box.
+12. Approvals — pending items (name, subject) with "Approve & send" / "Not now".
+13. Digests — staff digest + member digest preview cards, "Every Monday, 7am", items with tags, "Send this to me" toggle, from/subject preview.
+14. Cover — "Out of office — cover for a colleague": "A handoff, not a report. Pick whoever is out — everything they own comes with them." Owner picker; on select: "X is out — N companies, M need attention this week" with the handoff list.
+
+## MEMBER PORTAL SCREENS (bottom tabs: Home, Score, Events, Directory, More)
+1. Home — greeting, "4 things need your attention", next event card (18:00 · Belgrade, Hyatt — Energy Transition Roundtable, seat label, register), "Who to meet" recommendations (abbr, name, reason, CTA, "not relevant").
+2. Score — "Your engagement score": number + trend (▼ 9 vs Q2), plain-language explanation, factor list with directions, "score detail" expandable, FLAG FLOW: "This looks wrong" → sent state "Sent to your account manager — usually replies within 2 business days, here and by email" → replied state "MARIJA JOVANOVIĆ, YOUR ACCOUNT MANAGER, REPLIED" + reply text.
+3. Glance — "Your membership at a glance · 2026 to date — this is what your company has actually used this year": usage stat grid, event seats "6 of 10 used", "Compare tiers" link, "This summary is ready to send to your finance team. Share →".
+4. Recommended — "Based on your sector, your committee seats, and what you told us you are looking for": event/content cards with "why" reason per card.
+5. People — "Your people · 4 of 6 seats assigned", person rows with roles, "Add a person".
+6. Directory — filters panel (grouped with counts), saved searches, result cards (tier tag, desc, hiring flag, "Manufacturing · Kragujevac & Belgrade · 1,240 employees · exporter"), "Request intro" + "Save". Profile completeness widget: 86% — 'Add "services offered" so members find you in search. 62% of members leave this blank'.
+7. Committee — "Committee 3 of 10 — Environment & Energy Committee": mandate line, 26 member companies, join button; ADVOCACY TRACKER "What your membership is currently buying in policy terms" (status, owner, title, detail, stage; "Consultation open — closes 24 Sep"), outcomes achieved by year, working documents (type, date), "Your seat — held by Ana Ilić, Head of Regulatory. Attended 8 of 9 meetings. Next meeting 14 October, agenda attached."
+8. Lap Time — "13th edition · since 2012 — Lap Time 2026": "187 companies responded. Not a PDF — filter it, compare it": YEAR + SECTOR filters ("mine" toggle), business confidence index chart, "Your own responses" block ("Adriatica Grupa rated confidence 3.4 in 2026, down from 3.9 — 0.5 below the manufacturing average"), leading obstacles chart with direction arrows and editorial note ("Workforce availability tops the list for the first time in thirteen editions, displacing tax predictability").
+9. Onboarding — "New member — your first 90 days. A designed sequence rather than a welcome email": 5-step timeline (3 of 5 complete — day 34 of 90), each step mark/day/state/title/body/detail/CTA.
+10. Events — "Registration happens here. Live seat counts, waitlists, register colleagues": event cards (tag, meta, why, seats live count, "yours" indicator), history — "2026: 11 registrations across 7 events. Materials, photos and opt-in attendee lists attached."
+11. Marketplace — "Offers and marketplace — member to member. Offers, calls for partners, and jobs from the 270." Post-an-offer action, offer cards (tag, when, title, body, from).
+12. Seam (also at /platform/seam) — "The seam between the two products — Data and visibility": "The portal records what happens; the console turns it into priorities." Table: What the portal records / What staff see / Effect on your score. "What we never see" list. "Your controls" privacy toggles with the line: "Switching anything off lowers your visibility in the directory. It never affects your rights as a member."
+
+## GLOBAL
+- First-time tips ("FIRST TIME HERE" dismissible tip), a guided tour affordance (STEP n OF m, title, body, Back/Next, Skip tour, "Skip to who to meet →"), toast notifications ("Just happened" + "View in console →" cross-surface toast when a member action would surface to staff).
+- Cross-surface echo: when a portal action happens (e.g. flag sent), show how it lands in console — the seam made visible.
+- Console feels operational (dense, warm off-white, tables, mono accents for numbers). Portal feels member-warm (softer, bigger type, card-based). Both unmistakably the same design family as the public site: ink navy, warm off-white, AmCham red, cyan on dark only, Playfair Display + Plus Jakarta Sans.
+- Blueprint: add one line to /blueprint/roadmap step 5 noting the member platform is the concrete post-launch horizon (link to /platform).

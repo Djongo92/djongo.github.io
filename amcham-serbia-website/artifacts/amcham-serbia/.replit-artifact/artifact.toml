@@ -1,0 +1,28 @@
+kind = "web"
+previewPath = "/"
+title = "AmCham Serbia Website"
+description = "A modern editorial redesign of the AmCham Serbia website: membership, events, advocacy, research insights, and a searchable member directory, presented as a premium business publication with a living connection motif."
+version = "1.0.0"
+id = "artifacts/amcham-serbia"
+router = "path"
+
+[[services]]
+name = "web"
+paths = [ "/" ]
+localPort = 25003
+
+[services.development]
+run = "pnpm --filter @workspace/amcham-serbia run dev"
+
+[services.production]
+build = [ "pnpm", "--filter", "@workspace/amcham-serbia", "run", "build" ]
+serve = "static"
+publicDir = "artifacts/amcham-serbia/dist/public"
+
+[[services.production.rewrites]]
+from = "/*"
+to = "/index.html"
+
+[services.env]
+PORT = "25003"
+BASE_PATH = "/"

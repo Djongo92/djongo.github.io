@@ -1,0 +1,145 @@
+openapi: 3.1.0
+info:
+  # Do not change the title, if the title changes, the import paths will be broken
+  title: Api
+  version: 0.1.0
+  description: API specification
+servers:
+  - url: /api
+    description: Base API path
+tags:
+  - name: health
+    description: Health operations
+  - name: enquiries
+    description: Membership enquiries
+paths:
+  /enquiries:
+    post:
+      operationId: createEnquiry
+      tags: [enquiries]
+      summary: Submit a membership enquiry
+      description: Stores a membership enquiry from the website form and returns the stored record with its reference id.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/EnquiryInput"
+      responses:
+        "201":
+          description: Enquiry stored
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Enquiry"
+        "400":
+          description: Invalid enquiry payload
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+    get:
+      operationId: listEnquiries
+      tags: [enquiries]
+      summary: List membership enquiries
+      description: Returns all stored membership enquiries, newest first. Used by the chamber team to verify intake.
+      responses:
+        "200":
+          description: All enquiries
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Enquiry"
+  /healthz:
+    get:
+      operationId: healthCheck
+      tags: [health]
+      summary: Health check
+      description: Returns server health status
+      responses:
+        "200":
+          description: Healthy
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/HealthStatus"
+components:
+  schemas:
+    HealthStatus:
+      type: object
+      properties:
+        status:
+          type: string
+      required:
+        - status
+    Error:
+      type: object
+      properties:
+        error:
+          type: string
+      required:
+        - error
+    Enquiry:
+      type: object
+      properties:
+        id:
+          type: integer
+        companyName:
+          type: string
+        contactPerson:
+          type: string
+        email:
+          type: string
+          format: email
+        phone:
+          type: string
+        category:
+          type: string
+          enum: [Patron, Corporate, Business, Non-Profit]
+        message:
+          type: ["string", "null"]
+        createdAt:
+          type: string
+          format: date-time
+      required:
+        - id
+        - companyName
+        - contactPerson
+        - email
+        - phone
+        - category
+        - createdAt
+    EnquiryInput:
+      type: object
+      properties:
+        companyName:
+          type: string
+          minLength: 2
+          maxLength: 200
+        contactPerson:
+          type: string
+          minLength: 2
+          maxLength: 200
+        email:
+          type: string
+          format: email
+          maxLength: 320
+        phone:
+          type: string
+          minLength: 6
+          maxLength: 40
+        category:
+          type: string
+          enum: [Patron, Corporate, Business, Non-Profit]
+        message:
+          type: string
+          maxLength: 4000
+      required:
+        - companyName
+        - contactPerson
+        - email
+        - phone
+        - category
+

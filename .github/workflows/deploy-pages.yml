@@ -25,6 +25,29 @@ jobs:
           cache: npm
       - run: npm ci
       - run: npm run build
+
+      # AmCham Serbia demo — built separately (its own pnpm workspace) and
+      # published alongside the main site at /amcham-preview/. Additive only:
+      # nothing above this point changes, and a failure here does not affect
+      # the main site's own build/deploy steps.
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 10
+      - name: Install AmCham demo dependencies
+        working-directory: amcham-serbia-website
+        run: pnpm install --frozen-lockfile
+      - name: Build AmCham demo
+        working-directory: amcham-serbia-website/artifacts/amcham-serbia
+        env:
+          PORT: "5000"
+          BASE_PATH: /amcham-preview/
+        run: pnpm run build
+      - name: Copy AmCham demo into Pages output
+        run: |
+          mkdir -p dist/amcham-preview
+          cp -r amcham-serbia-website/artifacts/amcham-serbia/dist/public/* dist/amcham-preview/
+          rm -f dist/amcham-preview/preview-platform.html dist/amcham-preview/robots.txt
+
       - uses: actions/configure-pages@v5
       - uses: actions/upload-pages-artifact@v3
         with:
