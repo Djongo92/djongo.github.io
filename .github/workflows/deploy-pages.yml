@@ -30,6 +30,14 @@ jobs:
       # published alongside the main site at /amcham-preview/. Additive only:
       # nothing above this point changes, and a failure here does not affect
       # the main site's own build/deploy steps.
+      #
+      # BASE_PATH includes /djongo.github.io/: this repo's name doesn't
+      # exactly match the special `<owner>.github.io` user-site pattern
+      # (owner is Djongo92, repo is djongo.github.io), so Pages serves it
+      # as a project site at that subpath rather than at the bare domain —
+      # confirmed via the deploy job's own "Evaluated environment url".
+      # The main app's index.html hardcodes the same /djongo.github.io/
+      # prefix for its manifest/icon links for the same reason.
       - uses: pnpm/action-setup@v4
         with:
           version: 10
@@ -40,7 +48,7 @@ jobs:
         working-directory: amcham-serbia-website/artifacts/amcham-serbia
         env:
           PORT: "5000"
-          BASE_PATH: /amcham-preview/
+          BASE_PATH: /djongo.github.io/amcham-preview/
         run: pnpm run build
       - name: Copy AmCham demo into Pages output
         run: |
