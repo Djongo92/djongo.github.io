@@ -73,7 +73,7 @@ export function HeatmapView({ navigateTo, roleParam }: any) {
         {Object.entries(grouped).sort((a,b) => b[1].length - a[1].length).map(([groupName, comps]) => (
           <div key={groupName} className="bg-card border border-border rounded-[32px] p-8 shadow-sm relative overflow-hidden group">
             <div className="absolute top-0 right-0 w-64 h-64 bg-primary/5 rounded-full blur-3xl pointer-events-none"></div>
-            <div className="flex items-end justify-between mb-6 relative z-10">
+            <div className="flex flex-wrap items-end justify-between gap-y-3 mb-6 relative z-10">
               <h3 className="text-xl font-bold capitalize text-foreground flex items-center gap-3">
                 {groupName}
                 <span className="text-xs font-bold text-muted-foreground px-3 py-1 bg-muted rounded-full">{comps.length}</span>

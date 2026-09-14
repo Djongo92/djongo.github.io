@@ -215,7 +215,7 @@ export default function Console() {
     <div className="min-h-[100dvh] bg-background text-foreground flex font-sans selection:bg-primary/20">
       
       {/* Desktop Sidebar */}
-      <nav className="hidden md:flex w-72 border-r border-border flex-col shrink-0 sticky top-0 h-[100dvh] bg-background/60 backdrop-blur-3xl z-40">
+      <nav className="hidden md:flex w-72 border-r border-border flex-col shrink-0 sticky top-0 h-[100dvh] bg-background/60 backdrop-blur-3xl z-40 print:hidden">
         {navContent}
       </nav>
 
@@ -249,7 +249,7 @@ export default function Console() {
       </AnimatePresence>
 
       {/* Main Content Area */}
-      <main className="flex-1 flex flex-col relative min-h-[100dvh] pt-16 md:pt-0">
+      <main className="flex-1 flex flex-col relative min-h-[100dvh] pt-16 md:pt-0 min-w-0 overflow-hidden">
         <header className="hidden md:flex h-20 border-b border-border items-center px-10 justify-between shrink-0 bg-transparent print:hidden">
           <h1 className="text-2xl font-serif font-light text-foreground">
             {navGroups.flatMap(g => g.items).find(i => i.id === view)?.label || view}
