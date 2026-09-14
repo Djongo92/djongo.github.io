@@ -13,6 +13,7 @@ export default function Home() {
 
   // Get active items
   const latestNews = mockNews.slice(0, 3);
+  const newsThumbnails = ['images/real/event.jpg', 'images/event-panel.jpg', 'images/office-meeting.jpg'];
   const nextEvent = mockEvents.find(e => e.status === 'open' || e.status === 'request_pending') || mockEvents[0];
 
   // Parallax Setup (Disable on mobile for performance/layout)
@@ -151,7 +152,7 @@ export default function Home() {
               <Link key={news.id} href={`/news/${news.id}`} className="group flex flex-col h-full">
                 <div className="aspect-[3/2] overflow-hidden rounded-sm bg-background mb-4">
                   <img 
-                    src={`${import.meta.env.BASE_URL}${i === 0 ? 'images/real/event.jpg' : 'images/news-placeholder.jpg'}`} 
+                    src={`${import.meta.env.BASE_URL}${newsThumbnails[i % newsThumbnails.length]}`}
                     alt="" 
                     className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                   />

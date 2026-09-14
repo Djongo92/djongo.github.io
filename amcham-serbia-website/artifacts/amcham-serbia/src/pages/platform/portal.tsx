@@ -9,6 +9,7 @@ import {
   Bell, Search, Target, Zap, CreditCard, Activity
 } from 'lucide-react';
 import { PortalStateProvider, usePortalState } from './portal-state';
+import { TourOverlay } from './console/components/Overlays';
 
 // Import Views
 import HomeView from './views/home-view';
@@ -38,6 +39,8 @@ function PortalContent() {
   const [notificationsOpen, setNotificationsOpen] = useState(false);
   const [roleMenuOpen, setRoleMenuOpen] = useState(false);
   const roleMenuTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const tourDisabled = searchParams.get('tour') === 'off';
+  const [tourStep, setTourStep] = useState(-1);
 
   const showToast = (msg: string) => {
     setToast(msg);
@@ -81,7 +84,31 @@ function PortalContent() {
     setLocation(`/platform/portal?view=${newView}&role=${roleParam}`);
   };
 
-  const roleConfig = roleParam === 'admin' 
+  useEffect(() => {
+    if (!tourDisabled && !localStorage.getItem('amcham_portal_tour_done')) {
+      setTourStep(0);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [tourDisabled]);
+
+  useEffect(() => {
+    if (tourStep === -1) return;
+    setNotificationsOpen(false);
+    if (tourStep === 0 && view !== 'home') navigateTo('home');
+    if (tourStep === 1 && view !== 'score') navigateTo('score');
+    if (tourStep === 2 && view !== 'directory') navigateTo('directory');
+    if (tourStep === 3 && view !== 'events') navigateTo('events');
+    if (tourStep === 4 && view !== 'directory') navigateTo('directory');
+    if (tourStep === 5) {
+      if (view !== 'seam') navigateTo('seam');
+      setNotificationsOpen(true);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [tourStep]);
+
+  const endTour = () => { setTourStep(-1); localStorage.setItem('amcham_portal_tour_done', 'true'); };
+
+  const roleConfig = roleParam === 'admin'
     ? { name: 'Ana Jokić', roleStr: t('portal_admin_view', 'Admin View'), avatar: 'AJ', company: 'Adriatica Grupa' }
     : { name: 'Marko R.', roleStr: t('portal_member_view', 'Member View'), avatar: 'MR', company: 'Adriatica Grupa' };
 
@@ -178,6 +205,9 @@ function PortalContent() {
                 <div className="bg-card border border-border rounded-2xl shadow-xl overflow-hidden flex flex-col">
                   <button onClick={() => { setRoleMenuOpen(false); setLocation(`/platform/portal?view=${roleParam === 'admin' ? view : 'home'}&role=admin`); }} className="px-4 py-3 text-left hover:bg-muted font-medium text-foreground text-sm border-b border-border">{t('portal_switch_admin', 'Switch to Admin')}</button>
                   <button onClick={() => { setRoleMenuOpen(false); setLocation(`/platform/portal?view=${roleParam === 'admin' && (view === 'people' || view === 'billing') ? 'home' : view}&role=member`); }} className="px-4 py-3 text-left hover:bg-muted font-medium text-foreground text-sm border-b border-border">{t('portal_switch_member', 'Switch to Member')}</button>
+                  <button onClick={() => { setRoleMenuOpen(false); setTourStep(0); }} className="px-4 py-3 text-left hover:bg-muted font-medium text-primary text-xs uppercase tracking-widest flex items-center justify-between">
+                    {t('portal_tour_replay', 'Replay Tour')} <ArrowRight className="w-3 h-3" />
+                  </button>
                 </div>
               </div>
             </div>
@@ -191,7 +221,7 @@ function PortalContent() {
                  {view === 'home' && <HomeView t={t} navigateTo={navigateTo} roleConfig={roleConfig} showToast={showToast} />}
                  {view === 'score' && <ScoreView t={t} navigateTo={navigateTo} showToast={showToast} />}
                  {view === 'glance' && <GlanceView t={t} navigateTo={navigateTo} roleParam={roleParam} />}
-                 {view === 'directory' && <DirectoryView t={t} showToast={showToast} />}
+                 {view === 'directory' && <DirectoryView t={t} showToast={showToast} initialViewMode={tourStep === 2 ? 'pending' : undefined} />}
                  {view === 'laptime' && <LapTimeView t={t} showToast={showToast} />}
                  {view === 'events' && <EventsView t={t} showToast={showToast} />}
                  {view === 'marketplace' && <MarketplaceView t={t} showToast={showToast} />}
@@ -227,6 +257,29 @@ function PortalContent() {
           <motion.div initial={{ opacity: 0, y: 50, scale: 0.95 }} animate={{ opacity: 1, y: 0, scale: 1 }} exit={{ opacity: 0, y: 20, scale: 0.95 }} className="fixed bottom-6 right-6 z-[60] bg-foreground text-background px-6 py-4 text-sm font-medium rounded-2xl shadow-xl flex items-center gap-3">
             <Activity className="w-5 h-5 text-background" /> {toast}
           </motion.div>
+        )}
+      </AnimatePresence>
+
+      <AnimatePresence>
+        {tourStep > -1 && (
+          <TourOverlay
+            step={tourStep}
+            setStep={setTourStep}
+            endTour={endTour}
+            steps={[
+              { title: t('portal_tour_step1_title', 'Home Base'), desc: t('portal_tour_step1_desc', 'Your personalized command center. Start here for the big picture.') },
+              { title: t('portal_tour_step2_title', 'Membership Value'), desc: t('portal_tour_step2_desc', 'See the outcomes your membership has supported and find a useful next step.') },
+              { title: t('portal_tour_step3_title', 'Introductions Pipeline'), desc: t('portal_tour_step3_desc', 'Watch your requested connections move from requested to connected in real time.') },
+              { title: t('portal_tour_step4_title', 'Events & Registration'), desc: t('portal_tour_step4_desc', 'Register yourself or colleagues for upcoming roundtables and events.') },
+              { title: t('portal_tour_step5_title', 'Member Directory'), desc: t('portal_tour_step5_desc', 'Find partners, filter by sector, and request introductions instantly.') },
+              { title: t('portal_tour_step6_title', 'Notifications & Seam'), desc: t('portal_tour_step6_desc', 'Control how you hear from us and manage your data boundaries.') },
+            ]}
+            labels={{
+              skip: t('portal_tour_skip', 'Skip Tour'),
+              next: t('portal_tour_next', 'Next'),
+              done: t('portal_tour_done', 'Done'),
+            }}
+          />
         )}
       </AnimatePresence>
     </div>
