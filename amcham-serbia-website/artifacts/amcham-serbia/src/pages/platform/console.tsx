@@ -362,14 +362,32 @@ export default function Console() {
         {glossaryOpen && <GlossaryDrawer close={() => setGlossaryOpen(false)} navigateTo={navigateTo} />}
       </AnimatePresence>
 
-      <AnimatePresence>
-        {tourStep > -1 && <TourOverlay step={tourStep} setStep={setTourStep} endTour={() => { setTourStep(-1); localStorage.setItem('amcham_tour_done', 'true'); }} />}
-      </AnimatePresence>
-
       {/* Command Palette */}
       <AnimatePresence>
         {cmdOpen && (
           <CommandPalette close={() => setCmdOpen(false)} navigateTo={navigateTo} />
+        )}
+      </AnimatePresence>
+
+      {/* Tour renders last so its Next/Done button stays clickable over any
+          overlay a step opens (e.g. the Command Palette at step 5) — both
+          use the same z-index, so DOM order decides which one is on top. */}
+      <AnimatePresence>
+        {tourStep > -1 && (
+          <TourOverlay
+            step={tourStep}
+            setStep={setTourStep}
+            endTour={() => { setTourStep(-1); localStorage.setItem('amcham_tour_done', 'true'); }}
+            steps={[
+              { title: t('platform.console.tour_step1_title'), desc: t('platform.console.tour_step1_desc') },
+              { title: t('platform.console.tour_step2_title'), desc: t('platform.console.tour_step2_desc') },
+              { title: t('platform.console.tour_step3_title'), desc: t('platform.console.tour_step3_desc') },
+              { title: t('platform.console.tour_step4_title'), desc: t('platform.console.tour_step4_desc') },
+              { title: t('platform.console.tour_step5_title'), desc: t('platform.console.tour_step5_desc') },
+              { title: t('platform.console.tour_step6_title'), desc: t('platform.console.tour_step6_desc') },
+            ]}
+            labels={{ skip: t('platform.console.tour_skip'), next: t('platform.console.tour_next'), done: t('platform.console.tour_done') }}
+          />
         )}
       </AnimatePresence>
 

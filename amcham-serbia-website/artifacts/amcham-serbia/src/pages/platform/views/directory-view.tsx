@@ -4,12 +4,12 @@ import { Search, Filter, Zap, Clock, ArrowRight, X, UserPlus, CheckCircle2, Chev
 import { cn } from '@/lib/utils';
 import { motion, AnimatePresence } from 'framer-motion';
 
-export default function DirectoryView({ t, showToast }: any) {
+export default function DirectoryView({ t, showToast, initialViewMode }: any) {
   const { directory, setDirectory } = usePortalState();
   const [search, setSearch] = useState('');
   const [filterTier, setFilterTier] = useState<string | null>(null);
   const [filterSector, setFilterSector] = useState<string | null>(null);
-  const [viewMode, setViewMode] = useState<'all' | 'saved' | 'pending'>('all');
+  const [viewMode, setViewMode] = useState<'all' | 'saved' | 'pending'>(initialViewMode || 'all');
   
   const [selectedMember, setSelectedMember] = useState<any>(null);
   const [requestContext, setRequestContext] = useState('');

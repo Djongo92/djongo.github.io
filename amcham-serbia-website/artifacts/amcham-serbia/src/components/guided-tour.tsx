@@ -19,7 +19,7 @@ const STEPS: TourStep[] = [
   { path: '/platform', titleKey: 'guided_tour.step5_title', descKey: 'guided_tour.step5_desc' },
   { path: '/platform/console?view=matchmaking&role=staffer&tour=off', titleKey: 'guided_tour.step6_title', descKey: 'guided_tour.step6_desc' },
   { path: '/platform/seam', titleKey: 'guided_tour.step7_title', descKey: 'guided_tour.step7_desc' },
-  { path: '/platform/portal?view=home&role=member', titleKey: 'guided_tour.step8_title', descKey: 'guided_tour.step8_desc' },
+  { path: '/platform/portal?view=home&role=member&tour=off', titleKey: 'guided_tour.step8_title', descKey: 'guided_tour.step8_desc' },
 ];
 
 interface GuidedTourContextValue {

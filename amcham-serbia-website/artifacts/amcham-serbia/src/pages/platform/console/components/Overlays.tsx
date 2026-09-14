@@ -5,18 +5,12 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Search, Command, X, Book, ArrowRight } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
-export function TourOverlay({ step, setStep, endTour }: { step: number, setStep: (s:number)=>void, endTour: ()=>void }) {
-  const { t } = useI18n();
-  const total = 6;
-  
-  const steps = [
-    { title: t('platform.console.tour_step1_title'), desc: t('platform.console.tour_step1_desc') },
-    { title: t('platform.console.tour_step2_title'), desc: t('platform.console.tour_step2_desc') },
-    { title: t('platform.console.tour_step3_title'), desc: t('platform.console.tour_step3_desc') },
-    { title: t('platform.console.tour_step4_title'), desc: t('platform.console.tour_step4_desc') },
-    { title: t('platform.console.tour_step5_title'), desc: t('platform.console.tour_step5_desc') },
-    { title: t('platform.console.tour_step6_title'), desc: t('platform.console.tour_step6_desc') },
-  ];
+export function TourOverlay({ step, setStep, endTour, steps, labels }: {
+  step: number, setStep: (s:number)=>void, endTour: ()=>void,
+  steps: { title: string, desc: string }[],
+  labels: { skip: string, next: string, done: string },
+}) {
+  const total = steps.length;
 
   return (
     <div className="fixed inset-0 z-[100] pointer-events-none flex items-end justify-center pb-10 px-4">
@@ -30,7 +24,7 @@ export function TourOverlay({ step, setStep, endTour }: { step: number, setStep:
               <div key={i} className={cn("h-1.5 rounded-full transition-all", i === step ? "w-6 bg-accent" : "w-1.5 bg-background/20")}></div>
             ))}
           </div>
-          <button onClick={endTour} className="text-[10px] font-bold uppercase tracking-widest text-background/50 hover:text-background transition-colors">{t('platform.console.tour_skip')}</button>
+          <button onClick={endTour} className="text-[10px] font-bold uppercase tracking-widest text-background/50 hover:text-background transition-colors">{labels.skip}</button>
         </div>
         <h3 className="text-3xl font-serif font-light mb-3">{steps[step].title}</h3>
         <p className="text-sm font-medium text-background/70 mb-8 leading-relaxed">{steps[step].desc}</p>
@@ -40,7 +34,7 @@ export function TourOverlay({ step, setStep, endTour }: { step: number, setStep:
             if (step === total - 1) endTour();
             else setStep(step + 1);
           }} className="px-6 py-2.5 rounded-full bg-accent text-foreground font-bold text-sm shadow-md hover:shadow-lg transition-transform active:scale-95">
-            {step === total - 1 ? t('platform.console.tour_done') : t('platform.console.tour_next')} <ArrowRight className="inline w-4 h-4 ml-1" />
+            {step === total - 1 ? labels.done : labels.next} <ArrowRight className="inline w-4 h-4 ml-1" />
           </button>
         </div>
       </motion.div>
