@@ -1,7 +1,7 @@
 import React from 'react';
 import { useI18n } from '@/lib/i18n';
 import { SEO } from '@/components/seo';
-import { Mail, Phone, MapPin, Building, Globe, Award, Users, ArrowRight, BarChart3 } from 'lucide-react';
+import { Mail, Phone, MapPin, Building, Globe, Award, Users, ArrowRight, BarChart3, Newspaper } from 'lucide-react';
 import { Link } from 'wouter';
 
 export default function About() {
@@ -176,6 +176,28 @@ export default function About() {
                     </div>
                   </div>
                 </div>
+              </div>
+
+              {/* Press & Media */}
+              <div id="press" className="bg-white border border-border p-8 rounded-sm mt-8 shadow-md scroll-mt-24">
+                <div className="flex items-center gap-3 mb-6 pb-4 border-b border-border">
+                  <Newspaper className="w-5 h-5 text-primary" />
+                  <h3 className="text-xl font-serif font-bold">{t('about.press')}</h3>
+                </div>
+                <p className="text-sm text-muted-foreground leading-relaxed mb-6">{t('about.press_desc')}</p>
+                <div className="flex items-center gap-4 mb-6">
+                  <div className="w-12 h-12 shrink-0 rounded-full overflow-hidden bg-muted">
+                    <img src={`${import.meta.env.BASE_URL}images/team/ana.jpg`} alt={t('team.ana.name')} className="w-full h-full object-cover" />
+                  </div>
+                  <div>
+                    <div className="font-bold text-sm text-foreground">{t('team.ana.name')}</div>
+                    <div className="text-xs text-muted-foreground">{t('about.press_contact_role')}</div>
+                  </div>
+                </div>
+                <a href="mailto:press@amcham.rs" className="inline-flex items-center gap-2 text-sm font-bold text-primary hover:underline mb-4">
+                  <Mail className="w-4 h-4" /> press@amcham.rs
+                </a>
+                <p className="text-xs text-muted-foreground border-t border-border pt-4">{t('about.press_note')}</p>
               </div>
             </div>
 

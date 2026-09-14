@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useI18n } from '@/lib/i18n';
 import { SEO } from '@/components/seo';
-import { CheckCircle2, ArrowRight, AlertCircle } from 'lucide-react';
+import { CheckCircle2, ArrowRight, AlertCircle, Quote } from 'lucide-react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
@@ -50,6 +50,7 @@ export default function Membership() {
   };
 
   const benefits = t('membership.benefits') as unknown as string[];
+  const testimonials = t('membership.testimonials') as unknown as { quote: string; name: string; role: string }[];
 
   return (
     <div className="w-full">
@@ -82,18 +83,39 @@ export default function Membership() {
                 ))}
               </ul>
 
+              {Array.isArray(testimonials) && testimonials.length > 0 && (
+                <div className="mb-12 pt-8 border-t border-border">
+                  <h2 className="text-2xl font-serif font-bold mb-6">{t('membership.testimonials_title')}</h2>
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    {testimonials.map((item, i) => (
+                      <div key={i} className="border border-border bg-white p-5 rounded-sm flex flex-col gap-3">
+                        <Quote className="w-5 h-5 text-primary/40 shrink-0" />
+                        <p className="text-sm text-foreground leading-relaxed italic flex-1">"{item.quote}"</p>
+                        <div className="pt-3 border-t border-border/60">
+                          <div className="text-sm font-bold text-foreground">{item.name}</div>
+                          <div className="text-xs text-muted-foreground">{item.role}</div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
               <h2 className="text-2xl font-serif font-bold mb-6 pt-8 border-t border-border">{t('membership.categories_title')}</h2>
               <div className="space-y-6">
                 {[
-                  { id: 'patron', name: t('membership.categories.patron.name'), desc: t('membership.categories.patron.desc') },
-                  { id: 'corporate', name: t('membership.categories.corporate.name'), desc: t('membership.categories.corporate.desc') },
-                  { id: 'business', name: t('membership.categories.business.name'), desc: t('membership.categories.business.desc') },
-                  { id: 'nonprofit', name: t('membership.categories.nonprofit.name'), desc: t('membership.categories.nonprofit.desc') }
+                  { id: 'patron', name: t('membership.categories.patron.name'), desc: t('membership.categories.patron.desc'), feeFrom: t('membership.categories.patron.fee_from') },
+                  { id: 'corporate', name: t('membership.categories.corporate.name'), desc: t('membership.categories.corporate.desc'), feeFrom: t('membership.categories.corporate.fee_from') },
+                  { id: 'business', name: t('membership.categories.business.name'), desc: t('membership.categories.business.desc'), feeFrom: t('membership.categories.business.fee_from') },
+                  { id: 'nonprofit', name: t('membership.categories.nonprofit.name'), desc: t('membership.categories.nonprofit.desc'), feeFrom: t('membership.categories.nonprofit.fee_from') }
                 ].map((cat, i) => (
                   <div key={i} className="border border-border p-6 rounded-sm hover:border-primary/30 transition-colors bg-white">
-                    <h3 className="font-bold text-lg mb-2 text-primary">{cat.name}</h3>
+                    <div className="flex items-start justify-between gap-4 mb-2">
+                      <h3 className="font-bold text-lg text-primary">{cat.name}</h3>
+                      <span className="text-sm font-bold text-foreground whitespace-nowrap shrink-0">{cat.feeFrom}</span>
+                    </div>
                     <p className="text-muted-foreground text-sm">{cat.desc}</p>
-                    <p className="text-xs text-foreground mt-4 font-semibold">{t('membership.fee_basis')}</p>
+                    <p className="text-xs text-muted-foreground mt-4">{t('membership.fee_basis')}</p>
                   </div>
                 ))}
               </div>

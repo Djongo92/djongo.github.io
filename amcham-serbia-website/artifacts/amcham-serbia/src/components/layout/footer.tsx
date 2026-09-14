@@ -7,7 +7,7 @@ export function Footer() {
   const { t } = useI18n();
 
   return (
-    <footer className="bg-secondary text-secondary-foreground pt-16 pb-8 border-t-4 border-primary">
+    <footer className="bg-secondary text-secondary-foreground pt-16 pb-8 border-t-4 border-primary print:hidden">
       <div className="container mx-auto px-4 md:px-8">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-12 mb-12">
           
@@ -40,6 +40,7 @@ export function Footer() {
               <Link href="/advocacy" className="hover:text-white transition-colors">{t('nav.advocacy')}</Link>
               <Link href="/news" className="hover:text-white transition-colors">{t('nav.news')}</Link>
               <Link href="/impact" className="hover:text-white transition-colors">{t('impact.title')}</Link>
+              <Link href="/about#press" className="hover:text-white transition-colors">{t('about.press')}</Link>
               <Link href="/platform" className="hover:text-primary text-primary font-bold transition-colors">{t('platform.nav')}</Link>
               <Link href="/blueprint" className="hover:text-accent text-accent transition-colors">{t('nav.blueprint')} →</Link>
             </div>

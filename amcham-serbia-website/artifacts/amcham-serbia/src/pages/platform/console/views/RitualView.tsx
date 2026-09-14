@@ -90,10 +90,10 @@ export function RitualView({ navigateTo, showToast, updateBadge, roleParam }: an
                   </div>
                   <div className="pl-12">
                     <h3 className="text-2xl font-serif mb-2 text-foreground group-hover:text-primary transition-colors">{item.text}</h3>
-                    <p className="text-sm text-muted-foreground flex items-center gap-3">
+                    <p className="text-sm text-muted-foreground flex flex-wrap items-center gap-3 gap-y-1.5">
                       <span className="font-bold text-foreground bg-background px-3 py-1 rounded-md border border-border shadow-sm text-xs flex items-center gap-1.5">Goal: {item.action}</span>
                       <span className="flex items-center gap-1">Confidence: <span className="font-bold text-foreground">{item.confidence}</span></span>
-                      <span className="text-border">•</span>
+                      <span className="text-border hidden sm:inline">•</span>
                       <span className="flex items-center gap-1">Target: <span className="font-bold text-foreground">{company?.name}</span></span>
                     </p>
                   </div>

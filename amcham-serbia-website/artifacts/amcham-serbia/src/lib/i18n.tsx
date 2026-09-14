@@ -3,7 +3,7 @@ import React, { createContext, useContext, useState, useEffect } from 'react';
 export type Language = 'en' | 'sr';
 
 interface Translations {
-  [key: string]: string | Translations | string[];
+  [key: string]: string | Translations | string[] | Record<string, string>[];
 }
 
 const dictionary: Record<Language, Translations> = {
@@ -181,11 +181,17 @@ en: {
         "Vote and be elected to the Board of Governors to shape the association's agenda."
       ],
       categories: {
-        patron: { name: "Patron", desc: "For industry leaders requiring maximum visibility and strategic involvement." },
-        corporate: { name: "Corporate", desc: "For large enterprises with significant operations in Serbia." },
-        business: { name: "Business", desc: "For mid-sized companies and professional service firms." },
-        nonprofit: { name: "Non-Profit", desc: "For NGOs, academic institutions, and international organizations." }
+        patron: { name: "Patron", desc: "For industry leaders requiring maximum visibility and strategic involvement.", fee_from: "From €15,000 / year" },
+        corporate: { name: "Corporate", desc: "For large enterprises with significant operations in Serbia.", fee_from: "From €6,000 / year" },
+        business: { name: "Business", desc: "For mid-sized companies and professional service firms.", fee_from: "From €2,000 / year" },
+        nonprofit: { name: "Non-Profit", desc: "For NGOs, academic institutions, and international organizations.", fee_from: "From €500 / year" }
       },
+      testimonials_title: "What Members Say",
+      testimonials: [
+        { quote: "AmCham's regulatory affairs team flagged a compliance change in the new supply chain draft law three weeks before it became public. That lead time is the entire value of membership for us.", name: "Nemanja Radulović", role: "Head of Government Affairs, Hemofarm" },
+        { quote: "We've closed two supplier introductions through the Matchmaking desk this year alone — both would have taken months through a cold search.", name: "Milica Đorđević", role: "Business Development Director, S-Leasing" },
+        { quote: "The Digital Economy Committee is where the real conversations happen before policy gets written, not after.", name: "Dušan Petrović", role: "Country Manager, IBM Serbia" }
+      ],
       form: {
         title: "Membership Enquiry",
         subtitle: "We aim to respond to all enquiries within 2 business days to schedule an initial consultation.",
@@ -307,7 +313,11 @@ en: {
       contact: "Contact Us",
       office: "Executive Office",
       impact_cta: "See the full Impact report",
-      impact_cta_desc: "260+ members, €14bn invested, 119,000 jobs — the numbers behind the mission, charted."
+      impact_cta_desc: "260+ members, €14bn invested, 119,000 jobs — the numbers behind the mission, charted.",
+      press: "Press & Media",
+      press_desc: "For interview requests, data citations, or media inquiries, contact our communications team directly.",
+      press_contact_role: "Regulatory Affairs & Communications",
+      press_note: "Logo assets and a member/sector fact sheet are available on request."
     },
     impact: {
       title: "Impact",
@@ -1170,11 +1180,17 @@ sr: {
         "Glasajte i budite birani u Upravni odbor da biste oblikovali agendu udruženja."
       ],
       categories: {
-        patron: { name: "Pokrovitelj (Patron)", desc: "Za lidere u industriji koji zahtevaju maksimalnu vidljivost i strateško učešće." },
-        corporate: { name: "Korporativni", desc: "Za velika preduzeća sa značajnim operacijama u Srbiji." },
-        business: { name: "Poslovni", desc: "Za kompanije srednje veličine i firme za profesionalne usluge." },
-        nonprofit: { name: "Neprofitni", desc: "Za NVO, akademske institucije i međunarodne organizacije." }
+        patron: { name: "Pokrovitelj (Patron)", desc: "Za lidere u industriji koji zahtevaju maksimalnu vidljivost i strateško učešće.", fee_from: "Od 15.000 € / godišnje" },
+        corporate: { name: "Korporativni", desc: "Za velika preduzeća sa značajnim operacijama u Srbiji.", fee_from: "Od 6.000 € / godišnje" },
+        business: { name: "Poslovni", desc: "Za kompanije srednje veličine i firme za profesionalne usluge.", fee_from: "Od 2.000 € / godišnje" },
+        nonprofit: { name: "Neprofitni", desc: "Za NVO, akademske institucije i međunarodne organizacije.", fee_from: "Od 500 € / godišnje" }
       },
+      testimonials_title: "Šta kažu naši članovi",
+      testimonials: [
+        { quote: "Tim AmCham-a za regulatorna pitanja je uočio promenu usklađenosti u nacrtu novog zakona o lancu snabdevanja tri nedelje pre nego što je postala javna. To vreme unapred je cela vrednost članstva za nas.", name: "Nemanja Radulović", role: "Rukovodilac za odnose sa vladom, Hemofarm" },
+        { quote: "Samo ove godine smo zaključili dva uvođenja dobavljača preko Matchmaking servisa — oba bi bez toga trajala mesecima hladne potrage.", name: "Milica Đorđević", role: "Direktorka razvoja poslovanja, S-Leasing" },
+        { quote: "Odbor za digitalnu ekonomiju je mesto gde se prave prave razgovori pre nego što se politika napiše, a ne posle.", name: "Dušan Petrović", role: "Direktor za zemlju, IBM Srbija" }
+      ],
       form: {
         title: "Upit o članstvu",
         subtitle: "Trudimo se da odgovorimo na sve upite u roku od 2 radna dana kako bismo zakazali početnu konsultaciju.",
@@ -1296,7 +1312,11 @@ sr: {
       contact: "Kontaktirajte nas",
       office: "Izvršna kancelarija",
       impact_cta: "Pogledajte ceo izveštaj o uticaju",
-      impact_cta_desc: "260+ članova, 14 milijardi evra investicija, 119.000 radnih mesta — brojke iza misije, prikazane grafički."
+      impact_cta_desc: "260+ članova, 14 milijardi evra investicija, 119.000 radnih mesta — brojke iza misije, prikazane grafički.",
+      press: "Za medije",
+      press_desc: "Za zahteve za intervju, citiranje podataka ili medijske upite, obratite se direktno našem timu za komunikacije.",
+      press_contact_role: "Regulatorna pitanja i komunikacije",
+      press_note: "Logotip i pregled članstva/sektora dostupni su na zahtev."
     },
     impact: {
       title: "Uticaj",
