@@ -110,6 +110,7 @@ export default function SearchPage() {
       
       {/* Header */}
       <section className="bg-secondary text-secondary-foreground py-16 relative overflow-hidden">
+        <div className="absolute inset-0 bg-network-pattern opacity-10 pointer-events-none"></div>
         <div className="container mx-auto px-4 md:px-8 relative z-10">
           <h1 className="text-3xl md:text-5xl font-serif font-bold mb-4">{t('search.title')}</h1>
           {q && <p className="text-xl text-white/80">"{q}" ({totalResults})</p>}
@@ -123,7 +124,7 @@ export default function SearchPage() {
           {!q ? (
             <div className="text-center py-20 border border-dashed border-border rounded-sm bg-background">
               <SearchIcon className="w-12 h-12 text-muted-foreground mx-auto mb-4 opacity-50" />
-              <p className="text-xl font-medium text-muted-foreground">Enter a search term above.</p>
+              <p className="text-xl font-medium text-muted-foreground">{t('search.prompt')}</p>
             </div>
           ) : totalResults === 0 ? (
             <div className="text-center py-20 border border-border rounded-sm bg-white shadow-sm">

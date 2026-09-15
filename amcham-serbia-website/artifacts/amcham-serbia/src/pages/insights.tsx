@@ -81,6 +81,21 @@ export default function Insights() {
 
       <section className="pt-12">
         <div className="container mx-auto px-4 md:px-8">
+          {filteredInsights.length === 0 ? (
+            <div className="text-center py-24 border border-dashed border-border/50 rounded-sm bg-white">
+              <FileText className="w-12 h-12 text-muted-foreground mx-auto mb-4 opacity-50" />
+              <h3 className="text-xl font-bold font-serif mb-2">{t('insights.no_results')}</h3>
+              <p className="text-muted-foreground mb-6">{t('insights.no_results_desc')}</p>
+              {(typeFilter !== 'all' || yearFilter !== 'all') && (
+                <button
+                  onClick={() => updateFilters({ topic: 'all', year: 'all' })}
+                  className="text-primary font-bold hover:underline"
+                >
+                  {t('common.reset_filters')}
+                </button>
+              )}
+            </div>
+          ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
             {filteredInsights.map(insight => {
               const title = lang === 'sr' ? insight.titleSr : insight.title;
@@ -88,7 +103,7 @@ export default function Insights() {
               const type = lang === 'sr' ? insight.typeSr : insight.type;
               
               return (
-                <div key={insight.id} className="bg-white border border-border rounded-sm overflow-hidden group hover:shadow-lg transition-all flex flex-col">
+                <div key={insight.id} className="bg-white border border-border rounded-sm overflow-hidden group hover:shadow-lg hover:border-primary/50 transition-all flex flex-col">
                   <div className="p-8 flex-1">
                     <div className="flex justify-between items-start mb-6">
                       <div className="w-12 h-12 bg-primary/5 rounded-sm flex items-center justify-center">
@@ -128,6 +143,7 @@ export default function Insights() {
               );
             })}
           </div>
+          )}
         </div>
       </section>
     </div>

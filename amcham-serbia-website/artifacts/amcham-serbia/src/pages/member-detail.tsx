@@ -85,7 +85,7 @@ export default function MemberDetail() {
                 </div>
                 <div className="flex justify-between items-center py-2">
                   <span className="text-muted-foreground">{t('members.detail.updated')}</span>
-                  <span className="font-medium flex items-center gap-1 text-xs"><Calendar className="w-3 h-3"/> {new Date(member.reviewDate).toLocaleDateString(lang === 'sr' ? 'sr-RS' : 'en-US')}</span>
+                  <span className="font-medium flex items-center gap-1 text-xs"><Calendar className="w-3 h-3"/> {new Date(member.reviewDate).toLocaleDateString(lang === 'sr' ? 'sr-RS' : 'en-US', { month: 'short', day: 'numeric', year: 'numeric' })}</span>
                 </div>
               </div>
             </div>

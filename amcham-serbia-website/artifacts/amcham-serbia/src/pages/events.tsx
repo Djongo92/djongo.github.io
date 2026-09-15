@@ -52,8 +52,9 @@ export default function Events() {
       <SEO title={t('events.title')} description={t('events.subtitle')} />
       
       {/* Header */}
-      <section className="bg-secondary text-secondary-foreground py-16 border-b border-border/10">
-        <div className="container mx-auto px-4 md:px-8">
+      <section className="bg-secondary text-secondary-foreground py-16 border-b border-border/10 relative overflow-hidden">
+        <div className="absolute inset-0 bg-network-pattern opacity-10 pointer-events-none"></div>
+        <div className="container mx-auto px-4 md:px-8 relative z-10">
           <h1 className="text-4xl md:text-5xl font-serif font-bold mb-4">{t('events.title')}</h1>
           <p className="text-xl text-muted-foreground max-w-2xl">
             {t('events.subtitle')}
@@ -101,7 +102,15 @@ export default function Events() {
             <div className="text-center py-24 border border-dashed border-border/50 rounded-sm bg-white">
               <Calendar className="w-12 h-12 text-muted-foreground mx-auto mb-4 opacity-50" />
               <h3 className="text-xl font-bold font-serif mb-2">{t('events.no_results')}</h3>
-              <p className="text-muted-foreground">{t('events.no_results_desc')}</p>
+              <p className="text-muted-foreground mb-6">{t('events.no_results_desc')}</p>
+              {topicFilter !== 'all' && (
+                <button
+                  onClick={() => updateFilters({ topic: 'all' })}
+                  className="text-primary font-bold hover:underline"
+                >
+                  {t('common.reset_filters')}
+                </button>
+              )}
             </div>
           ) : (
             <div className="grid grid-cols-1 gap-6">

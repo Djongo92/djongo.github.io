@@ -270,6 +270,8 @@ en: {
       all_formats: "All Formats",
       all_years: "All Years",
       read_summary: "Read Summary",
+      no_results: "No insights found",
+      no_results_desc: "Try adjusting your format or year filter.",
       detail: {
         back: "Back to Research",
         key_findings: "Key Findings",
@@ -333,6 +335,7 @@ en: {
       title: "Search Results",
       placeholder: "Search...",
       shortcut: "Cmd+K to search",
+      prompt: "Enter a search term above.",
       zero: "No results for",
       zero_help: "Try browsing our main areas:",
       type_news: "News",
@@ -356,7 +359,9 @@ en: {
       title: "News",
       subtitle: "Latest updates, announcements, and press releases from AmCham Serbia.",
       back: "Back to News",
-      all_topics: "All Topics"
+      all_topics: "All Topics",
+      no_results: "No news found",
+      no_results_desc: "Try adjusting your topic filter."
     },
     blueprint: {
       title: "Design Blueprint",
@@ -1010,7 +1015,13 @@ nav_today: "Today",
       register: "Register Now",
       download: "Download PDF",
       search_results: "Search Results",
-      no_results: "No results found."
+      no_results: "No results found.",
+      reset_filters: "Reset filters"
+    },
+    not_found: {
+      title: "Page not found",
+      desc: "The page you are looking for doesn't exist or has been moved.",
+      cta: "Return to Home"
     }
   },
 sr: {
@@ -1269,6 +1280,8 @@ sr: {
       all_formats: "Svi formati",
       all_years: "Sve godine",
       read_summary: "Pročitaj rezime",
+      no_results: "Nema pronađenih istraživanja",
+      no_results_desc: "Pokušajte da prilagodite filter za format ili godinu.",
       detail: {
         back: "Nazad na istraživanja",
         key_findings: "Ključni nalazi",
@@ -1332,6 +1345,7 @@ sr: {
       title: "Rezultati pretrage",
       placeholder: "Pretraga...",
       shortcut: "Cmd+K za pretragu",
+      prompt: "Unesite pojam za pretragu iznad.",
       zero: "Nema rezultata za",
       zero_help: "Pokušajte da pregledate naše glavne oblasti:",
       type_news: "Vesti",
@@ -1355,7 +1369,9 @@ sr: {
       title: "Vesti",
       subtitle: "Najnovija ažuriranja, najave i saopštenja za javnost od AmCham Srbija.",
       back: "Nazad na vesti",
-      all_topics: "Sve teme"
+      all_topics: "Sve teme",
+      no_results: "Nema pronađenih vesti",
+      no_results_desc: "Pokušajte da prilagodite filter za temu."
     },
     blueprint: {
       title: "Nacrt dizajna",
@@ -1993,7 +2009,13 @@ nav_today: "Danas",
       register: "Prijavi se",
       download: "Preuzmi PDF",
       search_results: "Rezultati pretrage",
-      no_results: "Nema rezultata."
+      no_results: "Nema rezultata.",
+      reset_filters: "Poništi filtere"
+    },
+    not_found: {
+      title: "Stranica nije pronađena",
+      desc: "Stranica koju tražite ne postoji ili je premeštena.",
+      cta: "Povratak na početnu"
     }
   }
 };
