@@ -1,10 +1,10 @@
-import React, { useRef } from 'react';
+import React, { useRef, useState, useEffect } from 'react';
 import { Link } from 'wouter';
 import { useI18n } from '@/lib/i18n';
 import { SEO } from '@/components/seo';
 import { ArrowRight, ChevronRight, Newspaper, ArrowUpRight, CheckCircle2, Compass } from 'lucide-react';
 import { mockEvents, mockNews } from '@/data/mock';
-import { useScroll, useTransform, motion } from 'framer-motion';
+import { useScroll, useTransform, motion, AnimatePresence } from 'framer-motion';
 import { useGuidedTour } from '@/components/guided-tour';
 
 export default function Home() {
@@ -15,6 +15,15 @@ export default function Home() {
   const latestNews = mockNews.slice(0, 3);
   const newsThumbnails = ['images/real/event.jpg', 'images/event-panel.jpg', 'images/office-meeting.jpg'];
   const nextEvent = mockEvents.find(e => e.status === 'open' || e.status === 'request_pending') || mockEvents[0];
+
+  // Hero carousel — slow crossfade, pauses for prefers-reduced-motion
+  const heroImages = ['images/real/hero-2.jpg', 'images/real/hero-1.jpg', 'images/event-panel.jpg'];
+  const [heroIndex, setHeroIndex] = useState(0);
+  useEffect(() => {
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+    const id = setInterval(() => setHeroIndex((i) => (i + 1) % heroImages.length), 6000);
+    return () => clearInterval(id);
+  }, []);
 
   // Parallax Setup (Disable on mobile for performance/layout)
   const isMobile = typeof window !== 'undefined' && window.innerWidth < 768;
@@ -50,12 +59,19 @@ export default function Home() {
       {/* 1. Hero Section */}
       <section className="relative w-full h-[90vh] min-h-[600px] flex items-center justify-center overflow-hidden bg-secondary">
         <div className="absolute inset-0 z-0">
-          <img 
-            src={`${import.meta.env.BASE_URL}images/real/hero-2.jpg`}
-            alt="Business Moves Serbia"
-            className="w-full h-full object-cover opacity-40"
-          />
-          <div className="absolute inset-0 bg-gradient-to-b from-secondary/80 via-secondary/40 to-background"></div>
+          <AnimatePresence>
+            <motion.img
+              key={heroIndex}
+              src={`${import.meta.env.BASE_URL}${heroImages[heroIndex]}`}
+              alt="Business Moves Serbia"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 0.6 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 1.5, ease: 'easeInOut' }}
+              className="absolute inset-0 w-full h-full object-cover"
+            />
+          </AnimatePresence>
+          <div className="absolute inset-0 bg-gradient-to-b from-secondary/70 via-secondary/30 to-background"></div>
         </div>
         
         {/* Soft decorative shape */}
