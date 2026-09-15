@@ -65,7 +65,7 @@ export default function Home() {
               src={`${import.meta.env.BASE_URL}${heroImages[heroIndex]}`}
               alt="Business Moves Serbia"
               initial={{ opacity: 0 }}
-              animate={{ opacity: 0.6 }}
+              animate={{ opacity: 0.75 }}
               exit={{ opacity: 0 }}
               transition={{ duration: 1.5, ease: 'easeInOut' }}
               className="absolute inset-0 w-full h-full object-cover"

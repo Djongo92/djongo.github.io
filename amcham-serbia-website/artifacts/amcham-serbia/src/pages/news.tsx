@@ -37,8 +37,9 @@ export default function News() {
       <SEO title={t('news.title')} description={t('news.subtitle')} />
       
       {/* Header */}
-      <section className="bg-secondary text-secondary-foreground py-16 border-b border-border/10">
-        <div className="container mx-auto px-4 md:px-8">
+      <section className="bg-secondary text-secondary-foreground py-16 border-b border-border/10 relative overflow-hidden">
+        <div className="absolute inset-0 bg-network-pattern opacity-10 pointer-events-none"></div>
+        <div className="container mx-auto px-4 md:px-8 relative z-10">
           <h1 className="text-4xl md:text-5xl font-serif font-bold mb-4">{t('news.title')}</h1>
           <p className="text-xl text-muted-foreground max-w-2xl">
             {t('news.subtitle')}
@@ -47,7 +48,7 @@ export default function News() {
       </section>
 
       {/* Filters */}
-      <section className="bg-white border-b border-border sticky top-20 z-40">
+      <section className="bg-white border-b border-border sticky top-20 z-40 shadow-sm">
         <div className="container mx-auto px-4 md:px-8 py-4 flex flex-col md:flex-row gap-4 justify-end items-center">
           <div className="flex items-center gap-2 w-full md:w-auto">
             <span className="text-sm font-semibold text-muted-foreground">{t('events.topic')}</span>
@@ -71,7 +72,16 @@ export default function News() {
           {filteredNews.length === 0 ? (
             <div className="text-center py-24 border border-dashed border-border/50 rounded-sm bg-white">
               <Newspaper className="w-12 h-12 text-muted-foreground mx-auto mb-4 opacity-50" />
-              <h3 className="text-xl font-bold font-serif mb-2">{t('common.no_results')}</h3>
+              <h3 className="text-xl font-bold font-serif mb-2">{t('news.no_results')}</h3>
+              <p className="text-muted-foreground mb-6">{t('news.no_results_desc')}</p>
+              {topicFilter !== 'all' && (
+                <button
+                  onClick={() => updateFilters({ topic: 'all' })}
+                  className="text-primary font-bold hover:underline"
+                >
+                  {t('common.reset_filters')}
+                </button>
+              )}
             </div>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
