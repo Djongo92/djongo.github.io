@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useI18n } from '@/lib/i18n';
 import { platformData, Company, committeeRosters } from '@/data/platform';
-import { Search, Download, ShieldCheck, Clock, Check, X, ArrowRight, Activity, Calendar, Building, Eye } from 'lucide-react';
+import { Search, Download, ShieldCheck, Clock, Check, X, ArrowRight, Activity, Calendar, Building, Eye, UserMinus, Users } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useConsoleState } from '../console-state';
 import { cn } from '@/lib/utils';
@@ -12,12 +12,65 @@ interface AppliedFilter {
   type: string;
 }
 
-function runFixtureQuery(query: string, t: (path: string, fallback?: string) => string): { results: Company[]; explanation: string; applied: AppliedFilter[] } {
+interface DepartedMember {
+  id: string;
+  name: string;
+  sector: string;
+  tier: string;
+  lastScore: number;
+  departedDate: string;
+  lastManager: string;
+  reason: string;
+}
+
+// "12d ago" / "3w ago" / "2m ago" -> approximate days elapsed. Every
+// lastInteraction string in the fixture data follows this shape.
+function parseLastInteractionDays(s: string): number | null {
+  const m = /(\d+)\s*(d|w|m)\s*ago/i.exec(s);
+  if (!m) return null;
+  const n = +m[1];
+  const unit = m[2].toLowerCase();
+  if (unit === 'd') return n;
+  if (unit === 'w') return n * 7;
+  return n * 30;
+}
+
+function runFixtureQuery(query: string, t: (path: string, fallback?: string) => string): { results: Company[]; departed: DepartedMember[] | null; explanation: string; applied: AppliedFilter[] } {
   const q = query.toLowerCase();
   let filtered = [...platformData.allMembers];
   const applied: AppliedFilter[] = [];
 
   const hasWord = (term: string) => new RegExp(`\\b${term.replace(/[.*+?^${}()|[\\]\\\\]/g, '\\\\$&')}\\b`, 'i').test(query);
+
+  // Departure/churn questions get a fundamentally different answer shape (a
+  // short, historical list, not a live company table) so they're resolved
+  // first and short-circuit the rest of the filter chain entirely.
+  const departedDaysMatch = /\b(?:left|departed|churned|canceled|cancelled)\b.*?\b(?:in the |over the )?(?:past|last)\s+(\d+)\s*days?\b/i.exec(query);
+  const departedGeneric = /\bwho\s+(?:left|departed|churned|cancell?ed)\b|\bdeparted members?\b|\brecent (?:cancellations?|departures?|churn)\b|\bchurned members?\b/i.test(query);
+  if (departedDaysMatch || departedGeneric) {
+    const now = new Date();
+    let departed = [...(platformData.console as any).departedMembers] as DepartedMember[];
+    const departedApplied: AppliedFilter[] = [];
+    if (departedDaysMatch) {
+      const threshold = parseInt(departedDaysMatch[1], 10);
+      departed = departed.filter(d => {
+        const days = (now.getTime() - new Date(d.departedDate).getTime()) / 86400000;
+        return days >= 0 && days <= threshold;
+      });
+      departedApplied.push({ id: `departed-${threshold}`, label: `Departed ≤ ${threshold}d ago`, type: 'departed' });
+    } else {
+      departedApplied.push({ id: 'departed-all', label: 'Departed members', type: 'departed' });
+    }
+    departed.sort((a, b) => new Date(b.departedDate).getTime() - new Date(a.departedDate).getTime());
+    return {
+      results: [],
+      departed,
+      explanation: departed.length === 0
+        ? 'No departures matched that window.'
+        : `${departed.length} departed member${departed.length === 1 ? '' : 's'} found.`,
+      applied: departedApplied,
+    };
+  }
 
   const sectors = [...new Set(platformData.allMembers.map(c => c.sector))].sort((a, b) => b.length - a.length);
   const matchedSector = sectors.find(s => hasWord(s.toLowerCase()));
@@ -58,6 +111,33 @@ function runFixtureQuery(query: string, t: (path: string, fallback?: string) => 
     applied.push({ id: 'lifecycle-at-risk', label: 'Lifecycle: at-risk', type: 'lifecycle' });
   }
 
+  const contactDaysMatch = /\b(?:no contact|haven'?t (?:talked|spoken|been in touch)|not (?:talked|spoken)|no touchpoint)\b.*?\b(\d+)\s*days?\b/i.exec(query);
+  if (contactDaysMatch) {
+    const threshold = parseInt(contactDaysMatch[1], 10);
+    filtered = filtered.filter(c => {
+      const days = parseLastInteractionDays(c.lastInteraction);
+      return days !== null && days >= threshold;
+    });
+    applied.push({ id: `contact-days-${threshold}`, label: `No contact ≥ ${threshold}d`, type: 'contact' });
+  } else if (/\bstale contacts?\b|\bhaven'?t (?:talked|spoken|been in touch)\b|\bwho haven'?t i (?:talked|spoken)\b|\bno recent contact\b/i.test(query)) {
+    filtered = filtered.filter(c => c.contactFreshness === 'stale');
+    applied.push({ id: 'contact-stale', label: 'Contact: stale', type: 'contact' });
+  }
+
+  const joinedDaysMatch = /\bjoined\b.*?\b(?:in the |over the )?(?:past|last)\s+(\d+)\s*days?\b/i.exec(query);
+  if (joinedDaysMatch) {
+    const threshold = parseInt(joinedDaysMatch[1], 10);
+    const now = new Date();
+    filtered = filtered.filter(c => {
+      const days = (now.getTime() - new Date(c.joinDate).getTime()) / 86400000;
+      return days >= 0 && days <= threshold;
+    });
+    applied.push({ id: `joined-${threshold}`, label: `Joined ≤ ${threshold}d ago`, type: 'joined' });
+  } else if (/\bnew members?\b|\brecently joined\b|\bnew joiners?\b/i.test(query)) {
+    filtered = filtered.filter(c => c.lifecycle === 'onboarding');
+    applied.push({ id: 'joined-onboarding', label: 'Lifecycle: onboarding', type: 'joined' });
+  }
+
   const matchedCommittee = committeeRosters.find(cm => hasWord(cm.name.toLowerCase()) || query.toLowerCase().includes(cm.name.toLowerCase()));
   if (matchedCommittee) {
     const rosterIds = new Set([matchedCommittee.chairCompanyId, ...matchedCommittee.memberCompanyIds]);
@@ -85,9 +165,9 @@ function runFixtureQuery(query: string, t: (path: string, fallback?: string) => 
   }
 
   if (applied.length === 0) {
-    return { results: [], explanation: t('console_v2.ask_no_filter', 'No recognizable filter in this query. Try naming a sector, tier, location, "exporters", "low engagement", or "below average".'), applied: [] };
+    return { results: [], departed: null, explanation: t('console_v2.ask_no_filter', 'No recognizable filter in this query. Try naming a sector, tier, location, "exporters", "low engagement", "below average", "haven\'t talked to in 30 days", "joined in the past 90 days", or "who left in the past 90 days".'), applied: [] };
   }
-  return { results: filtered, explanation: `${t('console_v2.ask_applied', 'Applied')} ${applied.length} filters — returning ${filtered.length} records.`, applied };
+  return { results: filtered, departed: null, explanation: `${t('console_v2.ask_applied', 'Applied')} ${applied.length} filters — returning ${filtered.length} records.`, applied };
 }
 
 export function AskView({ showToast }: { showToast: (m:string) => void }) {
@@ -95,6 +175,7 @@ export function AskView({ showToast }: { showToast: (m:string) => void }) {
   const [query, setQuery] = useState("");
   const [loading, setLoading] = useState(false);
   const [results, setResults] = useState<Company[] | null>(null);
+  const [departed, setDeparted] = useState<DepartedMember[] | null>(null);
   const [explanation, setExplanation] = useState('');
   const [appliedFilters, setAppliedFilters] = useState<AppliedFilter[]>([]);
   const { queueOutreach, isQueued } = useConsoleState();
@@ -109,6 +190,7 @@ export function AskView({ showToast }: { showToast: (m:string) => void }) {
     if (!q.trim()) {
       setLoading(false);
       setResults(null);
+      setDeparted(null);
       setExplanation('');
       setAppliedFilters([]);
       return;
@@ -117,8 +199,9 @@ export function AskView({ showToast }: { showToast: (m:string) => void }) {
     setExported(false);
     searchTimer.current = setTimeout(() => {
       setLoading(false);
-      const { results: found, explanation: expl, applied } = runFixtureQuery(q, t);
+      const { results: found, departed: departedFound, explanation: expl, applied } = runFixtureQuery(q, t);
       setResults(found);
+      setDeparted(departedFound);
       setExplanation(expl);
       setAppliedFilters(applied);
     }, 800);
@@ -140,6 +223,12 @@ export function AskView({ showToast }: { showToast: (m:string) => void }) {
     } else if (filter.type === 'committee') {
       const val = filter.label.split(': ')[1];
       newQuery = newQuery.replace(new RegExp(val, 'ig'), '').trim();
+    } else if (filter.type === 'contact') {
+      newQuery = newQuery.replace(/(?:no contact|haven'?t (?:talked|spoken|been in touch)|not (?:talked|spoken)|no touchpoint).*?\d+\s*days?|stale contacts?|haven'?t (?:talked|spoken|been in touch)|who haven'?t i (?:talked|spoken)|no recent contact/ig, '').trim();
+    } else if (filter.type === 'joined') {
+      newQuery = newQuery.replace(/joined.*?(?:in the |over the )?(?:past|last)\s+\d+\s*days?|new members?|recently joined|new joiners?/ig, '').trim();
+    } else if (filter.type === 'departed') {
+      newQuery = '';
     }
     setQuery(newQuery);
     handleSearch(null as any, newQuery);
@@ -170,7 +259,7 @@ export function AskView({ showToast }: { showToast: (m:string) => void }) {
 
       {!results && !loading && (
         <div className="flex gap-4 flex-wrap">
-          {["Manufacturing exporters in Kragujevac", "Patrons with renewal in 90 days", "IT companies with low engagement", "At-risk accounts", "Digital Economy committee members", "Legal sector companies in Belgrade", "Companies below the book average", "Startup tier companies"].map(q => (
+          {["Manufacturing exporters in Kragujevac", "Patrons with renewal in 90 days", "IT companies with low engagement", "At-risk accounts", "Digital Economy committee members", "Legal sector companies in Belgrade", "Companies below the book average", "Startup tier companies", "Haven't talked to in 30 days", "Joined in the past 90 days", "Who left in the past 90 days"].map(q => (
             <button key={q} onClick={() => { setQuery(q); handleSearch(null as any, q); }} className="bg-background border border-border rounded-full px-5 py-3 text-sm font-bold text-foreground hover:border-primary hover:bg-primary/5 transition-colors shadow-sm flex items-center gap-2">
               <Search className="w-3 h-3 text-muted-foreground"/> {q}
             </button>
@@ -197,8 +286,12 @@ export function AskView({ showToast }: { showToast: (m:string) => void }) {
               
               <div className="flex flex-col md:flex-row justify-between items-start md:items-end mb-8 relative z-10 gap-6">
                 <div>
-                  <h3 className="text-4xl font-serif font-light text-foreground mb-4">{results.length === 0 ? t('console_v2.ask_no_matches', 'No matching companies') : `${results.length} ${t('console_v2.ask_found', 'Results Found')}`}</h3>
-                  
+                  <h3 className="text-4xl font-serif font-light text-foreground mb-4">
+                    {departed !== null
+                      ? (departed.length === 0 ? 'No Departures Found' : `${departed.length} Departed Member${departed.length === 1 ? '' : 's'}`)
+                      : (results!.length === 0 ? t('console_v2.ask_no_matches', 'No matching companies') : `${results!.length} ${t('console_v2.ask_found', 'Results Found')}`)}
+                  </h3>
+
                   {appliedFilters.length > 0 && (
                     <div className="flex flex-wrap items-center gap-2 mb-4">
                       <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest mr-2">Filters Applied:</span>
@@ -212,21 +305,58 @@ export function AskView({ showToast }: { showToast: (m:string) => void }) {
                       ))}
                     </div>
                   )}
-                  
+
                   <div className="flex items-center gap-6 text-[10px] font-bold text-muted-foreground uppercase tracking-widest">
                      <span className="flex items-center gap-2 bg-muted px-3 py-1.5 rounded-md border border-border/50"><ShieldCheck className="w-3 h-3 text-emerald-500" /> Platform Fixture Data</span>
                   </div>
                 </div>
-                
-                {exported ? (
-                  <span className="text-sm font-bold bg-emerald-500/10 text-emerald-600 border border-emerald-500/20 flex items-center gap-2 px-6 py-3 rounded-full shadow-sm"><Check className="w-4 h-4" /> {t('console_v2.ask_export_ready', 'Export Ready')} ({results.length})</span>
-                ) : (
-                  <button onClick={() => { if (results.length === 0) return; setExported(true); showToast("Exported to CSV"); }} disabled={results.length === 0} className="text-sm font-bold bg-background border border-border text-foreground flex items-center gap-2 hover:bg-muted px-6 py-3 rounded-full transition-colors shadow-sm disabled:opacity-50">
-                    <Download className="w-4 h-4" /> Export CSV
-                  </button>
+
+                {departed === null && results && (
+                  <div className="flex items-center gap-3">
+                    {results.filter(c => !isQueued(c.id)).length > 0 && (
+                      <button
+                        onClick={() => {
+                          const toQueue = results.filter(c => !isQueued(c.id));
+                          toQueue.forEach(c => queueOutreach(c));
+                          showToast(`Queued ${toQueue.length} for outreach`);
+                        }}
+                        className="text-sm font-bold bg-primary text-primary-foreground flex items-center gap-2 hover:bg-primary/90 px-6 py-3 rounded-full transition-colors shadow-md"
+                      >
+                        <Users className="w-4 h-4" /> Queue All ({results.filter(c => !isQueued(c.id)).length})
+                      </button>
+                    )}
+                    {exported ? (
+                      <span className="text-sm font-bold bg-emerald-500/10 text-emerald-600 border border-emerald-500/20 flex items-center gap-2 px-6 py-3 rounded-full shadow-sm"><Check className="w-4 h-4" /> {t('console_v2.ask_export_ready', 'Export Ready')} ({results.length})</span>
+                    ) : (
+                      <button onClick={() => { if (results.length === 0) return; setExported(true); showToast("Exported to CSV"); }} disabled={results.length === 0} className="text-sm font-bold bg-background border border-border text-foreground flex items-center gap-2 hover:bg-muted px-6 py-3 rounded-full transition-colors shadow-sm disabled:opacity-50">
+                        <Download className="w-4 h-4" /> Export CSV
+                      </button>
+                    )}
+                  </div>
                 )}
               </div>
 
+              {departed !== null ? (
+                <div className="flex-1 relative z-10 space-y-3">
+                  {departed.length === 0 && (
+                    <div className="text-muted-foreground font-medium italic text-center py-16 border border-dashed border-border rounded-3xl">No members departed in that window.</div>
+                  )}
+                  {departed.map(d => (
+                    <div key={d.id} className="bg-background border border-border rounded-3xl p-6 flex flex-col md:flex-row md:items-center gap-4 md:gap-8">
+                      <div className="w-12 h-12 rounded-2xl bg-destructive/10 text-destructive flex items-center justify-center shrink-0"><UserMinus className="w-5 h-5" /></div>
+                      <div className="flex-1">
+                        <div className="font-bold text-lg text-foreground">{d.name}</div>
+                        <div className="text-xs font-medium text-muted-foreground mt-0.5">{d.sector} · {d.tier} · last managed by {d.lastManager}</div>
+                        <p className="text-sm text-foreground/80 mt-2">{d.reason}</p>
+                      </div>
+                      <div className="flex flex-col items-start md:items-end gap-1 shrink-0">
+                        <div className="flex items-center gap-1.5 text-xs font-bold text-muted-foreground uppercase tracking-widest"><Clock className="w-3 h-3" /> {new Date(d.departedDate).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })}</div>
+                        <div className="text-sm font-serif tabular-nums text-muted-foreground">Last score: {d.lastScore}</div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              ) : (
               <div className="flex-1 overflow-x-auto relative z-10 bg-background rounded-3xl border border-border">
                 <table className="w-full text-sm text-left">
                   <thead className="bg-muted text-[10px] uppercase tracking-widest text-muted-foreground sticky top-0 backdrop-blur-xl">
@@ -238,7 +368,7 @@ export function AskView({ showToast }: { showToast: (m:string) => void }) {
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-border/50">
-                    {results.map((c, i) => (
+                    {results!.map((c, i) => (
                       <motion.tr 
                         initial={{ opacity: 0, x: -10 }}
                         animate={{ opacity: 1, x: 0 }}
@@ -285,7 +415,8 @@ export function AskView({ showToast }: { showToast: (m:string) => void }) {
                   </tbody>
                 </table>
               </div>
-              
+              )}
+
               <div className="mt-8 bg-muted p-5 rounded-3xl border border-border/50 flex flex-col md:flex-row justify-between items-start md:items-center gap-4 relative z-10 shadow-sm">
                 <div>
                   <div className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground mb-1 flex items-center gap-2"><Activity className="w-3 h-3"/> Provenance & Execution</div>

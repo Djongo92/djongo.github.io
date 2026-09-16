@@ -5,15 +5,16 @@ import { cn } from '@/lib/utils';
 import { Download, FileText, CheckCircle2, AlertTriangle, ArrowRight, Check, Target, ChevronDown, ChevronUp } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
-export function BriefView({ companyId, navigateTo }: { companyId: string | null, navigateTo: (v:string) => void }) {
+export function BriefView({ companyId, navigateTo, showToast }: { companyId: string | null, navigateTo: (v:string) => void, showToast: (m:string) => void }) {
   const { t } = useI18n();
   const [readProgress, setReadProgress] = useState(0);
   const [expandedSections, setExpandedSections] = useState<Record<string, boolean>>({ talkingPoints: true, context: true });
   const [completedActions, setCompletedActions] = useState<Record<number, boolean>>({});
   const [notes, setNotes] = useState("");
+  const [savedToCrm, setSavedToCrm] = useState(false);
 
   const c = companyId ? platformData.allMembers.find(x => x.id === companyId) : undefined;
-  const brief = companyId ? platformData.console.briefs[companyId as keyof typeof platformData.console.briefs] as any : undefined;
+  const brief = c ? platformData.console.briefs[c.id as keyof typeof platformData.console.briefs] as any : undefined;
 
   // Simple reading progress based on scroll within the modal if it's scrollable,
   // or window if it's page-level. We'll attach to window for general case.
@@ -31,6 +32,17 @@ export function BriefView({ companyId, navigateTo }: { companyId: string | null,
 
   const toggleSection = (s: string) => setExpandedSections(p => ({ ...p, [s]: !p[s] }));
   const toggleAction = (i: number) => setCompletedActions(p => ({ ...p, [i]: !p[i] }));
+
+  if (!c) {
+    return (
+      <div className="max-w-4xl mx-auto py-24 text-center">
+        <div className="w-14 h-14 rounded-full bg-muted mx-auto mb-6 flex items-center justify-center"><FileText className="w-6 h-6 text-muted-foreground" /></div>
+        <h2 className="text-3xl font-serif font-light mb-3">No company selected</h2>
+        <p className="text-muted-foreground mb-8">Open a brief from a company's dossier or the Ritual queue.</p>
+        <button onClick={() => navigateTo('accounts')} className="px-5 py-3 rounded-full bg-primary text-primary-foreground text-sm font-bold">Return to Accounts</button>
+      </div>
+    );
+  }
 
   return (
     <div className="max-w-4xl mx-auto bg-card rounded-[40px] text-card-foreground min-h-[800px] p-12 md:p-20 shadow-xl border border-border relative my-10 print:shadow-none print:p-0 print:border-none print:m-0 font-sans overflow-hidden">
@@ -223,7 +235,11 @@ export function BriefView({ companyId, navigateTo }: { companyId: string | null,
                 className="flex-1 w-full bg-card border border-border rounded-[32px] p-6 text-base font-medium outline-none focus:border-primary/50 transition-colors shadow-inner resize-none min-h-[200px]"
               />
               <div className="mt-4 flex justify-end">
-                <button className="px-6 py-2.5 rounded-full bg-foreground text-background font-bold text-xs shadow-sm hover:shadow-md transition-all">Save to CRM</button>
+                {savedToCrm ? (
+                  <span className="px-6 py-2.5 rounded-full bg-emerald-500/10 text-emerald-600 border border-emerald-500/20 font-bold text-xs flex items-center gap-2"><Check className="w-3.5 h-3.5" /> Saved to CRM</span>
+                ) : (
+                  <button onClick={() => { setSavedToCrm(true); showToast(`Notes saved to ${c.name}'s CRM record`); }} className="px-6 py-2.5 rounded-full bg-foreground text-background font-bold text-xs shadow-sm hover:shadow-md transition-all">Save to CRM</button>
+                )}
               </div>
             </div>
          </div>

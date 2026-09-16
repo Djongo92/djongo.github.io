@@ -329,7 +329,7 @@ export default function Console() {
                   {view === 'digests' && <DigestsView showToast={showToast} />}
                   {view === 'analytics' && <AnalyticsView navigateTo={navigateTo} />}
                   {view === 'reports' && <ReportsView />}
-                  {view === 'brief' && <BriefView companyId={selectedCompanyId} navigateTo={navigateTo} />}
+                  {view === 'brief' && <BriefView companyId={selectedCompanyId} navigateTo={navigateTo} showToast={showToast} />}
                   {!['ritual','heatmap','accounts','retention','outreach','ask','matchmaking','sponsorship','committees','intelligence','flags','approvals','my-team','board-summary','cover','digests','analytics','reports','brief'].includes(view) && (
                     <div className="max-w-xl mx-auto py-24 text-center">
                       <div className="w-14 h-14 rounded-full bg-muted mx-auto mb-6 flex items-center justify-center"><Eye className="w-6 h-6 text-muted-foreground" /></div>
