@@ -1,10 +1,11 @@
 import React, { useState } from 'react';
 import { usePortalState } from '../portal-state';
-import { Search, Filter, Zap, Clock, ArrowRight, X, UserPlus, CheckCircle2, ChevronRight, BarChart3, ArrowUpRight, MapPin, Briefcase, Mail } from 'lucide-react';
+import { platformData } from '@/data/platform';
+import { Search, Filter, Zap, Clock, ArrowRight, X, UserPlus, CheckCircle2, ChevronRight, BarChart3, ArrowUpRight, MapPin, Briefcase, Mail, Sparkles } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { motion, AnimatePresence } from 'framer-motion';
 
-export default function DirectoryView({ t, showToast, initialViewMode }: any) {
+export default function DirectoryView({ t, showToast, initialViewMode, member }: any) {
   const { directory, setDirectory } = usePortalState();
   const [search, setSearch] = useState('');
   const [filterTier, setFilterTier] = useState<string | null>(null);
@@ -24,6 +25,22 @@ export default function DirectoryView({ t, showToast, initialViewMode }: any) {
     if (!requestContext.trim() || !selectedMember) return;
     setDirectory(directory.map((d: any) => d.id === selectedMember.id ? { ...d, reqStatus: 'pending' } : d));
     const name = selectedMember.name;
+    const requesterName = member?.name || 'A member';
+    // Member-initiated requests aren't staff-brokered — route them into the
+    // same Approvals queue staff already use for matchmaking/marketplace,
+    // rather than only living as local state the portal shows back to them.
+    (platformData.console.approvals as any[]).unshift({
+      id: `intro-${selectedMember.id}-${Date.now()}`,
+      type: 'Intro Request',
+      desc: `${requesterName} requests an introduction to ${name}`,
+      staff: requesterName,
+      context: requestContext,
+      history: 'Submitted directly via the member portal directory.',
+      diffs: [],
+      requesterConsent: true,
+      targetConsent: false,
+      policyChecks: ['Mutual consent required', 'Tier alignment check']
+    });
     setSelectedMember(null);
     setRequestContext('');
     showToast(`${t('portal_intro_sent', 'Intro request sent to')} ${name}`);
@@ -125,11 +142,17 @@ export default function DirectoryView({ t, showToast, initialViewMode }: any) {
                   
                   <div className="flex justify-between items-start mb-4">
                     <span className="text-[10px] uppercase font-bold tracking-widest bg-muted px-3 py-1 rounded-full">{d.sector}</span>
+                    {d.recommended && (
+                      <span className="text-[10px] uppercase font-bold tracking-widest bg-primary/10 text-primary px-3 py-1 rounded-full flex items-center gap-1"><Sparkles className="w-3 h-3"/> {t('portal_recommended', 'Recommended')}</span>
+                    )}
                   </div>
                   <h3 className="text-2xl font-serif font-light text-foreground mb-1 group-hover:text-primary transition-colors">{d.name}</h3>
                   <div className="text-[10px] uppercase font-bold tracking-widest text-primary mb-4">{d.tier}</div>
-                  
-                  <p className="text-sm text-muted-foreground flex-1 mb-6 leading-relaxed line-clamp-3">{d.description}</p>
+
+                  <p className="text-sm text-muted-foreground flex-1 mb-4 leading-relaxed line-clamp-3">{d.description}</p>
+                  {d.recommended && d.recReason && (
+                    <p className="text-xs font-medium text-primary/80 bg-primary/5 border border-primary/10 rounded-xl p-3 mb-4 leading-relaxed">{d.recReason}</p>
+                  )}
                   
                   {d.reqStatus === 'pending' ? (
                     <div className="w-full py-3 bg-muted text-muted-foreground rounded-full font-bold text-xs text-center border border-border flex items-center justify-center gap-2">

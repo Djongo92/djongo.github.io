@@ -14,3 +14,4 @@ export { BriefView } from './brief';
 export { MyTeamView } from './MyTeamView';
 export { BoardSummaryView } from './board-summary';
 export { DigestsView } from './digests';
+export { SponsorshipView } from './SponsorshipView';

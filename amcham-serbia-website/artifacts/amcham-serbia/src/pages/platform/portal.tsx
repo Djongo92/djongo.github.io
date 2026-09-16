@@ -235,7 +235,7 @@ function PortalContent({ viewAs }: { viewAs: ReturnType<typeof resolveViewAsMemb
                  {view === 'home' && <HomeView t={t} navigateTo={navigateTo} roleConfig={roleConfig} showToast={showToast} valueReceipt={viewAs.valueReceipt} />}
                  {view === 'score' && <ScoreView t={t} navigateTo={navigateTo} showToast={showToast} member={viewAs.member} valueReceipt={viewAs.valueReceipt} scoreNarrative={viewAs.scoreNarrative} peerBenchmark={viewAs.peerBenchmark} />}
                  {view === 'glance' && <GlanceView t={t} navigateTo={navigateTo} roleParam={roleParam} member={viewAs.member} billing={viewAs.billing} glanceData={viewAs.glance} />}
-                 {view === 'directory' && <DirectoryView t={t} showToast={showToast} initialViewMode={tourStep === 2 ? 'pending' : undefined} />}
+                 {view === 'directory' && <DirectoryView t={t} showToast={showToast} initialViewMode={tourStep === 2 ? 'pending' : undefined} member={viewAs.member} />}
                  {view === 'laptime' && <LapTimeView t={t} showToast={showToast} member={viewAs.member} />}
                  {view === 'events' && <EventsView t={t} showToast={showToast} />}
                  {view === 'marketplace' && <MarketplaceView t={t} showToast={showToast} />}

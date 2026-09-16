@@ -2,12 +2,14 @@ import React, { useState } from 'react';
 import { useI18n } from '@/lib/i18n';
 import { platformData } from '@/data/platform';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Handshake, AlertTriangle, CheckCircle2, Clock, Target, Layers, ChevronDown, ChevronUp, History } from 'lucide-react';
-import { cn } from '@/lib/utils';
+import { Handshake, AlertTriangle, CheckCircle2, Clock, Target, Layers, ChevronDown, ChevronUp, History, XCircle, TrendingUp } from 'lucide-react';
+import { cn, parseEuro, fmtEuro } from '@/lib/utils';
 
 export function MatchmakingView({ showToast }: { showToast: (m:string) => void }) {
   const { t } = useI18n();
   const [pairs, setPairs] = useState(() => platformData.console.matchmaking.pairs.map((p: any) => ({ ...p, pairId: `${p.from}-${p.to}` })));
+  const [deals, setDeals] = useState<any[]>((platformData.console.matchmaking as any).deals);
+  const [dealValue, setDealValue] = useState<Record<string, string>>({});
   const [expandedId, setExpandedId] = useState<string | null>(null);
 
   const dismissPair = (pairId: string, name?: string) => {
@@ -23,8 +25,25 @@ export function MatchmakingView({ showToast }: { showToast: (m:string) => void }
     }));
   };
 
+  const recordOutcome = (pairId: string, outcome: 'closed' | 'declined') => {
+    const pair = pairs.find(p => p.pairId === pairId);
+    if (!pair) return;
+    setDeals(prev => [{
+      id: `md-${pairId}-${Date.now()}`,
+      from: pair.from,
+      to: pair.to,
+      value: outcome === 'closed' ? (dealValue[pairId] || '€0') : '—',
+      outcome,
+      closedDate: 'Just now',
+      note: outcome === 'closed' ? 'Recorded via Mutual-Consent Broker.' : 'Declined after introduction.'
+    }, ...prev]);
+    setPairs(prev => prev.filter(p => p.pairId !== pairId));
+    showToast(outcome === 'closed' ? 'Deal recorded' : 'Match marked as declined');
+  };
+
   const pendingCount = pairs.filter(p => p.outcomeState === 'pending').length;
   const scheduledCount = pairs.filter(p => p.outcomeState === 'scheduled').length;
+  const closedTotal = deals.filter(d => d.outcome === 'closed').reduce((sum, d) => sum + parseEuro(d.value), 0);
 
   return (
     <div className="max-w-5xl mx-auto font-sans pb-20">
@@ -39,6 +58,9 @@ export function MatchmakingView({ showToast }: { showToast: (m:string) => void }
            </div>
            <div className="px-4 py-2 bg-emerald-500/10 text-emerald-600 rounded-full text-xs font-bold flex items-center gap-2">
              <CheckCircle2 className="w-4 h-4"/> {scheduledCount} Scheduled
+           </div>
+           <div className="px-4 py-2 bg-foreground text-background rounded-full text-xs font-bold flex items-center gap-2">
+             <TrendingUp className="w-4 h-4"/> {fmtEuro(closedTotal)} Closed YTD
            </div>
         </div>
       </div>
@@ -142,27 +164,65 @@ export function MatchmakingView({ showToast }: { showToast: (m:string) => void }
                   <div className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest flex items-center gap-2 bg-muted px-3 py-1.5 rounded-md border border-border/50">
                     <Clock className="w-3 h-3"/> Expires in: {pair.expiry}
                   </div>
-                  <div className="flex flex-wrap justify-center gap-3">
-                    <button onClick={() => dismissPair(pair.pairId, from?.name)} className="px-6 py-3 rounded-full text-sm font-bold text-muted-foreground bg-background border border-border hover:bg-muted transition-colors shadow-sm">
-                      {t('console_v2.match_dismiss', 'Dismiss')}
-                    </button>
-                    <button
-                      onClick={() => {
-                        advancePair(pair.pairId);
-                        showToast(pair.outcomeState === 'scheduled' ? `Meeting with ${from?.name} and ${to?.name} is already scheduled` : pair.toApproved ? `Introduction scheduled for ${from?.name} and ${to?.name}` : `Opt-in request sent to ${to?.name}`);
-                      }}
-                      disabled={pair.outcomeState === 'scheduled'}
-                      className={cn("px-8 py-3 font-bold rounded-full text-sm shadow-md transition-all active:scale-95 flex items-center gap-2", pair.outcomeState === 'scheduled' ? "bg-emerald-500/10 text-emerald-700 border border-emerald-500/20 cursor-not-allowed" : "bg-foreground text-background hover:bg-foreground/90")}
-                    >
-                      {pair.outcomeState === 'scheduled' ? <><CheckCircle2 className="w-4 h-4"/> {t('console_v2.match_scheduled', 'Scheduled')}</> : pair.toApproved ? t('console_v2.match_schedule_intro', 'Schedule Introduction') : `${t('console_v2.match_request_optin', 'Request Opt-in from')} ${to?.name}`}
-                    </button>
-                  </div>
+                  {pair.outcomeState === 'scheduled' ? (
+                    <div className="flex flex-wrap justify-center items-center gap-3">
+                      <input
+                        type="text"
+                        placeholder="Deal value, e.g. €15k"
+                        value={dealValue[pair.pairId] || ''}
+                        onChange={(e) => setDealValue(p => ({ ...p, [pair.pairId]: e.target.value }))}
+                        className="px-4 py-3 bg-background border border-border rounded-full text-sm w-44 focus:outline-none focus:border-primary shadow-sm"
+                      />
+                      <button onClick={() => recordOutcome(pair.pairId, 'closed')} className="px-6 py-3 rounded-full text-sm font-bold bg-emerald-500 text-white shadow-md hover:bg-emerald-600 transition-all active:scale-95 flex items-center gap-2">
+                        <CheckCircle2 className="w-4 h-4"/> Mark Closed
+                      </button>
+                      <button onClick={() => recordOutcome(pair.pairId, 'declined')} className="px-6 py-3 rounded-full text-sm font-bold text-destructive bg-background border border-border hover:bg-destructive/10 transition-colors flex items-center gap-2">
+                        <XCircle className="w-4 h-4"/> Mark Declined
+                      </button>
+                    </div>
+                  ) : (
+                    <div className="flex flex-wrap justify-center gap-3">
+                      <button onClick={() => dismissPair(pair.pairId, from?.name)} className="px-6 py-3 rounded-full text-sm font-bold text-muted-foreground bg-background border border-border hover:bg-muted transition-colors shadow-sm">
+                        {t('console_v2.match_dismiss', 'Dismiss')}
+                      </button>
+                      <button
+                        onClick={() => {
+                          advancePair(pair.pairId);
+                          showToast(pair.toApproved ? `Introduction scheduled for ${from?.name} and ${to?.name}` : `Opt-in request sent to ${to?.name}`);
+                        }}
+                        className="px-8 py-3 font-bold rounded-full text-sm shadow-md transition-all active:scale-95 flex items-center gap-2 bg-foreground text-background hover:bg-foreground/90"
+                      >
+                        {pair.toApproved ? t('console_v2.match_schedule_intro', 'Schedule Introduction') : `${t('console_v2.match_request_optin', 'Request Opt-in from')} ${to?.name}`}
+                      </button>
+                    </div>
+                  )}
                 </div>
               </motion.div>
             );
           })}
         </AnimatePresence>
       </div>
+
+      {deals.length > 0 && (
+        <div className="mt-16 pt-8 border-t border-border">
+          <div className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground mb-6 flex items-center gap-2"><History className="w-4 h-4"/> Recent Deal Outcomes</div>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {deals.slice(0, 6).map((d, i) => {
+              const from = platformData.allMembers.find(c => c.id === d.from);
+              const to = platformData.allMembers.find(c => c.id === d.to);
+              return (
+                <div key={d.id ?? i} className="bg-card border border-border rounded-2xl p-5 text-sm shadow-sm">
+                  <div className="flex justify-between items-start gap-3 mb-1.5">
+                    <span className="font-bold text-foreground">{from?.name} × {to?.name}</span>
+                    <span className={cn("text-[10px] font-bold uppercase tracking-widest px-2 py-0.5 rounded-md border shrink-0", d.outcome === 'closed' ? "bg-emerald-500/10 text-emerald-600 border-emerald-500/20" : "bg-destructive/10 text-destructive border-destructive/20")}>{d.outcome}{d.outcome === 'closed' ? ` · ${d.value}` : ''}</span>
+                  </div>
+                  <div className="text-xs text-muted-foreground">{d.note} — {d.closedDate}</div>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      )}
     </div>
   );
 }
