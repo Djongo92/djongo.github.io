@@ -9,7 +9,16 @@ export function PortalStateProvider({ children, viewAs }: { children: React.Reac
     { id: '2', type: 'event', text: 'Action required: Register colleagues for Energy Transition Roundtable.', urgency: 'high', action: 'Register', route: 'events', status: 'active', date: '4h ago' }
   ]);
   
-  const [directory, setDirectory] = useState(platformData.allMembers.map(m => ({ ...m, saved: false, reqStatus: 'none' })));
+  const viewAsId = viewAs?.member?.id;
+  const [directory, setDirectory] = useState(() => {
+    const pairs = platformData.console.matchmaking.pairs as any[];
+    return platformData.allMembers
+      .filter(m => m.id !== viewAsId)
+      .map(m => {
+        const match = pairs.find(p => (p.from === viewAsId && p.to === m.id) || (p.to === viewAsId && p.from === m.id));
+        return { ...m, saved: false, reqStatus: 'none', recommended: !!match, recReason: match?.rationale };
+      });
+  });
   
   const [events, setEvents] = useState([
     { id: 'e1', title: 'Energy Transition Roundtable', date: 'Tomorrow, 10:00', location: 'Hyatt Regency', capacity: { total: 50, booked: 50 }, registered: false, attendees: [], waitlist: false, agenda: [{ time: '10:00', desc: 'Opening Remarks' }, { time: '10:15', desc: 'Panel Discussion' }], speakers: ['Ana Brnabic', 'Milan Petrovic'], audience: ['Energy Sector', 'Patrons'] },

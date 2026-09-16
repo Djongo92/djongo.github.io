@@ -226,6 +226,18 @@ export const platformData = {
       { id: "a2", type: "Marketplace", desc: "Approve post: 'Office space available in NBG' from MSFT", staff: "Ana", context: "Premium real estate offer, aligns with marketplace guidelines.", history: "MSFT posts 1-2 times a year.", diffs: [{ field: "status", old: "draft", new: "published" }], requesterConsent: true, targetConsent: true, policyChecks: ["No offensive content", "Real estate allowed"] },
       { id: "a3", type: "Dossier Update", desc: "Change primary contact for Adriatica Grupa to Marko Ilić", staff: "Stefan", context: "Automated web signal detected leadership change.", history: "Old contact retired.", diffs: [{ field: "primaryContact", old: "Jovan", new: "Marko Ilić" }], requesterConsent: false, targetConsent: true, policyChecks: ["Data verification required"] }
     ],
+    // Non-dues revenue pipeline — a new surface, not an extension of an
+    // existing one. Stages: prospecting -> proposed -> confirmed, or declined.
+    sponsorship: [
+      { id: "sp1", companyId: "pmp", initiative: "Energy Transition Roundtable — Title Sponsor", stage: "confirmed", value: "€8k", owner: "Ana Savić", notes: "Renewed from 2025; logo on all event materials." },
+      { id: "sp2", companyId: "msft", initiative: "Tech Committee Annual Summit", stage: "confirmed", value: "€12k", owner: "Stefan Mitić", notes: "First-time sponsor; exploring a multi-year deal." },
+      { id: "sp3", companyId: "nkt", initiative: "Logistics & Supply Chain Forum", stage: "confirmed", value: "€9k", owner: "Stefan Mitić", notes: "Multi-year sponsor since 2024." },
+      { id: "sp4", companyId: "dlz", initiative: "Retail & Consumer Forum", stage: "proposed", value: "€6k", owner: "Ana Savić", notes: "Proposal sent; awaiting marketing budget approval." },
+      { id: "sp5", companyId: "ncr", initiative: "Digital Banking Roundtable", stage: "proposed", value: "€5k", owner: "Marko Ristić", notes: "Follow-up call scheduled for next week." },
+      { id: "sp6", companyId: "mcb", initiative: "AmCham Annual Gala", stage: "prospecting", value: "€15k", owner: "Ana Savić", notes: "Warm relationship from a board seat; not yet approached formally." },
+      { id: "sp7", companyId: "ccbc", initiative: "Sustainability Summit", stage: "prospecting", value: "€7k", owner: "Stefan Mitić", notes: "Identified via Lap Time's ESG interest signal." },
+      { id: "sp8", companyId: "kpmg", initiative: "Tax Policy Briefing Series", stage: "declined", value: "€4k", owner: "Marko Ristić", notes: "Budget frozen this cycle; revisit in Q1." }
+    ],
     digests: {
       nextSend: "Friday, 09:00",
       audience: 245,
@@ -251,7 +263,20 @@ export const platformData = {
         { from: "stada", to: "ncr", rationale: "Both expanding R&D operations in Serbia.", overlapEvidence: "Both indicated 'Tech Talent' as priority in Lap Time 2025", conflicts: "Competing for same talent pool", fromApproved: true, toApproved: true, expiry: "5 days", outcomeState: "scheduled" },
         { from: "kar", to: "ibm", rationale: "Both serve multinational clients navigating IT compliance and data protection law.", overlapEvidence: "Both flagged 'regulatory compliance' as a top priority in recent staff notes", conflicts: "None", fromApproved: true, toApproved: false, expiry: "4 days", outcomeState: "pending" },
         { from: "hmo", to: "pwc", rationale: "Hemofarm is exploring ESG audit partners; PwC offers dedicated ESG advisory.", overlapEvidence: "Both attended the Q3 ESG roundtable", conflicts: "None", fromApproved: true, toApproved: true, expiry: "3 days", outcomeState: "scheduled" },
-        { from: "mtk", to: "mcb", rationale: "Metalac is evaluating equipment financing for a manufacturing line upgrade.", overlapEvidence: "UniCredit's corporate desk flagged manufacturing equipment financing as a growth area", conflicts: "None", fromApproved: true, toApproved: false, expiry: "6 days", outcomeState: "pending" }
+        { from: "mtk", to: "mcb", rationale: "Metalac is evaluating equipment financing for a manufacturing line upgrade.", overlapEvidence: "UniCredit's corporate desk flagged manufacturing equipment financing as a growth area", conflicts: "None", fromApproved: true, toApproved: false, expiry: "6 days", outcomeState: "pending" },
+        { from: "adr", to: "nrb", rationale: "Adriatica's new production line increases energy consumption; NIS offers corporate energy supply contracts.", overlapEvidence: "Both flagged energy and supply-chain priorities in recent signals", conflicts: "None", fromApproved: true, toApproved: false, expiry: "7 days", outcomeState: "pending" }
+      ],
+      // Deals that made it past "scheduled" to a recorded outcome — the
+      // running total the Growth pillar is built to publish ("€X in
+      // member-to-member business this year"). Kept separate from `pairs`
+      // (still-open suggestions) so closing/declining a pair moves it here
+      // instead of erasing it.
+      deals: [
+        { id: "md1", from: "nkt", to: "ccbc", value: "€25k", outcome: "closed", closedDate: "Jun 2026", note: "Multi-year distribution contract signed." },
+        { id: "md2", from: "pwc", to: "kpmg", value: "€8k", outcome: "declined", closedDate: "May 2026", note: "Overlapping service lines; deemed a competitive conflict." },
+        { id: "md3", from: "dlz", to: "nkt", value: "€40k", outcome: "closed", closedDate: "Apr 2026", note: "Retail last-mile logistics partnership." },
+        { id: "md4", from: "msft", to: "ibm", value: "€15k", outcome: "declined", closedDate: "Mar 2026", note: "Direct competitors; withdrawn after review." },
+        { id: "md5", from: "mcb", to: "sls", value: "€12k", outcome: "closed", closedDate: "Feb 2026", note: "Equipment financing referral fee." }
       ]
     },
     briefs: {

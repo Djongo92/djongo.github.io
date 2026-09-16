@@ -1,11 +1,8 @@
 import React, { useState } from 'react';
 import { platformData } from '@/data/platform';
 import { AlertTriangle, TrendingUp, ShieldCheck, CheckCircle2, Target, ChevronDown, ChevronUp, Clock, Activity, Flag, History } from 'lucide-react';
-import { cn } from '@/lib/utils';
+import { cn, parseEuro, fmtEuro } from '@/lib/utils';
 import { motion, AnimatePresence } from 'framer-motion';
-
-const parseEuro = (v: string) => parseFloat(v.replace(/[€k]/g, '')) * (v.includes('k') ? 1000 : 1);
-const fmtEuro = (v: number) => v >= 1000 ? `€${Number((v / 1000).toFixed(1)).toString()}k` : `€${Math.round(v)}`;
 
 export function RetentionView({ navigateTo }: any) {
   const [items, setItems] = useState(platformData.console.retention);
