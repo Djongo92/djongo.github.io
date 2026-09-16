@@ -4,6 +4,8 @@ import { platformData } from '@/data/platform';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X, ArrowRight, Plus, Globe, Activity, MessageSquare, FileText, Mail, FileBadge, Calendar, Target, ShieldAlert, AlertTriangle } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { ScoreExplanation } from '@/components/ui/score-explanation';
+import { PresenceIndicator } from '@/components/ui/presence-indicator';
 
 export function DossierView({ companyId, close, navigateTo, showToast }: { companyId: string, close: () => void, navigateTo: (v:string, c?:string) => void, showToast: (m:string) => void }) {
   const { t } = useI18n();
@@ -19,9 +21,12 @@ export function DossierView({ companyId, close, navigateTo, showToast }: { compa
 
   return (
     <>
-      <div className="p-6 md:p-8 flex justify-between items-center shrink-0 border-b border-border bg-card">
+      <div className="p-6 md:p-8 flex justify-between items-center shrink-0 border-b border-border bg-card gap-3">
         <h3 className="font-bold text-foreground uppercase tracking-widest text-xs flex items-center gap-2"><FileBadge className="w-4 h-4"/> Role-Scoped Dossier</h3>
-        <button onClick={close} className="w-10 h-10 rounded-full bg-muted flex items-center justify-center text-muted-foreground hover:bg-border transition-colors"><X className="w-5 h-5" /></button>
+        <div className="flex items-center gap-3">
+          <PresenceIndicator companyId={c.id} className="hidden sm:inline-flex items-center gap-2 text-[10px] font-bold text-muted-foreground bg-muted px-3 py-1.5 rounded-full border border-border/50" />
+          <button onClick={close} className="w-10 h-10 rounded-full bg-muted flex items-center justify-center text-muted-foreground hover:bg-border transition-colors shrink-0"><X className="w-5 h-5" /></button>
+        </div>
       </div>
       
       <div className="flex-1 overflow-y-auto bg-background">
@@ -70,7 +75,7 @@ export function DossierView({ companyId, close, navigateTo, showToast }: { compa
                       )}
                     </div>
                     <div className="text-6xl font-serif font-light tabular-nums text-foreground flex items-baseline gap-3 mb-8">
-                      {c.score} <span className={cn("text-xl font-bold font-sans", c.scoreTrend < 0 ? "text-primary" : "text-emerald-500")}>{c.scoreTrend > 0 ? '+' : ''}{c.scoreTrend}</span>
+                      <ScoreExplanation companyId={c.id}>{c.score}</ScoreExplanation> <span className={cn("text-xl font-bold font-sans", c.scoreTrend < 0 ? "text-primary" : "text-emerald-500")}>{c.scoreTrend > 0 ? '+' : ''}{c.scoreTrend}</span>
                     </div>
 
                     {/* CSS Metric Visualization for Score Factors */}

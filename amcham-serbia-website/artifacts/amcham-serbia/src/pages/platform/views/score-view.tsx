@@ -1,8 +1,34 @@
 import React, { useState } from 'react';
 import { usePortalState } from '../portal-state';
-import { Calendar, FileText, CheckCircle2, ArrowRight, Users, X, Info, TrendingUp, Handshake, ShieldCheck, Megaphone, Activity, Printer } from 'lucide-react';
+import { Calendar, FileText, CheckCircle2, ArrowRight, Users, X, Info, TrendingUp, Handshake, ShieldCheck, Megaphone, Activity, Printer, Award, Star, Landmark } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { motion, AnimatePresence } from 'framer-motion';
+import { platformData, committeeRosters } from '@/data/platform';
+
+// Badges are computed straight off real fixture fields (tenure, book-wide
+// score rank, committee rosters) rather than being hand-assigned per member,
+// so they stay honest if the underlying data changes.
+function computeBadges(member: any): { icon: any; label: string }[] {
+  if (!member?.id) return [];
+  const badges: { icon: any; label: string }[] = [];
+
+  const tenure = new Date().getFullYear() - (member.since || new Date().getFullYear());
+  if (tenure >= 1) badges.push({ icon: Star, label: `${tenure}-Year Member` });
+
+  const allScores = platformData.allMembers.map(c => c.score).sort((a, b) => b - a);
+  const rank = allScores.indexOf(member.score);
+  if (rank !== -1) {
+    const topPercent = Math.max(1, Math.round(((rank + 1) / allScores.length) * 100));
+    if (topPercent <= 25) badges.push({ icon: TrendingUp, label: `Top ${topPercent}% Engagement` });
+  }
+
+  const seats = committeeRosters.filter(c => c.chairCompanyId === member.id || c.memberCompanyIds.includes(member.id));
+  const isChair = seats.some(c => c.chairCompanyId === member.id);
+  if (isChair) badges.push({ icon: Landmark, label: 'Committee Chair' });
+  else if (seats.length >= 2) badges.push({ icon: Award, label: 'Committee Champion' });
+
+  return badges;
+}
 
 export default function ScoreView({ t, navigateTo, showToast, member, valueReceipt, scoreNarrative, peerBenchmark }: any) {
   const [evidenceOpen, setEvidenceOpen] = useState(false);
@@ -39,6 +65,7 @@ export default function ScoreView({ t, navigateTo, showToast, member, valueRecei
   ].map(m => ({ ...m, trend: trendOf(m.details) }));
 
   const outcomes = scoreNarrative?.recentOutcomes || [];
+  const badges = computeBadges(member);
 
   return (
     <div className="space-y-8 animate-in fade-in duration-500">
@@ -49,9 +76,18 @@ export default function ScoreView({ t, navigateTo, showToast, member, valueRecei
             <Activity className="w-3 h-3"/> {t('portal_value_receipt', 'Membership Value')} — Q3 2026{member?.name ? ` · ${member.name}` : ''}
           </div>
           <h2 className="text-4xl md:text-6xl font-serif font-light mb-6">{t('portal_value_title', 'What your membership made possible')}</h2>
-          <p className="text-base md:text-lg text-background/70 leading-relaxed max-w-xl">
+          <p className="text-base md:text-lg text-background/70 leading-relaxed max-w-xl mb-6">
             A record of concrete outcomes and interactions. This activity log helps your team spot useful opportunities and ensures you are getting value from your tier.
           </p>
+          {badges.length > 0 && (
+            <div className="flex flex-wrap gap-2">
+              {badges.map((b, i) => (
+                <span key={i} className="inline-flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-widest bg-background/10 border border-background/20 text-[#40D9F1] px-3 py-1.5 rounded-full">
+                  <b.icon className="w-3 h-3" /> {b.label}
+                </span>
+              ))}
+            </div>
+          )}
         </div>
         <div className="relative z-10 flex flex-col gap-3 items-stretch shrink-0">
           <button onClick={() => setStatementOpen(true)} className="px-6 py-3.5 bg-[#40D9F1] text-foreground rounded-full font-bold text-sm hover:bg-[#40D9F1]/90 transition-colors flex items-center gap-2 whitespace-nowrap shadow-sm">

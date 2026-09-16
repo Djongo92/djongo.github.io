@@ -65,9 +65,12 @@ export function Footer() {
 
         <div className="pt-8 border-t border-border/20 flex flex-col md:flex-row items-center justify-between gap-4 text-xs text-muted-foreground">
           <p>{t('footer.rights')}</p>
-          <div className="flex gap-6">
+          <div className="flex gap-6 items-center">
             <a href="#" className="hover:text-white transition-colors">{t('footer.privacy')}</a>
             <a href="#" className="hover:text-white transition-colors">{t('footer.terms')}</a>
+            <Link href="/status" className="hover:text-white transition-colors flex items-center gap-1.5">
+              <span className="w-1.5 h-1.5 rounded-full bg-emerald-400" /> Status
+            </Link>
           </div>
         </div>
       </div>

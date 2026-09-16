@@ -5,6 +5,7 @@ import { cn } from '@/lib/utils';
 import { Filter, X, ChevronRight, BarChart2, Activity, Target } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Sparkline } from '@/components/ui/sparkline';
+import { ScoreExplanation } from '@/components/ui/score-explanation';
 
 export function HeatmapView({ navigateTo, roleParam }: any) {
   const { t } = useI18n();
@@ -156,7 +157,9 @@ export function HeatmapView({ navigateTo, roleParam }: any) {
                              </div>
                            </div>
                            <div className="text-right">
-                             <div className="text-3xl font-serif leading-none tabular-nums">{c.score}</div>
+                             <ScoreExplanation companyId={c.id}>
+                               <div className="text-3xl font-serif leading-none tabular-nums">{c.score}</div>
+                             </ScoreExplanation>
                              <div className={cn("text-[10px] font-bold uppercase tracking-widest mt-1", c.scoreTrend > 0 ? "text-emerald-500" : "text-destructive")}>{c.scoreTrend > 0 ? `+${c.scoreTrend}` : c.scoreTrend}</div>
                            </div>
                          </div>

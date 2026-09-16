@@ -18,3 +18,5 @@ export { SponsorshipView } from './SponsorshipView';
 export { CommitteesView } from './CommitteesView';
 export { AnalyticsView } from './AnalyticsView';
 export { ReportsView } from './ReportsView';
+export { NetworkView } from './NetworkView';
+export { IntegrationsView } from './IntegrationsView';

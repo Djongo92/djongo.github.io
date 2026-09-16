@@ -9,7 +9,7 @@ import {
   CheckSquare, Inbox, Repeat, ArrowRight,
   Search, X, Check, Eye, Download, ChevronLeft,
   Command, Menu, Phone, Activity, Globe, Mail, Plus, Book, Award, Landmark,
-  BarChart3, FileBarChart2
+  BarChart3, FileBarChart2, Bell, Keyboard, Network
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Link } from 'wouter';
@@ -18,9 +18,10 @@ import {
   OutreachView, AskView, MatchmakingView, IntelligenceView,
   FlagsView, ApprovalsView, CoverView, DossierView,
   BriefView, MyTeamView, BoardSummaryView, DigestsView,
-  SponsorshipView, CommitteesView, AnalyticsView, ReportsView
+  SponsorshipView, CommitteesView, AnalyticsView, ReportsView,
+  NetworkView, IntegrationsView
 } from './console/views';
-import { CommandPalette, GlossaryDrawer, TourOverlay } from './console/components/Overlays';
+import { CommandPalette, GlossaryDrawer, TourOverlay, ShortcutsOverlay } from './console/components/Overlays';
 import { ConsoleStateProvider } from './console/console-state';
 
 export default function Console() {
@@ -41,6 +42,18 @@ export default function Console() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [glossaryOpen, setGlossaryOpen] = useState(false);
   const [tourStep, setTourStep] = useState(-1);
+  const [notifOpen, setNotifOpen] = useState(false);
+  const [shortcutsOpen, setShortcutsOpen] = useState(false);
+  const [notifications, setNotifications] = useState([
+    { id: 'n1', text: 'Your Q3 Board Summary is ready to review', read: false, time: '2h ago' },
+    { id: 'n2', text: '3 renewals move into the 90-day window this week', read: false, time: '5h ago' },
+    { id: 'n3', text: 'New committee seat opened on Digital Economy', read: false, time: '1d ago' },
+    { id: 'n4', text: 'STADA IT Solutions crossed into onboarding completion', read: true, time: '2d ago' },
+    { id: 'n5', text: 'Matchmaking overlap flagged: S-Leasing × Nelt', read: true, time: '3d ago' },
+  ]);
+  const unreadCount = notifications.filter(n => !n.read).length;
+  const markAllRead = () => setNotifications(prev => prev.map(n => ({ ...n, read: true })));
+  const markRead = (id: string) => setNotifications(prev => prev.map(n => n.id === id ? { ...n, read: true } : n));
 
   const showToast = (msg: string) => {
     setToast(msg);
@@ -52,6 +65,18 @@ export default function Console() {
       if (e.key === 'k' && (e.metaKey || e.ctrlKey)) {
         e.preventDefault();
         setCmdOpen((open) => !open);
+        return;
+      }
+      const target = e.target as HTMLElement | null;
+      const isTyping = target && (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA' || target.isContentEditable);
+      if (e.key === '?' && !isTyping) {
+        e.preventDefault();
+        setShortcutsOpen((open) => !open);
+      }
+      if (e.key === 'Escape') {
+        setShortcutsOpen(false);
+        setNotifOpen(false);
+        setCmdOpen(false);
       }
     };
     document.addEventListener('keydown', down);
@@ -96,7 +121,7 @@ export default function Console() {
   const roleConfig = roleMapping[roleParam] || roleMapping.staffer;
   const roleAllowed = roleParam !== 'exec'
     ? roleParam === 'lead' || !['my-team', 'board-summary'].includes(view)
-    : ['board-summary', 'retention', 'heatmap', 'analytics'].includes(view);
+    : ['board-summary', 'retention', 'heatmap', 'analytics', 'network'].includes(view);
 
   const navGroups = [];
 
@@ -113,7 +138,8 @@ export default function Console() {
         items: [
           { id: 'heatmap', icon: BarChart, label: t('platform.console.heatmap'), badge: 0 },
           { id: 'retention', icon: AlertTriangle, label: t('platform.console.retention'), badge: 0 },
-          { id: 'analytics', icon: BarChart3, label: t('platform.console.nav_analytics', 'Analytics'), badge: 0 }
+          { id: 'analytics', icon: BarChart3, label: t('platform.console.nav_analytics', 'Analytics'), badge: 0 },
+          { id: 'network', icon: Network, label: 'Network', badge: 0 }
         ]
       }
     );
@@ -139,6 +165,7 @@ export default function Console() {
       { id: 'intelligence', icon: Search, label: t('platform.console.nav.intelligence'), badge: 0 },
       { id: 'retention', icon: AlertTriangle, label: t('platform.console.retention'), badge: 0 },
       { id: 'analytics', icon: BarChart3, label: t('platform.console.nav_analytics', 'Analytics'), badge: 0 },
+      { id: 'network', icon: Network, label: 'Network', badge: 0 },
     ];
     if (roleParam === 'lead') {
       toolsItems.push({ id: 'my-team', icon: Users, label: t('platform.console.nav_my_team'), badge: 0 });
@@ -151,6 +178,10 @@ export default function Console() {
       { id: 'cover', icon: Repeat, label: t('platform.console.cover'), badge: 0 },
     ];
     navGroups.push({ title: t('platform.console.nav_reports'), items: reportsItems });
+
+    navGroups.push({ title: 'Settings', items: [
+      { id: 'integrations', icon: Globe, label: 'Integrations', badge: 0 },
+    ] });
   }
 
   const navigateTo = (newView: string, companyId?: string) => {
@@ -262,30 +293,73 @@ export default function Console() {
           <h1 className="text-2xl font-serif font-light text-foreground">
             {navGroups.flatMap(g => g.items).find(i => i.id === view)?.label || view}
           </h1>
-          <div
-            className="flex items-center gap-4 text-sm font-medium text-muted-foreground relative"
-            onMouseEnter={() => { if (roleMenuTimer.current) clearTimeout(roleMenuTimer.current); setRoleMenuOpen(true); }}
-            onMouseLeave={() => { roleMenuTimer.current = setTimeout(() => setRoleMenuOpen(false), 300); }}
-          >
+          <div className="flex items-center gap-4 text-sm font-medium text-muted-foreground relative">
+            <button onClick={() => setShortcutsOpen(true)} className="w-10 h-10 rounded-full border border-border bg-background shadow-sm flex items-center justify-center text-muted-foreground hover:bg-muted transition-colors" title="Keyboard shortcuts (?)">
+              <Keyboard className="w-4 h-4" />
+            </button>
+            <div className="relative">
+              <button onClick={(e) => { e.stopPropagation(); setNotifOpen(o => !o); }} className="w-10 h-10 rounded-full border border-border bg-background shadow-sm flex items-center justify-center text-muted-foreground hover:bg-muted transition-colors relative" title="Notifications">
+                <Bell className="w-4 h-4" />
+                {unreadCount > 0 && (
+                  <span className="absolute -top-1 -right-1 min-w-[18px] h-[18px] px-1 rounded-full bg-primary text-primary-foreground text-[10px] font-bold flex items-center justify-center shadow-sm">{unreadCount}</span>
+                )}
+              </button>
+              <AnimatePresence>
+                {notifOpen && (
+                  <>
+                    <div className="fixed inset-0 z-40" onClick={() => setNotifOpen(false)} />
+                    <motion.div
+                      initial={{ opacity: 0, y: -10, scale: 0.97 }}
+                      animate={{ opacity: 1, y: 0, scale: 1 }}
+                      exit={{ opacity: 0, y: -10, scale: 0.97 }}
+                      transition={{ type: 'spring', stiffness: 400, damping: 35 }}
+                      className="absolute top-full right-0 mt-2 w-80 bg-background border border-border rounded-3xl shadow-2xl z-50 overflow-hidden text-left"
+                    >
+                      <div className="p-4 border-b border-border flex items-center justify-between bg-muted/30">
+                        <span className="text-xs font-bold uppercase tracking-widest text-foreground">Notifications</span>
+                        {unreadCount > 0 && <button onClick={markAllRead} className="text-[10px] font-bold text-primary hover:underline">Mark all read</button>}
+                      </div>
+                      <div className="max-h-80 overflow-y-auto">
+                        {notifications.map(n => (
+                          <button key={n.id} onClick={() => markRead(n.id)} className={cn("w-full text-left px-4 py-3.5 border-b border-border/50 last:border-0 flex items-start gap-3 hover:bg-muted/40 transition-colors", !n.read && "bg-primary/5")}>
+                            <div className={cn("w-1.5 h-1.5 rounded-full mt-1.5 shrink-0", n.read ? "bg-transparent" : "bg-primary")} />
+                            <div className="flex-1">
+                              <div className={cn("text-xs font-medium leading-relaxed", n.read ? "text-muted-foreground" : "text-foreground font-bold")}>{n.text}</div>
+                              <div className="text-[10px] text-muted-foreground mt-1">{n.time}</div>
+                            </div>
+                          </button>
+                        ))}
+                      </div>
+                    </motion.div>
+                  </>
+                )}
+              </AnimatePresence>
+            </div>
             <button onClick={() => setGlossaryOpen(true)} className="w-10 h-10 rounded-full border border-border bg-background shadow-sm flex items-center justify-center text-muted-foreground hover:bg-muted transition-colors" title={t('platform.console.glossary')}>
               <Book className="w-4 h-4" />
             </button>
-            <button onClick={() => setRoleMenuOpen(o => !o)} className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-background border border-border shadow-sm hover:bg-muted transition-colors">
-              <div className="w-2 h-2 bg-primary rounded-full shadow-sm shadow-primary/50 animate-pulse"></div>
-              <div className="flex flex-col items-start leading-none mr-2">
-                <span className="text-foreground font-bold">{roleConfig.name}</span>
-                <span className="text-[10px] uppercase tracking-widest">{roleConfig.title}</span>
-              </div>
-              <div className="w-6 h-6 rounded-full bg-primary/10 text-primary flex items-center justify-center text-xs font-bold ml-1 shrink-0">{roleConfig.avatar}</div>
-            </button>
-            <div className={`absolute top-full right-0 pt-2 w-48 transition-all z-50 ${roleMenuOpen ? 'opacity-100 translate-y-0 pointer-events-auto' : 'opacity-0 translate-y-2 pointer-events-none'}`}>
-              <div className="bg-background border border-border rounded-2xl shadow-xl flex flex-col overflow-hidden">
-               <button onClick={() => { setRoleMenuOpen(false); setLocation(`/platform/console?view=${view}&role=staffer`); }} className="px-4 py-3 text-left hover:bg-muted font-medium text-foreground border-b border-border">Switch to Staffer</button>
-               <button onClick={() => { setRoleMenuOpen(false); setLocation(`/platform/console?view=${view}&role=lead`); }} className="px-4 py-3 text-left hover:bg-muted font-medium text-foreground border-b border-border">Switch to Team Lead</button>
-               <button onClick={() => { setRoleMenuOpen(false); setLocation(`/platform/console?view=${view}&role=exec`); }} className="px-4 py-3 text-left hover:bg-muted font-medium text-foreground border-b border-border">Switch to Executive</button>
-               <button onClick={() => { setRoleMenuOpen(false); setTourStep(0); setLocation(`/platform/console?view=ritual&role=${roleParam}`); }} className="px-4 py-3 text-left hover:bg-muted font-medium text-primary text-xs uppercase tracking-widest flex items-center justify-between">
-                 {t('platform.console.tour_replay')} <ArrowRight className="w-3 h-3" />
-               </button>
+            <div
+              className="relative"
+              onMouseEnter={() => { if (roleMenuTimer.current) clearTimeout(roleMenuTimer.current); setRoleMenuOpen(true); }}
+              onMouseLeave={() => { roleMenuTimer.current = setTimeout(() => setRoleMenuOpen(false), 300); }}
+            >
+              <button onClick={() => setRoleMenuOpen(o => !o)} className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-background border border-border shadow-sm hover:bg-muted transition-colors">
+                <div className="w-2 h-2 bg-primary rounded-full shadow-sm shadow-primary/50 animate-pulse"></div>
+                <div className="flex flex-col items-start leading-none mr-2">
+                  <span className="text-foreground font-bold">{roleConfig.name}</span>
+                  <span className="text-[10px] uppercase tracking-widest">{roleConfig.title}</span>
+                </div>
+                <div className="w-6 h-6 rounded-full bg-primary/10 text-primary flex items-center justify-center text-xs font-bold ml-1 shrink-0">{roleConfig.avatar}</div>
+              </button>
+              <div className={`absolute top-full right-0 pt-2 w-48 transition-all z-50 ${roleMenuOpen ? 'opacity-100 translate-y-0 pointer-events-auto' : 'opacity-0 translate-y-2 pointer-events-none'}`}>
+                <div className="bg-background border border-border rounded-2xl shadow-xl flex flex-col overflow-hidden">
+                 <button onClick={() => { setRoleMenuOpen(false); setLocation(`/platform/console?view=${view}&role=staffer`); }} className="px-4 py-3 text-left hover:bg-muted font-medium text-foreground border-b border-border">Switch to Staffer</button>
+                 <button onClick={() => { setRoleMenuOpen(false); setLocation(`/platform/console?view=${view}&role=lead`); }} className="px-4 py-3 text-left hover:bg-muted font-medium text-foreground border-b border-border">Switch to Team Lead</button>
+                 <button onClick={() => { setRoleMenuOpen(false); setLocation(`/platform/console?view=${view}&role=exec`); }} className="px-4 py-3 text-left hover:bg-muted font-medium text-foreground border-b border-border">Switch to Executive</button>
+                 <button onClick={() => { setRoleMenuOpen(false); setTourStep(0); setLocation(`/platform/console?view=ritual&role=${roleParam}`); }} className="px-4 py-3 text-left hover:bg-muted font-medium text-primary text-xs uppercase tracking-widest flex items-center justify-between">
+                   {t('platform.console.tour_replay')} <ArrowRight className="w-3 h-3" />
+                 </button>
+                </div>
               </div>
             </div>
           </div>
@@ -330,7 +404,9 @@ export default function Console() {
                   {view === 'analytics' && <AnalyticsView navigateTo={navigateTo} />}
                   {view === 'reports' && <ReportsView />}
                   {view === 'brief' && <BriefView companyId={selectedCompanyId} navigateTo={navigateTo} showToast={showToast} />}
-                  {!['ritual','heatmap','accounts','retention','outreach','ask','matchmaking','sponsorship','committees','intelligence','flags','approvals','my-team','board-summary','cover','digests','analytics','reports','brief'].includes(view) && (
+                  {view === 'network' && <NetworkView navigateTo={navigateTo} />}
+                  {view === 'integrations' && <IntegrationsView showToast={showToast} />}
+                  {!['ritual','heatmap','accounts','retention','outreach','ask','matchmaking','sponsorship','committees','intelligence','flags','approvals','my-team','board-summary','cover','digests','analytics','reports','brief','network','integrations'].includes(view) && (
                     <div className="max-w-xl mx-auto py-24 text-center">
                       <div className="w-14 h-14 rounded-full bg-muted mx-auto mb-6 flex items-center justify-center"><Eye className="w-6 h-6 text-muted-foreground" /></div>
                       <h2 className="text-3xl font-serif font-light mb-3">Page Not Found</h2>
@@ -379,6 +455,10 @@ export default function Console() {
         {cmdOpen && (
           <CommandPalette close={() => setCmdOpen(false)} navigateTo={navigateTo} />
         )}
+      </AnimatePresence>
+
+      <AnimatePresence>
+        {shortcutsOpen && <ShortcutsOverlay close={() => setShortcutsOpen(false)} />}
       </AnimatePresence>
 
       {/* Tour renders last so its Next/Done button stays clickable over any

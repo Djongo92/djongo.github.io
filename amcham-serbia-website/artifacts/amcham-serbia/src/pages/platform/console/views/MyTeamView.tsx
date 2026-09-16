@@ -4,6 +4,7 @@ import { platformData } from '@/data/platform';
 import { cn } from '@/lib/utils';
 import { Users, BarChart, TrendingUp, AlertTriangle, ArrowRight, ShieldCheck, CheckCircle, Clock, ChevronDown, Activity, Info, ShieldAlert } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { AnimatedCounter } from '../components/AnimatedCounter';
 
 export function MyTeamView({ navigateTo, showToast }: any) {
   const { t } = useI18n();
@@ -116,7 +117,7 @@ export function MyTeamView({ navigateTo, showToast }: any) {
             </div>
             <div className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest mb-1.5">{stat.label}</div>
             <div className="text-3xl font-serif tabular-nums flex items-end justify-between text-foreground">
-              {stat.value}
+              <AnimatedCounter value={stat.value} />
               <span className={`text-sm font-bold font-sans ${stat.color}`}>{stat.trend}</span>
             </div>
           </div>

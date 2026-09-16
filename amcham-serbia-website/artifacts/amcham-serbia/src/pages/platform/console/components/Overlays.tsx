@@ -1,9 +1,11 @@
-import React, { useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import { useI18n } from '@/lib/i18n';
 import { platformData } from '@/data/platform';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Search, Command, X, Book, ArrowRight } from 'lucide-react';
+import { Search, Command, X, Book, ArrowRight, Compass, UserMinus, Keyboard } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { runFixtureQuery } from '../views/ask';
+import { AI_NAME } from '@/components/ui/ai-badge';
 
 export function TourOverlay({ step, setStep, endTour, steps, labels }: {
   step: number, setStep: (s:number)=>void, endTour: ()=>void,
@@ -66,6 +68,17 @@ export function CommandPalette({ close, navigateTo }: { close: () => void, navig
   const matchedViews = views.filter(v => v.label.toLowerCase().includes(query.toLowerCase()));
   const matchedCompanies = platformData.allMembers.filter(c => c.name.toLowerCase().includes(query.toLowerCase()));
 
+  // Beyond simple name/destination matching, longer queries also go through
+  // the same governed-answer engine that powers the dedicated Ask page, so
+  // the palette can act as an omnipresent copilot rather than just a jump-to
+  // tool. Only surfaces when the query actually resolves to a real filter.
+  const compassAnswer = useMemo(() => {
+    if (query.trim().length < 4) return null;
+    const { results, departed, explanation, applied } = runFixtureQuery(query, t);
+    if (applied.length === 0) return null;
+    return { results, departed, explanation };
+  }, [query]);
+
   return (
     <div className="fixed inset-0 z-[100] flex items-start justify-center pt-[15vh] px-4 font-sans">
       <motion.div 
@@ -96,6 +109,37 @@ export function CommandPalette({ close, navigateTo }: { close: () => void, navig
         </div>
         
         <div className="max-h-[50vh] overflow-y-auto p-4 space-y-6">
+          {compassAnswer && (
+            <div className="bg-background/5 border border-accent/20 rounded-2xl p-5">
+              <div className="text-[10px] uppercase font-bold text-accent tracking-widest px-0 mb-3 flex items-center gap-2">
+                <Compass className="w-3.5 h-3.5" /> Ask {AI_NAME}
+              </div>
+              <p className="text-sm text-background/80 font-medium mb-4">{compassAnswer.explanation}</p>
+              {compassAnswer.departed !== null ? (
+                <div className="space-y-2 mb-4">
+                  {compassAnswer.departed.slice(0, 3).map(d => (
+                    <div key={d.id} className="flex items-center gap-3 px-3 py-2 rounded-xl bg-background/10">
+                      <UserMinus className="w-4 h-4 text-destructive shrink-0" />
+                      <span className="text-sm font-medium text-background">{d.name}</span>
+                    </div>
+                  ))}
+                </div>
+              ) : compassAnswer.results.length > 0 && (
+                <div className="space-y-2 mb-4">
+                  {compassAnswer.results.slice(0, 3).map(c => (
+                    <button key={c.id} onClick={() => { navigateTo('accounts', c.id); close(); }} className="w-full flex items-center justify-between gap-3 px-3 py-2 rounded-xl bg-background/10 hover:bg-background/20 transition-colors group">
+                      <span className="text-sm font-medium text-background group-hover:text-accent">{c.name}</span>
+                      <span className="text-xs text-background/50 font-medium">Score: {c.score}</span>
+                    </button>
+                  ))}
+                </div>
+              )}
+              <button onClick={() => { navigateTo('ask'); close(); }} className="text-xs font-bold text-accent hover:underline flex items-center gap-1">
+                Open full results in Ask <ArrowRight className="w-3 h-3" />
+              </button>
+            </div>
+          )}
+
           {matchedViews.length > 0 && (
             <div>
               <div className="text-[10px] uppercase font-bold text-accent tracking-widest px-4 mb-2">Destinations</div>
@@ -166,5 +210,45 @@ export function GlossaryDrawer({ close, navigateTo }: { close: () => void, navig
         </div>
       </motion.div>
     </>
+  );
+}
+
+const SHORTCUTS: { keys: string[]; desc: string }[] = [
+  { keys: ['⌘', 'K'], desc: 'Open the command palette / Ask Compass' },
+  { keys: ['?'], desc: 'Open this shortcuts reference' },
+  { keys: ['Esc'], desc: 'Close any open panel or overlay' },
+  { keys: ['↑', '↓'], desc: 'Move between rows in a list or table' },
+  { keys: ['Enter'], desc: 'Open the focused row or submit a form' },
+];
+
+export function ShortcutsOverlay({ close }: { close: () => void }) {
+  return (
+    <div className="fixed inset-0 z-[100] flex items-center justify-center px-4 font-sans">
+      <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onClick={close} className="fixed inset-0 bg-foreground/20 backdrop-blur-sm" />
+      <motion.div
+        initial={{ opacity: 0, scale: 0.95, y: -10 }}
+        animate={{ opacity: 1, scale: 1, y: 0 }}
+        exit={{ opacity: 0, scale: 0.95, y: -10 }}
+        transition={{ type: 'spring', stiffness: 400, damping: 35 }}
+        className="w-full max-w-md bg-background border border-border rounded-[32px] shadow-2xl relative z-10 overflow-hidden"
+      >
+        <div className="p-6 border-b border-border flex items-center justify-between bg-muted/30">
+          <h3 className="font-bold text-foreground uppercase tracking-widest text-xs flex items-center gap-2"><Keyboard className="w-4 h-4" /> Keyboard Shortcuts</h3>
+          <button onClick={close} className="w-8 h-8 rounded-full bg-muted flex items-center justify-center text-muted-foreground hover:bg-border transition-colors"><X className="w-4 h-4" /></button>
+        </div>
+        <div className="p-6 space-y-4">
+          {SHORTCUTS.map((s, i) => (
+            <div key={i} className="flex items-center justify-between gap-4">
+              <span className="text-sm font-medium text-foreground/80">{s.desc}</span>
+              <div className="flex items-center gap-1 shrink-0">
+                {s.keys.map((k, j) => (
+                  <kbd key={j} className="min-w-[28px] h-7 px-2 rounded-lg bg-muted border border-border text-xs font-bold text-foreground flex items-center justify-center shadow-sm">{k}</kbd>
+                ))}
+              </div>
+            </div>
+          ))}
+        </div>
+      </motion.div>
+    </div>
   );
 }

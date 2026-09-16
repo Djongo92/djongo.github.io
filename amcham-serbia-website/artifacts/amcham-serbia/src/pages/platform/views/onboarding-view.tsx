@@ -3,6 +3,7 @@ import { Target, CheckCircle2, ArrowRight, SkipForward, Mail, X, TrendingUp, Che
 import { cn } from '@/lib/utils';
 import { motion, AnimatePresence } from 'framer-motion';
 import { platformData } from '@/data/platform';
+import { ProgressRing } from '@/components/ui/progress-ring';
 
 export default function OnboardingView({ t, navigateTo, showToast, member }: any) {
   const oData = (platformData.portal as any).onboarding;
@@ -54,14 +55,10 @@ export default function OnboardingView({ t, navigateTo, showToast, member }: any
           </p>
         </div>
         
-        <div className="relative z-10 bg-background/10 backdrop-blur-md rounded-[32px] p-6 border border-background/20 min-w-[250px] shrink-0">
-          <div className="text-[10px] uppercase font-bold text-[#40D9F1] tracking-widest mb-4">Overall Progress</div>
-          <div className="flex items-end gap-2 mb-3">
-             <div className="text-5xl font-serif font-light">{progress}%</div>
-          </div>
-          <div className="w-full bg-background/20 rounded-full h-2 overflow-hidden mb-1">
-             <motion.div initial={{ width: 0 }} animate={{ width: `${progress}%` }} className="bg-[#40D9F1] h-full" />
-          </div>
+        <div className="relative z-10 bg-background/10 backdrop-blur-md rounded-[32px] p-6 border border-background/20 min-w-[250px] shrink-0 flex flex-col items-center gap-4">
+          <div className="text-[10px] uppercase font-bold text-[#40D9F1] tracking-widest">Overall Progress</div>
+          <ProgressRing percent={progress} size={128} stroke={11} />
+          <div className="text-xs text-background/60 font-medium">{completedSteps} of {totalSteps} steps complete</div>
         </div>
       </div>
 
