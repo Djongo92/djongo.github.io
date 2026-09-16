@@ -17,7 +17,7 @@ export function MyTeamView({ navigateTo, showToast }: any) {
   // A company is a coverage gap when its manager isn't one of the real
   // staffers on this team — an owner the book-size/workload math above
   // never actually accounts for. Scoped to Patron tier ("key accounts")
-  // so the alert stays actionable rather than flagging all 20 companies.
+  // so the alert stays actionable rather than flagging every member company.
   const teamNames = new Set(team.map(m => m.name));
   const coverageGaps = platformData.allMembers.filter(c => c.tier === 'Patron' && !teamNames.has(c.manager) && !reassignments[c.id]);
 
@@ -104,7 +104,7 @@ export function MyTeamView({ navigateTo, showToast }: any) {
 
       <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
         {[
-          { label: "Total Book Size", value: "155", trend: "+5", icon: Users, color: "text-blue-500", bg: "bg-blue-500/10" },
+          { label: "Total Book Size", value: "172", trend: "+17", icon: Users, color: "text-blue-500", bg: "bg-blue-500/10" },
           { label: "Avg Compliance", value: "92%", trend: "+2%", icon: ShieldCheck, color: "text-emerald-500", bg: "bg-emerald-500/10" },
           { label: "Rituals Completed", value: "91", trend: "Today", icon: CheckCircle, color: "text-primary", bg: "bg-primary/10" },
           { label: "SLA Aging", value: "1.2d", trend: "-0.3d", icon: Clock, color: "text-amber-500", bg: "bg-amber-500/10" }

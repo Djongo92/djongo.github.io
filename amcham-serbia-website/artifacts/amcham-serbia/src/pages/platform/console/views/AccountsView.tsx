@@ -201,7 +201,7 @@ export function AccountsView({ navigateTo }: any) {
 
                 <div className="bg-background border border-border p-4 rounded-2xl shadow-sm">
                   <div className="flex justify-between items-center text-[10px] font-bold text-muted-foreground uppercase tracking-widest mb-2">
-                    <span className="flex items-center gap-1"><BarChart2 className="w-3 h-3" /> 9-Month Trend</span>
+                    <span className="flex items-center gap-1"><BarChart2 className="w-3 h-3" /> {drawerCompany.history.length}-Month Trend</span>
                     <span className="tabular-nums">{drawerCompany.history[0].score} → {drawerCompany.score}</span>
                   </div>
                   <Sparkline
