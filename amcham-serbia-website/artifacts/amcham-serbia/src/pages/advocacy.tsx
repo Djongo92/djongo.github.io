@@ -1,23 +1,30 @@
 import React from 'react';
 import { useI18n } from '@/lib/i18n';
 import { SEO } from '@/components/seo';
-import { Shield, TrendingUp, Users, Scale, Laptop, HeartPulse, Sprout, Building2, Globe, FileText, Briefcase, CheckCircle2 } from 'lucide-react';
+import { Shield, TrendingUp, Users, Scale, Laptop, HeartPulse, Sprout, Building2, Globe, FileText, Briefcase, CheckCircle2, Crown } from 'lucide-react';
 import { Link } from 'wouter';
 import { policyWins } from '@/data/mock';
+import { committeeRosters, platformData } from '@/data/platform';
+
+const COMMITTEE_ICONS: Record<string, any> = {
+  "Digital Economy": Laptop,
+  "Health Care": HeartPulse,
+  "Tax & Finance": TrendingUp,
+  "Labor & HR": Users,
+  "Real Estate & Construction": Building2,
+  "ESG & Environment": Sprout,
+  "Compliance & Ethics": Shield,
+  "Trade & Customs": Scale
+};
 
 export default function Advocacy() {
   const { t, lang } = useI18n();
 
-  const committees = [
-    { name: "Digital Economy", nameSr: "Digitalna ekonomija", icon: Laptop, status: "Active" },
-    { name: "Health Care", nameSr: "Zdravstvo", icon: HeartPulse, status: "Active" },
-    { name: "Tax & Finance", nameSr: "Porezi i finansije", icon: TrendingUp, status: "Active" },
-    { name: "Labor & HR", nameSr: "Rad i ljudski resursi", icon: Users, status: "Active" },
-    { name: "Real Estate & Construction", nameSr: "Nekretnine i građevinarstvo", icon: Building2, status: "Active" },
-    { name: "ESG & Environment", nameSr: "ESG i životna sredina", icon: Sprout, status: "Active" },
-    { name: "Compliance & Ethics", nameSr: "Usklađenost i etika", icon: Shield, status: "Active" },
-    { name: "Trade & Customs", nameSr: "Trgovina i carine", icon: Scale, status: "Active" }
-  ];
+  const committees = committeeRosters.map(c => {
+    const chair = platformData.allMembers.find(m => m.id === c.chairCompanyId);
+    const memberNames = c.memberCompanyIds.map(id => platformData.allMembers.find(m => m.id === id)?.name).filter(Boolean) as string[];
+    return { name: c.name, nameSr: c.nameSr, icon: COMMITTEE_ICONS[c.name] || Globe, chairName: chair?.name, memberNames, size: 1 + c.memberCompanyIds.length };
+  });
 
   return (
     <div className="w-full bg-background min-h-screen pb-24">
@@ -111,15 +118,20 @@ export default function Advocacy() {
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
               {committees.map((committee, i) => {
                 const Icon = committee.icon;
-                const { lang } = useI18n();
                 return (
                   <div key={i} className="bg-white border border-border p-6 rounded-sm hover:border-primary/50 hover:shadow-md transition-all group flex flex-col items-start h-full">
                     <div className="w-12 h-12 bg-primary/5 rounded-sm flex items-center justify-center mb-6 group-hover:bg-primary transition-colors text-primary group-hover:text-primary-foreground">
                       <Icon className="w-6 h-6" />
                     </div>
                     <h3 className="font-bold text-lg mb-2">{lang === 'sr' ? committee.nameSr : committee.name}</h3>
+                    <div className="text-xs text-muted-foreground flex items-center gap-1.5 mb-1">
+                      <Crown className="w-3 h-3 text-primary" /> {t('advocacy.chaired_by')} {committee.chairName}
+                    </div>
+                    {committee.memberNames.length > 0 && (
+                      <p className="text-xs text-muted-foreground/80 leading-relaxed">{committee.memberNames.join(', ')}</p>
+                    )}
                     <div className="mt-auto pt-4 w-full flex justify-between items-center text-sm border-t border-border/50">
-                      <span className="text-muted-foreground">{t('advocacy.status')}: <span className="text-green-600 font-semibold">{t('advocacy.active')}</span></span>
+                      <span className="text-muted-foreground">{committee.size} {t('advocacy.member_companies')}</span>
                     </div>
                   </div>
                 )
