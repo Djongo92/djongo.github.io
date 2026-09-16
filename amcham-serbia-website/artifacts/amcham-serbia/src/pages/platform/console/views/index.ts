@@ -16,3 +16,5 @@ export { BoardSummaryView } from './board-summary';
 export { DigestsView } from './digests';
 export { SponsorshipView } from './SponsorshipView';
 export { CommitteesView } from './CommitteesView';
+export { AnalyticsView } from './AnalyticsView';
+export { ReportsView } from './ReportsView';
