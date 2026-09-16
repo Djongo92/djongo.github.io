@@ -69,6 +69,14 @@ export const platformData = {
       { id: "sbb", companyId: "sbb", risk: "High", reason: "Contact attrition", impact: "€5k", intervention: "Identify new C-level sponsor via LinkedIn", stage: "Action Required", owner: "Nikola K.", deadline: "Oct 12", evidence: "Bounce emails from primary contact.", measurableOutcome: "Target: New primary contact designated" },
       { id: "kpmg", companyId: "kpmg", risk: "Low", reason: "Missed 2 events", impact: "€5k", intervention: "Send policy digest directly", stage: "Monitoring", owner: "Marko R.", deadline: "Nov 30", evidence: "Two no-shows for registered events.", measurableOutcome: "Target: Newsletter open rate > 50%" }
     ],
+    savePlays: [
+      { id: "sp1", companyId: "mtk", owner: "Stefan Mitić", intervention: "Restructured event invitations around manufacturing-specific content", outcome: "saved", value: "€5k", resolvedDate: "Jul 2026", note: "Attendance recovered within one quarter." },
+      { id: "sp2", companyId: "nrb", owner: "Stefan Mitić", intervention: "Direct executive briefing on energy-sector advocacy wins", outcome: "saved", value: "€18k", resolvedDate: "May 2026", note: "Renewed ahead of the May window." },
+      { id: "sp3", companyId: "pwc", owner: "Jelena Kostić", intervention: "Fast-tracked a Tax Policy working group seat", outcome: "saved", value: "€5k", resolvedDate: "Aug 2026", note: "Renewed at Corporate tier." },
+      { id: "sp4", companyId: "mcb", owner: "Ana Savić", intervention: "Reconnected with the regional CFO after a quarterly check-in lapse", outcome: "saved", value: "€18k", resolvedDate: "Apr 2026", note: "Engagement back on cadence." },
+      { id: "sp5", companyId: "bky", owner: "Milica Kostić", intervention: "Looped in the FMCG committee chair directly", outcome: "saved", value: "€5k", resolvedDate: "Mar 2026", note: "Attendance and portal logins recovered." },
+      { id: "sp6", companyId: "ibm", owner: "Marko Ristić", intervention: "Offered a Corporate-to-Business step-down to retain partial engagement", outcome: "lost", value: "€5k", resolvedDate: "Jun 2026", note: "Declined; cited an internal budget freeze." }
+    ],
     outreach: {
       stats: { queue: 12, onCadence: 247, timePerPerson: "31m" },
       items: [
@@ -85,6 +93,81 @@ export const platformData = {
       { id: "staff-5", name: "Ana Savić", role: "Executive Director", avatar: "A", bookSize: 10, compliance: 100, ritualsCompleted: 22, flagAvgTime: "0.5h", atRisk: 0, temperature: [5, 5, 0], workload: "60%", slaAging: "0.2 days", qualityScore: "5.0/5" }
     ],
     rollup: {
+      "Q1 2025": {
+        healthTrend: { scoreBands: { high: 32, mid: 45, low: 23 }, delta: "+1" },
+        retention: { protected: "€0.90M", atRisk: "€220k" },
+        kpis: { events: 820, intros: 24, marketplace: 98, committee: 58 },
+        wins: [
+          { title: "Onboarded First Legal-Sector Cohort", action: "Ran a dedicated legal-sector welcome briefing." }
+        ],
+        risks: [
+          { title: "Post-Holiday Engagement Dip", action: "Front-loaded Q1 event calendar to re-engage." }
+        ],
+        methodology: "Data aggregated from 118 active members.",
+        provenance: "AmCham OS Intelligence Engine v4",
+        riskRegister: [{ risk: "Slow Q1 renewal pipeline", severity: "Medium" }],
+        owners: ["Ana Savić"]
+      },
+      "Q2 2025": {
+        healthTrend: { scoreBands: { high: 35, mid: 44, low: 21 }, delta: "+3" },
+        retention: { protected: "€0.95M", atRisk: "€200k" },
+        kpis: { events: 920, intros: 28, marketplace: 112, committee: 65 },
+        wins: [
+          { title: "Finance Committee Relaunch", action: "Recruited a new committee chair from S-Leasing's sector." }
+        ],
+        risks: [
+          { title: "IT Sector Renewal Softness", action: "Scheduled one-on-one check-ins with IT-tier accounts." }
+        ],
+        methodology: "Data aggregated from 124 active members.",
+        provenance: "AmCham OS Intelligence Engine v4",
+        riskRegister: [{ risk: "IT sector budget freezes", severity: "Medium" }],
+        owners: ["Ana Savić"]
+      },
+      "Q3 2025": {
+        healthTrend: { scoreBands: { high: 38, mid: 43, low: 19 }, delta: "+3" },
+        retention: { protected: "€1.00M", atRisk: "€190k" },
+        kpis: { events: 1020, intros: 32, marketplace: 126, committee: 71 },
+        wins: [
+          { title: "Retail Sector Record Attendance", action: "Expanded the retail-track event series." }
+        ],
+        risks: [
+          { title: "Energy Sector Regulatory Uncertainty", action: "Briefed energy-tier members on pending reforms." }
+        ],
+        methodology: "Data aggregated from 131 active members.",
+        provenance: "AmCham OS Intelligence Engine v4",
+        riskRegister: [{ risk: "Energy sector policy volatility", severity: "High" }],
+        owners: ["Ana Savić", "Stefan Mitić"]
+      },
+      "Q4 2025": {
+        healthTrend: { scoreBands: { high: 41, mid: 42, low: 17 }, delta: "+3" },
+        retention: { protected: "€1.10M", atRisk: "€175k" },
+        kpis: { events: 1120, intros: 36, marketplace: 140, committee: 77 },
+        wins: [
+          { title: "Year-End Renewal Push", action: "Cleared 90% of Q4 renewals ahead of deadline." }
+        ],
+        risks: [
+          { title: "Consulting Sector Engagement Drop", action: "Piloted a consulting-only roundtable format." }
+        ],
+        methodology: "Data aggregated from 138 active members.",
+        provenance: "AmCham OS Intelligence Engine v4",
+        riskRegister: [{ risk: "Consulting sector demand slowdown", severity: "Medium" }],
+        owners: ["Ana Savić"]
+      },
+      "Q1 2026": {
+        healthTrend: { scoreBands: { high: 43, mid: 41, low: 16 }, delta: "+2" },
+        retention: { protected: "€1.15M", atRisk: "€160k" },
+        kpis: { events: 1180, intros: 39, marketplace: 148, committee: 81 },
+        wins: [
+          { title: "Manufacturing Cohort Save-Play Wins", action: "Recovered two at-risk manufacturing accounts." }
+        ],
+        risks: [
+          { title: "SBB Contact Attrition Emerging", action: "Flagged for early Retention Control intervention." }
+        ],
+        methodology: "Data aggregated from 142 active members.",
+        provenance: "AmCham OS Intelligence Engine v4",
+        riskRegister: [{ risk: "Key-account contact turnover", severity: "Medium" }],
+        owners: ["Ana Savić", "Stefan Mitić"]
+      },
       "Q2 2026": {
         healthTrend: { scoreBands: { high: 45, mid: 40, low: 15 }, delta: "+2" },
         retention: { protected: "€1.2M", atRisk: "€150k" },
@@ -116,6 +199,20 @@ export const platformData = {
         methodology: "Data aggregated from 152 active members.",
         provenance: "AmCham OS Intelligence Engine v4",
         riskRegister: [{ risk: "Election year pausing investments", severity: "High" }],
+        owners: ["Ana Savić"]
+      },
+      "Q4 2026 (Forecast)": {
+        isForecast: true,
+        healthTrend: { scoreBands: { high: 53, mid: 36, low: 11 }, delta: "+3" },
+        retention: { protected: "~€1.35M", atRisk: "~€90k" },
+        kpis: { events: 1460, intros: 58, marketplace: 188, committee: 95 },
+        wins: [],
+        risks: [
+          { title: "Election-Year Investment Pause Persists", action: "Monitoring; no action taken yet." }
+        ],
+        methodology: "Linear projection from the last four quarters — not measured data.",
+        provenance: "AmCham OS Forecast Model (beta)",
+        riskRegister: [{ risk: "Renewal softness if election uncertainty extends into Q1 2027", severity: "Medium" }],
         owners: ["Ana Savić"]
       }
     },
@@ -381,6 +478,149 @@ export const platformData = {
             { name: "Market Signals", weight: 20, value: 13, max: 20, signals: [{ text: "Growing local team, potential upgrade signal", source: "web", date: "6d ago" }] },
             { name: "Staff Assessment", weight: 30, value: 22, max: 30, signals: [{ text: "Positive relationship with regional IT lead", source: "staff", date: "3w ago" }] }
           ]
+        },
+        "ncr": {
+          total: 91,
+          confidence: "High",
+          signalsCount: 12,
+          factors: [
+            { name: "Event Attendance", weight: 30, value: 27, max: 30, signals: [{ text: "Consistent attendance across IT and Trade committees", source: "engagement", date: "Ongoing" }] },
+            { name: "Committee Activity", weight: 20, value: 18, max: 20, signals: [{ text: "Active sponsor of two working groups", source: "engagement", date: "Ongoing" }] },
+            { name: "Market Signals", weight: 20, value: 19, max: 20, signals: [{ text: "Continued hiring surge at the Belgrade hub", source: "web", date: "8d ago" }] },
+            { name: "Staff Assessment", weight: 30, value: 27, max: 30, signals: [{ text: "Highly responsive account contact", source: "staff", date: "2w ago" }] }
+          ]
+        },
+        "pmp": {
+          total: 94,
+          confidence: "High",
+          signalsCount: 10,
+          factors: [
+            { name: "Event Attendance", weight: 30, value: 28, max: 30, signals: [{ text: "Near-perfect attendance across major events", source: "engagement", date: "Ongoing" }] },
+            { name: "Committee Activity", weight: 20, value: 19, max: 20, signals: [{ text: "Chairs the Trade Facilitation working group", source: "engagement", date: "Ongoing" }] },
+            { name: "Market Signals", weight: 20, value: 19, max: 20, signals: [{ text: "Stable market leadership, no negative press", source: "web", date: "3w ago" }] },
+            { name: "Staff Assessment", weight: 30, value: 28, max: 30, signals: [{ text: "Long-tenured relationship, highly engaged", source: "staff", date: "1m ago" }] }
+          ]
+        },
+        "ccbc": {
+          total: 85,
+          confidence: "High",
+          signalsCount: 9,
+          factors: [
+            { name: "Event Attendance", weight: 30, value: 25, max: 30, signals: [{ text: "Strong attendance, slight dip in Q3 regional events", source: "engagement", date: "Q3 2026" }] },
+            { name: "Committee Activity", weight: 20, value: 16, max: 20, signals: [{ text: "Active in FMCG and Trade committees", source: "engagement", date: "Ongoing" }] },
+            { name: "Market Signals", weight: 20, value: 17, max: 20, signals: [{ text: "Expanding bottling capacity signalled in press", source: "web", date: "12d ago" }] },
+            { name: "Staff Assessment", weight: 30, value: 27, max: 30, signals: [{ text: "Reliable, proactive account contact", source: "staff", date: "10d ago" }] }
+          ]
+        },
+        "nrb": {
+          total: 76,
+          confidence: "Medium",
+          signalsCount: 8,
+          factors: [
+            { name: "Event Attendance", weight: 30, value: 20, max: 30, signals: [{ text: "Attendance softened this quarter", source: "engagement", date: "Q3 2026" }] },
+            { name: "Committee Activity", weight: 20, value: 12, max: 20, signals: [{ text: "One active committee seat, down from two", source: "engagement", date: "Ongoing" }] },
+            { name: "Market Signals", weight: 20, value: 16, max: 20, signals: [{ text: "Energy sector regulatory uncertainty noted", source: "web", date: "2w ago" }] },
+            { name: "Staff Assessment", weight: 30, value: 28, max: 30, signals: [{ text: "Long relationship; renewal conversation underway", source: "staff", date: "5d ago" }] }
+          ]
+        },
+        "dlz": {
+          total: 92,
+          confidence: "High",
+          signalsCount: 11,
+          factors: [
+            { name: "Event Attendance", weight: 30, value: 28, max: 30, signals: [{ text: "Attendance up sharply across all event types", source: "engagement", date: "Ongoing" }] },
+            { name: "Committee Activity", weight: 20, value: 18, max: 20, signals: [{ text: "Newly active in two committees", source: "engagement", date: "1m ago" }] },
+            { name: "Market Signals", weight: 20, value: 19, max: 20, signals: [{ text: "Rapid store network expansion covered in press", source: "web", date: "5d ago" }] },
+            { name: "Staff Assessment", weight: 30, value: 27, max: 30, signals: [{ text: "Executive sponsor highly engaged this year", source: "staff", date: "4d ago" }] }
+          ]
+        },
+        "msft": {
+          total: 89,
+          confidence: "High",
+          signalsCount: 9,
+          factors: [
+            { name: "Event Attendance", weight: 30, value: 26, max: 30, signals: [{ text: "Slight attendance dip from senior team travel", source: "engagement", date: "Q3 2026" }] },
+            { name: "Committee Activity", weight: 20, value: 17, max: 20, signals: [{ text: "Active in Tech Committee leadership", source: "engagement", date: "Ongoing" }] },
+            { name: "Market Signals", weight: 20, value: 18, max: 20, signals: [{ text: "Stable hiring, no major signals", source: "web", date: "1m ago" }] },
+            { name: "Staff Assessment", weight: 30, value: 28, max: 30, signals: [{ text: "Consistently responsive engineering-hub contact", source: "staff", date: "1w ago" }] }
+          ]
+        },
+        "pwc": {
+          total: 71,
+          confidence: "Medium",
+          signalsCount: 7,
+          factors: [
+            { name: "Event Attendance", weight: 30, value: 19, max: 30, signals: [{ text: "Moderate attendance, mostly junior staff", source: "engagement", date: "Ongoing" }] },
+            { name: "Committee Activity", weight: 20, value: 12, max: 20, signals: [{ text: "One committee seat, inconsistent attendance", source: "engagement", date: "Q3 2026" }] },
+            { name: "Market Signals", weight: 20, value: 14, max: 20, signals: [{ text: "Stable market position", source: "web", date: "3w ago" }] },
+            { name: "Staff Assessment", weight: 30, value: 26, max: 30, signals: [{ text: "Responsive contact; renewal terms still under discussion", source: "staff", date: "2w ago" }] }
+          ]
+        },
+        "nkt": {
+          total: 79,
+          confidence: "Medium",
+          signalsCount: 8,
+          factors: [
+            { name: "Event Attendance", weight: 30, value: 23, max: 30, signals: [{ text: "Steady attendance across logistics-focused events", source: "engagement", date: "Ongoing" }] },
+            { name: "Committee Activity", weight: 20, value: 14, max: 20, signals: [{ text: "Active in Transport sub-committee", source: "engagement", date: "Ongoing" }] },
+            { name: "Market Signals", weight: 20, value: 16, max: 20, signals: [{ text: "Regional distribution network growing", source: "web", date: "9d ago" }] },
+            { name: "Staff Assessment", weight: 30, value: 26, max: 30, signals: [{ text: "Cooperative account relationship ahead of renewal", source: "staff", date: "6d ago" }] }
+          ]
+        },
+        "mcb": {
+          total: 81,
+          confidence: "High",
+          signalsCount: 9,
+          factors: [
+            { name: "Event Attendance", weight: 30, value: 24, max: 30, signals: [{ text: "Attendance climbing steadily this year", source: "engagement", date: "Ongoing" }] },
+            { name: "Committee Activity", weight: 20, value: 15, max: 20, signals: [{ text: "Newly active in Finance Committee", source: "engagement", date: "6w ago" }] },
+            { name: "Market Signals", weight: 20, value: 17, max: 20, signals: [{ text: "Expanding corporate lending signalled in press", source: "web", date: "11d ago" }] },
+            { name: "Staff Assessment", weight: 30, value: 25, max: 30, signals: [{ text: "Engaged relationship manager, quick to respond", source: "staff", date: "1w ago" }] }
+          ]
+        },
+        "ibm": {
+          total: 64,
+          confidence: "Medium",
+          signalsCount: 7,
+          factors: [
+            { name: "Event Attendance", weight: 30, value: 17, max: 30, signals: [{ text: "Attendance down from prior year", source: "engagement", date: "Q3 2026" }] },
+            { name: "Committee Activity", weight: 20, value: 10, max: 20, signals: [{ text: "Reduced committee participation", source: "engagement", date: "Ongoing" }] },
+            { name: "Market Signals", weight: 20, value: 13, max: 20, signals: [{ text: "No major signals this quarter", source: "web", date: "1m ago" }] },
+            { name: "Staff Assessment", weight: 30, value: 24, max: 30, signals: [{ text: "Contact remains responsive despite lower activity", source: "staff", date: "3w ago" }] }
+          ]
+        },
+        "bky": {
+          total: 77,
+          confidence: "Medium",
+          signalsCount: 8,
+          factors: [
+            { name: "Event Attendance", weight: 30, value: 22, max: 30, signals: [{ text: "Solid attendance across FMCG-track events", source: "engagement", date: "Ongoing" }] },
+            { name: "Committee Activity", weight: 20, value: 14, max: 20, signals: [{ text: "One active committee seat", source: "engagement", date: "Ongoing" }] },
+            { name: "Market Signals", weight: 20, value: 16, max: 20, signals: [{ text: "Stable domestic market position", source: "web", date: "3w ago" }] },
+            { name: "Staff Assessment", weight: 30, value: 25, max: 30, signals: [{ text: "Consistent, positive relationship", source: "staff", date: "2w ago" }] }
+          ]
+        },
+        "mtk": {
+          total: 73,
+          confidence: "Medium",
+          signalsCount: 7,
+          factors: [
+            { name: "Event Attendance", weight: 30, value: 20, max: 30, signals: [{ text: "Flat attendance year over year", source: "engagement", date: "Ongoing" }] },
+            { name: "Committee Activity", weight: 20, value: 12, max: 20, signals: [{ text: "Limited committee engagement", source: "engagement", date: "Q3 2026" }] },
+            { name: "Market Signals", weight: 20, value: 15, max: 20, signals: [{ text: "Stable export demand for the cookware line", source: "web", date: "3w ago" }] },
+            { name: "Staff Assessment", weight: 30, value: 26, max: 30, signals: [{ text: "Reliable, long-standing contact", source: "staff", date: "2w ago" }] }
+          ]
+        },
+        "tln": {
+          total: 86,
+          confidence: "High",
+          signalsCount: 10,
+          factors: [
+            { name: "Event Attendance", weight: 30, value: 26, max: 30, signals: [{ text: "Attendance rising sharply this year", source: "engagement", date: "Ongoing" }] },
+            { name: "Committee Activity", weight: 20, value: 16, max: 20, signals: [{ text: "Newly active in Tech Committee", source: "engagement", date: "1m ago" }] },
+            { name: "Market Signals", weight: 20, value: 18, max: 20, signals: [{ text: "5G rollout coverage driving visibility", source: "web", date: "4d ago" }] },
+            { name: "Staff Assessment", weight: 30, value: 26, max: 30, signals: [{ text: "Highly engaged since new digital lead joined", source: "staff", date: "1w ago" }] }
+          ]
         }
       }
     }
@@ -422,6 +662,45 @@ export const platformData = {
       { id: "i3", target: "Banca Intesa", status: "Connected", date: "Aug 15", broker: "Ana S.", lastUpdate: "Direct introduction made via email." }
     ],
     valueReceipt: { introsBrokered: 3, eventsAttended: 12, advocacyWins: 2, marketplaceResponses: 4 },
+    scoreNarrative: {
+      recentOutcomes: [
+        "A direct introduction to Banca Intesa was completed in August.",
+        "Your team contributed to the Environment Committee's current work on packaging regulations.",
+        "Two advocacy priorities connected to your sector moved forward this quarter."
+      ],
+      committeeNote: "Ana Ilić actively participated in the Environment Committee"
+    },
+    peerBenchmarks: {
+      Patron: { introsBrokered: 5, eventsAttended: 16, advocacyWins: 2, marketplaceResponses: 5 },
+      Corporate: { introsBrokered: 2, eventsAttended: 7, advocacyWins: 1, marketplaceResponses: 2 },
+      Business: { introsBrokered: 2, eventsAttended: 6, advocacyWins: 1, marketplaceResponses: 2 }
+    },
+    laptimeSectorBreakdown: {
+      "2025": {
+        Manufacturing: { climate: 2.5, innovation: 60, revenueGrowth: 65 },
+        Pharma: { climate: 3.4, innovation: 74, revenueGrowth: 80 },
+        IT: { climate: 3.1, innovation: 82, revenueGrowth: 78 },
+        Logistics: { climate: 2.8, innovation: 65, revenueGrowth: 70 },
+        Finance: { climate: 2.3, innovation: 58, revenueGrowth: 55 },
+        FMCG: { climate: 3.0, innovation: 70, revenueGrowth: 75 },
+        Energy: { climate: 2.2, innovation: 55, revenueGrowth: 50 },
+        Retail: { climate: 3.2, innovation: 68, revenueGrowth: 82 },
+        Legal: { climate: 2.9, innovation: 63, revenueGrowth: 68 },
+        Consulting: { climate: 2.6, innovation: 66, revenueGrowth: 60 }
+      },
+      "2024": {
+        Manufacturing: { climate: 2.7, innovation: 54, revenueGrowth: 78 },
+        Pharma: { climate: 3.6, innovation: 68, revenueGrowth: 93 },
+        IT: { climate: 3.3, innovation: 76, revenueGrowth: 91 },
+        Logistics: { climate: 3.0, innovation: 59, revenueGrowth: 83 },
+        Finance: { climate: 2.5, innovation: 52, revenueGrowth: 68 },
+        FMCG: { climate: 3.2, innovation: 64, revenueGrowth: 88 },
+        Energy: { climate: 2.4, innovation: 49, revenueGrowth: 63 },
+        Retail: { climate: 3.4, innovation: 62, revenueGrowth: 95 },
+        Legal: { climate: 3.1, innovation: 57, revenueGrowth: 81 },
+        Consulting: { climate: 2.8, innovation: 60, revenueGrowth: 73 }
+      }
+    },
     sinceLastVisit: { introsProgressed: 1, newMatches: 2, eventReminder: "Tomorrow, 10:00" },
     glance: {
       eventSeats: { used: 6, total: 10 },
@@ -452,6 +731,14 @@ export const platformData = {
           ]
         },
         valueReceipt: { introsBrokered: 7, eventsAttended: 22, advocacyWins: 3, marketplaceResponses: 6 },
+        scoreNarrative: {
+          recentOutcomes: [
+            "A direct introduction to a regional distribution partner was completed in August.",
+            "Your team chaired the Health Care Committee's Q3 session on export licensing.",
+            "Two ESG-aligned advocacy priorities for the pharma sector moved forward this quarter."
+          ],
+          committeeNote: "Your regional director chairs the ESG and Health Care committees"
+        },
         glance: {
           eventSeats: { used: 9, total: 10 },
           committeeSeats: { used: 5, total: 6 },
@@ -475,6 +762,14 @@ export const platformData = {
           ]
         },
         valueReceipt: { introsBrokered: 4, eventsAttended: 9, advocacyWins: 1, marketplaceResponses: 2 },
+        scoreNarrative: {
+          recentOutcomes: [
+            "A direct introduction to IBM Serbia's compliance team was completed in September.",
+            "Your team contributed to the Legal & Trade Committee's review of data protection rules.",
+            "One advocacy priority connected to cross-border practice moved forward this quarter."
+          ],
+          committeeNote: "Your firm is active in two policy committees this year"
+        },
         glance: {
           eventSeats: { used: 4, total: 5 },
           committeeSeats: { used: 2, total: 3 },
@@ -653,10 +948,13 @@ export const VIEW_AS_OPTIONS = ["adr", "hmo", "kar"] as const;
 export function resolveViewAsMember(id: string | null | undefined) {
   const member = platformData.allMembers.find(c => c.id === id) || platformData.member;
   const overrides = (platformData.portal.memberOverrides as Record<string, any>)[member.id];
+  const peerBenchmarks = platformData.portal.peerBenchmarks as Record<string, any>;
   return {
     member,
     billing: { ...platformData.portal.billing, ...(overrides?.billing || {}) },
     valueReceipt: overrides?.valueReceipt || platformData.portal.valueReceipt,
+    scoreNarrative: overrides?.scoreNarrative || platformData.portal.scoreNarrative,
+    peerBenchmark: peerBenchmarks[member.tier] || null,
     glance: { ...platformData.portal.glance, tier: member.tier, ...(overrides?.glance || {}) }
   };
 }

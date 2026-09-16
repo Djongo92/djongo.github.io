@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useI18n } from '@/lib/i18n';
 import { platformData } from '@/data/platform';
-import { Check, Clock, FileText, User, MessageSquare, AlertTriangle, ArrowRight, X, ChevronDown, CheckCircle } from 'lucide-react';
+import { Check, Clock, FileText, User, MessageSquare, AlertTriangle, ArrowRight, X, ChevronDown, CheckCircle, ShieldAlert } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { motion, AnimatePresence } from 'framer-motion';
 
@@ -73,6 +73,7 @@ export function RitualView({ navigateTo, showToast, updateBadge, roleParam }: an
             const isExpanded = expandedItem === item.id;
             const company = platformData.allMembers.find(m => m.id === item.companyId);
             const brief = (platformData.console.briefs as any)[item.companyId];
+            const retentionCase = platformData.console.retention.find(r => r.companyId === item.companyId);
 
             return (
               <motion.div key={item.id} layout initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, scale: 0.95 }} className={cn("bg-card border rounded-[32px] overflow-hidden transition-all", isExpanded ? "border-foreground/30 shadow-md ring-1 ring-foreground/10" : "border-border shadow-sm")}>
@@ -147,6 +148,11 @@ export function RitualView({ navigateTo, showToast, updateBadge, roleParam }: an
                           <button onClick={(e) => { e.stopPropagation(); navigateTo('brief', item.companyId); }} className="flex items-center gap-2 text-muted-foreground hover:text-foreground text-sm font-bold px-4 py-2 rounded-full hover:bg-muted transition-colors border border-transparent hover:border-border">
                             <FileText className="w-4 h-4" /> {t('console_v2.brief', 'Brief')}
                           </button>
+                          {retentionCase && (
+                            <button onClick={(e) => { e.stopPropagation(); navigateTo('retention', item.companyId); }} className="flex items-center gap-2 text-destructive hover:text-destructive text-sm font-bold px-4 py-2 rounded-full bg-destructive/10 hover:bg-destructive/20 transition-colors border border-destructive/20">
+                              <ShieldAlert className="w-4 h-4" /> Active Retention Case ({retentionCase.risk})
+                            </button>
+                          )}
                         </div>
                       </div>
                     </motion.div>

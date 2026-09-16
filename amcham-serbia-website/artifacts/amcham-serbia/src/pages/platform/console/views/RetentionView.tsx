@@ -1,18 +1,35 @@
 import React, { useState } from 'react';
 import { platformData } from '@/data/platform';
-import { AlertTriangle, TrendingUp, ShieldCheck, CheckCircle2, Target, ChevronDown, ChevronUp, Clock, Activity, Flag } from 'lucide-react';
+import { AlertTriangle, TrendingUp, ShieldCheck, CheckCircle2, Target, ChevronDown, ChevronUp, Clock, Activity, Flag, History } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { motion, AnimatePresence } from 'framer-motion';
 
+const parseEuro = (v: string) => parseFloat(v.replace(/[€k]/g, '')) * (v.includes('k') ? 1000 : 1);
+const fmtEuro = (v: number) => v >= 1000 ? `€${Number((v / 1000).toFixed(1)).toString()}k` : `€${Math.round(v)}`;
+
 export function RetentionView({ navigateTo }: any) {
   const [items, setItems] = useState(platformData.console.retention);
+  const [savePlays, setSavePlays] = useState<any[]>((platformData.console as any).savePlays);
   const [expandedId, setExpandedId] = useState<string | null>(null);
 
   const moveStage = (id: string, newStage: string) => {
     setItems(items.map(i => i.id === id ? { ...i, stage: newStage } : i));
   };
 
-  const remove = (id: string) => {
+  const resolve = (id: string, outcome: 'saved' | 'lost') => {
+    const item = items.find(i => i.id === id);
+    if (item) {
+      setSavePlays(prev => [{
+        id: `sp-${item.id}-${Date.now()}`,
+        companyId: item.companyId,
+        owner: item.owner,
+        intervention: item.intervention,
+        outcome,
+        value: item.impact,
+        resolvedDate: 'Just now',
+        note: outcome === 'saved' ? item.measurableOutcome : 'Case closed without recovery.'
+      }, ...prev]);
+    }
     setItems(items.filter(i => i.id !== id));
   };
 
@@ -22,6 +39,11 @@ export function RetentionView({ navigateTo }: any) {
   const medRiskCount = items.filter(i => i.risk === 'Medium').length;
   const lowRiskCount = items.filter(i => i.risk === 'Low').length;
   const totalCases = items.length;
+  const activeAtRiskValue = items.reduce((sum, i) => sum + parseEuro(i.impact), 0);
+  const savedValue = savePlays.filter(p => p.outcome === 'saved').reduce((sum, p) => sum + parseEuro(p.value), 0);
+  const lostValue = savePlays.filter(p => p.outcome === 'lost').reduce((sum, p) => sum + parseEuro(p.value), 0);
+  const resolvedTotal = savedValue + lostValue;
+  const savedCount = savePlays.filter(p => p.outcome === 'saved').length;
 
   return (
     <div className="space-y-8 max-w-7xl mx-auto pb-20 font-sans">
@@ -36,7 +58,7 @@ export function RetentionView({ navigateTo }: any) {
           </div>
           <div className="flex flex-col leading-none">
             <span className="text-[10px] font-bold uppercase tracking-widest mb-1">Value At Risk</span>
-            <span className="text-2xl font-serif tabular-nums tracking-tight">€160.5k</span>
+            <span className="text-2xl font-serif tabular-nums tracking-tight">{fmtEuro(activeAtRiskValue)}</span>
           </div>
         </div>
       </div>
@@ -129,8 +151,8 @@ export function RetentionView({ navigateTo }: any) {
                           <button onClick={() => setExpandedId(isExpanded ? null : item.id)} className="p-2 rounded-full hover:bg-muted transition-colors text-muted-foreground mr-2">
                             {isExpanded ? <ChevronUp className="w-5 h-5" /> : <ChevronDown className="w-5 h-5" />}
                           </button>
-                          <button onClick={() => remove(item.id)} className="px-5 py-2.5 rounded-full text-sm font-bold text-destructive hover:bg-destructive/10 transition-colors border border-transparent hover:border-destructive/20 shadow-sm">Mark Lost</button>
-                          <button onClick={() => remove(item.id)} className="px-5 py-2.5 rounded-full text-sm font-bold bg-foreground text-background shadow-md hover:bg-foreground/90 transition-transform active:scale-95 flex items-center gap-2"><CheckCircle2 className="w-4 h-4"/> Mark Saved</button>
+                          <button onClick={() => resolve(item.id, 'lost')} className="px-5 py-2.5 rounded-full text-sm font-bold text-destructive hover:bg-destructive/10 transition-colors border border-transparent hover:border-destructive/20 shadow-sm">Mark Lost</button>
+                          <button onClick={() => resolve(item.id, 'saved')} className="px-5 py-2.5 rounded-full text-sm font-bold bg-foreground text-background shadow-md hover:bg-foreground/90 transition-transform active:scale-95 flex items-center gap-2"><CheckCircle2 className="w-4 h-4"/> Mark Saved</button>
                         </div>
                       </div>
                     </div>
@@ -159,24 +181,44 @@ export function RetentionView({ navigateTo }: any) {
             <div className="space-y-8 relative z-10">
               <div>
                 <div className="flex justify-between items-end mb-3">
-                  <div className="flex items-center gap-2 text-sm font-bold text-muted-foreground"><ShieldCheck className="w-4 h-4 text-emerald-500"/> Saved (Q3)</div>
-                  <span className="text-3xl font-serif text-emerald-500 tracking-tight tabular-nums">€45k</span>
+                  <div className="flex items-center gap-2 text-sm font-bold text-muted-foreground"><ShieldCheck className="w-4 h-4 text-emerald-500"/> Saved (YTD)</div>
+                  <span className="text-3xl font-serif text-emerald-500 tracking-tight tabular-nums">{fmtEuro(savedValue)}</span>
                 </div>
-                <div className="w-full bg-muted rounded-full h-3 overflow-hidden shadow-inner"><div className="bg-emerald-500 h-full w-[60%] rounded-full relative"><div className="absolute inset-0 bg-white/20 w-1/2 rounded-full blur-sm"></div></div></div>
+                <div className="w-full bg-muted rounded-full h-3 overflow-hidden shadow-inner"><div className="bg-emerald-500 h-full rounded-full relative" style={{ width: `${resolvedTotal > 0 ? (savedValue / resolvedTotal) * 100 : 0}%` }}><div className="absolute inset-0 bg-white/20 w-1/2 rounded-full blur-sm"></div></div></div>
               </div>
               <div className="pt-6 border-t border-border/50">
                 <div className="flex justify-between items-end mb-3">
-                  <div className="flex items-center gap-2 text-sm font-bold text-muted-foreground"><AlertTriangle className="w-4 h-4 text-destructive"/> Lost (Q3)</div>
-                  <span className="text-3xl font-serif text-destructive tracking-tight tabular-nums">€10k</span>
+                  <div className="flex items-center gap-2 text-sm font-bold text-muted-foreground"><AlertTriangle className="w-4 h-4 text-destructive"/> Lost (YTD)</div>
+                  <span className="text-3xl font-serif text-destructive tracking-tight tabular-nums">{fmtEuro(lostValue)}</span>
                 </div>
-                <div className="w-full bg-muted rounded-full h-3 overflow-hidden shadow-inner"><div className="bg-destructive h-full w-[15%] rounded-full relative"><div className="absolute inset-0 bg-white/20 w-1/2 rounded-full blur-sm"></div></div></div>
+                <div className="w-full bg-muted rounded-full h-3 overflow-hidden shadow-inner"><div className="bg-destructive h-full rounded-full relative" style={{ width: `${resolvedTotal > 0 ? (lostValue / resolvedTotal) * 100 : 0}%` }}><div className="absolute inset-0 bg-white/20 w-1/2 rounded-full blur-sm"></div></div></div>
               </div>
             </div>
-            
+
             <div className="mt-8 bg-muted p-5 rounded-3xl border border-border/50 relative z-10 shadow-sm">
-              <div className="text-xs font-bold text-foreground mb-2 flex items-center gap-2"><Target className="w-4 h-4" /> ROI Result</div>
-              <p className="text-sm text-muted-foreground leading-relaxed">Interventions have protected 81% of at-risk value this quarter, representing a 14x return on platform cost.</p>
+              <div className="text-xs font-bold text-foreground mb-2 flex items-center gap-2"><Target className="w-4 h-4" /> Save-Play Result</div>
+              <p className="text-sm text-muted-foreground leading-relaxed">{savedCount} of {savePlays.length} resolved cases saved this year, protecting {fmtEuro(savedValue)} in dues.</p>
             </div>
+
+            {savePlays.length > 0 && (
+              <div className="mt-8 relative z-10">
+                <div className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground mb-4 flex items-center gap-2"><History className="w-4 h-4"/> Recent Save Plays</div>
+                <div className="space-y-3">
+                  {savePlays.slice(0, 4).map((p, i) => {
+                    const company = platformData.allMembers.find(m => m.id === p.companyId);
+                    return (
+                      <div key={p.id ?? i} className="bg-background border border-border/50 rounded-2xl p-4 text-sm">
+                        <div className="flex justify-between items-start gap-3 mb-1.5">
+                          <span className="font-bold text-foreground">{company?.name}</span>
+                          <span className={cn("text-[10px] font-bold uppercase tracking-widest px-2 py-0.5 rounded-md border shrink-0", p.outcome === 'saved' ? "bg-emerald-500/10 text-emerald-600 border-emerald-500/20" : "bg-destructive/10 text-destructive border-destructive/20")}>{p.outcome} · {p.value}</span>
+                        </div>
+                        <div className="text-xs text-muted-foreground">{p.intervention} — <span className="font-medium text-foreground/80">{p.owner}</span>, {p.resolvedDate}</div>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
           </div>
         </div>
       </div>

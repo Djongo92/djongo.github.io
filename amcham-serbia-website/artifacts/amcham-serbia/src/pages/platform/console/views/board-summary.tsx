@@ -5,14 +5,16 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { FileText, ShieldAlert, ChevronDown, ChevronUp, TrendingUp, TrendingDown, Users, BarChart3, Building } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
+const TIER_SPLIT = { events: [0.5736, 0.3208, 0.1057], intros: [0.4433, 0.5567], marketplace: [0.4167, 0.5833] };
+
 export function BoardSummaryView() {
   const { t } = useI18n();
+  const quarters = Object.keys((platformData.console as any).rollup);
   const [quarter, setQuarter] = useState('Q3 2026');
   const [expandedKpi, setExpandedKpi] = useState<string | null>(null);
   const [expandedSections, setExpandedSections] = useState<Record<string, boolean>>({ wins: true, risks: true });
-  
+
   const data = (platformData.console as any).rollup[quarter];
-  const isQ3 = quarter === 'Q3 2026';
 
   const toggleSection = (sec: string) => {
     setExpandedSections(prev => ({ ...prev, [sec]: !prev[sec] }));
@@ -20,17 +22,17 @@ export function BoardSummaryView() {
 
   const breakdowns = {
     events: [
-      { label: "Patron Tier", value: isQ3 ? 820 : 700, color: "bg-primary" },
-      { label: "Corporate Tier", value: isQ3 ? 450 : 400, color: "bg-blue-500" },
-      { label: "Business Tier", value: isQ3 ? 130 : 150, color: "bg-orange-400" },
+      { label: "Patron Tier", value: Math.round(data.kpis.events * TIER_SPLIT.events[0]), color: "bg-primary" },
+      { label: "Corporate Tier", value: Math.round(data.kpis.events * TIER_SPLIT.events[1]), color: "bg-blue-500" },
+      { label: "Business Tier", value: Math.round(data.kpis.events * TIER_SPLIT.events[2]), color: "bg-orange-400" },
     ],
     intros: [
-      { label: "C-Level to C-Level", value: isQ3 ? 25 : 18, color: "bg-emerald-500" },
-      { label: "B2B Ops Match", value: isQ3 ? 30 : 24, color: "bg-primary" },
+      { label: "C-Level to C-Level", value: Math.round(data.kpis.intros * TIER_SPLIT.intros[0]), color: "bg-emerald-500" },
+      { label: "B2B Ops Match", value: Math.round(data.kpis.intros * TIER_SPLIT.intros[1]), color: "bg-primary" },
     ],
     marketplace: [
-      { label: "Real Estate/Assets", value: isQ3 ? 80 : 60, color: "bg-orange-500" },
-      { label: "Services/Offers", value: isQ3 ? 100 : 96, color: "bg-blue-500" },
+      { label: "Real Estate/Assets", value: Math.round(data.kpis.marketplace * TIER_SPLIT.marketplace[0]), color: "bg-orange-500" },
+      { label: "Services/Offers", value: Math.round(data.kpis.marketplace * TIER_SPLIT.marketplace[1]), color: "bg-blue-500" },
     ]
   };
 
@@ -41,10 +43,11 @@ export function BoardSummaryView() {
           <h2 className="text-4xl md:text-5xl font-serif font-light tracking-tight text-foreground mb-2">{t('platform.console.nav_board_summary', 'Board Summary')}</h2>
           <p className="text-sm font-medium text-muted-foreground">{t('platform.console.board_summary_purpose', 'Decision-grade leadership view.')}</p>
         </div>
-        <div className="flex items-center gap-4">
-          <div className="bg-muted p-1 rounded-full flex gap-1 shadow-inner">
-            <button onClick={() => setQuarter('Q2 2026')} className={cn("px-5 py-2 rounded-full text-xs font-bold transition-all", quarter === 'Q2 2026' ? "bg-background text-foreground shadow-sm" : "text-muted-foreground hover:text-foreground")}>Q2 2026</button>
-            <button onClick={() => setQuarter('Q3 2026')} className={cn("px-5 py-2 rounded-full text-xs font-bold transition-all", quarter === 'Q3 2026' ? "bg-background text-foreground shadow-sm" : "text-muted-foreground hover:text-foreground")}>Q3 2026</button>
+        <div className="flex flex-col items-end gap-3">
+          <div className="bg-muted p-1 rounded-full flex gap-1 shadow-inner overflow-x-auto max-w-full">
+            {quarters.map(q => (
+              <button key={q} onClick={() => setQuarter(q)} className={cn("px-4 py-2 rounded-full text-xs font-bold transition-all whitespace-nowrap", quarter === q ? "bg-background text-foreground shadow-sm" : "text-muted-foreground hover:text-foreground")}>{q.replace(' (Forecast)', ' (Fcst)')}</button>
+            ))}
           </div>
           <button onClick={() => window.print()} className="px-6 py-2.5 rounded-full bg-primary text-primary-foreground font-bold text-xs shadow-md hover:shadow-lg transition-all flex items-center gap-2 active:scale-95">
             <FileText className="w-4 h-4" /> {t('platform.console.print_rollup', 'Print Report')}
@@ -52,9 +55,16 @@ export function BoardSummaryView() {
         </div>
       </div>
 
+      {data.isForecast && (
+        <div className="mb-8 print:mb-4 px-6 py-4 rounded-2xl border-2 border-dashed border-amber-500/40 bg-amber-500/5 flex items-center gap-3 text-sm">
+          <span className="px-3 py-1 rounded-full bg-amber-500/15 text-amber-700 text-[10px] font-bold uppercase tracking-widest shrink-0">Forecast</span>
+          <span className="text-muted-foreground font-medium print:text-gray-700">{data.methodology} Figures below are projected, not measured.</span>
+        </div>
+      )}
+
       {/* Print Header */}
       <div className="hidden print:block border-b-4 border-black pb-4 mb-8">
-        <div className="text-[10px] font-bold uppercase tracking-widest text-gray-500 mb-2">AmCham Serbia</div>
+        <div className="text-[10px] font-bold uppercase tracking-widest text-gray-500 mb-2">AmCham Serbia{data.isForecast ? ' · Forecast — Not Measured Data' : ''}</div>
         <h1 className="text-4xl font-serif font-light text-black">Board Summary — {quarter}</h1>
       </div>
 
@@ -166,12 +176,14 @@ export function BoardSummaryView() {
                {expandedSections.wins && (
                  <motion.div initial={{ height: 0 }} animate={{ height: 'auto' }} exit={{ height: 0 }} className="overflow-hidden">
                    <div className="p-8 space-y-8">
-                      {data.wins.map((w:any, i:number) => (
+                      {data.wins.length > 0 ? data.wins.map((w:any, i:number) => (
                         <div key={i} className="group">
                           <h4 className="text-xl font-serif font-light text-foreground mb-2 print:text-black group-hover:text-green-600 transition-colors">{w.title}</h4>
                           <p className="text-sm font-medium text-muted-foreground print:text-gray-600"><span className="font-bold text-foreground print:text-black">{t('platform.console.action_taken', 'Action Taken')}:</span> {w.action}</p>
                         </div>
-                      ))}
+                      )) : (
+                        <p className="text-sm text-muted-foreground italic print:text-gray-600">{data.isForecast ? "Not yet known — this quarter hasn't happened." : "No wins recorded for this quarter."}</p>
+                      )}
                    </div>
                  </motion.div>
                )}
