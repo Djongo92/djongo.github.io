@@ -5,14 +5,15 @@ import { Search, Download, ShieldCheck, Clock, Check, X, ArrowRight, Activity, C
 import { motion, AnimatePresence } from 'framer-motion';
 import { useConsoleState } from '../console-state';
 import { cn } from '@/lib/utils';
+import { AiBadge, AiThinking, TypewriterText } from '@/components/ui/ai-badge';
 
-interface AppliedFilter {
+export interface AppliedFilter {
   id: string;
   label: string;
   type: string;
 }
 
-interface DepartedMember {
+export interface DepartedMember {
   id: string;
   name: string;
   sector: string;
@@ -35,7 +36,7 @@ function parseLastInteractionDays(s: string): number | null {
   return n * 30;
 }
 
-function runFixtureQuery(query: string, t: (path: string, fallback?: string) => string): { results: Company[]; departed: DepartedMember[] | null; explanation: string; applied: AppliedFilter[] } {
+export function runFixtureQuery(query: string, t: (path: string, fallback?: string) => string): { results: Company[]; departed: DepartedMember[] | null; explanation: string; applied: AppliedFilter[] } {
   const q = query.toLowerCase();
   let filtered = [...platformData.allMembers];
   const applied: AppliedFilter[] = [];
@@ -270,7 +271,7 @@ export function AskView({ showToast }: { showToast: (m:string) => void }) {
       {loading && (
         <div className="flex flex-col items-center justify-center py-32">
           <div className="w-16 h-16 border-4 border-muted border-t-primary rounded-full animate-spin mb-8 shadow-lg"></div>
-          <div className="text-sm font-bold text-primary uppercase tracking-widest animate-pulse flex items-center gap-2"><ShieldCheck className="w-4 h-4"/> Querying Knowledge Graph...</div>
+          <AiThinking label="Compass is analyzing 40 companies" />
         </div>
       )}
 
@@ -420,10 +421,13 @@ export function AskView({ showToast }: { showToast: (m:string) => void }) {
               <div className="mt-8 bg-muted p-5 rounded-3xl border border-border/50 flex flex-col md:flex-row justify-between items-start md:items-center gap-4 relative z-10 shadow-sm">
                 <div>
                   <div className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground mb-1 flex items-center gap-2"><Activity className="w-3 h-3"/> Provenance & Execution</div>
-                  <div className="text-sm font-medium text-foreground">{explanation}</div>
+                  <div className="text-sm font-medium text-foreground min-h-[1.25em]"><TypewriterText text={explanation} runKey={query} speedMs={8} /></div>
                 </div>
-                <div className="text-xs font-bold bg-background px-3 py-1.5 rounded-lg border border-border text-muted-foreground whitespace-nowrap">
-                   Execution Time: 0.8s
+                <div className="flex items-center gap-3 shrink-0">
+                  <AiBadge />
+                  <div className="text-xs font-bold bg-background px-3 py-1.5 rounded-lg border border-border text-muted-foreground whitespace-nowrap">
+                     Execution Time: 0.8s
+                  </div>
                 </div>
               </div>
             </div>

@@ -4,6 +4,9 @@ import { platformData } from '@/data/platform';
 import { cn } from '@/lib/utils';
 import { Download, FileText, CheckCircle2, AlertTriangle, ArrowRight, Check, Target, ChevronDown, ChevronUp } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { ScoreExplanation } from '@/components/ui/score-explanation';
+import { PresenceIndicator } from '@/components/ui/presence-indicator';
+import { AiBadge, TypewriterText } from '@/components/ui/ai-badge';
 
 export function BriefView({ companyId, navigateTo, showToast }: { companyId: string | null, navigateTo: (v:string) => void, showToast: (m:string) => void }) {
   const { t } = useI18n();
@@ -59,8 +62,9 @@ export function BriefView({ companyId, navigateTo, showToast }: { companyId: str
         </button>
       </div>
 
-      <div className="mb-6 print:hidden">
+      <div className="mb-6 print:hidden flex items-center justify-between flex-wrap gap-3">
         <p className="text-sm font-medium text-muted-foreground flex items-center gap-2"><Target className="w-4 h-4"/> {t('platform.console.brief_purpose', 'Source-linked meeting workspace.')}</p>
+        <PresenceIndicator companyId={c.id} />
       </div>
 
       <div className="border-b-[4px] border-foreground pb-10 mb-12 mt-6">
@@ -75,7 +79,7 @@ export function BriefView({ companyId, navigateTo, showToast }: { companyId: str
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-16">
         <div className="bg-background p-8 rounded-[32px] border border-border shadow-sm">
           <div className="text-[10px] uppercase font-bold tracking-widest text-muted-foreground mb-2">{t('platform.console.engagement_score', 'Score')}</div>
-          <div className="text-4xl font-serif font-light tabular-nums text-foreground">{c.score}/100</div>
+          <div className="text-4xl font-serif font-light tabular-nums text-foreground"><ScoreExplanation companyId={c.id}>{c.score}</ScoreExplanation>/100</div>
           <div className={cn("mt-2 text-sm font-bold font-sans", c.scoreTrend > 0 ? "text-emerald-500" : "text-primary")}>{c.scoreTrend > 0 ? '+' : ''}{c.scoreTrend} 30d trend</div>
         </div>
         <div className="bg-background p-8 rounded-[32px] border border-border shadow-sm">
@@ -89,15 +93,16 @@ export function BriefView({ companyId, navigateTo, showToast }: { companyId: str
       </div>
 
       <div className="mb-16">
-        <h3 className="text-[10px] font-bold text-muted-foreground border-b border-border pb-3 mb-6 uppercase tracking-widest flex items-center gap-2">
-           <CheckCircle2 className="w-4 h-4"/> {t('platform.console.the_ask', 'The Ask')} & Desired Outcome
+        <h3 className="text-[10px] font-bold text-muted-foreground border-b border-border pb-3 mb-6 uppercase tracking-widest flex items-center justify-between gap-2">
+           <span className="flex items-center gap-2"><CheckCircle2 className="w-4 h-4"/> {t('platform.console.the_ask', 'The Ask')} & Desired Outcome</span>
+           {brief && <AiBadge />}
         </h3>
         {brief ? (
           <div>
             <div className="bg-foreground text-background p-10 rounded-[32px] mb-8 shadow-lg relative overflow-hidden">
                <div className="absolute -right-10 -top-10 text-background/10"><Target className="w-64 h-64"/></div>
                <div className="relative z-10">
-                 <div className="text-3xl font-serif font-light text-accent mb-6 leading-tight">{brief.ask}</div>
+                 <div className="text-3xl font-serif font-light text-accent mb-6 leading-tight min-h-[1.2em]"><TypewriterText text={brief.ask} runKey={c.id} /></div>
                  <div className="text-sm font-bold text-background/80 uppercase tracking-widest flex items-center gap-3">
                    <div className="w-2 h-2 rounded-full bg-accent"></div> Target: <span className="text-background font-medium normal-case ml-2">{brief.desiredOutcome}</span>
                  </div>

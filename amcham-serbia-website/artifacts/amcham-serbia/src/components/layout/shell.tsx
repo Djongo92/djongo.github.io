@@ -2,6 +2,7 @@ import React, { useEffect } from 'react';
 import { useLocation } from 'wouter';
 import { Header } from './header';
 import { Footer } from './footer';
+import { ChatBubble } from './chat-bubble';
 import { AnimatePresence, motion } from 'framer-motion';
 
 export function Shell({ children }: { children: React.ReactNode }) {
@@ -30,6 +31,7 @@ export function Shell({ children }: { children: React.ReactNode }) {
         </AnimatePresence>
       </main>
       <Footer />
+      <ChatBubble />
     </div>
   );
 }

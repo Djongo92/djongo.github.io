@@ -4,6 +4,7 @@ import { platformData } from '@/data/platform';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Handshake, AlertTriangle, CheckCircle2, Clock, Target, Layers, ChevronDown, ChevronUp, History, XCircle, TrendingUp } from 'lucide-react';
 import { cn, parseEuro, fmtEuro } from '@/lib/utils';
+import { Confetti } from '@/components/ui/confetti';
 
 export function MatchmakingView({ showToast }: { showToast: (m:string) => void }) {
   const { t } = useI18n();
@@ -11,6 +12,7 @@ export function MatchmakingView({ showToast }: { showToast: (m:string) => void }
   const [deals, setDeals] = useState<any[]>((platformData.console.matchmaking as any).deals);
   const [dealValue, setDealValue] = useState<Record<string, string>>({});
   const [expandedId, setExpandedId] = useState<string | null>(null);
+  const [confettiTrigger, setConfettiTrigger] = useState(0);
 
   const dismissPair = (pairId: string, name?: string) => {
     setPairs(prev => prev.filter(p => p.pairId !== pairId));
@@ -39,6 +41,7 @@ export function MatchmakingView({ showToast }: { showToast: (m:string) => void }
     }, ...prev]);
     setPairs(prev => prev.filter(p => p.pairId !== pairId));
     showToast(outcome === 'closed' ? 'Deal recorded' : 'Match marked as declined');
+    if (outcome === 'closed') setConfettiTrigger(n => n + 1);
   };
 
   const pendingCount = pairs.filter(p => p.outcomeState === 'pending').length;
@@ -47,6 +50,7 @@ export function MatchmakingView({ showToast }: { showToast: (m:string) => void }
 
   return (
     <div className="max-w-5xl mx-auto font-sans pb-20">
+      <Confetti trigger={confettiTrigger} />
       <div className="mb-12 flex flex-col md:flex-row justify-between items-start md:items-end gap-6 border-b border-border pb-6">
         <div>
           <h2 className="text-4xl font-serif font-light tracking-tight text-foreground mb-4">Mutual-Consent Broker</h2>

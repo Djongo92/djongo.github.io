@@ -4,6 +4,8 @@ import { platformData } from '@/data/platform';
 import { Check, Clock, FileText, User, MessageSquare, AlertTriangle, ArrowRight, X, ChevronDown, CheckCircle, ShieldAlert } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { motion, AnimatePresence } from 'framer-motion';
+import { ActivityTicker } from '../components/ActivityTicker';
+import { Confetti } from '@/components/ui/confetti';
 
 export function RitualView({ navigateTo, showToast, updateBadge, roleParam }: any) {
   const { t } = useI18n();
@@ -13,6 +15,7 @@ export function RitualView({ navigateTo, showToast, updateBadge, roleParam }: an
   const [snoozeReason, setSnoozeReason] = useState("");
   const [expandedItem, setExpandedItem] = useState<string | null>(null);
   const [checkedPoints, setCheckedPoints] = useState<Record<string, boolean>>({});
+  const [confettiTrigger, setConfettiTrigger] = useState(0);
 
   const items = platformData.console.ritual.items;
   const activeItems = items.filter(i => !completed.includes(i.id) && !snoozed.includes(i.id));
@@ -21,6 +24,7 @@ export function RitualView({ navigateTo, showToast, updateBadge, roleParam }: an
     if (type === 'complete') {
       setCompleted(p => [...p, id]);
       showToast(t('console_v2.completed', 'Completed'));
+      setConfettiTrigger(n => n + 1);
     } else {
       setSnoozed(p => [...p, id]);
       showToast(t('console_v2.snoozed', 'Snoozed'));
@@ -39,6 +43,7 @@ export function RitualView({ navigateTo, showToast, updateBadge, roleParam }: an
 
   return (
     <div className="space-y-8 max-w-4xl mx-auto pb-20 font-sans">
+      <Confetti trigger={confettiTrigger} />
       <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 border-b border-border pb-6">
         <div>
           <h2 className="text-4xl font-serif font-light tracking-tight text-foreground mb-2">Daily Ritual</h2>
@@ -54,7 +59,9 @@ export function RitualView({ navigateTo, showToast, updateBadge, roleParam }: an
           </div>
         </div>
       </div>
-      
+
+      <ActivityTicker />
+
       <AnimatePresence>
         {activeItems.length === 0 && (
           <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="py-32 flex flex-col items-center justify-center border-2 border-dashed border-border rounded-[32px] bg-card/50">

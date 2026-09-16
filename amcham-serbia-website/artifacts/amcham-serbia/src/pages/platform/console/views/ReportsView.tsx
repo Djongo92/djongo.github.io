@@ -4,6 +4,7 @@ import { FileBarChart2, Users, TrendingUp, TrendingDown, AlertTriangle, Activity
 import { cn, parseEuro, fmtEuro } from '@/lib/utils';
 import { commonMonthlyTrend } from '@/lib/analytics';
 import { TrendChart } from '@/components/ui/trend-chart';
+import { DataFreshness } from '@/components/ui/data-freshness';
 
 type Dimension = 'all' | 'sector' | 'tier' | 'lifecycle' | 'manager';
 
@@ -57,7 +58,8 @@ export function ReportsView() {
       <div className="mb-8 flex flex-col md:flex-row justify-between items-start md:items-end gap-6 print:hidden">
         <div>
           <h2 className="text-4xl font-serif font-light tracking-tight text-foreground mb-2 flex items-center gap-3"><FileBarChart2 className="w-8 h-8 text-primary" /> Reports</h2>
-          <p className="text-sm font-medium text-muted-foreground max-w-2xl">Generate a scoped membership report for any segment and time window, ready to print or share.</p>
+          <p className="text-sm font-medium text-muted-foreground max-w-2xl mb-3">Generate a scoped membership report for any segment and time window, ready to print or share.</p>
+          <DataFreshness />
         </div>
         <button onClick={() => window.print()} className="px-6 py-2.5 rounded-full bg-primary text-primary-foreground font-bold text-xs shadow-md hover:shadow-lg transition-all flex items-center gap-2 active:scale-95 shrink-0">
           <FileBarChart2 className="w-4 h-4" /> Print Report

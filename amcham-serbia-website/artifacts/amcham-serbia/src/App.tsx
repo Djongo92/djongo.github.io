@@ -29,6 +29,7 @@ import Impact from '@/pages/impact';
 import News from '@/pages/news';
 import NewsDetail from '@/pages/news-detail';
 import SearchPage from '@/pages/search';
+import StatusPage from '@/pages/status';
 import PlatformHub from '@/pages/platform/index';
 import PlatformConsole from '@/pages/platform/console';
 import PlatformPortal from '@/pages/platform/portal';
@@ -61,6 +62,7 @@ function Router() {
           <Route path="/news" component={News} />
           <Route path="/news/:id" component={NewsDetail} />
           <Route path="/search" component={SearchPage} />
+          <Route path="/status" component={StatusPage} />
           <Route path="/platform" component={PlatformHub} />
           <Route path="/platform/console" component={PlatformConsole} />
           <Route path="/platform/portal" component={PlatformPortal} />

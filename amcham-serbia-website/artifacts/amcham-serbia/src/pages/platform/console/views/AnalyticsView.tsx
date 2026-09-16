@@ -5,6 +5,8 @@ import { BarChart3, TrendingUp, TrendingDown, Users, AlertTriangle, Activity, La
 import { cn, parseEuro, fmtEuro } from '@/lib/utils';
 import { commonMonthlyTrend, segmentBreakdown, cohortsByJoinYear } from '@/lib/analytics';
 import { TrendChart } from '@/components/ui/trend-chart';
+import { AnimatedCounter } from '../components/AnimatedCounter';
+import { DataFreshness } from '@/components/ui/data-freshness';
 
 const SEGMENTS = [
   { key: 'sector', label: 'Sector' },
@@ -50,7 +52,8 @@ export function AnalyticsView({ navigateTo }: { navigateTo: (v: string, c?: stri
       <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-6 border-b border-border pb-6">
         <div>
           <h2 className="text-4xl font-serif font-light tracking-tight text-foreground mb-2 flex items-center gap-3"><BarChart3 className="w-8 h-8 text-primary" /> Analytics</h2>
-          <p className="text-sm font-medium text-muted-foreground max-w-2xl">Membership health trends and drill-down across the full book — {members.length} companies, {trend.length} months of comparable history.</p>
+          <p className="text-sm font-medium text-muted-foreground max-w-2xl mb-3">Membership health trends and drill-down across the full book — {members.length} companies, {trend.length} months of comparable history.</p>
+          <DataFreshness />
         </div>
         <div className="flex items-center gap-2 bg-muted p-1 rounded-2xl border border-border/50 shadow-inner">
           {(['overview', 'cohorts'] as const).map(id => (
@@ -69,7 +72,7 @@ export function AnalyticsView({ navigateTo }: { navigateTo: (v: string, c?: stri
         <div className="bg-card rounded-[32px] border border-border p-6 shadow-sm flex items-center justify-between">
           <div>
             <div className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest mb-1">Total Members</div>
-            <div className="text-4xl font-serif font-light tabular-nums">{members.length}</div>
+            <div className="text-4xl font-serif font-light tabular-nums"><AnimatedCounter value={members.length} /></div>
           </div>
           <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center text-primary shrink-0"><Users className="w-5 h-5" /></div>
         </div>
@@ -77,7 +80,7 @@ export function AnalyticsView({ navigateTo }: { navigateTo: (v: string, c?: stri
           <div>
             <div className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest mb-1">Book Avg Score</div>
             <div className="flex items-baseline gap-2">
-              <div className="text-4xl font-serif font-light tabular-nums">{Math.round(latest.avgScore)}</div>
+              <div className="text-4xl font-serif font-light tabular-nums"><AnimatedCounter value={Math.round(latest.avgScore)} /></div>
               <span className={cn("text-xs font-bold flex items-center gap-0.5", scoreDelta >= 0 ? "text-emerald-600" : "text-destructive")}>
                 {scoreDelta >= 0 ? <TrendingUp className="w-3 h-3" /> : <TrendingDown className="w-3 h-3" />}{scoreDelta >= 0 ? `+${scoreDelta}` : scoreDelta}
               </span>
@@ -88,7 +91,7 @@ export function AnalyticsView({ navigateTo }: { navigateTo: (v: string, c?: stri
         <div className="bg-card rounded-[32px] border border-border p-6 shadow-sm flex items-center justify-between">
           <div>
             <div className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest mb-1">At-Risk Exposure</div>
-            <div className="text-4xl font-serif font-light tabular-nums text-destructive">{fmtEuro(atRiskValue)}</div>
+            <div className="text-4xl font-serif font-light tabular-nums text-destructive"><AnimatedCounter value={fmtEuro(atRiskValue)} /></div>
             <div className="text-[10px] font-bold text-muted-foreground mt-0.5">{atRiskCompanies.length} accounts</div>
           </div>
           <div className="w-12 h-12 rounded-full bg-destructive/10 flex items-center justify-center text-destructive shrink-0"><AlertTriangle className="w-5 h-5" /></div>
@@ -96,7 +99,7 @@ export function AnalyticsView({ navigateTo }: { navigateTo: (v: string, c?: stri
         <div className="bg-foreground text-background rounded-[32px] border border-border p-6 shadow-lg flex items-center justify-between">
           <div>
             <div className="text-[10px] font-bold text-accent uppercase tracking-widest mb-1">Avg Engagement</div>
-            <div className="text-4xl font-serif font-light tabular-nums">{Math.round(latest.avgEngagement)}%</div>
+            <div className="text-4xl font-serif font-light tabular-nums"><AnimatedCounter value={Math.round(latest.avgEngagement)} />%</div>
           </div>
           <div className="w-12 h-12 rounded-full bg-accent/20 flex items-center justify-center text-accent shrink-0"><Activity className="w-5 h-5" /></div>
         </div>
