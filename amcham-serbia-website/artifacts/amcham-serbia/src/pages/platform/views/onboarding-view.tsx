@@ -4,7 +4,7 @@ import { cn } from '@/lib/utils';
 import { motion, AnimatePresence } from 'framer-motion';
 import { platformData } from '@/data/platform';
 
-export default function OnboardingView({ t, navigateTo, showToast }: any) {
+export default function OnboardingView({ t, navigateTo, showToast, member }: any) {
   const oData = (platformData.portal as any).onboarding;
   
   // Local state for phases and steps
@@ -71,7 +71,7 @@ export default function OnboardingView({ t, navigateTo, showToast }: any) {
         </div>
         <div>
           <h4 className="font-bold text-lg mb-1 text-primary">You are ahead of the curve</h4>
-          <p className="text-sm text-foreground/80 leading-relaxed">Companies in the <strong className="text-foreground">{platformData.member.sector}</strong> sector typically complete the first engagement phase by day 40. You're on track to finish by day 30, placing you in the top 15% of active new members.</p>
+          <p className="text-sm text-foreground/80 leading-relaxed">Companies in the <strong className="text-foreground">{member.sector}</strong> sector typically complete the first engagement phase by day 40. You're on track to finish by day 30, placing you in the top 15% of active new members.</p>
         </div>
       </div>
 

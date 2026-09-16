@@ -1,16 +1,15 @@
 import React, { useState } from 'react';
 import { usePortalState } from '../portal-state';
 import { Calendar, Users, ArrowRight, Activity, Clock, ShieldCheck, ChevronDown, ChevronUp, FileText, CheckCircle2 } from 'lucide-react';
-import { platformData } from '@/data/platform';
 import { cn } from '@/lib/utils';
 import { motion, AnimatePresence } from 'framer-motion';
 
-export default function GlanceView({ t, navigateTo, roleParam }: any) {
-  const { glance, billing, people, notifications } = platformData.portal as any;
+export default function GlanceView({ t, navigateTo, roleParam, member, billing, glanceData }: any) {
+  const { people, notifications } = usePortalState();
+  const glance = glanceData;
   const tier = glance.tier;
   const eventSeats = glance.eventSeats;
   const committeeSeats = glance.committeeSeats;
-  const member = platformData.member;
 
   const [expandedEntitlement, setExpandedEntitlement] = useState<string | null>(null);
 

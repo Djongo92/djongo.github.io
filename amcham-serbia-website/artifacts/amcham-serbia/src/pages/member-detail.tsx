@@ -3,7 +3,7 @@ import { useRoute, Link } from 'wouter';
 import { mockMembers } from '@/data/mock';
 import { useI18n } from '@/lib/i18n';
 import { SEO } from '@/components/seo';
-import { ArrowLeft, Globe, Building2, Info, Calendar } from 'lucide-react';
+import { ArrowLeft, Globe, Building2, Info, Calendar, LayoutDashboard } from 'lucide-react';
 
 export default function MemberDetail() {
   const [, params] = useRoute('/members/:id');
@@ -47,9 +47,12 @@ export default function MemberDetail() {
             
             <h1 className="text-3xl md:text-5xl font-serif font-bold mb-6">{member.name}</h1>
             
-            <div className="flex items-center gap-4 border-t border-border pt-6">
+            <div className="flex flex-wrap items-center gap-4 border-t border-border pt-6">
               <a href={member.website} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-2 text-sm font-bold bg-background border border-border px-4 py-2 hover:border-primary hover:text-primary transition-all rounded-sm">
                 <Globe className="w-4 h-4" /> {t('members.detail.website')}
+              </a>
+              <a href={`${import.meta.env.BASE_URL}platform/console?view=heatmap&company=${member.id}&tour=off`} className="inline-flex items-center gap-2 text-sm font-bold bg-primary/5 border border-primary/20 text-primary px-4 py-2 hover:bg-primary/10 hover:border-primary/40 transition-all rounded-sm">
+                <LayoutDashboard className="w-4 h-4" /> {t('members.detail.view_in_console')}
               </a>
             </div>
           </div>

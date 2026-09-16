@@ -2,10 +2,11 @@ import React, { useState } from 'react';
 import { usePortalState } from '../portal-state';
 import { cn } from '@/lib/utils';
 import { ArrowRight, CheckCircle2, ChevronDown, ChevronUp, Clock, Activity, TrendingUp, Users, Calendar } from 'lucide-react';
-import { platformData } from '@/data/platform';
 import { motion, AnimatePresence } from 'framer-motion';
 
-export default function HomeView({ t, navigateTo, roleConfig, showToast }: any) {
+export default function HomeView({ t, navigateTo, roleConfig, showToast, valueReceipt }: any) {
+  const introsBrokered = valueReceipt?.introsBrokered ?? 3;
+  const eventsAttended = valueReceipt?.eventsAttended ?? 12;
   const { inbox, setInbox } = usePortalState();
   const [tab, setTab] = useState<'active' | 'snoozed' | 'done'>('active');
   const [expandedInboxId, setExpandedInboxId] = useState<string | null>(null);
@@ -153,15 +154,15 @@ export default function HomeView({ t, navigateTo, roleConfig, showToast }: any) 
                  </div>
                  
                  <div className="relative z-10">
-                    <h3 className="text-3xl lg:text-4xl font-serif font-light mb-8 leading-tight">Your team participated in 12 events and progressed 3 introductions.</h3>
-                    
+                    <h3 className="text-3xl lg:text-4xl font-serif font-light mb-8 leading-tight">Your team participated in {eventsAttended} events and progressed {introsBrokered} introductions.</h3>
+
                     <div className="grid grid-cols-2 gap-6 pt-6 border-t border-background/20">
                       <div>
-                        <div className="text-4xl font-serif font-light tabular-nums mb-1 text-[#40D9F1]">3</div>
+                        <div className="text-4xl font-serif font-light tabular-nums mb-1 text-[#40D9F1]">{introsBrokered}</div>
                         <div className="text-[10px] font-bold text-background/60 uppercase tracking-widest">Intros Brokered</div>
                       </div>
                       <div>
-                        <div className="text-4xl font-serif font-light tabular-nums mb-1 text-[#40D9F1]">12</div>
+                        <div className="text-4xl font-serif font-light tabular-nums mb-1 text-[#40D9F1]">{eventsAttended}</div>
                         <div className="text-[10px] font-bold text-background/60 uppercase tracking-widest">Events Attended</div>
                       </div>
                     </div>

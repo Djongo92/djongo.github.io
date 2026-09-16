@@ -74,7 +74,7 @@ export default function BlueprintPages() {
     {
       id: "S6",
       name: "Member detail",
-      path: "/members/mem-01",
+      path: "/members/hmo",
       description: "Consistent public profile: sector, description, approved public contacts only; no personal details exposed by default."
     },
     {

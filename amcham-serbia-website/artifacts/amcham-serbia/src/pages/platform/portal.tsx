@@ -10,6 +10,7 @@ import {
 } from 'lucide-react';
 import { PortalStateProvider, usePortalState } from './portal-state';
 import { TourOverlay } from './console/components/Overlays';
+import { platformData, resolveViewAsMember, VIEW_AS_OPTIONS } from '@/data/platform';
 
 // Import Views
 import HomeView from './views/home-view';
@@ -26,13 +27,14 @@ import PeopleView from './views/people-view';
 import BillingView from './views/billing-view';
 import NotificationsView from './views/notifications-view';
 
-function PortalContent() {
+function PortalContent({ viewAs }: { viewAs: ReturnType<typeof resolveViewAsMember> }) {
   const { t } = useI18n();
   const searchString = useSearch();
   const [location, setLocation] = useLocation();
   const searchParams = new URLSearchParams(searchString);
   const roleParam = searchParams.get('role') || 'member';
   const view = searchParams.get('view') || 'home';
+  const viewAsId = searchParams.get('member') || platformData.member.id;
   
   const { notifications, setNotifications } = usePortalState();
   const [toast, setToast] = useState<string | null>(null);
@@ -81,7 +83,7 @@ function PortalContent() {
   const navItems = navGroups.flatMap(g => g.items);
 
   const navigateTo = (newView: string) => {
-    setLocation(`/platform/portal?view=${newView}&role=${roleParam}`);
+    setLocation(`/platform/portal?view=${newView}&role=${roleParam}${viewAsId !== platformData.member.id ? `&member=${viewAsId}` : ''}`);
   };
 
   useEffect(() => {
@@ -109,8 +111,8 @@ function PortalContent() {
   const endTour = () => { setTourStep(-1); localStorage.setItem('amcham_portal_tour_done', 'true'); };
 
   const roleConfig = roleParam === 'admin'
-    ? { name: 'Ana Jokić', roleStr: t('portal_admin_view', 'Admin View'), avatar: 'AJ', company: 'Adriatica Grupa' }
-    : { name: 'Marko R.', roleStr: t('portal_member_view', 'Member View'), avatar: 'MR', company: 'Adriatica Grupa' };
+    ? { name: 'Ana Jokić', roleStr: t('portal_admin_view', 'Admin View'), avatar: 'AJ', company: viewAs.member.name }
+    : { name: 'Marko R.', roleStr: t('portal_member_view', 'Member View'), avatar: 'MR', company: viewAs.member.name };
 
   const unreadCount = notifications.filter((n:any) => n.status === 'unread').length;
 
@@ -159,6 +161,18 @@ function PortalContent() {
           </h1>
 
           <div className="flex items-center gap-4 relative">
+            <select
+              value={viewAsId}
+              onChange={(e) => setLocation(`/platform/portal?view=${view}&role=${roleParam}&member=${e.target.value}`)}
+              className="hidden lg:block bg-background border border-border rounded-full pl-4 pr-3 py-1.5 text-xs font-bold text-foreground outline-none cursor-pointer hover:border-primary/50 transition-colors shadow-sm"
+              title="Demo: view the portal as a different member"
+            >
+              {VIEW_AS_OPTIONS.map(id => {
+                const c = platformData.allMembers.find(m => m.id === id);
+                return <option key={id} value={id}>{c?.name}</option>;
+              })}
+            </select>
+
             <button onClick={() => setNotificationsOpen(!notificationsOpen)} className="relative p-2 text-muted-foreground hover:text-foreground transition-colors">
               <Bell className="w-5 h-5" />
               {unreadCount > 0 && (
@@ -218,15 +232,15 @@ function PortalContent() {
           <div className="max-w-6xl mx-auto space-y-12 pb-20">
              <AnimatePresence mode="wait">
                <motion.div key={view} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }} transition={{ duration: 0.2 }}>
-                 {view === 'home' && <HomeView t={t} navigateTo={navigateTo} roleConfig={roleConfig} showToast={showToast} />}
+                 {view === 'home' && <HomeView t={t} navigateTo={navigateTo} roleConfig={roleConfig} showToast={showToast} valueReceipt={viewAs.valueReceipt} />}
                  {view === 'score' && <ScoreView t={t} navigateTo={navigateTo} showToast={showToast} />}
-                 {view === 'glance' && <GlanceView t={t} navigateTo={navigateTo} roleParam={roleParam} />}
+                 {view === 'glance' && <GlanceView t={t} navigateTo={navigateTo} roleParam={roleParam} member={viewAs.member} billing={viewAs.billing} glanceData={viewAs.glance} />}
                  {view === 'directory' && <DirectoryView t={t} showToast={showToast} initialViewMode={tourStep === 2 ? 'pending' : undefined} />}
                  {view === 'laptime' && <LapTimeView t={t} showToast={showToast} />}
                  {view === 'events' && <EventsView t={t} showToast={showToast} />}
                  {view === 'marketplace' && <MarketplaceView t={t} showToast={showToast} />}
                  {view === 'committee' && <CommitteeView t={t} showToast={showToast} />}
-                 {view === 'onboarding' && <OnboardingView t={t} navigateTo={navigateTo} showToast={showToast} />}
+                 {view === 'onboarding' && <OnboardingView t={t} navigateTo={navigateTo} showToast={showToast} member={viewAs.member} />}
                  {view === 'seam' && <SeamView t={t} showToast={showToast} />}
                  {view === 'people' && roleParam === 'admin' && <PeopleView t={t} showToast={showToast} />}
                  {view === 'billing' && roleParam === 'admin' && <BillingView t={t} showToast={showToast} />}
@@ -287,9 +301,14 @@ function PortalContent() {
 }
 
 export default function Portal() {
+  const searchString = useSearch();
+  const searchParams = new URLSearchParams(searchString);
+  const viewAsId = searchParams.get('member') || platformData.member.id;
+  const viewAs = resolveViewAsMember(viewAsId);
+
   return (
-    <PortalStateProvider>
-      <PortalContent />
+    <PortalStateProvider key={viewAsId} viewAs={viewAs}>
+      <PortalContent viewAs={viewAs} />
     </PortalStateProvider>
   );
 }

@@ -1,9 +1,9 @@
 import React, { createContext, useContext, useState } from 'react';
-import { platformData } from '@/data/platform';
+import { platformData, resolveViewAsMember } from '@/data/platform';
 
 const PortalStateContext = createContext<any>(null);
 
-export function PortalStateProvider({ children }: { children: React.ReactNode }) {
+export function PortalStateProvider({ children, viewAs }: { children: React.ReactNode; viewAs?: ReturnType<typeof resolveViewAsMember> }) {
   const [inbox, setInbox] = useState([
     { id: '1', type: 'intro', text: 'Intro request to Nelt Co moved to "Being Brokered".', urgency: 'normal', action: 'View', route: 'directory', status: 'active', date: '2h ago' },
     { id: '2', type: 'event', text: 'Action required: Register colleagues for Energy Transition Roundtable.', urgency: 'high', action: 'Register', route: 'events', status: 'active', date: '4h ago' }
@@ -31,10 +31,11 @@ export function PortalStateProvider({ children }: { children: React.ReactNode })
     { id: 'p2', name: 'Marko R.', role: 'member', email: 'marko@company.com', lastAccess: '1d ago', status: 'active' }
   ]);
 
+  const resolvedBilling = viewAs?.billing || (platformData.portal as any).billing;
   const [billing, setBilling] = useState({
-    autoRenew: true,
-    paymentMethod: 'Bank Transfer ...4567',
-    invoices: (platformData.portal as any).billing?.invoices || []
+    autoRenew: resolvedBilling?.autoRenew ?? true,
+    paymentMethod: resolvedBilling?.paymentMethod ? `${resolvedBilling.paymentMethod.type} ${resolvedBilling.paymentMethod.details}` : 'Bank Transfer ...4567',
+    invoices: resolvedBilling?.invoices || []
   });
 
   const NOTIFICATION_VIEWS: Record<string, string> = { intro: 'seam', event: 'events', value: 'score' };
