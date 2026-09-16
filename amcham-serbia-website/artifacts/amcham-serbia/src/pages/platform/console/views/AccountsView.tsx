@@ -1,8 +1,9 @@
 import React, { useState, useMemo } from 'react';
 import { platformData, Company } from '@/data/platform';
-import { Search, Mail, Download, Eye, SlidersHorizontal, Check, Building, Phone, Calendar, Activity, X } from 'lucide-react';
+import { Search, Mail, Download, Eye, SlidersHorizontal, Check, Building, Phone, Calendar, Activity, X, BarChart2 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { motion, AnimatePresence } from 'framer-motion';
+import { Sparkline } from '@/components/ui/sparkline';
 
 export function AccountsView({ navigateTo }: any) {
   const [search, setSearch] = useState("");
@@ -196,6 +197,17 @@ export function AccountsView({ navigateTo }: any) {
                        <span className={cn("text-xs font-bold", drawerCompany.scoreTrend > 0 ? "text-emerald-500" : "text-destructive")}>{drawerCompany.scoreTrend > 0 ? '+' : ''}{drawerCompany.scoreTrend}</span>
                      </div>
                    </div>
+                </div>
+
+                <div className="bg-background border border-border p-4 rounded-2xl shadow-sm">
+                  <div className="flex justify-between items-center text-[10px] font-bold text-muted-foreground uppercase tracking-widest mb-2">
+                    <span className="flex items-center gap-1"><BarChart2 className="w-3 h-3" /> 9-Month Trend</span>
+                    <span className="tabular-nums">{drawerCompany.history[0].score} → {drawerCompany.score}</span>
+                  </div>
+                  <Sparkline
+                    data={drawerCompany.history.map(h => h.score)}
+                    className={cn('w-full h-10', drawerCompany.scoreTrend > 0 ? 'text-emerald-500' : drawerCompany.scoreTrend < 0 ? 'text-destructive' : 'text-muted-foreground')}
+                  />
                 </div>
 
                 <div>

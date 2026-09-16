@@ -257,6 +257,7 @@ en: {
       detail: {
         back: "Directory",
         website: "Visit Website",
+        view_in_console: "View in Staff Console",
         about: "About",
         details: "Membership Details",
         category: "Category",
@@ -1267,6 +1268,7 @@ sr: {
       detail: {
         back: "Direktorijum",
         website: "Poseti veb sajt",
+        view_in_console: "Pogledaj u konzoli za osoblje",
         about: "O nama",
         details: "Detalji o članstvu",
         category: "Kategorija",

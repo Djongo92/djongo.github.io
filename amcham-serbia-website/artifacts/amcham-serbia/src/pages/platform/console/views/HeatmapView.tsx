@@ -4,6 +4,7 @@ import { platformData, Company } from '@/data/platform';
 import { cn } from '@/lib/utils';
 import { Filter, X, ChevronRight, BarChart2, Activity, Target } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { Sparkline } from '@/components/ui/sparkline';
 
 export function HeatmapView({ navigateTo, roleParam }: any) {
   const { t } = useI18n();
@@ -158,6 +159,17 @@ export function HeatmapView({ navigateTo, roleParam }: any) {
                              <div className="text-3xl font-serif leading-none tabular-nums">{c.score}</div>
                              <div className={cn("text-[10px] font-bold uppercase tracking-widest mt-1", c.scoreTrend > 0 ? "text-emerald-500" : "text-destructive")}>{c.scoreTrend > 0 ? `+${c.scoreTrend}` : c.scoreTrend}</div>
                            </div>
+                         </div>
+
+                         <div className="mb-4">
+                           <div className="flex justify-between items-center text-[10px] font-bold uppercase tracking-widest text-muted-foreground mb-1.5">
+                             <span>9-Month Trend</span>
+                             <span className="tabular-nums">{c.history[0].score} → {c.score}</span>
+                           </div>
+                           <Sparkline
+                             data={c.history.map(h => h.score)}
+                             className={cn('w-full h-8', c.scoreTrend > 0 ? 'text-emerald-500' : c.scoreTrend < 0 ? 'text-destructive' : 'text-muted-foreground')}
+                           />
                          </div>
 
                          <div className="space-y-3">

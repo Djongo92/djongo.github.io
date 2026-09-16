@@ -5,6 +5,7 @@ export interface Company {
   id: string;
   name: string;
   sector: Sector;
+  sectorSr: string;
   location: string;
   employees: number;
   exporter: boolean;
@@ -17,32 +18,36 @@ export interface Company {
   renewalDate: string;
   avatar: string;
   description: string;
+  descriptionSr: string;
+  website: string;
+  reviewDate: string;
   lifecycle: 'onboarding' | 'active' | 'at-risk' | 'renewing';
   contactFreshness: 'fresh' | 'stale' | 'unknown';
   lastInteraction: string;
+  history: { month: string; score: number; engagement: number }[];
 }
 
 export const companies: Company[] = [
-  { id: "adr", name: "Adriatica Grupa", sector: "Manufacturing", location: "Kragujevac", employees: 1240, exporter: true, tier: "Patron", score: 62, scoreTrend: -9, since: 2004, fee: "€18k", manager: "Marija Jovanović", renewalDate: "Oct 2026", avatar: "A", description: "Leading manufacturer of industrial components for the European automotive supply chain.", lifecycle: 'at-risk', contactFreshness: 'stale', lastInteraction: '12d ago' },
-  { id: "hmo", name: "Hemofarm", sector: "Pharma", location: "Vršac", employees: 3400, exporter: true, tier: "Patron", score: 88, scoreTrend: 2, since: 2002, fee: "€18k", manager: "Nikola Krstić", renewalDate: "Jan 2027", avatar: "H", description: "The largest regional pharmaceutical company, producing over 5 billion tablets annually.", lifecycle: 'active', contactFreshness: 'fresh', lastInteraction: '2d ago' },
-  { id: "ncr", name: "NCR Atleos", sector: "IT", location: "Belgrade", employees: 5000, exporter: true, tier: "Patron", score: 91, scoreTrend: 5, since: 2011, fee: "€18k", manager: "Ana Savić", renewalDate: "Mar 2027", avatar: "N", description: "Global technology hub driving innovations in ATM and digital banking infrastructure.", lifecycle: 'active', contactFreshness: 'fresh', lastInteraction: '5d ago' },
-  { id: "sls", name: "S-Leasing", sector: "Finance", location: "Belgrade", employees: 150, exporter: false, tier: "Corporate", score: 45, scoreTrend: -12, since: 2008, fee: "€5k", manager: "Jelena Kostić", renewalDate: "Aug 2026", avatar: "S", description: "Specialized financial institution focusing on commercial vehicle and equipment leasing.", lifecycle: 'at-risk', contactFreshness: 'stale', lastInteraction: '45d ago' },
-  { id: "pmp", name: "Philip Morris", sector: "FMCG", location: "Niš", employees: 900, exporter: true, tier: "Patron", score: 94, scoreTrend: 1, since: 2003, fee: "€18k", manager: "Marko Ristić", renewalDate: "Dec 2026", avatar: "P", description: "Pioneering smoke-free products and modernizing the Serbian tobacco industry.", lifecycle: 'active', contactFreshness: 'fresh', lastInteraction: '1w ago' },
-  { id: "ccbc", name: "Coca-Cola HBC", sector: "FMCG", location: "Zemun", employees: 1100, exporter: true, tier: "Patron", score: 85, scoreTrend: 4, since: 2001, fee: "€18k", manager: "Marija Jovanović", renewalDate: "Feb 2027", avatar: "C", description: "Strategic bottling partner serving Serbia and Montenegro with comprehensive beverage portfolio.", lifecycle: 'active', contactFreshness: 'fresh', lastInteraction: '3d ago' },
-  { id: "nrb", name: "NIS a.d.", sector: "Energy", location: "Novi Sad", employees: 4000, exporter: true, tier: "Patron", score: 76, scoreTrend: -3, since: 2006, fee: "€18k", manager: "Stefan Mitić", renewalDate: "May 2026", avatar: "N", description: "Integrated energy company managing upstream and downstream operations across the Balkans.", lifecycle: 'renewing', contactFreshness: 'fresh', lastInteraction: '2w ago' },
-  { id: "dlz", name: "Delhaize Serbia", sector: "Retail", location: "Belgrade", employees: 13000, exporter: false, tier: "Patron", score: 92, scoreTrend: 8, since: 2011, fee: "€18k", manager: "Ana Savić", renewalDate: "Sep 2026", avatar: "D", description: "Largest retail chain in Serbia, operating Maxi, Mega Maxi, and Shop&Go networks.", lifecycle: 'active', contactFreshness: 'fresh', lastInteraction: '4d ago' },
-  { id: "msft", name: "Microsoft", sector: "IT", location: "Belgrade", employees: 600, exporter: true, tier: "Patron", score: 89, scoreTrend: -2, since: 2002, fee: "€18k", manager: "Nikola Krstić", renewalDate: "Nov 2026", avatar: "M", description: "Microsoft Development Center Serbia, one of the most critical engineering hubs in Europe.", lifecycle: 'active', contactFreshness: 'fresh', lastInteraction: '1d ago' },
-  { id: "pwc", name: "PwC Serbia", sector: "Consulting", location: "Belgrade", employees: 300, exporter: false, tier: "Corporate", score: 71, scoreTrend: 1, since: 2001, fee: "€5k", manager: "Jelena Kostić", renewalDate: "Jul 2026", avatar: "P", description: "Providing industry-focused assurance, tax, and advisory services to build public trust.", lifecycle: 'renewing', contactFreshness: 'fresh', lastInteraction: '3w ago' },
-  { id: "kpmg", name: "KPMG", sector: "Consulting", location: "Belgrade", employees: 350, exporter: false, tier: "Corporate", score: 68, scoreTrend: -4, since: 2001, fee: "€5k", manager: "Marko Ristić", renewalDate: "Jun 2026", avatar: "K", description: "Audit, tax and advisory services designed to mitigate risks and grasp opportunities.", lifecycle: 'renewing', contactFreshness: 'fresh', lastInteraction: '1m ago' },
-  { id: "kar", name: "Karanovic & Partners", sector: "Legal", location: "Belgrade", employees: 120, exporter: true, tier: "Business", score: 82, scoreTrend: 5, since: 2005, fee: "€2.5k", manager: "Marija Jovanović", renewalDate: "Apr 2027", avatar: "K", description: "Regional legal practice offering cross-border corporate and commercial legal advice.", lifecycle: 'active', contactFreshness: 'fresh', lastInteraction: '5d ago' },
-  { id: "nkt", name: "Nelt Co", sector: "Logistics", location: "Dobanovci", employees: 4200, exporter: true, tier: "Patron", score: 79, scoreTrend: 2, since: 2008, fee: "€18k", manager: "Stefan Mitić", renewalDate: "Oct 2026", avatar: "N", description: "Leading regional distribution and logistics company operating across the Balkans.", lifecycle: 'renewing', contactFreshness: 'fresh', lastInteraction: '2d ago' },
-  { id: "mcb", name: "UniCredit Bank", sector: "Finance", location: "Belgrade", employees: 1200, exporter: false, tier: "Patron", score: 81, scoreTrend: 6, since: 2003, fee: "€18k", manager: "Ana Savić", renewalDate: "Dec 2026", avatar: "U", description: "Pan-European commercial bank delivering unique corporate and retail financial solutions.", lifecycle: 'active', contactFreshness: 'fresh', lastInteraction: '1w ago' },
-  { id: "sbb", name: "SBB", sector: "IT", location: "Belgrade", employees: 1800, exporter: false, tier: "Corporate", score: 55, scoreTrend: -15, since: 2009, fee: "€5k", manager: "Nikola Krstić", renewalDate: "Jan 2027", avatar: "S", description: "Premier broadband internet and pay-TV provider in Serbia.", lifecycle: 'at-risk', contactFreshness: 'stale', lastInteraction: '2m ago' },
-  { id: "ibm", name: "IBM Serbia", sector: "IT", location: "Belgrade", employees: 200, exporter: true, tier: "Corporate", score: 64, scoreTrend: -5, since: 2004, fee: "€5k", manager: "Marko Ristić", renewalDate: "Feb 2027", avatar: "I", description: "Enterprise IT solutions, cloud computing, and AI consulting services.", lifecycle: 'active', contactFreshness: 'fresh', lastInteraction: '3w ago' },
-  { id: "bky", name: "Bambi", sector: "FMCG", location: "Požarevac", employees: 800, exporter: true, tier: "Corporate", score: 77, scoreTrend: 3, since: 2010, fee: "€5k", manager: "Jelena Kostić", renewalDate: "May 2026", avatar: "B", description: "Iconic domestic confectionery manufacturer, part of the Coca-Cola HBC family.", lifecycle: 'active', contactFreshness: 'fresh', lastInteraction: '1w ago' },
-  { id: "mtk", name: "Metalac", sector: "Manufacturing", location: "Gornji Milanovac", employees: 2100, exporter: true, tier: "Corporate", score: 73, scoreTrend: 1, since: 2012, fee: "€5k", manager: "Stefan Mitić", renewalDate: "Aug 2026", avatar: "M", description: "European leader in cookware manufacturing with a robust regional retail network.", lifecycle: 'renewing', contactFreshness: 'fresh', lastInteraction: '2w ago' },
-  { id: "tln", name: "Yettel", sector: "IT", location: "Belgrade", employees: 1400, exporter: false, tier: "Patron", score: 86, scoreTrend: 7, since: 2006, fee: "€18k", manager: "Marija Jovanović", renewalDate: "Mar 2027", avatar: "Y", description: "Digital mobile network operator driving 5G adoption and digital services.", lifecycle: 'active', contactFreshness: 'fresh', lastInteraction: '3d ago' },
-  { id: "stada", name: "STADA IT Solutions", sector: "IT", location: "Vršac", employees: 150, exporter: true, tier: "Business", score: 48, scoreTrend: -8, since: 2018, fee: "€2.5k", manager: "Nikola Krstić", renewalDate: "Nov 2026", avatar: "S", description: "Global IT competence center for the STADA Group.", lifecycle: 'at-risk', contactFreshness: 'unknown', lastInteraction: '3m ago' }
+  { id: "adr", name: "Adriatica Grupa", sector: "Manufacturing", location: "Kragujevac", employees: 1240, exporter: true, tier: "Patron", score: 62, scoreTrend: -9, since: 2004, fee: "€18k", manager: "Marija Jovanović", renewalDate: "Oct 2026", avatar: "A", description: "Leading manufacturer of industrial components for the European automotive supply chain.", lifecycle: 'at-risk', contactFreshness: 'stale', lastInteraction: '12d ago', sectorSr: "Proizvodnja", descriptionSr: "Vodeći proizvođač industrijskih komponenti za evropski lanac snabdevanja automobilske industrije.", website: "https://adriaticagrupa.rs", reviewDate: "2026-07-22", history: [{ month: "Jan", score: 76, engagement: 70 }, { month: "Feb", score: 75, engagement: 68 }, { month: "Mar", score: 77, engagement: 65 }, { month: "Apr", score: 73, engagement: 58 }, { month: "May", score: 71, engagement: 50 }, { month: "Jun", score: 68, engagement: 42 }, { month: "Jul", score: 65, engagement: 35 }, { month: "Aug", score: 63, engagement: 30 }, { month: "Sep", score: 62, engagement: 28 }] },
+  { id: "hmo", name: "Hemofarm", sector: "Pharma", location: "Vršac", employees: 3400, exporter: true, tier: "Patron", score: 88, scoreTrend: 2, since: 2002, fee: "€18k", manager: "Nikola Krstić", renewalDate: "Jan 2027", avatar: "H", description: "The largest regional pharmaceutical company, producing over 5 billion tablets annually.", lifecycle: 'active', contactFreshness: 'fresh', lastInteraction: '2d ago', sectorSr: "Farmaceutska industrija", descriptionSr: "Najveća regionalna farmaceutska kompanija, sa proizvodnjom od preko 5 milijardi tableta godišnje.", website: "https://www.hemofarm.com", reviewDate: "2026-08-30", history: [{ month: "Jan", score: 83, engagement: 80 }, { month: "Feb", score: 84, engagement: 82 }, { month: "Mar", score: 85, engagement: 83 }, { month: "Apr", score: 85, engagement: 84 }, { month: "May", score: 86, engagement: 85 }, { month: "Jun", score: 87, engagement: 86 }, { month: "Jul", score: 86, engagement: 85 }, { month: "Aug", score: 87, engagement: 87 }, { month: "Sep", score: 88, engagement: 88 }] },
+  { id: "ncr", name: "NCR Atleos", sector: "IT", location: "Belgrade", employees: 5000, exporter: true, tier: "Patron", score: 91, scoreTrend: 5, since: 2011, fee: "€18k", manager: "Ana Savić", renewalDate: "Mar 2027", avatar: "N", description: "Global technology hub driving innovations in ATM and digital banking infrastructure.", lifecycle: 'active', contactFreshness: 'fresh', lastInteraction: '5d ago', sectorSr: "Informacione tehnologije", descriptionSr: "Globalni tehnološki centar koji pokreće inovacije u ATM infrastrukturi i digitalnom bankarstvu.", website: "https://www.ncratleos.com", reviewDate: "2026-08-10", history: [{ month: "Jan", score: 82, engagement: 78 }, { month: "Feb", score: 84, engagement: 80 }, { month: "Mar", score: 85, engagement: 82 }, { month: "Apr", score: 86, engagement: 84 }, { month: "May", score: 87, engagement: 86 }, { month: "Jun", score: 88, engagement: 87 }, { month: "Jul", score: 89, engagement: 88 }, { month: "Aug", score: 90, engagement: 90 }, { month: "Sep", score: 91, engagement: 92 }] },
+  { id: "sls", name: "S-Leasing", sector: "Finance", location: "Belgrade", employees: 150, exporter: false, tier: "Corporate", score: 45, scoreTrend: -12, since: 2008, fee: "€5k", manager: "Jelena Kostić", renewalDate: "Aug 2026", avatar: "S", description: "Specialized financial institution focusing on commercial vehicle and equipment leasing.", lifecycle: 'at-risk', contactFreshness: 'stale', lastInteraction: '45d ago', sectorSr: "Finansije", descriptionSr: "Specijalizovana finansijska institucija fokusirana na lizing komercijalnih vozila i opreme.", website: "https://www.s-leasing.rs", reviewDate: "2026-06-02", history: [{ month: "Jan", score: 66, engagement: 55 }, { month: "Feb", score: 63, engagement: 50 }, { month: "Mar", score: 60, engagement: 44 }, { month: "Apr", score: 57, engagement: 38 }, { month: "May", score: 54, engagement: 32 }, { month: "Jun", score: 51, engagement: 27 }, { month: "Jul", score: 49, engagement: 22 }, { month: "Aug", score: 47, engagement: 18 }, { month: "Sep", score: 45, engagement: 15 }] },
+  { id: "pmp", name: "Philip Morris", sector: "FMCG", location: "Niš", employees: 900, exporter: true, tier: "Patron", score: 94, scoreTrend: 1, since: 2003, fee: "€18k", manager: "Marko Ristić", renewalDate: "Dec 2026", avatar: "P", description: "Pioneering smoke-free products and modernizing the Serbian tobacco industry.", lifecycle: 'active', contactFreshness: 'fresh', lastInteraction: '1w ago', sectorSr: "Brza obrtna roba (FMCG)", descriptionSr: "Predvodnik u proizvodima bez dima i modernizaciji duvanske industrije u Srbiji.", website: "https://www.pmi.com", reviewDate: "2026-09-01", history: [{ month: "Jan", score: 91, engagement: 88 }, { month: "Feb", score: 92, engagement: 89 }, { month: "Mar", score: 93, engagement: 90 }, { month: "Apr", score: 92, engagement: 90 }, { month: "May", score: 93, engagement: 91 }, { month: "Jun", score: 94, engagement: 92 }, { month: "Jul", score: 93, engagement: 91 }, { month: "Aug", score: 94, engagement: 92 }, { month: "Sep", score: 94, engagement: 93 }] },
+  { id: "ccbc", name: "Coca-Cola HBC", sector: "FMCG", location: "Zemun", employees: 1100, exporter: true, tier: "Patron", score: 85, scoreTrend: 4, since: 2001, fee: "€18k", manager: "Marija Jovanović", renewalDate: "Feb 2027", avatar: "C", description: "Strategic bottling partner serving Serbia and Montenegro with comprehensive beverage portfolio.", lifecycle: 'active', contactFreshness: 'fresh', lastInteraction: '3d ago', sectorSr: "Brza obrtna roba (FMCG)", descriptionSr: "Strateški partner za flaširanje koji opslužuje Srbiju i Crnu Goru sveobuhvatnim portfoliom pića.", website: "https://www.coca-colahellenic.com", reviewDate: "2026-08-18", history: [{ month: "Jan", score: 76, engagement: 74 }, { month: "Feb", score: 78, engagement: 76 }, { month: "Mar", score: 79, engagement: 78 }, { month: "Apr", score: 80, engagement: 79 }, { month: "May", score: 81, engagement: 81 }, { month: "Jun", score: 82, engagement: 82 }, { month: "Jul", score: 83, engagement: 83 }, { month: "Aug", score: 84, engagement: 85 }, { month: "Sep", score: 85, engagement: 86 }] },
+  { id: "nrb", name: "NIS a.d.", sector: "Energy", location: "Novi Sad", employees: 4000, exporter: true, tier: "Patron", score: 76, scoreTrend: -3, since: 2006, fee: "€18k", manager: "Stefan Mitić", renewalDate: "May 2026", avatar: "N", description: "Integrated energy company managing upstream and downstream operations across the Balkans.", lifecycle: 'renewing', contactFreshness: 'fresh', lastInteraction: '2w ago', sectorSr: "Energetika", descriptionSr: "Integrisana energetska kompanija koja upravlja istražno-proizvodnim i prerađivačkim operacijama širom Balkana.", website: "https://www.nis.rs", reviewDate: "2026-05-20", history: [{ month: "Jan", score: 82, engagement: 75 }, { month: "Feb", score: 80, engagement: 73 }, { month: "Mar", score: 79, engagement: 71 }, { month: "Apr", score: 77, engagement: 70 }, { month: "May", score: 76, engagement: 68 }, { month: "Jun", score: 75, engagement: 67 }, { month: "Jul", score: 76, engagement: 68 }, { month: "Aug", score: 75, engagement: 69 }, { month: "Sep", score: 76, engagement: 70 }] },
+  { id: "dlz", name: "Delhaize Serbia", sector: "Retail", location: "Belgrade", employees: 13000, exporter: false, tier: "Patron", score: 92, scoreTrend: 8, since: 2011, fee: "€18k", manager: "Ana Savić", renewalDate: "Sep 2026", avatar: "D", description: "Largest retail chain in Serbia, operating Maxi, Mega Maxi, and Shop&Go networks.", lifecycle: 'active', contactFreshness: 'fresh', lastInteraction: '4d ago', sectorSr: "Maloprodaja", descriptionSr: "Najveći maloprodajni lanac u Srbiji, sa mrežama Maxi, Mega Maxi i Shop&Go.", website: "https://www.delhaizeserbia.rs", reviewDate: "2026-08-25", history: [{ month: "Jan", score: 78, engagement: 75 }, { month: "Feb", score: 80, engagement: 78 }, { month: "Mar", score: 82, engagement: 80 }, { month: "Apr", score: 84, engagement: 83 }, { month: "May", score: 86, engagement: 85 }, { month: "Jun", score: 88, engagement: 87 }, { month: "Jul", score: 89, engagement: 89 }, { month: "Aug", score: 91, engagement: 91 }, { month: "Sep", score: 92, engagement: 93 }] },
+  { id: "msft", name: "Microsoft", sector: "IT", location: "Belgrade", employees: 600, exporter: true, tier: "Patron", score: 89, scoreTrend: -2, since: 2002, fee: "€18k", manager: "Nikola Krstić", renewalDate: "Nov 2026", avatar: "M", description: "Microsoft Development Center Serbia, one of the most critical engineering hubs in Europe.", lifecycle: 'active', contactFreshness: 'fresh', lastInteraction: '1d ago', sectorSr: "Informacione tehnologije", descriptionSr: "Microsoft Razvojni Centar Srbija, jedan od najvažnijih inženjerskih centara u Evropi.", website: "https://www.microsoft.com/sr-rs", reviewDate: "2026-09-05", history: [{ month: "Jan", score: 92, engagement: 88 }, { month: "Feb", score: 91, engagement: 87 }, { month: "Mar", score: 92, engagement: 88 }, { month: "Apr", score: 90, engagement: 86 }, { month: "May", score: 91, engagement: 87 }, { month: "Jun", score: 89, engagement: 85 }, { month: "Jul", score: 90, engagement: 86 }, { month: "Aug", score: 88, engagement: 85 }, { month: "Sep", score: 89, engagement: 86 }] },
+  { id: "pwc", name: "PwC Serbia", sector: "Consulting", location: "Belgrade", employees: 300, exporter: false, tier: "Corporate", score: 71, scoreTrend: 1, since: 2001, fee: "€5k", manager: "Jelena Kostić", renewalDate: "Jul 2026", avatar: "P", description: "Providing industry-focused assurance, tax, and advisory services to build public trust.", lifecycle: 'renewing', contactFreshness: 'fresh', lastInteraction: '3w ago', sectorSr: "Konsalting", descriptionSr: "Pruža revizijske, poreske i savetodavne usluge fokusirane na industriju radi izgradnje javnog poverenja.", website: "https://www.pwc.rs", reviewDate: "2026-07-14", history: [{ month: "Jan", score: 68, engagement: 64 }, { month: "Feb", score: 69, engagement: 65 }, { month: "Mar", score: 70, engagement: 66 }, { month: "Apr", score: 69, engagement: 66 }, { month: "May", score: 70, engagement: 67 }, { month: "Jun", score: 71, engagement: 68 }, { month: "Jul", score: 70, engagement: 67 }, { month: "Aug", score: 71, engagement: 68 }, { month: "Sep", score: 71, engagement: 69 }] },
+  { id: "kpmg", name: "KPMG", sector: "Consulting", location: "Belgrade", employees: 350, exporter: false, tier: "Corporate", score: 68, scoreTrend: -4, since: 2001, fee: "€5k", manager: "Marko Ristić", renewalDate: "Jun 2026", avatar: "K", description: "Audit, tax and advisory services designed to mitigate risks and grasp opportunities.", lifecycle: 'renewing', contactFreshness: 'fresh', lastInteraction: '1m ago', sectorSr: "Konsalting", descriptionSr: "Revizijske, poreske i savetodavne usluge osmišljene da ublaže rizike i iskoriste prilike.", website: "https://www.kpmg.com/rs", reviewDate: "2026-06-28", history: [{ month: "Jan", score: 75, engagement: 70 }, { month: "Feb", score: 74, engagement: 68 }, { month: "Mar", score: 73, engagement: 67 }, { month: "Apr", score: 71, engagement: 65 }, { month: "May", score: 70, engagement: 64 }, { month: "Jun", score: 69, engagement: 63 }, { month: "Jul", score: 70, engagement: 63 }, { month: "Aug", score: 69, engagement: 62 }, { month: "Sep", score: 68, engagement: 61 }] },
+  { id: "kar", name: "Karanovic & Partners", sector: "Legal", location: "Belgrade", employees: 120, exporter: true, tier: "Business", score: 82, scoreTrend: 5, since: 2005, fee: "€2.5k", manager: "Marija Jovanović", renewalDate: "Apr 2027", avatar: "K", description: "Regional legal practice offering cross-border corporate and commercial legal advice.", lifecycle: 'active', contactFreshness: 'fresh', lastInteraction: '5d ago', sectorSr: "Pravne usluge", descriptionSr: "Regionalna advokatska kancelarija koja pruža prekogranične korporativne i komercijalne pravne savete.", website: "https://www.karanovicpartners.com", reviewDate: "2026-08-02", history: [{ month: "Jan", score: 72, engagement: 70 }, { month: "Feb", score: 74, engagement: 72 }, { month: "Mar", score: 76, engagement: 74 }, { month: "Apr", score: 77, engagement: 76 }, { month: "May", score: 78, engagement: 77 }, { month: "Jun", score: 79, engagement: 78 }, { month: "Jul", score: 80, engagement: 80 }, { month: "Aug", score: 81, engagement: 81 }, { month: "Sep", score: 82, engagement: 83 }] },
+  { id: "nkt", name: "Nelt Co", sector: "Logistics", location: "Dobanovci", employees: 4200, exporter: true, tier: "Patron", score: 79, scoreTrend: 2, since: 2008, fee: "€18k", manager: "Stefan Mitić", renewalDate: "Oct 2026", avatar: "N", description: "Leading regional distribution and logistics company operating across the Balkans.", lifecycle: 'renewing', contactFreshness: 'fresh', lastInteraction: '2d ago', sectorSr: "Logistika", descriptionSr: "Vodeća regionalna distributivna i logistička kompanija koja posluje širom Balkana.", website: "https://www.nelt.com", reviewDate: "2026-07-30", history: [{ month: "Jan", score: 74, engagement: 72 }, { month: "Feb", score: 75, engagement: 73 }, { month: "Mar", score: 76, engagement: 74 }, { month: "Apr", score: 76, engagement: 75 }, { month: "May", score: 77, engagement: 76 }, { month: "Jun", score: 78, engagement: 76 }, { month: "Jul", score: 77, engagement: 77 }, { month: "Aug", score: 78, engagement: 78 }, { month: "Sep", score: 79, engagement: 79 }] },
+  { id: "mcb", name: "UniCredit Bank", sector: "Finance", location: "Belgrade", employees: 1200, exporter: false, tier: "Patron", score: 81, scoreTrend: 6, since: 2003, fee: "€18k", manager: "Ana Savić", renewalDate: "Dec 2026", avatar: "U", description: "Pan-European commercial bank delivering unique corporate and retail financial solutions.", lifecycle: 'active', contactFreshness: 'fresh', lastInteraction: '1w ago', sectorSr: "Finansije", descriptionSr: "Panevropska komercijalna banka koja pruža jedinstvena korporativna i retail finansijska rešenja.", website: "https://www.unicreditbank.rs", reviewDate: "2026-08-12", history: [{ month: "Jan", score: 70, engagement: 68 }, { month: "Feb", score: 72, engagement: 70 }, { month: "Mar", score: 74, engagement: 72 }, { month: "Apr", score: 75, engagement: 74 }, { month: "May", score: 77, engagement: 76 }, { month: "Jun", score: 78, engagement: 77 }, { month: "Jul", score: 79, engagement: 78 }, { month: "Aug", score: 80, engagement: 80 }, { month: "Sep", score: 81, engagement: 82 }] },
+  { id: "sbb", name: "SBB", sector: "IT", location: "Belgrade", employees: 1800, exporter: false, tier: "Corporate", score: 55, scoreTrend: -15, since: 2009, fee: "€5k", manager: "Nikola Krstić", renewalDate: "Jan 2027", avatar: "S", description: "Premier broadband internet and pay-TV provider in Serbia.", lifecycle: 'at-risk', contactFreshness: 'stale', lastInteraction: '2m ago', sectorSr: "Informacione tehnologije", descriptionSr: "Vodeći provajder širokopojasnog interneta i kablovske televizije u Srbiji.", website: "https://www.sbb.rs", reviewDate: "2026-04-15", history: [{ month: "Jan", score: 80, engagement: 72 }, { month: "Feb", score: 76, engagement: 68 }, { month: "Mar", score: 73, engagement: 63 }, { month: "Apr", score: 70, engagement: 58 }, { month: "May", score: 67, engagement: 52 }, { month: "Jun", score: 63, engagement: 46 }, { month: "Jul", score: 60, engagement: 40 }, { month: "Aug", score: 57, engagement: 35 }, { month: "Sep", score: 55, engagement: 30 }] },
+  { id: "ibm", name: "IBM Serbia", sector: "IT", location: "Belgrade", employees: 200, exporter: true, tier: "Corporate", score: 64, scoreTrend: -5, since: 2004, fee: "€5k", manager: "Marko Ristić", renewalDate: "Feb 2027", avatar: "I", description: "Enterprise IT solutions, cloud computing, and AI consulting services.", lifecycle: 'active', contactFreshness: 'fresh', lastInteraction: '3w ago', sectorSr: "Informacione tehnologije", descriptionSr: "Rešenja za korporativnu IT infrastrukturu, cloud computing i konsalting u oblasti veštačke inteligencije.", website: "https://www.ibm.com/rs-sr", reviewDate: "2026-07-08", history: [{ month: "Jan", score: 71, engagement: 68 }, { month: "Feb", score: 70, engagement: 67 }, { month: "Mar", score: 69, engagement: 66 }, { month: "Apr", score: 68, engagement: 64 }, { month: "May", score: 67, engagement: 63 }, { month: "Jun", score: 66, engagement: 62 }, { month: "Jul", score: 65, engagement: 61 }, { month: "Aug", score: 65, engagement: 60 }, { month: "Sep", score: 64, engagement: 59 }] },
+  { id: "bky", name: "Bambi", sector: "FMCG", location: "Požarevac", employees: 800, exporter: true, tier: "Corporate", score: 77, scoreTrend: 3, since: 2010, fee: "€5k", manager: "Jelena Kostić", renewalDate: "May 2026", avatar: "B", description: "Iconic domestic confectionery manufacturer, part of the Coca-Cola HBC family.", lifecycle: 'active', contactFreshness: 'fresh', lastInteraction: '1w ago', sectorSr: "Brza obrtna roba (FMCG)", descriptionSr: "Ikonični domaći proizvođač konditorskih proizvoda, deo Coca-Cola HBC porodice.", website: "https://www.bambi.rs", reviewDate: "2026-08-05", history: [{ month: "Jan", score: 70, engagement: 68 }, { month: "Feb", score: 71, engagement: 69 }, { month: "Mar", score: 72, engagement: 70 }, { month: "Apr", score: 73, engagement: 71 }, { month: "May", score: 74, engagement: 72 }, { month: "Jun", score: 75, engagement: 73 }, { month: "Jul", score: 75, engagement: 74 }, { month: "Aug", score: 76, engagement: 75 }, { month: "Sep", score: 77, engagement: 76 }] },
+  { id: "mtk", name: "Metalac", sector: "Manufacturing", location: "Gornji Milanovac", employees: 2100, exporter: true, tier: "Corporate", score: 73, scoreTrend: 1, since: 2012, fee: "€5k", manager: "Stefan Mitić", renewalDate: "Aug 2026", avatar: "M", description: "European leader in cookware manufacturing with a robust regional retail network.", lifecycle: 'renewing', contactFreshness: 'fresh', lastInteraction: '2w ago', sectorSr: "Proizvodnja", descriptionSr: "Evropski lider u proizvodnji kuhinjskog posuđa sa snažnom regionalnom maloprodajnom mrežom.", website: "https://www.metalac.com", reviewDate: "2026-06-19", history: [{ month: "Jan", score: 70, engagement: 66 }, { month: "Feb", score: 71, engagement: 67 }, { month: "Mar", score: 72, engagement: 68 }, { month: "Apr", score: 71, engagement: 68 }, { month: "May", score: 72, engagement: 69 }, { month: "Jun", score: 73, engagement: 70 }, { month: "Jul", score: 72, engagement: 69 }, { month: "Aug", score: 73, engagement: 70 }, { month: "Sep", score: 73, engagement: 71 }] },
+  { id: "tln", name: "Yettel", sector: "IT", location: "Belgrade", employees: 1400, exporter: false, tier: "Patron", score: 86, scoreTrend: 7, since: 2006, fee: "€18k", manager: "Marija Jovanović", renewalDate: "Mar 2027", avatar: "Y", description: "Digital mobile network operator driving 5G adoption and digital services.", lifecycle: 'active', contactFreshness: 'fresh', lastInteraction: '3d ago', sectorSr: "Informacione tehnologije", descriptionSr: "Digitalni operater mobilne mreže koji predvodi usvajanje 5G tehnologije i digitalnih usluga.", website: "https://www.yettel.rs", reviewDate: "2026-08-28", history: [{ month: "Jan", score: 73, engagement: 71 }, { month: "Feb", score: 75, engagement: 73 }, { month: "Mar", score: 77, engagement: 75 }, { month: "Apr", score: 79, engagement: 77 }, { month: "May", score: 80, engagement: 79 }, { month: "Jun", score: 82, engagement: 81 }, { month: "Jul", score: 83, engagement: 83 }, { month: "Aug", score: 85, engagement: 85 }, { month: "Sep", score: 86, engagement: 87 }] },
+  { id: "stada", name: "STADA IT Solutions", sector: "IT", location: "Vršac", employees: 150, exporter: true, tier: "Business", score: 48, scoreTrend: -8, since: 2018, fee: "€2.5k", manager: "Nikola Krstić", renewalDate: "Nov 2026", avatar: "S", description: "Global IT competence center for the STADA Group.", lifecycle: 'at-risk', contactFreshness: 'unknown', lastInteraction: '3m ago', sectorSr: "Informacione tehnologije", descriptionSr: "Globalni centar kompetencija za informacione tehnologije STADA grupacije.", website: "https://www.stada.com", reviewDate: "2026-05-30", history: [{ month: "Jan", score: 60, engagement: 55 }, { month: "Feb", score: 58, engagement: 52 }, { month: "Mar", score: 57, engagement: 49 }, { month: "Apr", score: 55, engagement: 46 }, { month: "May", score: 53, engagement: 43 }, { month: "Jun", score: 51, engagement: 40 }, { month: "Jul", score: 50, engagement: 38 }, { month: "Aug", score: 49, engagement: 36 }, { month: "Sep", score: 48, engagement: 34 }] }
 ];
 
 export const platformData = {
@@ -146,7 +151,10 @@ export const platformData = {
     matchmaking: {
       pairs: [
         { from: "sls", to: "nkt", rationale: "Nelt is expanding fleet; S-Leasing offers commercial vehicle financing.", overlapEvidence: "Both active in Transport sub-committee", conflicts: "None", fromApproved: true, toApproved: false, expiry: "2 days", outcomeState: "pending" },
-        { from: "stada", to: "ncr", rationale: "Both expanding R&D operations in Serbia.", overlapEvidence: "Both indicated 'Tech Talent' as priority in Lap Time 2025", conflicts: "Competing for same talent pool", fromApproved: true, toApproved: true, expiry: "5 days", outcomeState: "scheduled" }
+        { from: "stada", to: "ncr", rationale: "Both expanding R&D operations in Serbia.", overlapEvidence: "Both indicated 'Tech Talent' as priority in Lap Time 2025", conflicts: "Competing for same talent pool", fromApproved: true, toApproved: true, expiry: "5 days", outcomeState: "scheduled" },
+        { from: "kar", to: "ibm", rationale: "Both serve multinational clients navigating IT compliance and data protection law.", overlapEvidence: "Both flagged 'regulatory compliance' as a top priority in recent staff notes", conflicts: "None", fromApproved: true, toApproved: false, expiry: "4 days", outcomeState: "pending" },
+        { from: "hmo", to: "pwc", rationale: "Hemofarm is exploring ESG audit partners; PwC offers dedicated ESG advisory.", overlapEvidence: "Both attended the Q3 ESG roundtable", conflicts: "None", fromApproved: true, toApproved: true, expiry: "3 days", outcomeState: "scheduled" },
+        { from: "mtk", to: "mcb", rationale: "Metalac is evaluating equipment financing for a manufacturing line upgrade.", overlapEvidence: "UniCredit's corporate desk flagged manufacturing equipment financing as a growth area", conflicts: "None", fromApproved: true, toApproved: false, expiry: "6 days", outcomeState: "pending" }
       ]
     },
     briefs: {
@@ -211,6 +219,72 @@ export const platformData = {
         attendeeContext: "Very ROI focused.",
         notesCommitments: [],
         followUpActions: []
+      },
+      "hmo": {
+        desiredOutcome: "Explore Board of Governors nomination for their regional director.",
+        talkingPoints: [
+          "Congratulate them on the new production milestone.",
+          "Discuss their interest in the upcoming Health Care Committee chair rotation.",
+          "Introduce the Annual Value Statement concept as a board-reporting tool."
+        ],
+        ask: "Nominate a senior executive for the Board of Governors.",
+        rationale: "Consistently highest-scoring Patron account; a natural advocate for the association.",
+        signals: [
+          { text: "Score 88, +2 trend — highest in the Pharma sector", type: "system" },
+          { text: "Active in ESG and Health committees", type: "engagement" },
+          { text: "Continued regional expansion (web, 10d ago)", type: "web" },
+          { text: "Patron since 2002", type: "system" }
+        ],
+        agenda: ["09:00 - Arrival", "09:10 - Year in Review", "09:30 - Board Nomination Discussion"],
+        citations: ["LapTime 2025: Pharma sector leadership", "Q3 2026 Portfolio Rollup"],
+        contradictions: [],
+        attendeeContext: "Values direct, data-backed conversations; proud of their ESG record.",
+        notesCommitments: [],
+        followUpActions: ["Send Board of Governors nomination packet", "Loop in Health Care Committee chair"]
+      },
+      "kar": {
+        desiredOutcome: "Explore upgrade from Business to Corporate tier.",
+        talkingPoints: [
+          "Highlight the growth in their cross-border practice.",
+          "Discuss the value of additional committee seats at Corporate tier.",
+          "Ask about their expanding IP practice group."
+        ],
+        ask: "Consider a tier upgrade ahead of their April renewal.",
+        rationale: "Fastest-growing Business-tier account; usage patterns already resemble Corporate-tier members.",
+        signals: [
+          { text: "Score 82, +5 trend — strongest growth in the Legal sector", type: "system" },
+          { text: "Active in two policy committees", type: "engagement" },
+          { text: "Expanding cross-border practice (web, 9d ago)", type: "web" },
+          { text: "Renewal in 7 months", type: "system" }
+        ],
+        agenda: ["14:00 - Coffee", "14:15 - Growth Review", "14:35 - Tier Options"],
+        citations: ["Q3 2026 Portfolio Rollup"],
+        contradictions: [],
+        attendeeContext: "Pragmatic; wants to see ROI numbers before committing to a higher tier.",
+        notesCommitments: [],
+        followUpActions: ["Send Corporate tier comparison sheet"]
+      },
+      "kpmg": {
+        desiredOutcome: "Secure renewal commitment and identify the cause of declining engagement.",
+        talkingPoints: [
+          "Ask directly about the drop in event attendance this year.",
+          "Offer a seat on the newly forming Tax Policy working group.",
+          "Review which committees align with their current priorities."
+        ],
+        ask: "Confirm Corporate tier renewal and commit to one committee seat.",
+        rationale: "Long-standing member with a quietly declining score; early outreach ahead of the June renewal.",
+        signals: [
+          { text: "Score 68, -4 trend over the last two quarters", type: "system" },
+          { text: "Attended only 2 of 4 major events this year", type: "engagement" },
+          { text: "Stable market position, no negative press", type: "web" },
+          { text: "Renewal in 9 months", type: "system" }
+        ],
+        agenda: ["11:00 - Check-in", "11:15 - Engagement Review", "11:35 - Committee Options"],
+        citations: [],
+        contradictions: ["Consistently rates AmCham highly in pulse surveys despite low attendance."],
+        attendeeContext: "Time-constrained; prefers a short, focused agenda.",
+        notesCommitments: [],
+        followUpActions: ["Send Tax Policy working group invitation"]
       }
     },
     intelligence: {
@@ -240,6 +314,72 @@ export const platformData = {
             { name: "Committee Activity", weight: 20, value: 5, max: 20, signals: [{ text: "No active committee members", source: "engagement", date: "Ongoing" }] },
             { name: "Market Signals", weight: 20, value: 18, max: 20, signals: [{ text: "€15M production line", source: "web", date: "6d ago" }] },
             { name: "Staff Assessment", weight: 30, value: 27, max: 30, signals: [{ text: "Strong alignment on ESG", source: "staff", date: "15d ago" }] }
+          ]
+        },
+        "hmo": {
+          total: 88,
+          confidence: "High",
+          signalsCount: 11,
+          factors: [
+            { name: "Event Attendance", weight: 30, value: 27, max: 30, signals: [{ text: "Attended every major event this year", source: "engagement", date: "Ongoing" }] },
+            { name: "Committee Activity", weight: 20, value: 18, max: 20, signals: [{ text: "Active in ESG and Health committees", source: "engagement", date: "Ongoing" }] },
+            { name: "Market Signals", weight: 20, value: 19, max: 20, signals: [{ text: "Continued regional expansion, strong press presence", source: "web", date: "10d ago" }] },
+            { name: "Staff Assessment", weight: 30, value: 24, max: 30, signals: [{ text: "Highly engaged executive sponsor", source: "staff", date: "5d ago" }] }
+          ]
+        },
+        "sbb": {
+          total: 55,
+          confidence: "High",
+          signalsCount: 9,
+          factors: [
+            { name: "Event Attendance", weight: 30, value: 15, max: 30, signals: [{ text: "Missed all Q3 events following primary contact's departure", source: "engagement", date: "Q3 2026" }] },
+            { name: "Committee Activity", weight: 20, value: 5, max: 20, signals: [{ text: "No active committee members currently", source: "engagement", date: "Ongoing" }] },
+            { name: "Market Signals", weight: 20, value: 8, max: 20, signals: [{ text: "CTO departed for a competitor", source: "web", date: "2d ago" }] },
+            { name: "Staff Assessment", weight: 30, value: 27, max: 30, signals: [{ text: "Strong historical relationship; actively working to identify a new sponsor", source: "staff", date: "1d ago" }] }
+          ]
+        },
+        "sls": {
+          total: 45,
+          confidence: "Medium",
+          signalsCount: 8,
+          factors: [
+            { name: "Event Attendance", weight: 30, value: 8, max: 30, signals: [{ text: "Zero event registrations in 2026", source: "engagement", date: "YTD" }] },
+            { name: "Committee Activity", weight: 20, value: 4, max: 20, signals: [{ text: "Not active in Finance Committee despite invitation", source: "engagement", date: "Ongoing" }] },
+            { name: "Market Signals", weight: 20, value: 10, max: 20, signals: [{ text: "Pulse survey: 'Need more targeted matchmaking'", source: "feedback", date: "1w ago" }] },
+            { name: "Staff Assessment", weight: 30, value: 23, max: 30, signals: [{ text: "New marketing lead engaged; budget confirmed for Q4", source: "staff", date: "3d ago" }] }
+          ]
+        },
+        "kar": {
+          total: 82,
+          confidence: "High",
+          signalsCount: 10,
+          factors: [
+            { name: "Event Attendance", weight: 30, value: 24, max: 30, signals: [{ text: "Consistent attendance across Legal & Trade committees", source: "engagement", date: "Ongoing" }] },
+            { name: "Committee Activity", weight: 20, value: 17, max: 20, signals: [{ text: "Active member of two policy committees", source: "engagement", date: "Ongoing" }] },
+            { name: "Market Signals", weight: 20, value: 17, max: 20, signals: [{ text: "Expanding cross-border practice, strong regional press", source: "web", date: "9d ago" }] },
+            { name: "Staff Assessment", weight: 30, value: 24, max: 30, signals: [{ text: "Reliable primary contact, quick to respond", source: "staff", date: "5d ago" }] }
+          ]
+        },
+        "kpmg": {
+          total: 68,
+          confidence: "Medium",
+          signalsCount: 7,
+          factors: [
+            { name: "Event Attendance", weight: 30, value: 18, max: 30, signals: [{ text: "Attended 2 of 4 major events this year", source: "engagement", date: "YTD" }] },
+            { name: "Committee Activity", weight: 20, value: 10, max: 20, signals: [{ text: "Limited committee engagement this quarter", source: "engagement", date: "Q3 2026" }] },
+            { name: "Market Signals", weight: 20, value: 14, max: 20, signals: [{ text: "Stable market position, no major signals", source: "web", date: "3w ago" }] },
+            { name: "Staff Assessment", weight: 30, value: 26, max: 30, signals: [{ text: "Long-standing relationship, responsive to outreach", source: "staff", date: "1m ago" }] }
+          ]
+        },
+        "stada": {
+          total: 48,
+          confidence: "Medium",
+          signalsCount: 8,
+          factors: [
+            { name: "Event Attendance", weight: 30, value: 9, max: 30, signals: [{ text: "Did not join Tech Committee despite mandate", source: "engagement", date: "Ongoing" }] },
+            { name: "Committee Activity", weight: 20, value: 4, max: 20, signals: [{ text: "No committee participation", source: "engagement", date: "Ongoing" }] },
+            { name: "Market Signals", weight: 20, value: 13, max: 20, signals: [{ text: "Growing local team, potential upgrade signal", source: "web", date: "6d ago" }] },
+            { name: "Staff Assessment", weight: 30, value: 22, max: 30, signals: [{ text: "Positive relationship with regional IT lead", source: "staff", date: "3w ago" }] }
           ]
         }
       }
@@ -286,8 +426,61 @@ export const platformData = {
     glance: {
       eventSeats: { used: 6, total: 10 },
       committeeSeats: { used: 4, total: 6 },
-      tier: "Corporate",
       cadence: "90d"
+    },
+    // "View portal as" overrides for the demo — the fields above are Adriatica
+    // Grupa's (the default member). These layer on top for a couple of other
+    // companies so a viewer can contrast a thriving Patron and a growing
+    // Business-tier member against the at-risk default. Any id not listed
+    // here just falls back to the default fields above.
+    memberOverrides: {
+      hmo: {
+        billing: {
+          renewalDate: "Jan 15, 2027",
+          seatsUsed: "10 of 10",
+          autoRenew: true,
+          invoices: [
+            { id: "INV-2025-0212", date: "Jan 15, 2026", amount: "€18,000", status: "Paid" },
+            { id: "INV-2024-0212", date: "Jan 15, 2025", amount: "€18,000", status: "Paid" },
+            { id: "INV-2023-0212", date: "Jan 15, 2024", amount: "€17,000", status: "Paid" }
+          ],
+          paymentMethod: { type: "Bank Transfer", details: "Ending in ...2210" },
+          documents: [
+            { id: "doc1", name: "AmCham Membership Agreement 2025.pdf", type: "Contract" },
+            { id: "doc2", name: "Membership Certificate 2026.pdf", type: "Certificate" },
+            { id: "doc3", name: "Tax Residency Document (W-8BEN).pdf", type: "Tax" }
+          ]
+        },
+        valueReceipt: { introsBrokered: 7, eventsAttended: 22, advocacyWins: 3, marketplaceResponses: 6 },
+        glance: {
+          eventSeats: { used: 9, total: 10 },
+          committeeSeats: { used: 5, total: 6 },
+          cadence: "90d"
+        }
+      },
+      kar: {
+        billing: {
+          renewalDate: "Apr 20, 2027",
+          seatsUsed: "3 of 4",
+          autoRenew: true,
+          invoices: [
+            { id: "INV-2025-0337", date: "Apr 20, 2026", amount: "€2,500", status: "Paid" },
+            { id: "INV-2024-0337", date: "Apr 20, 2025", amount: "€2,500", status: "Paid" },
+            { id: "INV-2023-0337", date: "Apr 20, 2024", amount: "€2,000", status: "Paid" }
+          ],
+          paymentMethod: { type: "Bank Transfer", details: "Ending in ...7734" },
+          documents: [
+            { id: "doc1", name: "AmCham Membership Agreement 2025.pdf", type: "Contract" },
+            { id: "doc2", name: "Membership Certificate 2026.pdf", type: "Certificate" }
+          ]
+        },
+        valueReceipt: { introsBrokered: 4, eventsAttended: 9, advocacyWins: 1, marketplaceResponses: 2 },
+        glance: {
+          eventSeats: { used: 4, total: 5 },
+          committeeSeats: { used: 2, total: 3 },
+          cadence: "180d"
+        }
+      }
     },
     onboarding: {
       step: 3,
@@ -451,3 +644,19 @@ export const platformData = {
     ]
   }
 };
+
+// Resolves which company the member portal is currently being viewed as, and
+// that company's billing/home/glance data — the default company's own data
+// when no override exists, or when the id isn't recognized at all.
+export const VIEW_AS_OPTIONS = ["adr", "hmo", "kar"] as const;
+
+export function resolveViewAsMember(id: string | null | undefined) {
+  const member = platformData.allMembers.find(c => c.id === id) || platformData.member;
+  const overrides = (platformData.portal.memberOverrides as Record<string, any>)[member.id];
+  return {
+    member,
+    billing: { ...platformData.portal.billing, ...(overrides?.billing || {}) },
+    valueReceipt: overrides?.valueReceipt || platformData.portal.valueReceipt,
+    glance: { ...platformData.portal.glance, tier: member.tier, ...(overrides?.glance || {}) }
+  };
+}
