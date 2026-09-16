@@ -8,7 +8,7 @@ import {
   Target, MessageSquare, Handshake, Flag,
   CheckSquare, Inbox, Repeat, ArrowRight,
   Search, X, Check, Eye, Download, ChevronLeft,
-  Command, Menu, Phone, Activity, Globe, Mail, Plus, Book, Award
+  Command, Menu, Phone, Activity, Globe, Mail, Plus, Book, Award, Landmark
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Link } from 'wouter';
@@ -17,7 +17,7 @@ import {
   OutreachView, AskView, MatchmakingView, IntelligenceView,
   FlagsView, ApprovalsView, CoverView, DossierView,
   BriefView, MyTeamView, BoardSummaryView, DigestsView,
-  SponsorshipView
+  SponsorshipView, CommitteesView
 } from './console/views';
 import { CommandPalette, GlossaryDrawer, TourOverlay } from './console/components/Overlays';
 import { ConsoleStateProvider } from './console/console-state';
@@ -133,6 +133,7 @@ export default function Console() {
       { id: 'ask', icon: Search, label: t('platform.console.ask'), badge: 0 },
       { id: 'matchmaking', icon: Handshake, label: t('platform.console.matchmaking'), badge: 0 },
       { id: 'sponsorship', icon: Award, label: t('platform.console.nav_sponsorship', 'Sponsorship'), badge: 0 },
+      { id: 'committees', icon: Landmark, label: t('platform.console.nav_committees', 'Committees'), badge: 0 },
       { id: 'intelligence', icon: Search, label: t('platform.console.nav.intelligence'), badge: 0 },
       { id: 'retention', icon: AlertTriangle, label: t('platform.console.retention'), badge: 0 },
     ];
@@ -313,6 +314,7 @@ export default function Console() {
                   {view === 'ask' && <AskView showToast={showToast} />}
                   {view === 'matchmaking' && <MatchmakingView showToast={showToast} />}
                   {view === 'sponsorship' && <SponsorshipView navigateTo={navigateTo} />}
+                  {view === 'committees' && <CommitteesView navigateTo={navigateTo} />}
                   {view === 'intelligence' && <IntelligenceView navigateTo={navigateTo} />}
                   {view === 'flags' && <FlagsView showToast={showToast} updateBadge={(v: any) => setNavBadges(p => ({...p, flags: v}))} />}
                   {view === 'approvals' && <ApprovalsView showToast={showToast} updateBadge={(v: any) => setNavBadges(p => ({...p, approvals: v}))} />}
@@ -321,7 +323,7 @@ export default function Console() {
                   {view === 'cover' && <CoverView showToast={showToast} />}
                   {view === 'digests' && <DigestsView showToast={showToast} />}
                   {view === 'brief' && <BriefView companyId={selectedCompanyId} navigateTo={navigateTo} />}
-                  {!['ritual','heatmap','accounts','retention','outreach','ask','matchmaking','sponsorship','intelligence','flags','approvals','my-team','board-summary','cover','digests','brief'].includes(view) && (
+                  {!['ritual','heatmap','accounts','retention','outreach','ask','matchmaking','sponsorship','committees','intelligence','flags','approvals','my-team','board-summary','cover','digests','brief'].includes(view) && (
                     <div className="max-w-xl mx-auto py-24 text-center">
                       <div className="w-14 h-14 rounded-full bg-muted mx-auto mb-6 flex items-center justify-center"><Eye className="w-6 h-6 text-muted-foreground" /></div>
                       <h2 className="text-3xl font-serif font-light mb-3">Page Not Found</h2>

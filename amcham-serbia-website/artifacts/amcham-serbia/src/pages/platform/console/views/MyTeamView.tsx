@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { useI18n } from '@/lib/i18n';
 import { platformData } from '@/data/platform';
 import { cn } from '@/lib/utils';
-import { Users, BarChart, TrendingUp, AlertTriangle, ArrowRight, ShieldCheck, CheckCircle, Clock, ChevronDown, Activity, Info } from 'lucide-react';
+import { Users, BarChart, TrendingUp, AlertTriangle, ArrowRight, ShieldCheck, CheckCircle, Clock, ChevronDown, Activity, Info, ShieldAlert } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
 export function MyTeamView({ navigateTo, showToast }: any) {
@@ -12,6 +12,19 @@ export function MyTeamView({ navigateTo, showToast }: any) {
   const [coached, setCoached] = useState<string[]>([]);
   const [expandedMember, setExpandedMember] = useState<string | null>(null);
   const [showMath, setShowMath] = useState(false);
+  const [reassignments, setReassignments] = useState<Record<string, string>>({});
+
+  // A company is a coverage gap when its manager isn't one of the real
+  // staffers on this team — an owner the book-size/workload math above
+  // never actually accounts for. Scoped to Patron tier ("key accounts")
+  // so the alert stays actionable rather than flagging all 20 companies.
+  const teamNames = new Set(team.map(m => m.name));
+  const coverageGaps = platformData.allMembers.filter(c => c.tier === 'Patron' && !teamNames.has(c.manager) && !reassignments[c.id]);
+
+  const reassign = (companyId: string, staffName: string) => {
+    setReassignments(prev => ({ ...prev, [companyId]: staffName }));
+    showToast(`Reassigned to ${staffName}`);
+  };
 
   const handleReassign = () => {
     if (balanced) return;
@@ -109,6 +122,34 @@ export function MyTeamView({ navigateTo, showToast }: any) {
           </div>
         ))}
       </div>
+
+      {coverageGaps.length > 0 && (
+        <div className="bg-destructive/5 border border-destructive/20 rounded-[32px] p-6 md:p-8">
+          <div className="flex items-center gap-2 mb-5">
+            <ShieldAlert className="w-5 h-5 text-destructive" />
+            <h3 className="text-lg font-bold text-foreground">Coverage Gap — {coverageGaps.length} Key Account{coverageGaps.length > 1 ? 's' : ''} Unowned</h3>
+          </div>
+          <p className="text-sm text-muted-foreground mb-6 max-w-2xl">These Patron-tier accounts are assigned to a manager who isn't on this team's active roster — their workload never shows up in the capacity math above.</p>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {coverageGaps.map(c => (
+              <div key={c.id} className="bg-card border border-border rounded-2xl p-5 flex items-center justify-between gap-4 shadow-sm">
+                <div className="min-w-0">
+                  <button onClick={() => navigateTo('heatmap', c.id)} className="font-bold text-foreground hover:text-primary transition-colors text-sm truncate block">{c.name}</button>
+                  <div className="text-xs text-muted-foreground truncate">Assigned to <span className="text-destructive font-medium">{c.manager}</span> — not on this team</div>
+                </div>
+                <select
+                  defaultValue=""
+                  onChange={(e) => { if (e.target.value) reassign(c.id, e.target.value); }}
+                  className="text-xs font-bold bg-muted border border-border rounded-full px-3 py-2 shrink-0 outline-none cursor-pointer"
+                >
+                  <option value="" disabled>Reassign to…</option>
+                  {team.map(m => <option key={m.id} value={m.name}>{m.name}</option>)}
+                </select>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
 
       <div className="bg-card border border-border rounded-[40px] overflow-hidden shadow-sm">
         <table className="w-full text-sm text-left">

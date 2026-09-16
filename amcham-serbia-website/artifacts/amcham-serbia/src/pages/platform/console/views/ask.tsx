@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useI18n } from '@/lib/i18n';
-import { platformData, Company } from '@/data/platform';
+import { platformData, Company, committeeRosters } from '@/data/platform';
 import { Search, Download, ShieldCheck, Clock, Check, X, ArrowRight, Activity, Calendar, Building, Eye } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useConsoleState } from '../console-state';
@@ -38,11 +38,23 @@ function runFixtureQuery(query: string, t: (path: string, fallback?: string) => 
     applied.push({ id: 'exporter-true', label: 'Exporters only', type: 'boolean' }); 
   }
   
-  if (/\blow engagement\b|\blow score\b/i.test(query)) { 
-    filtered = filtered.filter(c => c.score < 60); 
-    applied.push({ id: 'score-low', label: 'Score < 60', type: 'metric' }); 
+  if (/\blow engagement\b|\blow score\b/i.test(query)) {
+    filtered = filtered.filter(c => c.score < 60);
+    applied.push({ id: 'score-low', label: 'Score < 60', type: 'metric' });
   }
-  
+
+  if (/\bat.risk\b/i.test(query)) {
+    filtered = filtered.filter(c => c.lifecycle === 'at-risk');
+    applied.push({ id: 'lifecycle-at-risk', label: 'Lifecycle: at-risk', type: 'lifecycle' });
+  }
+
+  const matchedCommittee = committeeRosters.find(cm => hasWord(cm.name.toLowerCase()) || query.toLowerCase().includes(cm.name.toLowerCase()));
+  if (matchedCommittee) {
+    const rosterIds = new Set([matchedCommittee.chairCompanyId, ...matchedCommittee.memberCompanyIds]);
+    filtered = filtered.filter(c => rosterIds.has(c.id));
+    applied.push({ id: `committee-${matchedCommittee.id}`, label: `Committee: ${matchedCommittee.name}`, type: 'committee' });
+  }
+
   const renewalDays = /renewal[s]?\s+in\s+(\d+)\s+days/i.exec(query);
   if (renewalDays) {
     const horizon = new Date(); horizon.setDate(horizon.getDate() + parseInt(renewalDays[1], 10));
@@ -113,6 +125,11 @@ export function AskView({ showToast }: { showToast: (m:string) => void }) {
       newQuery = newQuery.replace(/low engagement|low score/ig, '').trim();
     } else if (filter.type === 'date') {
       newQuery = newQuery.replace(/renewals?\s+in\s+\d+\s+days|renewals?/ig, '').trim();
+    } else if (filter.type === 'lifecycle') {
+      newQuery = newQuery.replace(/at.risk/ig, '').trim();
+    } else if (filter.type === 'committee') {
+      const val = filter.label.split(': ')[1];
+      newQuery = newQuery.replace(new RegExp(val, 'ig'), '').trim();
     }
     setQuery(newQuery);
     handleSearch(null as any, newQuery);
@@ -143,7 +160,7 @@ export function AskView({ showToast }: { showToast: (m:string) => void }) {
 
       {!results && !loading && (
         <div className="flex gap-4 flex-wrap">
-          {["Manufacturing exporters in Kragujevac", "Patrons with renewal in 90 days", "IT companies with low engagement"].map(q => (
+          {["Manufacturing exporters in Kragujevac", "Patrons with renewal in 90 days", "IT companies with low engagement", "At-risk accounts", "Digital Economy committee members", "Legal sector companies in Belgrade"].map(q => (
             <button key={q} onClick={() => { setQuery(q); handleSearch(null as any, q); }} className="bg-background border border-border rounded-full px-5 py-3 text-sm font-bold text-foreground hover:border-primary hover:bg-primary/5 transition-colors shadow-sm flex items-center gap-2">
               <Search className="w-3 h-3 text-muted-foreground"/> {q}
             </button>

@@ -224,7 +224,13 @@ export const platformData = {
     approvals: [
       { id: "a1", type: "Matchmaking", desc: "Suggest intro: S-Leasing (Finance) to Nelt Co (Logistics)", staff: "Marko", context: "S-Leasing pulse survey indicated a need for logistics partners.", history: "Nelt previously accepted 2 intros from us.", diffs: [], requesterConsent: true, targetConsent: false, policyChecks: ["No direct competitors", "Tier alignment OK"] },
       { id: "a2", type: "Marketplace", desc: "Approve post: 'Office space available in NBG' from MSFT", staff: "Ana", context: "Premium real estate offer, aligns with marketplace guidelines.", history: "MSFT posts 1-2 times a year.", diffs: [{ field: "status", old: "draft", new: "published" }], requesterConsent: true, targetConsent: true, policyChecks: ["No offensive content", "Real estate allowed"] },
-      { id: "a3", type: "Dossier Update", desc: "Change primary contact for Adriatica Grupa to Marko Ilić", staff: "Stefan", context: "Automated web signal detected leadership change.", history: "Old contact retired.", diffs: [{ field: "primaryContact", old: "Jovan", new: "Marko Ilić" }], requesterConsent: false, targetConsent: true, policyChecks: ["Data verification required"] }
+      { id: "a3", type: "Dossier Update", desc: "Change primary contact for Adriatica Grupa to Marko Ilić", staff: "Stefan", context: "Automated web signal detected leadership change.", history: "Old contact retired.", diffs: [{ field: "primaryContact", old: "Jovan", new: "Marko Ilić" }], requesterConsent: false, targetConsent: true, policyChecks: ["Data verification required"] },
+      // Standing data-hygiene queue — surfaced by the same Approvals
+      // workflow instead of a separate tool, sourced from real per-company
+      // signals (contactFreshness, lastInteraction) rather than invented.
+      { id: "dh1", type: "Data Hygiene", desc: "Possible duplicate contact record for S-Leasing", staff: "System", context: "Two contact entries share the same email domain and phone area code; likely the same person entered twice during onboarding and a later update.", history: "No merge has been attempted for this record pair.", diffs: [], requesterConsent: true, targetConsent: true, policyChecks: ["Duplicate detection", "No data loss on merge"] },
+      { id: "dh2", type: "Data Hygiene", desc: "Stale primary contact for SBB — verify before next outreach", staff: "System", context: "Primary contact has not responded in 2 months and email bounces have been logged; contactFreshness is flagged stale.", history: "Last confirmed interaction: 2 months ago.", diffs: [{ field: "contactFreshness", old: "stale", new: "pending verification" }], requesterConsent: true, targetConsent: false, policyChecks: ["Stale-contact detection"] },
+      { id: "dh3", type: "Data Hygiene", desc: "Confirm the real decision-maker for STADA IT Solutions", staff: "System", context: "No contact activity has been logged in 3 months and contactFreshness is unknown; the account risks a renewal outreach going to the wrong person.", history: "Original contact freshness set at onboarding; never re-verified.", diffs: [], requesterConsent: true, targetConsent: false, policyChecks: ["Decision-maker verification"] }
     ],
     // Non-dues revenue pipeline — a new surface, not an extension of an
     // existing one. Stages: prospecting -> proposed -> confirmed, or declined.
@@ -964,6 +970,22 @@ export const platformData = {
     ]
   }
 };
+
+// Real committee rosters (not just names + icons) — who actually chairs and
+// sits on each committee, consistent with the "Committee Activity" signals
+// already authored per-company in scoreFactors above. Shared by the public
+// Advocacy page and the console's Committees view so both tell the same
+// story. Committee names/order match advocacy.tsx and mock.ts's policyWins.
+export const committeeRosters = [
+  { id: "digital-economy", name: "Digital Economy", nameSr: "Digitalna ekonomija", mandate: "Advocating for digital transformation, data protection, and AI regulation.", chairCompanyId: "msft", memberCompanyIds: ["ncr", "tln"], cadence: "Monthly", nextMeeting: "Nov 2, 2026" },
+  { id: "health-care", name: "Health Care", nameSr: "Zdravstvo", mandate: "Improving healthcare access and drug-pricing predictability.", chairCompanyId: "hmo", memberCompanyIds: [], cadence: "Quarterly", nextMeeting: "Nov 15, 2026" },
+  { id: "tax-finance", name: "Tax & Finance", nameSr: "Porezi i finansije", mandate: "Engaging on tax policy predictability and financial-sector regulation.", chairCompanyId: "mcb", memberCompanyIds: ["kpmg"], cadence: "Monthly", nextMeeting: "Oct 28, 2026" },
+  { id: "labor-hr", name: "Labor & HR", nameSr: "Rad i ljudski resursi", mandate: "Advocating for labor-market flexibility and workforce development.", chairCompanyId: "bky", memberCompanyIds: ["dlz"], cadence: "Bi-monthly", nextMeeting: "Nov 8, 2026" },
+  { id: "real-estate-construction", name: "Real Estate & Construction", nameSr: "Nekretnine i građevinarstvo", mandate: "Streamlining permitting and construction-sector regulation.", chairCompanyId: "dlz", memberCompanyIds: ["mtk"], cadence: "Quarterly", nextMeeting: "Dec 3, 2026" },
+  { id: "esg-environment", name: "ESG & Environment", nameSr: "ESG i životna sredina", mandate: "Advocating for sustainable energy policy, ESG compliance, and circular-economy integration.", chairCompanyId: "hmo", memberCompanyIds: ["nrb", "ccbc"], cadence: "Monthly", nextMeeting: "Oct 24, 2026" },
+  { id: "compliance-ethics", name: "Compliance & Ethics", nameSr: "Usklađenost i etika", mandate: "Promoting anti-corruption standards and regulatory compliance best practice.", chairCompanyId: "kar", memberCompanyIds: ["pwc"], cadence: "Quarterly", nextMeeting: "Nov 20, 2026" },
+  { id: "trade-customs", name: "Trade & Customs", nameSr: "Trgovina i carine", mandate: "Simplifying cross-border trade, customs procedures, and export facilitation.", chairCompanyId: "pmp", memberCompanyIds: ["ncr", "ccbc", "kar", "nkt"], cadence: "Monthly", nextMeeting: "Oct 30, 2026" }
+];
 
 // Resolves which company the member portal is currently being viewed as, and
 // that company's billing/home/glance data — the default company's own data
