@@ -163,7 +163,7 @@ export function HeatmapView({ navigateTo, roleParam }: any) {
 
                          <div className="mb-4">
                            <div className="flex justify-between items-center text-[10px] font-bold uppercase tracking-widest text-muted-foreground mb-1.5">
-                             <span>9-Month Trend</span>
+                             <span>{c.history.length}-Month Trend</span>
                              <span className="tabular-nums">{c.history[0].score} → {c.score}</span>
                            </div>
                            <Sparkline
