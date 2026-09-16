@@ -233,10 +233,10 @@ function PortalContent({ viewAs }: { viewAs: ReturnType<typeof resolveViewAsMemb
              <AnimatePresence mode="wait">
                <motion.div key={view} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }} transition={{ duration: 0.2 }}>
                  {view === 'home' && <HomeView t={t} navigateTo={navigateTo} roleConfig={roleConfig} showToast={showToast} valueReceipt={viewAs.valueReceipt} />}
-                 {view === 'score' && <ScoreView t={t} navigateTo={navigateTo} showToast={showToast} />}
+                 {view === 'score' && <ScoreView t={t} navigateTo={navigateTo} showToast={showToast} member={viewAs.member} valueReceipt={viewAs.valueReceipt} scoreNarrative={viewAs.scoreNarrative} peerBenchmark={viewAs.peerBenchmark} />}
                  {view === 'glance' && <GlanceView t={t} navigateTo={navigateTo} roleParam={roleParam} member={viewAs.member} billing={viewAs.billing} glanceData={viewAs.glance} />}
                  {view === 'directory' && <DirectoryView t={t} showToast={showToast} initialViewMode={tourStep === 2 ? 'pending' : undefined} />}
-                 {view === 'laptime' && <LapTimeView t={t} showToast={showToast} />}
+                 {view === 'laptime' && <LapTimeView t={t} showToast={showToast} member={viewAs.member} />}
                  {view === 'events' && <EventsView t={t} showToast={showToast} />}
                  {view === 'marketplace' && <MarketplaceView t={t} showToast={showToast} />}
                  {view === 'committee' && <CommitteeView t={t} showToast={showToast} />}

@@ -1,11 +1,16 @@
 import React, { useState } from 'react';
-import { Download, Activity, Target, Zap, Clock, ChevronDown, ChevronUp, CheckCircle2 } from 'lucide-react';
+import { Download, Activity, Target, Zap, Clock, ChevronDown, ChevronUp, CheckCircle2, Users } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { motion, AnimatePresence } from 'framer-motion';
+import { platformData } from '@/data/platform';
 
-export default function LapTimeView({ t, showToast }: any) {
+const REAL = (platformData.portal as any).lapTime;
+const SECTOR = (platformData.portal as any).laptimeSectorBreakdown;
+
+export default function LapTimeView({ t, showToast, member }: any) {
   const [tab, setTab] = useState<'overview'|'performance'|'priorities'>('overview');
   const [period, setPeriod] = useState<'2025' | '2024'>('2025');
+  const sectorRow = SECTOR?.[period]?.[member?.sector];
   const [briefingRequested, setBriefingRequested] = useState(false);
   const [downloading, setDownloading] = useState(false);
   const [downloaded, setDownloaded] = useState(false);
@@ -50,7 +55,7 @@ export default function LapTimeView({ t, showToast }: any) {
             Anonymized, aggregated market sentiment as of late Q3 {period}. This is not an evaluation of any individual member, but a pulse check on the Serbian business environment.
           </p>
           <div className="flex flex-wrap gap-3">
-            <span className="px-4 py-1.5 bg-background/10 border border-background/20 rounded-full text-xs font-bold text-[#40D9F1]">Sample: {period === '2025' ? '145' : '132'} Members</span>
+            <span className="px-4 py-1.5 bg-background/10 border border-background/20 rounded-full text-xs font-bold text-[#40D9F1]">Sample: {period === '2025' ? REAL?.methodology?.sampleMembers ?? 145 : '132'} Members</span>
             <span className="px-4 py-1.5 bg-background/10 border border-background/20 rounded-full text-xs font-bold text-[#40D9F1]">Partner: Ipsos</span>
           </div>
         </div>
@@ -80,8 +85,15 @@ export default function LapTimeView({ t, showToast }: any) {
                   <Activity className="w-5 h-5"/>
                   <h3 className="font-serif text-2xl font-medium">Business Climate Satisfaction</h3>
                 </div>
-                <div className="text-6xl md:text-7xl font-serif font-light text-foreground mb-4 tabular-nums">{period === '2025' ? '2.7' : '2.9'}<span className="text-2xl md:text-3xl text-muted-foreground">/5</span></div>
-                <p className="text-sm text-muted-foreground leading-relaxed">Average score. {period === '2025' ? '42%' : '35%'} of surveyed members are dissatisfied with the current climate, indicating a slight drop in confidence year-over-year.</p>
+                <div className="text-6xl md:text-7xl font-serif font-light text-foreground mb-4 tabular-nums">{period === '2025' ? REAL?.climate?.satisfaction ?? '2.6' : '2.9'}<span className="text-2xl md:text-3xl text-muted-foreground">/5</span></div>
+                <p className="text-sm text-muted-foreground leading-relaxed">Average score. {period === '2025' ? REAL?.climate?.dissatisfied ?? 36 : '35'}% of surveyed members are dissatisfied with the current climate, indicating a slight drop in confidence year-over-year.</p>
+                {sectorRow && (
+                  <div className="mt-4 pt-4 border-t border-border/50 flex items-center gap-2 text-xs font-bold">
+                    <Users className="w-3.5 h-3.5 text-muted-foreground" />
+                    <span className="text-muted-foreground">{member.sector} sector:</span>
+                    <span className={cn(sectorRow.climate >= (period === '2025' ? (REAL?.climate?.satisfaction ?? 2.6) : 2.9) ? "text-emerald-600" : "text-orange-500")}>{sectorRow.climate}/5</span>
+                  </div>
+                )}
               </div>
             </div>
             <div className="bg-card p-8 rounded-[32px] border border-border shadow-sm flex flex-col justify-between">
@@ -90,8 +102,15 @@ export default function LapTimeView({ t, showToast }: any) {
                   <Zap className="w-5 h-5"/>
                   <h3 className="font-serif text-2xl font-medium">Innovation Readiness</h3>
                 </div>
-                <div className="text-6xl md:text-7xl font-serif font-light text-foreground mb-4 tabular-nums">{period === '2025' ? '68' : '62'}<span className="text-3xl text-muted-foreground">%</span></div>
+                <div className="text-6xl md:text-7xl font-serif font-light text-foreground mb-4 tabular-nums">{period === '2025' ? REAL?.readiness?.innovation ?? 76 : '62'}<span className="text-3xl text-muted-foreground">%</span></div>
                 <p className="text-sm text-muted-foreground leading-relaxed">Members prepared for digital transformation and automation. This area shows steady improvement as structural investments mature.</p>
+                {sectorRow && (
+                  <div className="mt-4 pt-4 border-t border-border/50 flex items-center gap-2 text-xs font-bold">
+                    <Users className="w-3.5 h-3.5 text-muted-foreground" />
+                    <span className="text-muted-foreground">{member.sector} sector:</span>
+                    <span className={cn(sectorRow.innovation >= (period === '2025' ? (REAL?.readiness?.innovation ?? 76) : 62) ? "text-emerald-600" : "text-orange-500")}>{sectorRow.innovation}%</span>
+                  </div>
+                )}
               </div>
             </div>
           </div>
@@ -140,30 +159,37 @@ export default function LapTimeView({ t, showToast }: any) {
              <div>
                <div className="flex justify-between text-sm font-bold mb-3">
                  <span>Revenue Growth ({period})</span>
-                 <span className="text-primary">{period === '2025' ? '72%' : '85%'}</span>
+                 <span className="text-primary">{period === '2025' ? REAL?.performance?.revenueGrowth2025 ?? 51 : REAL?.performance?.revenueGrowth2024 ?? 71}%</span>
                </div>
                <div className="w-full bg-muted rounded-full h-3 overflow-hidden">
-                 <motion.div initial={{ width: 0 }} animate={{ width: period === '2025' ? '72%' : '85%' }} transition={{ duration: 1 }} className="bg-primary h-full"></motion.div>
+                 <motion.div initial={{ width: 0 }} animate={{ width: `${period === '2025' ? REAL?.performance?.revenueGrowth2025 ?? 51 : REAL?.performance?.revenueGrowth2024 ?? 71}%` }} transition={{ duration: 1 }} className="bg-primary h-full"></motion.div>
                </div>
                <div className="text-xs text-muted-foreground mt-3 font-medium">Percentage of members reporting year-over-year growth.</div>
+               {sectorRow && (
+                 <div className="mt-3 flex items-center gap-2 text-xs font-bold">
+                   <Users className="w-3.5 h-3.5 text-muted-foreground" />
+                   <span className="text-muted-foreground">{member.sector} sector:</span>
+                   <span className="text-foreground">{sectorRow.revenueGrowth}%</span>
+                 </div>
+               )}
              </div>
              <div>
                <div className="flex justify-between text-sm font-bold mb-3">
                  <span>Plan Additional Investment (Next Year)</span>
-                 <span className="text-foreground">{period === '2025' ? '55%' : '65%'}</span>
+                 <span className="text-foreground">{period === '2025' ? REAL?.performance?.expectInvestment2026 ?? 59 : '65'}%</span>
                </div>
                <div className="w-full bg-muted rounded-full h-3 overflow-hidden">
-                 <motion.div initial={{ width: 0 }} animate={{ width: period === '2025' ? '55%' : '65%' }} transition={{ duration: 1 }} className="bg-foreground h-full"></motion.div>
+                 <motion.div initial={{ width: 0 }} animate={{ width: `${period === '2025' ? REAL?.performance?.expectInvestment2026 ?? 59 : 65}%` }} transition={{ duration: 1 }} className="bg-foreground h-full"></motion.div>
                </div>
                <div className="text-xs text-muted-foreground mt-3 font-medium">Capex expansion plans remain cautious.</div>
              </div>
              <div>
                <div className="flex justify-between text-sm font-bold mb-3">
                  <span>Plan to Increase Headcount</span>
-                 <span className="text-green-600">{period === '2025' ? '48%' : '52%'}</span>
+                 <span className="text-green-600">{period === '2025' ? REAL?.performance?.expectEmployment2026 ?? 35 : '52'}%</span>
                </div>
                <div className="w-full bg-muted rounded-full h-3 overflow-hidden">
-                 <motion.div initial={{ width: 0 }} animate={{ width: period === '2025' ? '48%' : '52%' }} transition={{ duration: 1 }} className="bg-green-500 h-full"></motion.div>
+                 <motion.div initial={{ width: 0 }} animate={{ width: `${period === '2025' ? REAL?.performance?.expectEmployment2026 ?? 35 : 52}%` }} transition={{ duration: 1 }} className="bg-green-500 h-full"></motion.div>
                </div>
              </div>
            </div>
@@ -178,15 +204,14 @@ export default function LapTimeView({ t, showToast }: any) {
               <h3 className="font-serif text-3xl font-medium">Top Reform Areas</h3>
             </div>
             <ul className="space-y-6">
-              {[
-                "E-Government Expansion & Digitization",
-                "Judiciary Efficiency & Rule of Law",
-                "Labor Regulations & Flexibility",
-                "Predictability of Tax Policy"
-              ].map((item, i) => (
-                <li key={i} className="flex gap-4 items-center bg-background/50 p-4 rounded-2xl border border-primary/10 shadow-sm">
+              {[...(REAL?.priorities?.general || []), ...(REAL?.priorities?.labor || [])]
+                .sort((a: any, b: any) => b.value - a.value)
+                .slice(0, 4)
+                .map((item: any, i: number) => (
+                <li key={item.id} className="flex gap-4 items-center bg-background/50 p-4 rounded-2xl border border-primary/10 shadow-sm">
                   <span className="w-8 h-8 rounded-full bg-primary/20 text-primary font-bold flex items-center justify-center shrink-0">{i + 1}</span>
-                  <span className="text-foreground font-medium">{item}</span>
+                  <span className="text-foreground font-medium flex-1">{item.label}</span>
+                  <span className="text-primary font-bold text-sm tabular-nums">{item.value}%</span>
                 </li>
               ))}
             </ul>
