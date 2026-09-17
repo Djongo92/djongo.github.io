@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { Compass, X, Send, ArrowUpRight } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useI18n } from '@/lib/i18n';
@@ -48,6 +48,7 @@ export function CompassFab({ view, selectedCompanyId, roleParam, navigateTo, sho
   const [pinnedCompanyId, setPinnedCompanyId] = useState<string | null>(null);
 
   const nudge = useMemo(() => getProactiveNudge(), []);
+  const transcriptEndRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     if (open && messages.length === 0 && nudge) {
@@ -55,6 +56,10 @@ export function CompassFab({ view, selectedCompanyId, roleParam, navigateTo, sho
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [open]);
+
+  useEffect(() => {
+    transcriptEndRef.current?.scrollIntoView({ behavior: 'smooth', block: 'end' });
+  }, [messages]);
 
   const canShowDeepLinks = roleParam !== 'exec';
 
@@ -200,6 +205,7 @@ export function CompassFab({ view, selectedCompanyId, roleParam, navigateTo, sho
                   )}
                 </div>
               ))}
+              <div ref={transcriptEndRef} />
             </div>
             <div className="p-3 border-t border-border flex items-center gap-2 bg-card shrink-0">
               <input
