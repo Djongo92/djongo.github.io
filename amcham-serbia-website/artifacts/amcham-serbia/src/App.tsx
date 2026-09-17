@@ -1,5 +1,6 @@
 import { type ReactNode } from 'react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { ThemeProvider } from 'next-themes';
 import { ErrorBoundary } from '@/components/error-boundary';
 import { Toaster } from '@/components/ui/toaster';
 import { TooltipProvider } from '@/components/ui/tooltip';
@@ -86,20 +87,22 @@ function RoutedErrorBoundary({ children }: { children: ReactNode }) {
 
 function App() {
   return (
-    <QueryClientProvider client={queryClient}>
-      <TooltipProvider>
-        <I18nProvider>
-          <MotionConfig reducedMotion="user">
-            <WouterRouter base={import.meta.env.BASE_URL.replace(/\/$/, '')}>
-              <GuidedTourProvider>
-                <Router />
-              </GuidedTourProvider>
-            </WouterRouter>
-          </MotionConfig>
-          <Toaster />
-        </I18nProvider>
-      </TooltipProvider>
-    </QueryClientProvider>
+    <ThemeProvider attribute="class" defaultTheme="system" enableSystem disableTransitionOnChange>
+      <QueryClientProvider client={queryClient}>
+        <TooltipProvider>
+          <I18nProvider>
+            <MotionConfig reducedMotion="user">
+              <WouterRouter base={import.meta.env.BASE_URL.replace(/\/$/, '')}>
+                <GuidedTourProvider>
+                  <Router />
+                </GuidedTourProvider>
+              </WouterRouter>
+            </MotionConfig>
+            <Toaster />
+          </I18nProvider>
+        </TooltipProvider>
+      </QueryClientProvider>
+    </ThemeProvider>
   );
 }
 

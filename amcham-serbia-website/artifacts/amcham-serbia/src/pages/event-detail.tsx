@@ -30,7 +30,7 @@ export default function EventDetail() {
       <section className="bg-secondary text-secondary-foreground pt-12 pb-24 relative overflow-hidden">
         <div className="absolute inset-0 bg-network-pattern opacity-10 pointer-events-none"></div>
         <div className="container mx-auto px-4 md:px-8 relative z-10">
-          <Link href="/events" className="inline-flex items-center gap-2 text-sm font-semibold hover:text-white mb-12 text-muted-foreground transition-colors">
+          <Link href="/events" className="inline-flex items-center gap-2 text-sm font-semibold hover:text-secondary-foreground mb-12 text-muted-foreground transition-colors">
             <ArrowLeft className="w-4 h-4" /> {t('events.detail.back')}
           </Link>
           
@@ -61,7 +61,7 @@ export default function EventDetail() {
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
           
           {/* Main Content */}
-          <div className="lg:col-span-8 bg-white border border-border p-8 md:p-12 shadow-xl rounded-sm">
+          <div className="lg:col-span-8 bg-card border border-border p-8 md:p-12 shadow-xl rounded-sm">
             <h2 className="text-2xl font-serif font-bold mb-6 border-b border-border pb-4">{t('events.detail.agenda')}</h2>
             <div className="space-y-6 mb-12">
               {event.agenda.map((item, i) => (
@@ -78,7 +78,7 @@ export default function EventDetail() {
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   {event.speakers.map((speaker, i) => (
                     <div key={i} className="flex items-center gap-4 p-4 border border-border rounded-sm bg-background">
-                      <div className="w-12 h-12 bg-secondary rounded-full flex items-center justify-center text-white font-serif text-xl shrink-0">
+                      <div className="w-12 h-12 bg-secondary rounded-full flex items-center justify-center text-secondary-foreground font-serif text-xl shrink-0">
                         {speaker.name.charAt(0)}
                       </div>
                       <div>
@@ -94,7 +94,7 @@ export default function EventDetail() {
 
           {/* Sidebar CTA */}
           <div className="lg:col-span-4 space-y-6">
-            <div className="bg-white border border-border p-8 shadow-sm rounded-sm sticky top-24">
+            <div className="bg-card border border-border p-8 shadow-sm rounded-sm sticky top-24">
               <div className="mb-6 pb-6 border-b border-border space-y-4">
                 <div>
                   <span className="block text-xs font-bold text-muted-foreground uppercase tracking-wider mb-1">{t('events.detail.audience')}</span>

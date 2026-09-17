@@ -25,7 +25,7 @@ export default function BlueprintOverview() {
         {/* Diagnosis & Roadmap Preview Cards */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-20">
           
-          <div className="bg-white border border-border p-8 md:p-12 shadow-sm rounded-sm flex flex-col h-full group hover:border-primary/30 transition-colors">
+          <div className="bg-card border border-border p-8 md:p-12 shadow-sm rounded-sm flex flex-col h-full group hover:border-primary/30 transition-colors">
             <div className="mb-6 w-12 h-12 bg-primary/10 flex items-center justify-center rounded-full text-primary">
               <LayoutDashboard className="w-6 h-6" />
             </div>
@@ -40,7 +40,7 @@ export default function BlueprintOverview() {
             </div>
           </div>
 
-          <div className="bg-white border border-border p-8 md:p-12 shadow-sm rounded-sm flex flex-col h-full group hover:border-primary/30 transition-colors">
+          <div className="bg-card border border-border p-8 md:p-12 shadow-sm rounded-sm flex flex-col h-full group hover:border-primary/30 transition-colors">
             <div className="mb-6 w-12 h-12 bg-accent/10 flex items-center justify-center rounded-full text-accent">
               <Compass className="w-6 h-6" />
             </div>
@@ -61,14 +61,14 @@ export default function BlueprintOverview() {
         <div className="border-t border-border pt-16 mb-20">
           <h3 className="text-xl font-bold mb-8">Also in this blueprint:</h3>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-            <Link href="/blueprint/direction" className="bg-background border border-border p-6 rounded-sm hover:bg-white transition-colors group flex items-start gap-4">
+            <Link href="/blueprint/direction" className="bg-background border border-border p-6 rounded-sm hover:bg-muted transition-colors group flex items-start gap-4">
               <Layers className="w-6 h-6 text-primary shrink-0 mt-1" />
               <div>
                 <h4 className="font-bold mb-2 group-hover:text-primary transition-colors">Creative Direction</h4>
                 <p className="text-sm text-muted-foreground">The chosen visual blend, rationale, and living design tokens.</p>
               </div>
             </Link>
-            <Link href="/blueprint/pages" className="bg-background border border-border p-6 rounded-sm hover:bg-white transition-colors group flex items-start gap-4">
+            <Link href="/blueprint/pages" className="bg-background border border-border p-6 rounded-sm hover:bg-muted transition-colors group flex items-start gap-4">
               <CheckCircle2 className="w-6 h-6 text-primary shrink-0 mt-1" />
               <div>
                 <h4 className="font-bold mb-2 group-hover:text-primary transition-colors">Page Concepts</h4>

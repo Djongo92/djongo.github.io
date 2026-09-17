@@ -3,6 +3,7 @@ import { useI18n } from '@/lib/i18n';
 import { SEO } from '@/components/seo';
 import { Mail, Phone, MapPin, Building, Globe, Award, Users, ArrowRight, BarChart3, Newspaper } from 'lucide-react';
 import { Link } from 'wouter';
+import { ImageWithSkeleton } from '@/components/ui/image-with-skeleton';
 
 export default function About() {
   const { t } = useI18n();
@@ -40,7 +41,7 @@ export default function About() {
             <div className="lg:col-span-8 space-y-16">
               
               {/* Mission */}
-              <div className="bg-white border border-border p-8 md:p-12 shadow-xl rounded-sm">
+              <div className="bg-card border border-border p-8 md:p-12 shadow-xl rounded-sm">
                 <div className="flex items-center gap-4 mb-8 pb-4 border-b border-border">
                   <div className="w-12 h-12 bg-primary/10 rounded-full flex items-center justify-center">
                     <Globe className="w-6 h-6 text-primary" />
@@ -83,10 +84,10 @@ export default function About() {
                 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                   {team.map((member) => (
-                    <div key={member.id} className="bg-white border border-border p-6 rounded-sm flex gap-6 hover:shadow-md transition-shadow group">
-                      <div className="w-24 h-24 shrink-0 rounded-sm overflow-hidden bg-background">
-                        <img 
-                          src={`${import.meta.env.BASE_URL}images/team/${member.img}`} 
+                    <div key={member.id} className="bg-card border border-border p-6 rounded-sm flex gap-6 hover:shadow-md transition-shadow group">
+                      <div className="w-24 h-24 shrink-0 relative rounded-sm overflow-hidden bg-background">
+                        <ImageWithSkeleton
+                          src={`${import.meta.env.BASE_URL}images/team/${member.img}`}
                           alt={member.name}
                           className="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all duration-500"
                         />
@@ -113,22 +114,22 @@ export default function About() {
                 </div>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
                   {/* Board Members */}
-                  <div className="bg-white border border-border p-8 rounded-sm hover:shadow-md transition-shadow">
+                  <div className="bg-card border border-border p-8 rounded-sm hover:shadow-md transition-shadow">
                     <h3 className="font-bold text-xl mb-1">Stefan Lazarević</h3>
                     <p className="text-primary text-xs font-bold uppercase tracking-widest mb-4">President</p>
                     <p className="text-muted-foreground text-sm font-medium">Vice President, NCR Atleos</p>
                   </div>
-                  <div className="bg-white border border-border p-8 rounded-sm hover:shadow-md transition-shadow">
+                  <div className="bg-card border border-border p-8 rounded-sm hover:shadow-md transition-shadow">
                     <h3 className="font-bold text-xl mb-1">Ronald Seeliger</h3>
                     <p className="text-primary text-xs font-bold uppercase tracking-widest mb-4">First Vice President</p>
                     <p className="text-muted-foreground text-sm font-medium">CEO, Hemofarm</p>
                   </div>
-                  <div className="bg-white border border-border p-8 rounded-sm hover:shadow-md transition-shadow">
+                  <div className="bg-card border border-border p-8 rounded-sm hover:shadow-md transition-shadow">
                     <h3 className="font-bold text-xl mb-1">Ksenija Karić</h3>
                     <p className="text-primary text-xs font-bold uppercase tracking-widest mb-4">Second Vice President</p>
                     <p className="text-muted-foreground text-sm font-medium">Country General Manager, Schneider Electric</p>
                   </div>
-                  <div className="bg-white border border-border p-8 rounded-sm hover:shadow-md transition-shadow">
+                  <div className="bg-card border border-border p-8 rounded-sm hover:shadow-md transition-shadow">
                     <h3 className="font-bold text-xl mb-1">Bojan Vračević</h3>
                     <p className="text-primary text-xs font-bold uppercase tracking-widest mb-4">Secretary Treasurer</p>
                     <p className="text-muted-foreground text-sm font-medium">CEO, S-Leasing</p>
@@ -140,54 +141,54 @@ export default function About() {
             {/* Sidebar Contact */}
             <div className="lg:col-span-4">
               <div className="bg-secondary text-secondary-foreground p-8 md:p-10 rounded-sm sticky top-24 shadow-2xl">
-                <div className="flex items-center gap-3 mb-8 pb-4 border-b border-white/10">
-                  <Building className="w-6 h-6 text-white" />
-                  <h3 className="text-2xl font-serif font-bold text-white">{t('about.contact')}</h3>
+                <div className="flex items-center gap-3 mb-8 pb-4 border-b border-secondary-foreground/10">
+                  <Building className="w-6 h-6 text-secondary-foreground" />
+                  <h3 className="text-2xl font-serif font-bold text-secondary-foreground">{t('about.contact')}</h3>
                 </div>
-                
+
                 <div className="space-y-8">
                   <div className="flex items-start gap-4 group">
-                    <div className="w-10 h-10 bg-white/5 rounded-full flex items-center justify-center shrink-0 group-hover:bg-primary transition-colors text-white">
+                    <div className="w-10 h-10 bg-secondary-foreground/5 rounded-full flex items-center justify-center shrink-0 group-hover:bg-primary transition-colors text-secondary-foreground">
                       <MapPin className="w-5 h-5" />
                     </div>
                     <div>
-                      <h4 className="font-bold text-xs uppercase tracking-widest text-white/50 mb-2">Address</h4>
-                      <p className="text-white text-sm font-medium">{t('footer.address')}</p>
+                      <h4 className="font-bold text-xs uppercase tracking-widest text-secondary-foreground/50 mb-2">Address</h4>
+                      <p className="text-secondary-foreground text-sm font-medium">{t('footer.address')}</p>
                     </div>
                   </div>
-                  
+
                   <div className="flex items-start gap-4 group">
-                    <div className="w-10 h-10 bg-white/5 rounded-full flex items-center justify-center shrink-0 group-hover:bg-primary transition-colors text-white">
+                    <div className="w-10 h-10 bg-secondary-foreground/5 rounded-full flex items-center justify-center shrink-0 group-hover:bg-primary transition-colors text-secondary-foreground">
                       <Phone className="w-5 h-5" />
                     </div>
                     <div>
-                      <h4 className="font-bold text-xs uppercase tracking-widest text-white/50 mb-2">Phone</h4>
-                      <p className="text-white text-sm font-medium">{t('footer.phone')}</p>
+                      <h4 className="font-bold text-xs uppercase tracking-widest text-secondary-foreground/50 mb-2">Phone</h4>
+                      <p className="text-secondary-foreground text-sm font-medium">{t('footer.phone')}</p>
                     </div>
                   </div>
-                  
+
                   <div className="flex items-start gap-4 group">
-                    <div className="w-10 h-10 bg-white/5 rounded-full flex items-center justify-center shrink-0 group-hover:bg-primary transition-colors text-white">
+                    <div className="w-10 h-10 bg-secondary-foreground/5 rounded-full flex items-center justify-center shrink-0 group-hover:bg-primary transition-colors text-secondary-foreground">
                       <Mail className="w-5 h-5" />
                     </div>
                     <div>
-                      <h4 className="font-bold text-xs uppercase tracking-widest text-white/50 mb-2">Email</h4>
-                      <a href={`mailto:${t('footer.email')}`} className="text-white text-sm font-medium hover:text-primary transition-colors">{t('footer.email')}</a>
+                      <h4 className="font-bold text-xs uppercase tracking-widest text-secondary-foreground/50 mb-2">Email</h4>
+                      <a href={`mailto:${t('footer.email')}`} className="text-secondary-foreground text-sm font-medium hover:text-primary transition-colors">{t('footer.email')}</a>
                     </div>
                   </div>
                 </div>
               </div>
 
               {/* Press & Media */}
-              <div id="press" className="bg-white border border-border p-8 rounded-sm mt-8 shadow-md scroll-mt-24">
+              <div id="press" className="bg-card border border-border p-8 rounded-sm mt-8 shadow-md scroll-mt-24">
                 <div className="flex items-center gap-3 mb-6 pb-4 border-b border-border">
                   <Newspaper className="w-5 h-5 text-primary" />
                   <h3 className="text-xl font-serif font-bold">{t('about.press')}</h3>
                 </div>
                 <p className="text-sm text-muted-foreground leading-relaxed mb-6">{t('about.press_desc')}</p>
                 <div className="flex items-center gap-4 mb-6">
-                  <div className="w-12 h-12 shrink-0 rounded-full overflow-hidden bg-muted">
-                    <img src={`${import.meta.env.BASE_URL}images/team/ana.jpg`} alt={t('team.ana.name')} className="w-full h-full object-cover" />
+                  <div className="w-12 h-12 shrink-0 relative rounded-full overflow-hidden bg-muted">
+                    <ImageWithSkeleton src={`${import.meta.env.BASE_URL}images/team/ana.jpg`} alt={t('team.ana.name')} className="w-full h-full object-cover" />
                   </div>
                   <div>
                     <div className="font-bold text-sm text-foreground">{t('team.ana.name')}</div>

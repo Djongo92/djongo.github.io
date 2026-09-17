@@ -42,7 +42,7 @@ export function ChatBubble() {
                 <div className="font-bold text-sm">AmCham Serbia</div>
                 <div className="text-[10px] uppercase tracking-widest text-secondary-foreground/60 flex items-center gap-1.5"><span className="w-1.5 h-1.5 rounded-full bg-emerald-400" /> Typically replies in &lt;2h</div>
               </div>
-              <button onClick={() => setOpen(false)} className="w-8 h-8 rounded-full bg-white/10 flex items-center justify-center hover:bg-white/20 transition-colors"><X className="w-4 h-4" /></button>
+              <button onClick={() => setOpen(false)} className="w-8 h-8 rounded-full bg-secondary-foreground/10 flex items-center justify-center hover:bg-secondary-foreground/20 transition-colors"><X className="w-4 h-4" /></button>
             </div>
             <div className="flex-1 overflow-y-auto p-4 space-y-3 bg-muted/20">
               {messages.map((m, i) => (

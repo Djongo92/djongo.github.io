@@ -29,13 +29,13 @@ export default function MemberDetail() {
       
       <div className="container mx-auto px-4 md:px-8 relative -mt-24 md:-mt-32">
         
-        <Link href="/members" className="inline-flex items-center gap-2 text-sm font-semibold hover:text-white mb-6 text-white/80 transition-colors relative z-20">
+        <Link href="/members" className="inline-flex items-center gap-2 text-sm font-semibold hover:text-secondary-foreground mb-6 text-secondary-foreground/80 transition-colors relative z-20">
           <ArrowLeft className="w-4 h-4" /> {t('members.detail.back')}
         </Link>
         
-        <div className="bg-white border border-border rounded-sm shadow-xl p-8 md:p-12 mb-8 relative z-10 flex flex-col md:flex-row gap-8 items-start">
-          
-          <div className="w-32 h-32 md:w-48 md:h-48 bg-background border border-border shadow-sm flex items-center justify-center shrink-0 -mt-20 md:-mt-24 bg-white">
+        <div className="bg-card border border-border rounded-sm shadow-xl p-8 md:p-12 mb-8 relative z-10 flex flex-col md:flex-row gap-8 items-start">
+
+          <div className="w-32 h-32 md:w-48 md:h-48 bg-background border border-border shadow-sm flex items-center justify-center shrink-0 -mt-20 md:-mt-24">
             <span className="text-5xl md:text-7xl font-serif font-bold text-primary">{member.name.charAt(0)}</span>
           </div>
           
@@ -64,7 +64,7 @@ export default function MemberDetail() {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           
           <div className="lg:col-span-2 space-y-8">
-            <div className="bg-white border border-border p-8 rounded-sm shadow-sm">
+            <div className="bg-card border border-border p-8 rounded-sm shadow-sm">
               <h2 className="text-2xl font-serif font-bold mb-4 flex items-center gap-2">
                 <Info className="w-5 h-5 text-primary" /> {t('members.detail.about')}
               </h2>
@@ -75,7 +75,7 @@ export default function MemberDetail() {
           </div>
           
           <div className="lg:col-span-1 space-y-6">
-            <div className="bg-white border border-border p-6 rounded-sm shadow-sm sticky top-24">
+            <div className="bg-card border border-border p-6 rounded-sm shadow-sm sticky top-24">
               <h3 className="font-bold text-sm uppercase tracking-widest text-muted-foreground mb-4">{t('members.detail.details')}</h3>
               <div className="space-y-4 text-sm">
                 <div className="flex justify-between items-center py-2 border-b border-border/50">

@@ -51,7 +51,7 @@ export default function PlatformHub() {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-12">
             
             {/* Console */}
-            <Link href="/platform/console" className="bg-white border border-border rounded-3xl shadow-xl hover:shadow-2xl hover:border-primary/50 transition-all p-8 md:p-10 group flex flex-col items-start relative overflow-hidden">
+            <Link href="/platform/console" className="bg-card border border-border rounded-3xl shadow-xl hover:shadow-2xl hover:border-primary/50 transition-all p-8 md:p-10 group flex flex-col items-start relative overflow-hidden">
               <div className="w-16 h-16 bg-background border border-border rounded-2xl flex items-center justify-center text-foreground mb-8 group-hover:bg-primary group-hover:text-primary-foreground group-hover:border-primary transition-colors">
                 <LayoutDashboard className="w-8 h-8" />
               </div>
@@ -65,7 +65,7 @@ export default function PlatformHub() {
             </Link>
 
             {/* Portal */}
-            <Link href="/platform/portal" className="bg-white border border-border rounded-3xl shadow-xl hover:shadow-2xl hover:border-primary/50 transition-all p-8 md:p-10 group flex flex-col items-start relative overflow-hidden">
+            <Link href="/platform/portal" className="bg-card border border-border rounded-3xl shadow-xl hover:shadow-2xl hover:border-primary/50 transition-all p-8 md:p-10 group flex flex-col items-start relative overflow-hidden">
               <div className="absolute top-0 right-0 w-32 h-32 bg-primary/5 rounded-bl-full pointer-events-none transition-transform group-hover:scale-110 group-hover:bg-primary/10"></div>
               <div className="w-16 h-16 bg-background border border-border rounded-2xl flex items-center justify-center text-foreground mb-8 group-hover:bg-primary group-hover:text-primary-foreground group-hover:border-primary transition-colors relative z-10">
                 <Smartphone className="w-8 h-8" />
@@ -85,14 +85,14 @@ export default function PlatformHub() {
           <Link href="/platform/seam" className="block bg-secondary text-secondary-foreground rounded-3xl p-8 group hover:bg-secondary/90 transition-colors relative overflow-hidden shadow-xl">
             <div className="absolute inset-0 bg-network-pattern opacity-10 pointer-events-none"></div>
             <div className="flex flex-col md:flex-row gap-6 items-start md:items-center relative z-10">
-              <div className="w-12 h-12 bg-white/10 rounded-2xl flex items-center justify-center text-white shrink-0">
+              <div className="w-12 h-12 bg-secondary-foreground/10 rounded-2xl flex items-center justify-center text-secondary-foreground shrink-0">
                 <Layers className="w-6 h-6" />
               </div>
               <div className="flex-1">
                 <h3 className="text-xl font-bold mb-2">{t('platform.hub.seam')}</h3>
-                <p className="text-white/70">{t('platform.hub.seam_desc')}</p>
+                <p className="text-secondary-foreground/70">{t('platform.hub.seam_desc')}</p>
               </div>
-              <div className="shrink-0 flex items-center justify-center w-10 h-10 rounded-full border border-white/20 group-hover:border-white group-hover:bg-white text-white group-hover:text-secondary transition-all">
+              <div className="shrink-0 flex items-center justify-center w-10 h-10 rounded-full border border-secondary-foreground/20 group-hover:border-secondary-foreground group-hover:bg-secondary-foreground text-secondary-foreground group-hover:text-secondary transition-all">
                 <ArrowRight className="w-5 h-5" />
               </div>
             </div>

@@ -34,7 +34,7 @@ export default function PlatformSeam() {
             <h1 className="text-3xl md:text-5xl font-serif font-bold mb-2">{t('platform.seam.title')}</h1>
             <p className="text-lg text-muted-foreground">{t('platform.seam.subtitle')}</p>
           </div>
-          <div className="w-16 h-16 bg-white/10 rounded-sm flex items-center justify-center text-white shrink-0">
+          <div className="w-16 h-16 bg-secondary-foreground/10 rounded-sm flex items-center justify-center text-secondary-foreground shrink-0">
             <Layers className="w-8 h-8" />
           </div>
         </div>
@@ -48,7 +48,7 @@ export default function PlatformSeam() {
             {t('platform.seam.desc')}
           </p>
 
-          <div className="bg-white border border-border rounded-sm shadow-sm overflow-hidden mb-12">
+          <div className="bg-card border border-border rounded-sm shadow-sm overflow-hidden mb-12">
             <div className="overflow-x-auto">
               <table className="w-full text-left border-collapse">
                 <thead>
@@ -107,7 +107,7 @@ export default function PlatformSeam() {
                   { id: 'needs', label: "Use our data to infer matchmaking needs" },
                   { id: 'activity', label: "Show our event attendance history to other members" }
                 ].map((toggle) => (
-                  <div key={toggle.id} className="flex items-center justify-between p-4 bg-white border border-border rounded-sm shadow-sm">
+                  <div key={toggle.id} className="flex items-center justify-between p-4 bg-card border border-border rounded-sm shadow-sm">
                     <span className="text-sm font-bold text-foreground">{toggle.label}</span>
                     <button 
                       onClick={() => setToggles(prev => ({ ...prev, [toggle.id]: !prev[toggle.id as keyof typeof prev] }))}

@@ -65,7 +65,7 @@ export default function Members() {
       </section>
 
       {/* Search & Filters */}
-      <section className="bg-white border-b border-border sticky top-20 z-40 shadow-sm">
+      <section className="bg-background border-b border-border sticky top-20 z-40 shadow-sm">
         <div className="container mx-auto px-4 md:px-8 py-4 flex flex-col md:flex-row gap-4 items-center">
           
           <div className="relative flex-1 w-full">
@@ -118,7 +118,7 @@ export default function Members() {
           </div>
 
           {filteredMembers.length === 0 ? (
-            <div className="text-center py-24 bg-white border border-dashed border-border rounded-sm">
+            <div className="text-center py-24 bg-card border border-dashed border-border rounded-sm">
               <Building2 className="w-12 h-12 text-muted-foreground mx-auto mb-4 opacity-50" />
               <h3 className="text-xl font-bold font-serif mb-2">{t('members.no_results')}</h3>
               <p className="text-muted-foreground">{t('members.no_results_desc')}</p>
@@ -129,7 +129,7 @@ export default function Members() {
                 const summary = lang === 'sr' ? member.summarySr : member.summary;
                 const sector = lang === 'sr' ? member.sectorSr : member.sector;
                 return (
-                  <div key={member.id} className="bg-white border border-border rounded-sm p-6 hover:shadow-lg hover:border-primary/50 transition-all group flex flex-col relative">
+                  <div key={member.id} className="bg-card border border-border rounded-sm p-6 hover:shadow-lg hover:border-primary/50 transition-all group flex flex-col relative">
                     
                     <div className="flex justify-between items-start mb-4">
                       <div className="w-16 h-16 bg-background border border-border rounded-sm flex items-center justify-center text-primary font-serif font-bold text-2xl group-hover:bg-primary/5 transition-colors">

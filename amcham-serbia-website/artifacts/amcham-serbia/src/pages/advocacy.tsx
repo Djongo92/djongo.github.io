@@ -45,7 +45,7 @@ export default function Advocacy() {
       <section className="py-16 -mt-16 relative z-20">
         <div className="container mx-auto px-4 md:px-8">
           
-          <div className="bg-white border border-border p-8 md:p-12 shadow-xl rounded-sm mb-16">
+          <div className="bg-card border border-border p-8 md:p-12 shadow-xl rounded-sm mb-16">
             <h2 className="text-3xl font-serif font-bold mb-8">{t('advocacy.approach')}</h2>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
               <div className="flex flex-col border-l-2 border-primary/20 pl-6 hover:border-primary transition-colors duration-300">
@@ -88,7 +88,7 @@ export default function Advocacy() {
               {policyWins.map((win) => (
                 <div key={win.id} className="relative pl-10">
                   <div className="absolute -left-[9px] top-1 w-4 h-4 rounded-full bg-primary border-4 border-background shadow"></div>
-                  <div className="bg-white border border-border p-6 rounded-sm shadow-sm hover:shadow-md hover:border-primary/30 transition-all">
+                  <div className="bg-card border border-border p-6 rounded-sm shadow-sm hover:shadow-md hover:border-primary/30 transition-all">
                     <div className="flex flex-wrap items-center gap-3 mb-3 text-xs font-bold uppercase tracking-widest">
                       <span className="text-muted-foreground">
                         {new Date(win.date).toLocaleDateString(lang === 'sr' ? 'sr-RS' : 'en-US', { month: 'short', year: 'numeric' })}
@@ -119,7 +119,7 @@ export default function Advocacy() {
               {committees.map((committee, i) => {
                 const Icon = committee.icon;
                 return (
-                  <div key={i} className="bg-white border border-border p-6 rounded-sm hover:border-primary/50 hover:shadow-md transition-all group flex flex-col items-start h-full">
+                  <div key={i} className="bg-card border border-border p-6 rounded-sm hover:border-primary/50 hover:shadow-md transition-all group flex flex-col items-start h-full">
                     <div className="w-12 h-12 bg-primary/5 rounded-sm flex items-center justify-center mb-6 group-hover:bg-primary transition-colors text-primary group-hover:text-primary-foreground">
                       <Icon className="w-6 h-6" />
                     </div>

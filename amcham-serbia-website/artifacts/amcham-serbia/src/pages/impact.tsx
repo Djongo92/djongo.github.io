@@ -63,7 +63,7 @@ export default function Impact() {
           {/* Stat tiles */}
           <div className="grid grid-cols-2 md:grid-cols-4 gap-6 mb-16">
             {stats.map((stat, i) => (
-              <div key={i} className="bg-white border border-border p-6 md:p-8 rounded-sm shadow-xl">
+              <div key={i} className="bg-card border border-border p-6 md:p-8 rounded-sm shadow-xl">
                 <stat.icon className="w-6 h-6 text-primary mb-4" />
                 <div className="text-3xl md:text-4xl font-serif font-bold text-secondary mb-2">{stat.val}</div>
                 <div className="text-xs font-bold uppercase tracking-widest text-muted-foreground">{stat.label}</div>
@@ -74,7 +74,7 @@ export default function Impact() {
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
 
             {/* Membership growth */}
-            <div className="bg-white border border-border p-8 rounded-sm shadow-sm">
+            <div className="bg-card border border-border p-8 rounded-sm shadow-sm">
               <h2 className="text-2xl font-serif font-bold mb-2">{t('impact.growth_title')}</h2>
               <p className="text-muted-foreground text-sm mb-8 leading-relaxed">{t('impact.growth_desc')}</p>
               <ChartContainer config={growthConfig} className="aspect-auto h-[280px] w-full">
@@ -107,7 +107,7 @@ export default function Impact() {
             </div>
 
             {/* Sector breakdown */}
-            <div className="bg-white border border-border p-8 rounded-sm shadow-sm">
+            <div className="bg-card border border-border p-8 rounded-sm shadow-sm">
               <h2 className="text-2xl font-serif font-bold mb-2">{t('impact.sector_title')}</h2>
               <p className="text-muted-foreground text-sm mb-8 leading-relaxed">{t('impact.sector_desc')}</p>
               <ChartContainer config={sectorConfig} className="aspect-auto h-[280px] w-full">

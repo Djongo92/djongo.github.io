@@ -78,7 +78,7 @@ export default function BlueprintRoadmap() {
                 </div>
                 
                 {/* Content Card */}
-                <div className="w-[calc(100%-4rem)] md:w-[calc(50%-3rem)] ml-auto md:ml-0 bg-white border border-border p-6 md:p-8 rounded-sm shadow-sm group-hover:border-primary/40 group-hover:shadow-md transition-all">
+                <div className="w-[calc(100%-4rem)] md:w-[calc(50%-3rem)] ml-auto md:ml-0 bg-card border border-border p-6 md:p-8 rounded-sm shadow-sm group-hover:border-primary/40 group-hover:shadow-md transition-all">
                   
                   <div className="flex items-center gap-3 mb-2">
                     <Icon className="w-5 h-5 text-primary" />
