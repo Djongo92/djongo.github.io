@@ -11,6 +11,7 @@ import {
 import { PortalStateProvider, usePortalState } from './portal-state';
 import { ThemeToggle } from '@/components/ui/theme-toggle';
 import { TourOverlay } from './console/components/Overlays';
+import { PortalCompassFab } from './components/portal-compass-fab';
 import { platformData, resolveViewAsMember, VIEW_AS_OPTIONS } from '@/data/platform';
 
 // Import Views
@@ -40,6 +41,7 @@ function PortalContent({ viewAs }: { viewAs: ReturnType<typeof resolveViewAsMemb
   const { notifications, setNotifications } = usePortalState();
   const [toast, setToast] = useState<string | null>(null);
   const [notificationsOpen, setNotificationsOpen] = useState(false);
+  const [compassOpen, setCompassOpen] = useState(false);
   const [roleMenuOpen, setRoleMenuOpen] = useState(false);
   const roleMenuTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const tourDisabled = searchParams.get('tour') === 'off';
@@ -84,7 +86,7 @@ function PortalContent({ viewAs }: { viewAs: ReturnType<typeof resolveViewAsMemb
   const navItems = navGroups.flatMap(g => g.items);
 
   const navigateTo = (newView: string) => {
-    setLocation(`/platform/portal?view=${newView}&role=${roleParam}${viewAsId !== platformData.member.id ? `&member=${viewAsId}` : ''}`);
+    setLocation(`/platform/portal?view=${newView}&role=${roleParam}${viewAsId !== platformData.member.id ? `&member=${viewAsId}` : ''}${tourDisabled ? '&tour=off' : ''}`);
   };
 
   useEffect(() => {
@@ -276,6 +278,16 @@ function PortalContent({ viewAs }: { viewAs: ReturnType<typeof resolveViewAsMemb
           </motion.div>
         )}
       </AnimatePresence>
+
+      <PortalCompassFab
+        member={viewAs.member}
+        billing={viewAs.billing}
+        scoreNarrative={viewAs.scoreNarrative}
+        roleParam={roleParam}
+        navigateTo={navigateTo}
+        open={compassOpen}
+        setOpen={setCompassOpen}
+      />
 
       <AnimatePresence>
         {tourStep > -1 && (

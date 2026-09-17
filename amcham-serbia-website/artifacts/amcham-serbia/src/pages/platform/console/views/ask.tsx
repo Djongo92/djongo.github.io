@@ -93,7 +93,7 @@ export function runFixtureQuery(query: string, t: (path: string, fallback?: stri
     applied.push({ id: 'exporter-true', label: 'Exporters only', type: 'boolean' }); 
   }
   
-  if (/\blow engagement\b|\blow score\b/i.test(query)) {
+  if (/\blow engagement\b|\blow score\b|\bstruggling\b|\bunderperforming\b/i.test(query)) {
     filtered = filtered.filter(c => c.score < 60);
     applied.push({ id: 'score-low', label: 'Score < 60', type: 'metric' });
   }
@@ -102,13 +102,13 @@ export function runFixtureQuery(query: string, t: (path: string, fallback?: stri
     const bookAverage = Math.round(platformData.allMembers.reduce((sum, c) => sum + c.score, 0) / platformData.allMembers.length);
     filtered = filtered.filter(c => c.score < bookAverage);
     applied.push({ id: 'score-below-avg', label: `Score < book avg (${bookAverage})`, type: 'metric' });
-  } else if (/\babove (the )?(book )?average\b/i.test(query)) {
+  } else if (/\babove (the )?(book )?average\b|\btop performers?\b|\bbest members?\b|\bhighest scoring\b|\bstrongest accounts?\b/i.test(query)) {
     const bookAverage = Math.round(platformData.allMembers.reduce((sum, c) => sum + c.score, 0) / platformData.allMembers.length);
     filtered = filtered.filter(c => c.score >= bookAverage);
     applied.push({ id: 'score-above-avg', label: `Score ≥ book avg (${bookAverage})`, type: 'metric' });
   }
 
-  if (/\bat.risk\b/i.test(query)) {
+  if (/\bat.risk\b|\bflight risk\b|\bin trouble\b/i.test(query)) {
     filtered = filtered.filter(c => c.lifecycle === 'at-risk');
     applied.push({ id: 'lifecycle-at-risk', label: 'Lifecycle: at-risk', type: 'lifecycle' });
   }
@@ -121,9 +121,15 @@ export function runFixtureQuery(query: string, t: (path: string, fallback?: stri
       return days !== null && days >= threshold;
     });
     applied.push({ id: `contact-days-${threshold}`, label: `No contact ≥ ${threshold}d`, type: 'contact' });
-  } else if (/\bstale contacts?\b|\bhaven'?t (?:talked|spoken|been in touch)\b|\bwho haven'?t i (?:talked|spoken)\b|\bno recent contact\b/i.test(query)) {
+  } else if (/\bstale contacts?\b|\bhaven'?t (?:talked|spoken|been in touch)\b|\bwho haven'?t i (?:talked|spoken)\b|\bno recent contact\b|\bgone quiet\b|\bquiet accounts?\b|\bghosted (?:us|me)\b/i.test(query)) {
     filtered = filtered.filter(c => c.contactFreshness === 'stale');
     applied.push({ id: 'contact-stale', label: 'Contact: stale', type: 'contact' });
+  }
+
+  if (/\bneeds? (?:a )?(?:call|outreach|follow.?up)\b|\b(?:who|anyone)\b.*?\bshould\b.*?\b(?:call|contact|reach out)\b|\boverdue (?:for )?outreach\b/i.test(query)) {
+    const dueIds = new Set((platformData.console.outreach.items as any[]).filter(o => o.status === 'overdue' || o.status === 'due').map(o => o.companyId));
+    filtered = filtered.filter(c => dueIds.has(c.id));
+    applied.push({ id: 'outreach-due', label: 'Outreach due/overdue', type: 'outreach' });
   }
 
   const joinedDaysMatch = /\bjoined\b.*?\b(?:in the |over the )?(?:past|last)\s+(\d+)\s*days?\b/i.exec(query);
@@ -167,7 +173,7 @@ export function runFixtureQuery(query: string, t: (path: string, fallback?: stri
   }
 
   if (applied.length === 0) {
-    return { results: [], departed: null, explanation: t('console_v2.ask_no_filter', 'No recognizable filter in this query. Try naming a sector, tier, location, "exporters", "low engagement", "below average", "haven\'t talked to in 30 days", "joined in the past 90 days", or "who left in the past 90 days".'), applied: [] };
+    return { results: [], departed: null, explanation: t('console_v2.ask_no_filter', 'No recognizable filter in this query. Try naming a sector, tier, location, "exporters", "struggling", "top performers", "at risk", "gone quiet", "who needs a call", "joined in the past 90 days", or "who left in the past 90 days".'), applied: [] };
   }
   return { results: filtered, departed: null, explanation: `${t('console_v2.ask_applied', 'Applied')} ${applied.length} filters — returning ${filtered.length} records.`, applied };
 }
