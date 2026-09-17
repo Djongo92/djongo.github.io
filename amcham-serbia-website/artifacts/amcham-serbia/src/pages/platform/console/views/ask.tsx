@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
+import { useSearch } from 'wouter';
 import { useI18n } from '@/lib/i18n';
 import { platformData, Company, committeeRosters } from '@/data/platform';
 import { Search, Download, ShieldCheck, Clock, Check, X, ArrowRight, Activity, Calendar, Building, Eye, UserMinus, Users } from 'lucide-react';
@@ -207,6 +208,17 @@ export function AskView({ showToast }: { showToast: (m:string) => void }) {
       setAppliedFilters(applied);
     }, 800);
   };
+
+  // Lands populated when handed off from Cmd+K/Compass's "see full results"
+  // rather than dropping the query on a blank search box.
+  const prefillQuery = new URLSearchParams(useSearch()).get('q');
+  useEffect(() => {
+    if (prefillQuery) {
+      setQuery(prefillQuery);
+      handleSearch(null, prefillQuery);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const removeFilter = (filter: AppliedFilter) => {
     let newQuery = query;
