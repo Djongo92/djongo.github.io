@@ -22,6 +22,7 @@ import {
   NetworkView, IntegrationsView
 } from './console/views';
 import { CommandPalette, GlossaryDrawer, TourOverlay, ShortcutsOverlay } from './console/components/Overlays';
+import { CompassFab } from './console/components/compass-fab';
 import { ConsoleStateProvider } from './console/console-state';
 import { ThemeToggle } from '@/components/ui/theme-toggle';
 
@@ -45,6 +46,7 @@ export default function Console() {
   const [tourStep, setTourStep] = useState(-1);
   const [notifOpen, setNotifOpen] = useState(false);
   const [shortcutsOpen, setShortcutsOpen] = useState(false);
+  const [compassOpen, setCompassOpen] = useState(false);
   const [notifications, setNotifications] = useState([
     { id: 'n1', text: 'Your Q3 Board Summary is ready to review', read: false, time: '2h ago' },
     { id: 'n2', text: '3 renewals move into the 90-day window this week', read: false, time: '5h ago' },
@@ -78,6 +80,7 @@ export default function Console() {
         setShortcutsOpen(false);
         setNotifOpen(false);
         setCmdOpen(false);
+        setCompassOpen(false);
       }
     };
     document.addEventListener('keydown', down);
@@ -185,9 +188,12 @@ export default function Console() {
     ] });
   }
 
-  const navigateTo = (newView: string, companyId?: string) => {
+  const navigateTo = (newView: string, companyId?: string, extraParams?: Record<string, string>) => {
     let url = `/platform/console?view=${newView}&role=${roleParam}`;
     if (companyId) url += `&company=${companyId}`;
+    if (extraParams) {
+      for (const [key, value] of Object.entries(extraParams)) url += `&${key}=${encodeURIComponent(value)}`;
+    }
     if (tourDisabled) url += `&tour=off`;
     setLocation(url);
     setMobileMenuOpen(false);
@@ -419,6 +425,15 @@ export default function Console() {
                 </>}
               </motion.div>
             </AnimatePresence>
+            <CompassFab
+              view={view}
+              selectedCompanyId={selectedCompanyId}
+              roleParam={roleParam}
+              navigateTo={navigateTo}
+              showToast={showToast}
+              open={compassOpen}
+              setOpen={setCompassOpen}
+            />
             </ConsoleStateProvider>
           </div>
         </div>
