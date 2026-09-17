@@ -88,7 +88,7 @@ export default function Membership() {
                   <h2 className="text-2xl font-serif font-bold mb-6">{t('membership.testimonials_title')}</h2>
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                     {testimonials.map((item, i) => (
-                      <div key={i} className="border border-border bg-white p-5 rounded-sm flex flex-col gap-3">
+                      <div key={i} className="border border-border bg-card p-5 rounded-sm flex flex-col gap-3">
                         <Quote className="w-5 h-5 text-primary/40 shrink-0" />
                         <p className="text-sm text-foreground leading-relaxed italic flex-1">"{item.quote}"</p>
                         <div className="pt-3 border-t border-border/60">
@@ -109,7 +109,7 @@ export default function Membership() {
                   { id: 'business', name: t('membership.categories.business.name'), desc: t('membership.categories.business.desc'), feeFrom: t('membership.categories.business.fee_from') },
                   { id: 'nonprofit', name: t('membership.categories.nonprofit.name'), desc: t('membership.categories.nonprofit.desc'), feeFrom: t('membership.categories.nonprofit.fee_from') }
                 ].map((cat, i) => (
-                  <div key={i} className="border border-border p-6 rounded-sm hover:border-primary/30 transition-colors bg-white">
+                  <div key={i} className="border border-border p-6 rounded-sm hover:border-primary/30 transition-colors bg-card">
                     <div className="flex items-start justify-between gap-4 mb-2">
                       <h3 className="font-bold text-lg text-primary">{cat.name}</h3>
                       <span className="text-sm font-bold text-foreground whitespace-nowrap shrink-0">{cat.feeFrom}</span>
@@ -123,7 +123,7 @@ export default function Membership() {
 
             {/* Right Col: Form */}
             <div className="lg:col-span-5 relative z-20">
-              <div className="bg-white border-2 border-border p-8 sticky top-24 rounded-sm shadow-xl">
+              <div className="bg-card border-2 border-border p-8 sticky top-24 rounded-sm shadow-xl">
                 <h3 className="text-2xl font-serif font-bold mb-2">{t('membership.form.title')}</h3>
                 <p className="text-sm text-muted-foreground mb-8">{t('membership.form.subtitle')}</p>
                 
@@ -132,7 +132,7 @@ export default function Membership() {
                     <CheckCircle2 className="w-12 h-12 text-primary mx-auto mb-4" />
                     <h4 className="font-bold text-lg mb-2">{t('membership.form.success_title')}</h4>
                     <p className="text-sm text-muted-foreground mb-4">{t('membership.form.success_desc')}</p>
-                    <div className="bg-white py-2 px-4 rounded-sm border border-border inline-block text-sm font-mono font-bold text-foreground">
+                    <div className="bg-card py-2 px-4 rounded-sm border border-border inline-block text-sm font-mono font-bold text-foreground">
                       {t('membership.form.reference')}: #{referenceId}
                     </div>
                   </div>

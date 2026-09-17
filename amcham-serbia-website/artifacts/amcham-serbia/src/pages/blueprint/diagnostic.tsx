@@ -32,7 +32,7 @@ export default function BlueprintDiagnostic() {
                 "An A–Z member directory with individual company profiles exists.",
                 "Research is genuinely published — the Lap Time survey series as readable articles plus downloads."
               ].map((item, i) => (
-                <li key={i} className="flex gap-4 items-start bg-white border border-border p-4 rounded-sm shadow-sm">
+                <li key={i} className="flex gap-4 items-start bg-card border border-border p-4 rounded-sm shadow-sm">
                   <div className="w-2 h-2 rounded-full bg-emerald-600 mt-2 shrink-0"></div>
                   <span className="text-foreground leading-relaxed">{item}</span>
                 </li>
@@ -52,7 +52,7 @@ export default function BlueprintDiagnostic() {
                 "Finding an event, a company, a committee, or a research answer takes more effort than it should — the routes exist, the signposting doesn't.",
                 "Key facts hide behind decoration: headline statistics only appear after scroll animations; some links point to the wrong destination; some content is duplicated or out of date."
               ].map((item, i) => (
-                <li key={i} className="flex gap-4 items-start bg-white border border-border p-4 rounded-sm shadow-sm">
+                <li key={i} className="flex gap-4 items-start bg-card border border-border p-4 rounded-sm shadow-sm">
                   <div className="w-2 h-2 rounded-full bg-destructive mt-2 shrink-0"></div>
                   <span className="text-foreground leading-relaxed">{item}</span>
                 </li>
@@ -67,23 +67,23 @@ export default function BlueprintDiagnostic() {
           
           <div className="flex items-center gap-3 mb-8 relative z-10">
             <BarChart3 className="w-6 h-6 text-primary" />
-            <h3 className="text-2xl font-serif font-bold text-white">The Evidence</h3>
+            <h3 className="text-2xl font-serif font-bold text-secondary-foreground">The Evidence</h3>
           </div>
-          
+
           <div className="grid grid-cols-1 md:grid-cols-2 gap-12 relative z-10">
             <div className="space-y-6">
-              <p className="text-lg text-white/90 leading-relaxed">
-                Compared with 47 other AmCham websites across Europe, Serbia scores <strong className="text-white font-bold">8/12</strong> on how easy public information is to find — joining and events are the weak spots (research is already best-in-class at 3/3).
+              <p className="text-lg text-secondary-foreground/90 leading-relaxed">
+                Compared with 47 other AmCham websites across Europe, Serbia scores <strong className="text-secondary-foreground font-bold">8/12</strong> on how easy public information is to find — joining and events are the weak spots (research is already best-in-class at 3/3).
               </p>
-              <p className="text-lg text-white/90 leading-relaxed">
-                Visual first impression scores <strong className="text-white font-bold">4/6</strong> — the median. Not broken, not distinctive.
+              <p className="text-lg text-secondary-foreground/90 leading-relaxed">
+                Visual first impression scores <strong className="text-secondary-foreground font-bold">4/6</strong> — the median. Not broken, not distinctive.
               </p>
             </div>
-            
-            <div className="bg-white/10 border border-white/20 p-6 rounded-sm">
+
+            <div className="bg-secondary-foreground/10 border border-secondary-foreground/20 p-6 rounded-sm">
               <h4 className="font-bold text-accent mb-4 uppercase tracking-widest text-sm">Five Test Journeys</h4>
-              <p className="text-white/80 mb-4 text-sm">Everything in the redesign is judged against these five:</p>
-              <ol className="space-y-2 list-decimal list-inside text-white/90 font-medium">
+              <p className="text-secondary-foreground/80 mb-4 text-sm">Everything in the redesign is judged against these five:</p>
+              <ol className="space-y-2 list-decimal list-inside text-secondary-foreground/90 font-medium">
                 <li>Join AmCham</li>
                 <li>Attend an event</li>
                 <li>Find a member</li>

@@ -86,12 +86,12 @@ export default function BlueprintPages() {
   ];
 
   const renderPageCard = (page: any, isTestJourney: boolean) => (
-    <div key={page.id} className="bg-white border border-border rounded-sm shadow-xl overflow-hidden flex flex-col md:flex-row group">
+    <div key={page.id} className="bg-card border border-border rounded-sm shadow-xl overflow-hidden flex flex-col md:flex-row group">
       <div className="bg-secondary text-secondary-foreground p-8 md:p-12 md:w-1/3 shrink-0 flex flex-col justify-between relative overflow-hidden">
         <div className="absolute top-0 right-0 w-32 h-32 bg-primary/10 rounded-full blur-3xl -z-0 pointer-events-none"></div>
         <div className="relative z-10">
           <div className="flex items-center gap-3 mb-6">
-            <div className="w-12 h-12 bg-white/10 rounded-full flex items-center justify-center text-white font-serif font-bold text-xl">
+            <div className="w-12 h-12 bg-secondary-foreground/10 rounded-full flex items-center justify-center text-secondary-foreground font-serif font-bold text-xl">
               {page.id}
             </div>
             {isTestJourney && (

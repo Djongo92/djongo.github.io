@@ -48,7 +48,7 @@ export default function News() {
       </section>
 
       {/* Filters */}
-      <section className="bg-white border-b border-border sticky top-20 z-40 shadow-sm">
+      <section className="bg-background border-b border-border sticky top-20 z-40 shadow-sm">
         <div className="container mx-auto px-4 md:px-8 py-4 flex flex-col md:flex-row gap-4 justify-end items-center">
           <div className="flex items-center gap-2 w-full md:w-auto">
             <span className="text-sm font-semibold text-muted-foreground">{t('events.topic')}</span>
@@ -70,7 +70,7 @@ export default function News() {
       <section className="pt-12">
         <div className="container mx-auto px-4 md:px-8">
           {filteredNews.length === 0 ? (
-            <div className="text-center py-24 border border-dashed border-border/50 rounded-sm bg-white">
+            <div className="text-center py-24 border border-dashed border-border/50 rounded-sm bg-card">
               <Newspaper className="w-12 h-12 text-muted-foreground mx-auto mb-4 opacity-50" />
               <h3 className="text-xl font-bold font-serif mb-2">{t('news.no_results')}</h3>
               <p className="text-muted-foreground mb-6">{t('news.no_results_desc')}</p>
@@ -91,7 +91,7 @@ export default function News() {
                 const topic = lang === 'sr' ? news.topicSr : news.topic;
                 
                 return (
-                  <div key={news.id} className="bg-white border border-border rounded-sm hover:shadow-lg hover:border-primary/50 transition-all flex flex-col h-full group">
+                  <div key={news.id} className="bg-card border border-border rounded-sm hover:shadow-lg hover:border-primary/50 transition-all flex flex-col h-full group">
                     <div className="p-6 md:p-8 flex flex-col flex-1">
                       <div className="flex justify-between items-start mb-4">
                         <span className="text-xs font-bold px-2 py-1 bg-background border border-border rounded-sm text-muted-foreground uppercase tracking-wider">

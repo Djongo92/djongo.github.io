@@ -56,7 +56,7 @@ export default function Insights() {
         </div>
       </section>
 
-      <section className="bg-white border-b border-border sticky top-20 z-40 shadow-sm">
+      <section className="bg-background border-b border-border sticky top-20 z-40 shadow-sm">
         <div className="container mx-auto px-4 md:px-8 py-4 flex flex-col md:flex-row gap-4 justify-between items-center">
           <div className="flex gap-4 w-full md:w-auto">
             <select 
@@ -82,7 +82,7 @@ export default function Insights() {
       <section className="pt-12">
         <div className="container mx-auto px-4 md:px-8">
           {filteredInsights.length === 0 ? (
-            <div className="text-center py-24 border border-dashed border-border/50 rounded-sm bg-white">
+            <div className="text-center py-24 border border-dashed border-border/50 rounded-sm bg-card">
               <FileText className="w-12 h-12 text-muted-foreground mx-auto mb-4 opacity-50" />
               <h3 className="text-xl font-bold font-serif mb-2">{t('insights.no_results')}</h3>
               <p className="text-muted-foreground mb-6">{t('insights.no_results_desc')}</p>
@@ -103,7 +103,7 @@ export default function Insights() {
               const type = lang === 'sr' ? insight.typeSr : insight.type;
               
               return (
-                <div key={insight.id} className="bg-white border border-border rounded-sm overflow-hidden group hover:shadow-lg hover:border-primary/50 transition-all flex flex-col">
+                <div key={insight.id} className="bg-card border border-border rounded-sm overflow-hidden group hover:shadow-lg hover:border-primary/50 transition-all flex flex-col">
                   <div className="p-8 flex-1">
                     <div className="flex justify-between items-start mb-6">
                       <div className="w-12 h-12 bg-primary/5 rounded-sm flex items-center justify-center">

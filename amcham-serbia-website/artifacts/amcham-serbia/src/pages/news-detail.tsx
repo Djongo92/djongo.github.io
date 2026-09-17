@@ -26,7 +26,7 @@ export default function NewsDetail() {
       {/* Header */}
       <section className="bg-secondary text-secondary-foreground pt-12 pb-24">
         <div className="container mx-auto px-4 md:px-8">
-          <Link href="/news" className="inline-flex items-center gap-2 text-sm font-semibold hover:text-white mb-12 text-muted-foreground transition-colors">
+          <Link href="/news" className="inline-flex items-center gap-2 text-sm font-semibold hover:text-secondary-foreground mb-12 text-muted-foreground transition-colors">
             <ArrowLeft className="w-4 h-4" /> {t('news.back')}
           </Link>
           
@@ -47,7 +47,7 @@ export default function NewsDetail() {
 
       {/* Main Content */}
       <section className="container mx-auto px-4 md:px-8 -mt-12">
-        <div className="bg-white border border-border p-8 md:p-16 shadow-xl rounded-sm max-w-4xl mx-auto">
+        <div className="bg-card border border-border p-8 md:p-16 shadow-xl rounded-sm max-w-4xl mx-auto">
           <div className="prose prose-stone prose-lg max-w-none text-foreground leading-relaxed">
             <p className="lead text-xl font-medium text-muted-foreground mb-8">
               {lang === 'sr' ? news.summarySr : news.summary}

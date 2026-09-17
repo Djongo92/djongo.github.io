@@ -9,6 +9,7 @@ import {
   Bell, Search, Target, Zap, CreditCard, Activity
 } from 'lucide-react';
 import { PortalStateProvider, usePortalState } from './portal-state';
+import { ThemeToggle } from '@/components/ui/theme-toggle';
 import { TourOverlay } from './console/components/Overlays';
 import { platformData, resolveViewAsMember, VIEW_AS_OPTIONS } from '@/data/platform';
 
@@ -172,6 +173,8 @@ function PortalContent({ viewAs }: { viewAs: ReturnType<typeof resolveViewAsMemb
                 return <option key={id} value={id}>{c?.name}</option>;
               })}
             </select>
+
+            <ThemeToggle className="w-9 h-9 border-none shadow-none bg-transparent" />
 
             <button onClick={() => setNotificationsOpen(!notificationsOpen)} className="relative p-2 text-muted-foreground hover:text-foreground transition-colors">
               <Bell className="w-5 h-5" />

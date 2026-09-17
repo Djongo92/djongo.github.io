@@ -113,7 +113,7 @@ export default function SearchPage() {
         <div className="absolute inset-0 bg-network-pattern opacity-10 pointer-events-none"></div>
         <div className="container mx-auto px-4 md:px-8 relative z-10">
           <h1 className="text-3xl md:text-5xl font-serif font-bold mb-4">{t('search.title')}</h1>
-          {q && <p className="text-xl text-white/80">"{q}" ({totalResults})</p>}
+          {q && <p className="text-xl text-secondary-foreground/80">"{q}" ({totalResults})</p>}
         </div>
       </section>
 
@@ -127,7 +127,7 @@ export default function SearchPage() {
               <p className="text-xl font-medium text-muted-foreground">{t('search.prompt')}</p>
             </div>
           ) : totalResults === 0 ? (
-            <div className="text-center py-20 border border-border rounded-sm bg-white shadow-sm">
+            <div className="text-center py-20 border border-border rounded-sm bg-card shadow-sm">
               <SearchIcon className="w-12 h-12 text-primary mx-auto mb-4" />
               <h2 className="text-2xl font-serif font-bold mb-4">{t('search.zero')} "{q}"</h2>
               
@@ -160,7 +160,7 @@ export default function SearchPage() {
                       {items.map((item, i) => {
                         const Icon = item.icon;
                         return (
-                          <Link key={i} href={item.href} className="flex gap-4 p-4 border border-border rounded-sm bg-white hover:border-primary/50 hover:shadow-sm transition-all group">
+                          <Link key={i} href={item.href} className="flex gap-4 p-4 border border-border rounded-sm bg-card hover:border-primary/50 hover:shadow-sm transition-all group">
                             <div className="w-10 h-10 shrink-0 bg-background border border-border rounded-sm flex items-center justify-center group-hover:bg-primary/5 group-hover:text-primary transition-colors">
                               <Icon className="w-5 h-5" />
                             </div>

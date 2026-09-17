@@ -23,6 +23,7 @@ import {
 } from './console/views';
 import { CommandPalette, GlossaryDrawer, TourOverlay, ShortcutsOverlay } from './console/components/Overlays';
 import { ConsoleStateProvider } from './console/console-state';
+import { ThemeToggle } from '@/components/ui/theme-toggle';
 
 export default function Console() {
   const { t } = useI18n();
@@ -294,6 +295,7 @@ export default function Console() {
             {navGroups.flatMap(g => g.items).find(i => i.id === view)?.label || view}
           </h1>
           <div className="flex items-center gap-4 text-sm font-medium text-muted-foreground relative">
+            <ThemeToggle />
             <button onClick={() => setShortcutsOpen(true)} className="w-10 h-10 rounded-full border border-border bg-background shadow-sm flex items-center justify-center text-muted-foreground hover:bg-muted transition-colors" title="Keyboard shortcuts (?)">
               <Keyboard className="w-4 h-4" />
             </button>

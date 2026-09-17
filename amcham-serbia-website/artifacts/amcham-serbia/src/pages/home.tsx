@@ -6,6 +6,8 @@ import { ArrowRight, ChevronRight, Newspaper, ArrowUpRight, CheckCircle2, Compas
 import { mockEvents, mockNews } from '@/data/mock';
 import { useScroll, useTransform, motion, AnimatePresence } from 'framer-motion';
 import { useGuidedTour } from '@/components/guided-tour';
+import { Skeleton } from '@/components/ui/skeleton';
+import { ImageWithSkeleton } from '@/components/ui/image-with-skeleton';
 
 export default function Home() {
   const { t, lang } = useI18n();
@@ -59,6 +61,7 @@ export default function Home() {
       {/* 1. Hero Section */}
       <section className="relative w-full h-[90vh] min-h-[600px] flex items-center justify-center overflow-hidden bg-secondary">
         <div className="absolute inset-0 z-0">
+          <Skeleton className="absolute inset-0 rounded-none" />
           <AnimatePresence>
             <motion.img
               key={heroIndex}
@@ -100,7 +103,7 @@ export default function Home() {
       </section>
 
       {/* 2. Stats band */}
-      <section className="bg-white border-b border-border z-20 relative">
+      <section className="bg-background border-b border-border z-20 relative">
         <div className="container mx-auto px-4 md:px-8">
           <div className="grid grid-cols-2 md:grid-cols-4 gap-8 py-12">
             {[
@@ -123,10 +126,10 @@ export default function Home() {
         <div className="container mx-auto px-4 md:px-8">
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
             <div className="lg:col-span-6 relative group">
-              <div className="aspect-[4/3] rounded-sm overflow-hidden shadow-xl">
-                <img 
-                  src={`${import.meta.env.BASE_URL}images/real/in-focus.jpeg`} 
-                  alt="In Focus" 
+              <div className="aspect-[4/3] relative rounded-sm overflow-hidden shadow-xl">
+                <ImageWithSkeleton
+                  src={`${import.meta.env.BASE_URL}images/real/in-focus.jpeg`}
+                  alt="In Focus"
                   className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
                 />
               </div>
@@ -152,7 +155,7 @@ export default function Home() {
       </section>
 
       {/* 4. AmCham News */}
-      <section className="py-24 bg-white border-t border-border">
+      <section className="py-24 bg-background border-t border-border">
         <div className="container mx-auto px-4 md:px-8">
           <div className="flex justify-between items-end mb-12">
             <div>
@@ -166,10 +169,10 @@ export default function Home() {
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             {latestNews.map((news, i) => (
               <Link key={news.id} href={`/news/${news.id}`} className="group flex flex-col h-full">
-                <div className="aspect-[3/2] overflow-hidden rounded-sm bg-background mb-4">
-                  <img 
+                <div className="aspect-[3/2] relative overflow-hidden rounded-sm bg-background mb-4">
+                  <ImageWithSkeleton
                     src={`${import.meta.env.BASE_URL}${newsThumbnails[i % newsThumbnails.length]}`}
-                    alt="" 
+                    alt=""
                     className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                   />
                 </div>
@@ -210,7 +213,7 @@ export default function Home() {
       </section>
 
       {/* 5.5 Events preview */}
-      <section className="py-24 bg-white border-t border-border">
+      <section className="py-24 bg-background border-t border-border">
         <div className="container mx-auto px-4 md:px-8">
           <div className="flex justify-between items-end mb-12">
             <div>
@@ -240,7 +243,7 @@ export default function Home() {
       </section>
 
       {/* 6. Members News */}
-      <section className="py-24 bg-white border-t border-border relative overflow-hidden">
+      <section className="py-24 bg-background border-t border-border relative overflow-hidden">
         <div className="container mx-auto px-4 md:px-8 relative z-10">
           <div className="flex justify-between items-end mb-12">
             <h2 className="text-3xl font-serif font-bold text-foreground">{t('home.members_news')}</h2>
@@ -265,9 +268,9 @@ export default function Home() {
             </div>
             <div className="order-1 lg:order-2">
               <div className="aspect-[4/3] relative rounded-sm overflow-hidden shadow-md group">
-                <img 
-                  src={`${import.meta.env.BASE_URL}images/member-story-1.jpg`} 
-                  alt="Member Story" 
+                <ImageWithSkeleton
+                  src={`${import.meta.env.BASE_URL}images/member-story-1.jpg`}
+                  alt="Member Story"
                   className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
                 />
               </div>
@@ -321,10 +324,10 @@ export default function Home() {
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
             {team.slice(0, 4).map((member, i) => (
               <Link key={member.id} href="/about" className={`group block ${i % 2 === 1 ? 'md:translate-y-0 lg:translate-y-8' : ''}`}>
-                <div className="aspect-[3/4] overflow-hidden rounded-sm bg-white mb-4 relative shadow-sm group-hover:shadow-md transition-all">
-                  <img 
-                    src={`${import.meta.env.BASE_URL}images/team/${member.img}`} 
-                    alt={member.name} 
+                <div className="aspect-[3/4] overflow-hidden rounded-sm bg-muted mb-4 relative shadow-sm group-hover:shadow-md transition-all">
+                  <ImageWithSkeleton
+                    src={`${import.meta.env.BASE_URL}images/team/${member.img}`}
+                    alt={member.name}
                     className="w-full h-full object-cover object-center group-hover:scale-105 transition-transform duration-500 grayscale group-hover:grayscale-0"
                   />
                   <div className="absolute inset-0 bg-secondary/0 group-hover:bg-secondary/10 transition-colors"></div>
@@ -367,20 +370,20 @@ export default function Home() {
           <div className="max-w-2xl mb-16">
             <span className="text-xs font-bold uppercase tracking-widest text-accent mb-4 block">{t('home.scorecard.eyebrow')}</span>
             <h2 className="text-3xl md:text-4xl font-serif font-bold mb-6">{t('home.scorecard.title')}</h2>
-            <p className="text-lg text-white/70 leading-relaxed">{t('home.scorecard.desc')}</p>
+            <p className="text-lg text-secondary-foreground/70 leading-relaxed">{t('home.scorecard.desc')}</p>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-12">
-            <div className="bg-white/5 border border-white/10 rounded-sm p-8">
-              <span className="text-xs font-bold uppercase tracking-widest text-white/50 mb-6 block">{t('home.scorecard.old_label')}</span>
+            <div className="bg-secondary-foreground/5 border border-secondary-foreground/10 rounded-sm p-8">
+              <span className="text-xs font-bold uppercase tracking-widest text-secondary-foreground/50 mb-6 block">{t('home.scorecard.old_label')}</span>
               <div className="flex gap-10">
                 <div>
-                  <div className="text-4xl font-serif font-bold text-white/70">8<span className="text-xl text-white/40">/12</span></div>
-                  <div className="text-xs font-bold uppercase tracking-widest text-white/40 mt-2">{t('home.scorecard.findability_label')}</div>
+                  <div className="text-4xl font-serif font-bold text-secondary-foreground/70">8<span className="text-xl text-secondary-foreground/40">/12</span></div>
+                  <div className="text-xs font-bold uppercase tracking-widest text-secondary-foreground/40 mt-2">{t('home.scorecard.findability_label')}</div>
                 </div>
                 <div>
-                  <div className="text-4xl font-serif font-bold text-white/70">4<span className="text-xl text-white/40">/6</span></div>
-                  <div className="text-xs font-bold uppercase tracking-widest text-white/40 mt-2">{t('home.scorecard.visual_label')}</div>
+                  <div className="text-4xl font-serif font-bold text-secondary-foreground/70">4<span className="text-xl text-secondary-foreground/40">/6</span></div>
+                  <div className="text-xs font-bold uppercase tracking-widest text-secondary-foreground/40 mt-2">{t('home.scorecard.visual_label')}</div>
                 </div>
               </div>
             </div>
@@ -388,19 +391,19 @@ export default function Home() {
               <span className="text-xs font-bold uppercase tracking-widest text-primary mb-6 block">{t('home.scorecard.new_label')}</span>
               <div className="flex gap-10">
                 <div>
-                  <div className="text-4xl font-serif font-bold text-white">11<span className="text-xl text-white/50">/12</span></div>
-                  <div className="text-xs font-bold uppercase tracking-widest text-white/50 mt-2">{t('home.scorecard.findability_label')}</div>
+                  <div className="text-4xl font-serif font-bold text-secondary-foreground">11<span className="text-xl text-secondary-foreground/50">/12</span></div>
+                  <div className="text-xs font-bold uppercase tracking-widest text-secondary-foreground/50 mt-2">{t('home.scorecard.findability_label')}</div>
                 </div>
                 <div>
-                  <div className="text-4xl font-serif font-bold text-white">5<span className="text-xl text-white/50">/6</span></div>
-                  <div className="text-xs font-bold uppercase tracking-widest text-white/50 mt-2">{t('home.scorecard.visual_label')}</div>
+                  <div className="text-4xl font-serif font-bold text-secondary-foreground">5<span className="text-xl text-secondary-foreground/50">/6</span></div>
+                  <div className="text-xs font-bold uppercase tracking-widest text-secondary-foreground/50 mt-2">{t('home.scorecard.visual_label')}</div>
                 </div>
               </div>
             </div>
           </div>
 
-          <div className="bg-white/5 border border-white/10 rounded-sm p-8 mb-10">
-            <span className="text-xs font-bold uppercase tracking-widest text-white/50 mb-5 block">{t('home.scorecard.journeys_label')}</span>
+          <div className="bg-secondary-foreground/5 border border-secondary-foreground/10 rounded-sm p-8 mb-10">
+            <span className="text-xs font-bold uppercase tracking-widest text-secondary-foreground/50 mb-5 block">{t('home.scorecard.journeys_label')}</span>
             <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
               {[
                 t('home.scorecard.journey_1'),
@@ -409,7 +412,7 @@ export default function Home() {
                 t('home.scorecard.journey_4'),
                 t('home.scorecard.journey_5'),
               ].map((journey, i) => (
-                <div key={i} className="flex items-center gap-2 text-sm font-medium text-white/80">
+                <div key={i} className="flex items-center gap-2 text-sm font-medium text-secondary-foreground/80">
                   <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0" />
                   {journey}
                 </div>

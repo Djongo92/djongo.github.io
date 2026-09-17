@@ -3,6 +3,7 @@ import { Link, useLocation } from 'wouter';
 import { Search, Menu, X, Globe } from 'lucide-react';
 import { useI18n } from '@/lib/i18n';
 import { motion, AnimatePresence } from 'framer-motion';
+import { ThemeToggle } from '@/components/ui/theme-toggle';
 
 export function Header() {
   const { lang, setLang, t } = useI18n();
@@ -100,6 +101,8 @@ export function Header() {
             {lang.toUpperCase()}
           </button>
 
+          <ThemeToggle className="w-9 h-9" />
+
           <Link
             href="/membership"
             className="bg-primary text-primary-foreground px-4 xl:px-5 py-2.5 rounded-sm font-semibold text-sm hover:bg-primary/90 transition-colors shadow-sm whitespace-nowrap shrink-0"
@@ -170,16 +173,19 @@ export function Header() {
                   {t('platform.nav')}
                 </Link>
 
-                <button 
-                  onClick={() => { setLang(lang === 'en' ? 'sr' : 'en'); setIsMobileMenuOpen(false); }}
-                  className="flex items-center gap-2 text-sm font-bold"
-                >
-                  <Globe className="w-5 h-5" />
-                  {lang === 'en' ? 'Srpski' : 'English'}
-                </button>
-                
-                <Link 
-                  href="/membership" 
+                <div className="flex items-center gap-3">
+                  <button
+                    onClick={() => { setLang(lang === 'en' ? 'sr' : 'en'); setIsMobileMenuOpen(false); }}
+                    className="flex items-center gap-2 text-sm font-bold"
+                  >
+                    <Globe className="w-5 h-5" />
+                    {lang === 'en' ? 'Srpski' : 'English'}
+                  </button>
+                  <ThemeToggle className="w-9 h-9" />
+                </div>
+
+                <Link
+                  href="/membership"
                   onClick={() => setIsMobileMenuOpen(false)}
                   className="bg-primary text-primary-foreground px-5 py-2.5 rounded-sm font-semibold text-sm text-center"
                 >

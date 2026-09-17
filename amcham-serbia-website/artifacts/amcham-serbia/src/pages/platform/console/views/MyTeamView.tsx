@@ -85,7 +85,7 @@ export function MyTeamView({ navigateTo, showToast }: any) {
               <div className="flex-1">
                 <div className="text-[10px] uppercase font-bold text-[#40D9F1] tracking-widest mb-2">Distribution Logic</div>
                 <h3 className="text-xl font-serif mb-2">How auto-balance works</h3>
-                <p className="text-background/80 text-sm leading-relaxed">The algorithm calculates the true team average workload and redistributes active cases to ensure no team member is more than <span className="font-bold text-white">±5%</span> away from the mean. It will refuse to run if the standard deviation results in a spread <span className="font-bold text-white">&gt; 10%</span> after adjustment.</p>
+                <p className="text-background/80 text-sm leading-relaxed">The algorithm calculates the true team average workload and redistributes active cases to ensure no team member is more than <span className="font-bold text-background">±5%</span> away from the mean. It will refuse to run if the standard deviation results in a spread <span className="font-bold text-background">&gt; 10%</span> after adjustment.</p>
               </div>
               <div className="flex gap-6">
                 <div className="text-center">

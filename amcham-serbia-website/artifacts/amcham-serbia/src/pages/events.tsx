@@ -63,7 +63,7 @@ export default function Events() {
       </section>
 
       {/* Filters */}
-      <section className="border-b border-border bg-white sticky top-20 z-40 shadow-sm">
+      <section className="border-b border-border bg-background sticky top-20 z-40 shadow-sm">
         <div className="container mx-auto px-4 md:px-8 py-4 flex flex-col md:flex-row gap-4 items-center justify-between">
           <div className="flex gap-2 w-full md:w-auto overflow-x-auto">
             <button 
@@ -99,7 +99,7 @@ export default function Events() {
       <section className="pt-12">
         <div className="container mx-auto px-4 md:px-8">
           {filteredEvents.length === 0 ? (
-            <div className="text-center py-24 border border-dashed border-border/50 rounded-sm bg-white">
+            <div className="text-center py-24 border border-dashed border-border/50 rounded-sm bg-card">
               <Calendar className="w-12 h-12 text-muted-foreground mx-auto mb-4 opacity-50" />
               <h3 className="text-xl font-bold font-serif mb-2">{t('events.no_results')}</h3>
               <p className="text-muted-foreground mb-6">{t('events.no_results_desc')}</p>
@@ -121,7 +121,7 @@ export default function Events() {
                 
                 return (
                   <Link key={event.id} href={`/events/${event.id}`}>
-                    <div className="group bg-white border border-border hover:border-primary/50 p-6 md:p-8 rounded-sm shadow-sm hover:shadow-md transition-all flex flex-col md:flex-row gap-6 md:gap-12 items-start md:items-center relative overflow-hidden">
+                    <div className="group bg-card border border-border hover:border-primary/50 p-6 md:p-8 rounded-sm shadow-sm hover:shadow-md transition-all flex flex-col md:flex-row gap-6 md:gap-12 items-start md:items-center relative overflow-hidden">
                       <div className="absolute top-0 left-0 w-1 h-full bg-transparent group-hover:bg-primary transition-colors"></div>
                       
                       {/* Date Box */}
