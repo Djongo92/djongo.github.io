@@ -15,6 +15,13 @@ interface CompassMessage {
   answer?: CompassAnswer;
 }
 
+// Phrased the way someone would actually ask, not in filter-syntax — proof
+// that runFixtureQuery's synonym matching (struggling/at-risk/top performers/
+// gone quiet/who needs a call) understands natural phrasing, not just the
+// exact trigger words. Shown before the first message; clicking one submits
+// it immediately.
+const SUGGESTED_QUESTIONS = ["Who's struggling right now?", 'Anyone I should call today?', 'Our top performers', "Who's gone quiet?"];
+
 interface CompassFabProps {
   view: string;
   selectedCompanyId: string | null;
@@ -70,8 +77,8 @@ export function CompassFab({ view, selectedCompanyId, roleParam, navigateTo, sho
     setOpen(false);
   };
 
-  const send = () => {
-    const query = draft.trim();
+  const sendQuery = (raw: string) => {
+    const query = raw.trim();
     if (!query) return;
     const userMsg: CompassMessage = { id: `u-${Date.now()}`, role: 'user', text: query };
     const answer = answerCompassQuery(query, { selectedCompanyId: pinnedCompanyId }, t);
@@ -79,6 +86,13 @@ export function CompassFab({ view, selectedCompanyId, roleParam, navigateTo, sho
     setMessages((prev) => [...prev, userMsg, assistantMsg]);
     setDraft('');
   };
+  const send = () => sendQuery(draft);
+
+  const suggestions = useMemo(() => {
+    if (!pinnedCompanyId) return SUGGESTED_QUESTIONS;
+    const company = platformData.allMembers.find((c) => c.id === pinnedCompanyId);
+    return company ? [`Brief me on ${company.name}`, ...SUGGESTED_QUESTIONS.slice(0, 3)] : SUGGESTED_QUESTIONS;
+  }, [pinnedCompanyId]);
 
   // The Dossier side panel shares the FAB's right-hand edge (console.tsx's
   // own condition for showing it, mirrored here) — opening Compass closes it
@@ -114,10 +128,23 @@ export function CompassFab({ view, selectedCompanyId, roleParam, navigateTo, sho
               <AiBadge className="bg-secondary-foreground/10 border-secondary-foreground/10 text-secondary-foreground/70" />
             </div>
             <div className="flex-1 overflow-y-auto p-4 space-y-3 bg-muted/20">
-              {messages.length === 0 && (
-                <p className="text-xs text-muted-foreground leading-relaxed">
-                  Quick questions about the book — try "manufacturing exporters" or "at-risk accounts". Open a dossier first and ask "brief me on this" for that company.
-                </p>
+              {!messages.some((m) => m.role === 'user') && (
+                <div className="space-y-3">
+                  <p className="text-xs text-muted-foreground leading-relaxed">
+                    Quick questions about the book, in your own words — try one below, or type your own.
+                  </p>
+                  <div className="flex flex-col gap-1.5">
+                    {suggestions.map((s) => (
+                      <button
+                        key={s}
+                        onClick={() => sendQuery(s)}
+                        className="text-left text-xs font-semibold px-3 py-2 rounded-xl border border-border bg-background hover:border-primary/40 hover:text-primary transition-colors"
+                      >
+                        {s}
+                      </button>
+                    ))}
+                  </div>
+                </div>
               )}
               {messages.map((m) => (
                 <div key={m.id} className={m.role === 'user' ? 'flex justify-end' : 'flex justify-start'}>
