@@ -3,9 +3,9 @@ import { Compass, X, Send, ArrowUpRight } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Company } from '@/data/platform';
 import { usePortalState } from '../portal-state';
-import { answerPortalQuery, getPortalNudge, toSafeMember, PortalCompassAnswer, PortalCompassAction } from '../portal-compass-engine';
+import { answerPortalQuery, getPortalNudge, toSafeMember, toPeer, PortalCompassAnswer, PortalCompassAction, PortalCompassContext, PortalPeer } from '../portal-compass-engine';
 import { AiBadge, AiThinking, TypewriterText } from '@/components/ui/ai-badge';
-import { askCompassAI, CompassAiError } from '@/lib/compass-ai';
+import { askCompassAI, buildCompassHistory, CompassAiError } from '@/lib/compass-ai';
 import { cn } from '@/lib/utils';
 
 interface PortalCompassMessage {
@@ -21,11 +21,30 @@ interface PortalCompassMessage {
 // Phrased the way a member would actually ask, not in filter-syntax.
 const SUGGESTED_QUESTIONS = ['How\'s my score?', 'When do I renew?', 'Any recommended intros?', 'What events are open?'];
 
+// Lightweight page-awareness for the AI escalation path — a plain English
+// label is enough since this only ever reaches the model as a JSON field.
+const VIEW_LABELS: Record<string, string> = {
+  home: 'Home dashboard',
+  score: 'Membership Value (score breakdown)',
+  glance: 'At a Glance',
+  directory: 'the Member Directory',
+  laptime: 'Lap Time',
+  events: 'Events',
+  marketplace: 'the Opportunities marketplace',
+  committee: 'Committees',
+  onboarding: 'Onboarding',
+  seam: 'The Seam',
+  people: 'People',
+  billing: 'Billing',
+  notifications: 'Notifications',
+};
+
 interface PortalCompassFabProps {
   member: Company;
   billing: { renewalDate: string; paymentMethod: string; invoices: any[] };
   scoreNarrative?: { summary?: string } | null;
   roleParam: string;
+  view: string;
   navigateTo: (view: string) => void;
   open: boolean;
   setOpen: (open: boolean) => void;
@@ -36,7 +55,7 @@ interface PortalCompassFabProps {
 // numbers, plus the Directory's already-public peer fields (name, sector,
 // tier, recommended reason). Never manager, lifecycle, contactFreshness, or
 // another company's raw score — those stay staff-internal.
-export function PortalCompassFab({ member, billing, scoreNarrative, roleParam, navigateTo, open, setOpen }: PortalCompassFabProps) {
+export function PortalCompassFab({ member, billing, scoreNarrative, roleParam, view, navigateTo, open, setOpen }: PortalCompassFabProps) {
   const { directory, events, opportunities, committees } = usePortalState();
   const [messages, setMessages] = useState<PortalCompassMessage[]>([]);
   const [draft, setDraft] = useState('');
@@ -79,18 +98,41 @@ export function PortalCompassFab({ member, billing, scoreNarrative, roleParam, n
     }
 
     const placeholderId = `a-${Date.now()}`;
+    const history = buildCompassHistory(messages);
     setMessages((prev) => [...prev, userMsg, { id: placeholderId, role: 'assistant', pending: true }]);
     // Billing is re-gated here, not just inherited from `context` — the
     // deterministic fee branch above only gates it with a runtime `if`, so
     // this object (not `context` itself) is what actually leaves the
-    // browser toward the AI backend.
+    // browser toward the AI backend. Everything else here (peers, events,
+    // committees, opportunities) is already ungated in `context` — the
+    // deterministic branches above read it with no role check — so folding
+    // narrowed slices of it in here isn't a new exposure, just parity: the
+    // AI path was previously blind to exactly the topics the suggested
+    // questions invite (events, intros, committees), which is why an
+    // unmatched version of those questions came back so thin.
+    const recommendedPeers = directory.filter((d: PortalCompassContext['directory'][number]) => d.recommended).slice(0, 5).map(toPeer);
+    const lastAnsweredPeers = [...messages].reverse().find((m) => m.role === 'assistant' && m.answer?.peers?.length)?.answer?.peers ?? [];
+    const relevantPeers = new Map<string, PortalPeer>();
+    for (const p of [...recommendedPeers, ...lastAnsweredPeers]) relevantPeers.set(p.id, p);
     const groundingContext = {
       member: toSafeMember(member),
       billing: roleParam === 'admin' ? billing : undefined,
       scoreNarrative,
+      currentPage: VIEW_LABELS[view] ?? view,
+      relevantPeers: Array.from(relevantPeers.values()).slice(0, 8),
+      openEvents: events
+        .filter((e: PortalCompassContext['events'][number]) => e.capacity.booked < e.capacity.total)
+        .slice(0, 5)
+        .map((e: PortalCompassContext['events'][number]) => ({ title: e.title, date: e.date })),
+      notJoinedCommittees: committees
+        .filter((c: PortalCompassContext['committees'][number]) => !c.joined)
+        .map((c: PortalCompassContext['committees'][number]) => c.name),
+      openOpportunities: opportunities
+        .slice(0, 5)
+        .map((o: PortalCompassContext['opportunities'][number]) => ({ title: o.title, author: o.author })),
     };
     try {
-      const text = await askCompassAI(query, groundingContext);
+      const text = await askCompassAI(query, groundingContext, history);
       setMessages((prev) => prev.map((m) => (m.id === placeholderId ? { ...m, pending: false, answer: { text } } : m)));
     } catch (err) {
       const text = err instanceof CompassAiError ? err.message : 'Compass could not answer that just now.';
@@ -98,6 +140,19 @@ export function PortalCompassFab({ member, billing, scoreNarrative, roleParam, n
     }
   };
   const send = () => sendQuery(draft);
+
+  // Same recurring-chip fix as the console FAB: surface a peer from the just-
+  // given answer first, if there is one, then the static list minus whatever
+  // was just asked — never just go silent after the first exchange.
+  const hasUserMessage = messages.some((m) => m.role === 'user');
+  const lastMsg = messages[messages.length - 1];
+  const followUps = useMemo(() => {
+    if (!hasUserMessage || !lastMsg || lastMsg.role !== 'assistant' || lastMsg.pending) return [];
+    const lastUserText = [...messages].reverse().find((m) => m.role === 'user')?.text;
+    const fromAnswer = lastMsg.answer?.peers?.slice(0, 1).map((p) => `Tell me more about ${p.name}`) ?? [];
+    const rest = SUGGESTED_QUESTIONS.filter((s) => s !== lastUserText && !fromAnswer.includes(s));
+    return [...fromAnswer, ...rest].slice(0, 3);
+  }, [hasUserMessage, lastMsg, messages]);
 
   return (
     <div className="fixed bottom-24 right-6 md:right-10 z-[65] print:hidden">
@@ -138,10 +193,14 @@ export function PortalCompassFab({ member, billing, scoreNarrative, roleParam, n
                 </div>
               )}
               {messages.map((m) => (
-                <div key={m.id} className={m.role === 'user' ? 'flex justify-end' : 'flex justify-start'}>
+                <div key={m.id} className={m.role === 'user' ? 'flex justify-end' : 'flex justify-start gap-2'}>
                   {m.role === 'user' ? (
                     <div className="bg-primary text-primary-foreground rounded-2xl rounded-br-sm px-4 py-2.5 text-sm max-w-[85%] shadow-sm">{m.text}</div>
                   ) : (
+                    <>
+                    <div className="w-6 h-6 rounded-full bg-primary/10 border border-primary/20 flex items-center justify-center shrink-0 mt-0.5">
+                      <Compass className="w-3.5 h-3.5 text-primary" />
+                    </div>
                     <div className="bg-card border border-border rounded-2xl rounded-bl-sm px-4 py-3 text-sm max-w-[92%] shadow-sm text-foreground space-y-2.5">
                       {m.pending ? <AiThinking /> : <TypewriterText text={m.answer?.text || ''} runKey={m.id} speedMs={6} />}
                       {m.answer?.peers && m.answer.peers.length > 0 && (
@@ -169,9 +228,23 @@ export function PortalCompassFab({ member, billing, scoreNarrative, roleParam, n
                         </div>
                       )}
                     </div>
+                    </>
                   )}
                 </div>
               ))}
+              {followUps.length > 0 && (
+                <div className="flex flex-col gap-1.5 pt-1">
+                  {followUps.map((s) => (
+                    <button
+                      key={s}
+                      onClick={() => sendQuery(s)}
+                      className="text-left text-xs font-semibold px-3 py-2 rounded-xl border border-border bg-background hover:border-primary/40 hover:text-primary transition-colors"
+                    >
+                      {s}
+                    </button>
+                  ))}
+                </div>
+              )}
               <div ref={transcriptEndRef} />
             </div>
             <div className="p-3 border-t border-border flex items-center gap-2 bg-card shrink-0">

@@ -284,6 +284,7 @@ function PortalContent({ viewAs }: { viewAs: ReturnType<typeof resolveViewAsMemb
         billing={viewAs.billing}
         scoreNarrative={viewAs.scoreNarrative}
         roleParam={roleParam}
+        view={view}
         navigateTo={navigateTo}
         open={compassOpen}
         setOpen={setCompassOpen}
