@@ -7,10 +7,12 @@ import { cn } from '@/lib/utils';
 import { runFixtureQuery } from '../views/ask';
 import { AI_NAME } from '@/components/ui/ai-badge';
 
-export function TourOverlay({ step, setStep, endTour, steps, labels }: {
+export function TourOverlay({ step, setStep, endTour, steps, labels, onBack, badge }: {
   step: number, setStep: (s:number)=>void, endTour: ()=>void,
   steps: { title: string, desc: string }[],
-  labels: { skip: string, next: string, done: string },
+  labels: { skip: string, next: string, done: string, back?: string },
+  onBack?: () => void,
+  badge?: { icon: React.ComponentType<{ className?: string }>, label: string },
 }) {
   const total = steps.length;
 
@@ -20,13 +22,23 @@ export function TourOverlay({ step, setStep, endTour, steps, labels }: {
         <svg className="absolute top-0 right-0 w-32 h-32 opacity-10 pointer-events-none" viewBox="0 0 100 100">
            <circle cx="80" cy="20" r="40" fill="currentColor" />
         </svg>
+        {badge && (
+          <div className="flex items-center gap-2 text-[10px] font-bold uppercase tracking-widest text-accent mb-4">
+            <badge.icon className="w-3.5 h-3.5" /> {badge.label}
+          </div>
+        )}
         <div className="flex justify-between items-center mb-6">
           <div className="flex gap-1.5">
             {Array.from({length: total}).map((_, i) => (
               <div key={i} className={cn("h-1.5 rounded-full transition-all", i === step ? "w-6 bg-accent" : "w-1.5 bg-background/20")}></div>
             ))}
           </div>
-          <button onClick={endTour} className="text-[10px] font-bold uppercase tracking-widest text-background/50 hover:text-background transition-colors">{labels.skip}</button>
+          <div className="flex items-center gap-4">
+            {onBack && step > 0 && (
+              <button onClick={onBack} className="text-[10px] font-bold uppercase tracking-widest text-background/50 hover:text-background transition-colors">{labels.back || 'Back'}</button>
+            )}
+            <button onClick={endTour} className="text-[10px] font-bold uppercase tracking-widest text-background/50 hover:text-background transition-colors">{labels.skip}</button>
+          </div>
         </div>
         <h3 className="text-3xl font-serif font-light mb-3">{steps[step].title}</h3>
         <p className="text-sm font-medium text-background/70 mb-8 leading-relaxed">{steps[step].desc}</p>

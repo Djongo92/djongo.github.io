@@ -2,12 +2,14 @@ import React, { useState } from 'react';
 import { Link } from 'wouter';
 import { useI18n } from '@/lib/i18n';
 import { SEO } from '@/components/seo';
-import { LayoutDashboard, Smartphone, Layers, Info, ArrowRight, X } from 'lucide-react';
+import { LayoutDashboard, Smartphone, Layers, Info, ArrowRight, X, Presentation } from 'lucide-react';
 import { AnimatePresence, motion } from 'framer-motion';
+import { useSalesDemo } from '@/components/sales-demo-tour';
 
 export default function PlatformHub() {
   const { t } = useI18n();
   const [showTip, setShowTip] = useState(true);
+  const { start: startSalesDemo } = useSalesDemo();
 
   return (
     <div className="w-full bg-background min-h-screen pb-24">
@@ -79,6 +81,20 @@ export default function PlatformHub() {
               </div>
             </Link>
 
+          </div>
+
+          {/* Sales Demo CTA */}
+          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 bg-accent/10 border border-accent/20 rounded-2xl px-6 py-5 mb-8">
+            <div className="flex items-start gap-3">
+              <Presentation className="w-5 h-5 text-accent shrink-0 mt-0.5" />
+              <div>
+                <span className="text-xs font-bold text-accent uppercase tracking-widest block mb-1">{t('sales_demo.cta_label', 'Presenting to a prospect?')}</span>
+                <p className="text-sm text-foreground">{t('sales_demo.cta_body', "Take the guided sales walkthrough — a scripted tour through the platform's strongest moments.")}</p>
+              </div>
+            </div>
+            <button onClick={startSalesDemo} className="shrink-0 px-6 py-3 rounded-full bg-accent text-accent-foreground font-bold text-sm shadow-md hover:shadow-lg transition-all active:scale-95 flex items-center gap-2">
+              {t('sales_demo.cta_button', 'Start Sales Demo')} <ArrowRight className="w-4 h-4" />
+            </button>
           </div>
 
           {/* Seam */}

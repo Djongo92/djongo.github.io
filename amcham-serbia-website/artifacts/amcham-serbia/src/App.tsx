@@ -15,6 +15,7 @@ import { MotionConfig } from 'framer-motion';
 import { I18nProvider } from '@/lib/i18n';
 import { Shell } from '@/components/layout/shell';
 import { GuidedTourProvider } from '@/components/guided-tour';
+import { SalesDemoProvider } from '@/components/sales-demo-tour';
 
 import Home from '@/pages/home';
 import Membership from '@/pages/membership';
@@ -94,7 +95,9 @@ function App() {
             <MotionConfig reducedMotion="user">
               <WouterRouter base={import.meta.env.BASE_URL.replace(/\/$/, '')}>
                 <GuidedTourProvider>
-                  <Router />
+                  <SalesDemoProvider>
+                    <Router />
+                  </SalesDemoProvider>
                 </GuidedTourProvider>
               </WouterRouter>
             </MotionConfig>
