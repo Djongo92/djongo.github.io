@@ -46,7 +46,7 @@ function hasWord(query: string, term: string): boolean {
   return new RegExp(`\\b${term.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}\\b`, 'i').test(query);
 }
 
-function toPeer(d: PortalCompassContext['directory'][number]): PortalPeer {
+export function toPeer(d: PortalCompassContext['directory'][number]): PortalPeer {
   return { id: d.id, name: d.name, sector: d.sector, tier: d.tier, recommended: d.recommended, recReason: d.recReason };
 }
 

@@ -6,7 +6,7 @@ import { platformData } from '@/data/platform';
 import { useConsoleState } from '../console-state';
 import { answerCompassQuery, getProactiveNudge, getCompanyGroundingContext, CompassAnswer, CompassAction } from '../compass-engine';
 import { AiBadge, AiThinking, TypewriterText } from '@/components/ui/ai-badge';
-import { askCompassAI, CompassAiError } from '@/lib/compass-ai';
+import { askCompassAI, buildCompassHistory, CompassAiError } from '@/lib/compass-ai';
 import { cn } from '@/lib/utils';
 
 interface CompassMessage {
@@ -115,10 +115,11 @@ export function CompassFab({ view, selectedCompanyId, roleParam, navigateTo, sho
     }
 
     const placeholderId = `a-${Date.now()}`;
+    const history = buildCompassHistory(messages);
     setMessages((prev) => [...prev, userMsg, { id: placeholderId, role: 'assistant', pending: true }]);
     const groundingContext = pinnedCompanyId ? getCompanyGroundingContext(pinnedCompanyId) : buildBookContext();
     try {
-      const text = await askCompassAI(query, groundingContext);
+      const text = await askCompassAI(query, groundingContext, history);
       setMessages((prev) => prev.map((m) => (m.id === placeholderId ? { ...m, pending: false, answer: { text } } : m)));
     } catch (err) {
       const text = err instanceof CompassAiError ? err.message : 'Compass could not answer that just now.';
@@ -132,6 +133,21 @@ export function CompassFab({ view, selectedCompanyId, roleParam, navigateTo, sho
     const company = platformData.allMembers.find((c) => c.id === pinnedCompanyId);
     return company ? [`Brief me on ${company.name}`, ...SUGGESTED_QUESTIONS.slice(0, 3)] : SUGGESTED_QUESTIONS;
   }, [pinnedCompanyId]);
+
+  // Recurring, lightly contextual follow-ups shown after every resolved
+  // answer — not just before the first message — so the conversation never
+  // dead-ends into a bare text box the way it used to. Surfaces a company
+  // from the just-given answer first, if there is one, ahead of the static
+  // list; never repeats the question just asked.
+  const hasUserMessage = messages.some((m) => m.role === 'user');
+  const lastMsg = messages[messages.length - 1];
+  const followUps = useMemo(() => {
+    if (!hasUserMessage || !lastMsg || lastMsg.role !== 'assistant' || lastMsg.pending) return [];
+    const lastUserText = [...messages].reverse().find((m) => m.role === 'user')?.text;
+    const fromAnswer = lastMsg.answer?.companies?.slice(0, 1).map((c) => `Brief me on ${c.name}`) ?? [];
+    const rest = suggestions.filter((s) => s !== lastUserText && !fromAnswer.includes(s));
+    return [...fromAnswer, ...rest].slice(0, 3);
+  }, [hasUserMessage, lastMsg, messages, suggestions]);
 
   // The Dossier side panel shares the FAB's right-hand edge (console.tsx's
   // own condition for showing it, mirrored here) — opening Compass closes it
@@ -239,6 +255,19 @@ export function CompassFab({ view, selectedCompanyId, roleParam, navigateTo, sho
                   )}
                 </div>
               ))}
+              {followUps.length > 0 && (
+                <div className="flex flex-col gap-1.5 pt-1">
+                  {followUps.map((s) => (
+                    <button
+                      key={s}
+                      onClick={() => sendQuery(s)}
+                      className="text-left text-xs font-semibold px-3 py-2 rounded-xl border border-border bg-background hover:border-primary/40 hover:text-primary transition-colors"
+                    >
+                      {s}
+                    </button>
+                  ))}
+                </div>
+              )}
               <div ref={transcriptEndRef} />
             </div>
             <div className="p-3 border-t border-border flex items-center gap-2 bg-card shrink-0">

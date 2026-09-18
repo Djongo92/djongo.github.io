@@ -3,9 +3,9 @@ import { Compass, X, Send, ArrowUpRight } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Company } from '@/data/platform';
 import { usePortalState } from '../portal-state';
-import { answerPortalQuery, getPortalNudge, toSafeMember, PortalCompassAnswer, PortalCompassAction } from '../portal-compass-engine';
+import { answerPortalQuery, getPortalNudge, toSafeMember, toPeer, PortalCompassAnswer, PortalCompassAction, PortalCompassContext, PortalPeer } from '../portal-compass-engine';
 import { AiBadge, AiThinking, TypewriterText } from '@/components/ui/ai-badge';
-import { askCompassAI, CompassAiError } from '@/lib/compass-ai';
+import { askCompassAI, buildCompassHistory, CompassAiError } from '@/lib/compass-ai';
 import { cn } from '@/lib/utils';
 
 interface PortalCompassMessage {
@@ -79,18 +79,40 @@ export function PortalCompassFab({ member, billing, scoreNarrative, roleParam, n
     }
 
     const placeholderId = `a-${Date.now()}`;
+    const history = buildCompassHistory(messages);
     setMessages((prev) => [...prev, userMsg, { id: placeholderId, role: 'assistant', pending: true }]);
     // Billing is re-gated here, not just inherited from `context` — the
     // deterministic fee branch above only gates it with a runtime `if`, so
     // this object (not `context` itself) is what actually leaves the
-    // browser toward the AI backend.
+    // browser toward the AI backend. Everything else here (peers, events,
+    // committees, opportunities) is already ungated in `context` — the
+    // deterministic branches above read it with no role check — so folding
+    // narrowed slices of it in here isn't a new exposure, just parity: the
+    // AI path was previously blind to exactly the topics the suggested
+    // questions invite (events, intros, committees), which is why an
+    // unmatched version of those questions came back so thin.
+    const recommendedPeers = directory.filter((d: PortalCompassContext['directory'][number]) => d.recommended).slice(0, 5).map(toPeer);
+    const lastAnsweredPeers = [...messages].reverse().find((m) => m.role === 'assistant' && m.answer?.peers?.length)?.answer?.peers ?? [];
+    const relevantPeers = new Map<string, PortalPeer>();
+    for (const p of [...recommendedPeers, ...lastAnsweredPeers]) relevantPeers.set(p.id, p);
     const groundingContext = {
       member: toSafeMember(member),
       billing: roleParam === 'admin' ? billing : undefined,
       scoreNarrative,
+      relevantPeers: Array.from(relevantPeers.values()).slice(0, 8),
+      openEvents: events
+        .filter((e: PortalCompassContext['events'][number]) => e.capacity.booked < e.capacity.total)
+        .slice(0, 5)
+        .map((e: PortalCompassContext['events'][number]) => ({ title: e.title, date: e.date })),
+      notJoinedCommittees: committees
+        .filter((c: PortalCompassContext['committees'][number]) => !c.joined)
+        .map((c: PortalCompassContext['committees'][number]) => c.name),
+      openOpportunities: opportunities
+        .slice(0, 5)
+        .map((o: PortalCompassContext['opportunities'][number]) => ({ title: o.title, author: o.author })),
     };
     try {
-      const text = await askCompassAI(query, groundingContext);
+      const text = await askCompassAI(query, groundingContext, history);
       setMessages((prev) => prev.map((m) => (m.id === placeholderId ? { ...m, pending: false, answer: { text } } : m)));
     } catch (err) {
       const text = err instanceof CompassAiError ? err.message : 'Compass could not answer that just now.';
@@ -98,6 +120,19 @@ export function PortalCompassFab({ member, billing, scoreNarrative, roleParam, n
     }
   };
   const send = () => sendQuery(draft);
+
+  // Same recurring-chip fix as the console FAB: surface a peer from the just-
+  // given answer first, if there is one, then the static list minus whatever
+  // was just asked — never just go silent after the first exchange.
+  const hasUserMessage = messages.some((m) => m.role === 'user');
+  const lastMsg = messages[messages.length - 1];
+  const followUps = useMemo(() => {
+    if (!hasUserMessage || !lastMsg || lastMsg.role !== 'assistant' || lastMsg.pending) return [];
+    const lastUserText = [...messages].reverse().find((m) => m.role === 'user')?.text;
+    const fromAnswer = lastMsg.answer?.peers?.slice(0, 1).map((p) => `Tell me more about ${p.name}`) ?? [];
+    const rest = SUGGESTED_QUESTIONS.filter((s) => s !== lastUserText && !fromAnswer.includes(s));
+    return [...fromAnswer, ...rest].slice(0, 3);
+  }, [hasUserMessage, lastMsg, messages]);
 
   return (
     <div className="fixed bottom-24 right-6 md:right-10 z-[65] print:hidden">
@@ -172,6 +207,19 @@ export function PortalCompassFab({ member, billing, scoreNarrative, roleParam, n
                   )}
                 </div>
               ))}
+              {followUps.length > 0 && (
+                <div className="flex flex-col gap-1.5 pt-1">
+                  {followUps.map((s) => (
+                    <button
+                      key={s}
+                      onClick={() => sendQuery(s)}
+                      className="text-left text-xs font-semibold px-3 py-2 rounded-xl border border-border bg-background hover:border-primary/40 hover:text-primary transition-colors"
+                    >
+                      {s}
+                    </button>
+                  ))}
+                </div>
+              )}
               <div ref={transcriptEndRef} />
             </div>
             <div className="p-3 border-t border-border flex items-center gap-2 bg-card shrink-0">
