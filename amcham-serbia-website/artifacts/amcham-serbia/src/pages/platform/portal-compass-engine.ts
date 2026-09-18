@@ -24,6 +24,9 @@ export interface PortalCompassAnswer {
   text: string;
   peers?: PortalPeer[];
   actions?: PortalCompassAction[];
+  // Absent only on the final "nothing recognized" branch below — the one
+  // case the FAB escalates to a real AI call for.
+  matched?: boolean;
 }
 
 export interface PortalCompassContext {
@@ -47,6 +50,17 @@ function toPeer(d: PortalCompassContext['directory'][number]): PortalPeer {
   return { id: d.id, name: d.name, sector: d.sector, tier: d.tier, recommended: d.recommended, recReason: d.recReason };
 }
 
+// Same narrowing discipline as toPeer(), applied to the viewer's own record:
+// only fields already shown to a member about themselves elsewhere in the
+// portal (score-view, glance-view). Never manager/lifecycle/contactFreshness
+// (staff-internal, confirmed never rendered to a member) and never
+// Company.renewalDate specifically — that's a different value from the
+// portal's own ctx.billing.renewalDate fixture; renewal/fee questions stay
+// sourced from ctx.billing exactly as the deterministic branches above do.
+export function toSafeMember(m: Company) {
+  return { name: m.name, sector: m.sector, tier: m.tier, score: m.score, scoreTrend: m.scoreTrend, since: m.since };
+}
+
 export function answerPortalQuery(query: string, ctx: PortalCompassContext): PortalCompassAnswer {
   const q = query.trim();
   if (!q) {
@@ -58,16 +72,18 @@ export function answerPortalQuery(query: string, ctx: PortalCompassContext): Por
     return {
       text: `Your engagement score is ${ctx.member.score} (${trend} recently).${ctx.scoreNarrative?.summary ? ` ${ctx.scoreNarrative.summary}` : ''}`,
       actions: [{ type: 'openView', label: 'Open Membership Value', viewId: 'score' }],
+      matched: true,
     };
   }
 
   if (/\bfee\b|\bhow much do (?:i|we) pay\b|\binvoices?\b/i.test(q)) {
     if (ctx.roleParam !== 'admin') {
-      return { text: 'Billing detail is only visible to account admins for your company — switch to the admin view to see it.' };
+      return { text: 'Billing detail is only visible to account admins for your company — switch to the admin view to see it.', matched: true };
     }
     return {
       text: `Renews ${ctx.billing.renewalDate}, paid via ${ctx.billing.paymentMethod}.`,
       actions: [{ type: 'openView', label: 'Open Billing', viewId: 'billing' }],
+      matched: true,
     };
   }
 
@@ -75,18 +91,20 @@ export function answerPortalQuery(query: string, ctx: PortalCompassContext): Por
     return {
       text: `Your membership renews ${ctx.billing.renewalDate}.`,
       actions: [{ type: 'openView', label: 'Open Membership Value', viewId: 'score' }],
+      matched: true,
     };
   }
 
   if (/\brecommended\b|\bwho should i (?:meet|connect with)\b|\bintros?\b|\bintroductions?\b/i.test(q)) {
     const recs = ctx.directory.filter((d) => d.recommended).slice(0, 5).map(toPeer);
     if (recs.length === 0) {
-      return { text: 'No recommended introductions right now — check back after your next event or committee activity.' };
+      return { text: 'No recommended introductions right now — check back after your next event or committee activity.', matched: true };
     }
     return {
       text: `${recs.length} recommended connection${recs.length === 1 ? '' : 's'}, based on shared committees and matchmaking signals.`,
       peers: recs,
       actions: [{ type: 'openView', label: 'Open Directory', viewId: 'directory' }],
+      matched: true,
     };
   }
 
@@ -99,6 +117,7 @@ export function answerPortalQuery(query: string, ctx: PortalCompassContext): Por
         : `No ${matchedSector} members found in the directory.`,
       peers,
       actions: [{ type: 'openView', label: 'Open Directory', viewId: 'directory' }],
+      matched: true,
     };
   }
 
@@ -109,6 +128,7 @@ export function answerPortalQuery(query: string, ctx: PortalCompassContext): Por
         ? `${open.map((e) => `${e.title} (${e.date})`).join('; ')} — ${open.length} event${open.length === 1 ? ' has' : 's have'} open seats.`
         : 'No events with open seats right now — everything upcoming is fully booked.',
       actions: [{ type: 'openView', label: 'Open Events', viewId: 'events' }],
+      matched: true,
     };
   }
 
@@ -120,6 +140,7 @@ export function answerPortalQuery(query: string, ctx: PortalCompassContext): Por
         ? `You're not yet on: ${notJoined.map((c) => c.name).join(', ')}.${joined?.nextMeeting ? ` Your next meeting is ${joined.nextMeeting.date}.` : ''}`
         : "You're already on every active committee.",
       actions: [{ type: 'openView', label: 'Open Committees', viewId: 'committee' }],
+      matched: true,
     };
   }
 
@@ -129,6 +150,7 @@ export function answerPortalQuery(query: string, ctx: PortalCompassContext): Por
         ? `${ctx.opportunities.map((o) => `${o.author}: ${o.title}`).join('; ')}.`
         : 'No open opportunities in the marketplace right now.',
       actions: [{ type: 'openView', label: 'Open Opportunities', viewId: 'marketplace' }],
+      matched: true,
     };
   }
 

@@ -14,6 +14,9 @@ export interface CompassAnswer {
   companies?: Company[];
   departed?: DepartedMember[];
   actions?: CompassAction[];
+  // Absent only on the final "nothing recognized" branch below — the one
+  // case the FAB escalates to a real AI call for.
+  matched?: boolean;
 }
 
 // Phrases that mean "tell me about the company already open" rather than a
@@ -69,6 +72,35 @@ export function getCompanyContextSummary(companyId: string): CompassAnswer | nul
   return { text: parts.join(' '), companies: [company], actions };
 }
 
+// Same underlying lookups as getCompanyContextSummary, structured as plain
+// data rather than joined prose — this is what gets sent to the AI-escalation
+// path as grounding context, never the prose itself (Claude writes its own
+// phrasing from the raw facts).
+export function getCompanyGroundingContext(companyId: string): Record<string, unknown> | null {
+  const company = platformData.allMembers.find((c) => c.id === companyId);
+  if (!company) return null;
+
+  const explanation = explainScore(companyId);
+  const ritualItem = platformData.console.ritual.items.find((i) => i.companyId === companyId);
+  const retentionCase = platformData.console.retention.find((r) => r.companyId === companyId);
+  const openFlags = platformData.console.flags.filter((f) => f.companyId === companyId && f.status === 'pending');
+  const teamNames = new Set(platformData.console.team.map((m) => m.name));
+  const isCoverageGap = company.tier === 'Patron' && !teamNames.has(company.manager);
+
+  return {
+    name: company.name,
+    sector: company.sector,
+    tier: company.tier,
+    score: company.score,
+    scoreTrend: company.scoreTrend,
+    scoreExplanation: explanation?.text,
+    openRitualItem: ritualItem ? { tag: ritualItem.tag, text: ritualItem.text, urgency: ritualItem.urgency, dueDate: ritualItem.dueDate } : null,
+    retentionCase: retentionCase ? { risk: retentionCase.risk, reason: retentionCase.reason, stage: retentionCase.stage, deadline: retentionCase.deadline } : null,
+    pendingFlags: openFlags.map((f) => f.note),
+    coverageGap: isCoverageGap,
+  };
+}
+
 // Deterministic, grounded-in-real-fields "something needs attention" pick —
 // same idiom as ActivityTicker/PresenceIndicator: never random, always
 // traceable back to an actual fixture row.
@@ -109,12 +141,13 @@ export function answerCompassQuery(
   const { results, departed, explanation, applied } = runFixtureQuery(trimmed, t);
   if (applied.length > 0) {
     if (departed) {
-      return { text: explanation, departed, actions: [{ type: 'openAsk', label: 'See full results in Ask', query: trimmed }] };
+      return { text: explanation, departed, actions: [{ type: 'openAsk', label: 'See full results in Ask', query: trimmed }], matched: true };
     }
     return {
       text: explanation,
       companies: results.slice(0, 5),
       actions: [{ type: 'openAsk', label: `See all ${results.length} in Ask`, query: trimmed }],
+      matched: true,
     };
   }
 
@@ -122,11 +155,11 @@ export function answerCompassQuery(
   const mentioned = findMentionedCompany(trimmed);
   if (mentioned) {
     const summary = getCompanyContextSummary(mentioned.id);
-    if (summary) return summary;
+    if (summary) return { ...summary, matched: true };
   }
   if (ctx.selectedCompanyId && looksLikeContextFollowUp(trimmed)) {
     const summary = getCompanyContextSummary(ctx.selectedCompanyId);
-    if (summary) return summary;
+    if (summary) return { ...summary, matched: true };
   }
 
   // 3. Nothing recognized — the same "no filter matched" help text
