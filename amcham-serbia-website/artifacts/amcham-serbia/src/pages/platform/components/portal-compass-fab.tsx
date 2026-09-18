@@ -3,8 +3,9 @@ import { Compass, X, Send, ArrowUpRight } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Company } from '@/data/platform';
 import { usePortalState } from '../portal-state';
-import { answerPortalQuery, getPortalNudge, PortalCompassAnswer, PortalCompassAction } from '../portal-compass-engine';
-import { AiBadge, TypewriterText } from '@/components/ui/ai-badge';
+import { answerPortalQuery, getPortalNudge, toSafeMember, PortalCompassAnswer, PortalCompassAction } from '../portal-compass-engine';
+import { AiBadge, AiThinking, TypewriterText } from '@/components/ui/ai-badge';
+import { askCompassAI, CompassAiError } from '@/lib/compass-ai';
 import { cn } from '@/lib/utils';
 
 interface PortalCompassMessage {
@@ -12,6 +13,9 @@ interface PortalCompassMessage {
   role: 'user' | 'assistant';
   text?: string;
   answer?: PortalCompassAnswer;
+  // Transient UI state for the AI-escalation path — never part of a
+  // resolved PortalCompassAnswer.
+  pending?: boolean;
 }
 
 // Phrased the way a member would actually ask, not in filter-syntax.
@@ -61,14 +65,37 @@ export function PortalCompassFab({ member, billing, scoreNarrative, roleParam, n
     setOpen(false);
   };
 
-  const sendQuery = (raw: string) => {
+  const sendQuery = async (raw: string) => {
     const query = raw.trim();
     if (!query) return;
     const userMsg: PortalCompassMessage = { id: `u-${Date.now()}`, role: 'user', text: query };
     const answer = answerPortalQuery(query, context);
-    const assistantMsg: PortalCompassMessage = { id: `a-${Date.now()}`, role: 'assistant', answer };
-    setMessages((prev) => [...prev, userMsg, assistantMsg]);
     setDraft('');
+
+    if (answer.matched) {
+      const assistantMsg: PortalCompassMessage = { id: `a-${Date.now()}`, role: 'assistant', answer };
+      setMessages((prev) => [...prev, userMsg, assistantMsg]);
+      return;
+    }
+
+    const placeholderId = `a-${Date.now()}`;
+    setMessages((prev) => [...prev, userMsg, { id: placeholderId, role: 'assistant', pending: true }]);
+    // Billing is re-gated here, not just inherited from `context` — the
+    // deterministic fee branch above only gates it with a runtime `if`, so
+    // this object (not `context` itself) is what actually leaves the
+    // browser toward the AI backend.
+    const groundingContext = {
+      member: toSafeMember(member),
+      billing: roleParam === 'admin' ? billing : undefined,
+      scoreNarrative,
+    };
+    try {
+      const text = await askCompassAI(query, groundingContext);
+      setMessages((prev) => prev.map((m) => (m.id === placeholderId ? { ...m, pending: false, answer: { text } } : m)));
+    } catch (err) {
+      const text = err instanceof CompassAiError ? err.message : 'Compass could not answer that just now.';
+      setMessages((prev) => prev.map((m) => (m.id === placeholderId ? { ...m, pending: false, answer: { text } } : m)));
+    }
   };
   const send = () => sendQuery(draft);
 
@@ -116,7 +143,7 @@ export function PortalCompassFab({ member, billing, scoreNarrative, roleParam, n
                     <div className="bg-primary text-primary-foreground rounded-2xl rounded-br-sm px-4 py-2.5 text-sm max-w-[85%] shadow-sm">{m.text}</div>
                   ) : (
                     <div className="bg-card border border-border rounded-2xl rounded-bl-sm px-4 py-3 text-sm max-w-[92%] shadow-sm text-foreground space-y-2.5">
-                      <TypewriterText text={m.answer?.text || ''} runKey={m.id} speedMs={6} />
+                      {m.pending ? <AiThinking /> : <TypewriterText text={m.answer?.text || ''} runKey={m.id} speedMs={6} />}
                       {m.answer?.peers && m.answer.peers.length > 0 && (
                         <div className="space-y-1.5 pt-1">
                           {m.answer.peers.map((p) => (

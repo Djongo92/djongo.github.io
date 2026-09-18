@@ -4,8 +4,9 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { useI18n } from '@/lib/i18n';
 import { platformData } from '@/data/platform';
 import { useConsoleState } from '../console-state';
-import { answerCompassQuery, getProactiveNudge, CompassAnswer, CompassAction } from '../compass-engine';
-import { AiBadge, TypewriterText } from '@/components/ui/ai-badge';
+import { answerCompassQuery, getProactiveNudge, getCompanyGroundingContext, CompassAnswer, CompassAction } from '../compass-engine';
+import { AiBadge, AiThinking, TypewriterText } from '@/components/ui/ai-badge';
+import { askCompassAI, CompassAiError } from '@/lib/compass-ai';
 import { cn } from '@/lib/utils';
 
 interface CompassMessage {
@@ -13,6 +14,9 @@ interface CompassMessage {
   role: 'user' | 'assistant';
   text?: string;
   answer?: CompassAnswer;
+  // Transient UI state for the AI-escalation path — never part of a
+  // resolved CompassAnswer.
+  pending?: boolean;
 }
 
 // Phrased the way someone would actually ask, not in filter-syntax — proof
@@ -82,14 +86,44 @@ export function CompassFab({ view, selectedCompanyId, roleParam, navigateTo, sho
     setOpen(false);
   };
 
-  const sendQuery = (raw: string) => {
+  // Book-level context for a query with no company pinned — a small summary,
+  // never all 40 companies' full records. "at-risk" reuses ask.tsx's own
+  // lifecycle==='at-risk' definition so Compass's book-wide answers stay
+  // consistent with what Ask/Cmd+K already consider "at risk".
+  const buildBookContext = () => {
+    const members = platformData.allMembers;
+    const byTier: Record<string, number> = {};
+    for (const c of members) byTier[c.tier] = (byTier[c.tier] || 0) + 1;
+    const topAtRisk = members
+      .filter((c) => c.lifecycle === 'at-risk')
+      .slice(0, 5)
+      .map((c) => ({ name: c.name, score: c.score, scoreTrend: c.scoreTrend }));
+    return { totalMembers: members.length, byTier, topAtRisk };
+  };
+
+  const sendQuery = async (raw: string) => {
     const query = raw.trim();
     if (!query) return;
     const userMsg: CompassMessage = { id: `u-${Date.now()}`, role: 'user', text: query };
     const answer = answerCompassQuery(query, { selectedCompanyId: pinnedCompanyId }, t);
-    const assistantMsg: CompassMessage = { id: `a-${Date.now()}`, role: 'assistant', answer };
-    setMessages((prev) => [...prev, userMsg, assistantMsg]);
     setDraft('');
+
+    if (answer.matched) {
+      const assistantMsg: CompassMessage = { id: `a-${Date.now()}`, role: 'assistant', answer };
+      setMessages((prev) => [...prev, userMsg, assistantMsg]);
+      return;
+    }
+
+    const placeholderId = `a-${Date.now()}`;
+    setMessages((prev) => [...prev, userMsg, { id: placeholderId, role: 'assistant', pending: true }]);
+    const groundingContext = pinnedCompanyId ? getCompanyGroundingContext(pinnedCompanyId) : buildBookContext();
+    try {
+      const text = await askCompassAI(query, groundingContext);
+      setMessages((prev) => prev.map((m) => (m.id === placeholderId ? { ...m, pending: false, answer: { text } } : m)));
+    } catch (err) {
+      const text = err instanceof CompassAiError ? err.message : 'Compass could not answer that just now.';
+      setMessages((prev) => prev.map((m) => (m.id === placeholderId ? { ...m, pending: false, answer: { text } } : m)));
+    }
   };
   const send = () => sendQuery(draft);
 
@@ -157,7 +191,7 @@ export function CompassFab({ view, selectedCompanyId, roleParam, navigateTo, sho
                     <div className="bg-primary text-primary-foreground rounded-2xl rounded-br-sm px-4 py-2.5 text-sm max-w-[85%] shadow-sm">{m.text}</div>
                   ) : (
                     <div className="bg-card border border-border rounded-2xl rounded-bl-sm px-4 py-3 text-sm max-w-[92%] shadow-sm text-foreground space-y-2.5">
-                      <TypewriterText text={m.answer?.text || ''} runKey={m.id} speedMs={6} />
+                      {m.pending ? <AiThinking /> : <TypewriterText text={m.answer?.text || ''} runKey={m.id} speedMs={6} />}
                       {m.answer?.companies && m.answer.companies.length > 0 && (
                         <div className="space-y-1.5 pt-1">
                           {m.answer.companies.map((c) => (

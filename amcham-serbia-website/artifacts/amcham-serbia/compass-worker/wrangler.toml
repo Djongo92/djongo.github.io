@@ -1,0 +1,18 @@
+name = "amcham-compass-worker"
+main = "src/index.ts"
+compatibility_date = "2026-09-18"
+
+[vars]
+# Set to the real deployed site origin, e.g. "https://djongo92.github.io"
+ALLOWED_ORIGIN = "https://djongo92.github.io"
+
+[[ratelimits]]
+name = "COMPASS_LIMITER"
+namespace_id = "1001"
+
+[ratelimits.simple]
+limit = 30
+period = 60
+
+# ANTHROPIC_API_KEY is set via `wrangler secret put ANTHROPIC_API_KEY` —
+# never store it here, never commit it.
