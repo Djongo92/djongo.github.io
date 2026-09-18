@@ -2,7 +2,7 @@
 // server-side — this static site can never hold that key itself. The Worker
 // grounds every answer in whatever `context` the caller passes (never the
 // full fixture set), per its own system prompt. See compass-worker/.
-const COMPASS_WORKER_URL = 'https://amcham-compass-worker.YOUR-SUBDOMAIN.workers.dev';
+const COMPASS_WORKER_URL = 'https://amcham-compass-worker.andrija-amcham.workers.dev';
 
 export class CompassAiError extends Error {}
 
