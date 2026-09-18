@@ -26,6 +26,33 @@ interface CompassMessage {
 // it immediately.
 const SUGGESTED_QUESTIONS = ["Who's struggling right now?", 'Anyone I should call today?', 'Our top performers', "Who's gone quiet?"];
 
+// Lightweight page-awareness for the AI escalation path. Plain English is
+// enough here — this only ever reaches the model as a JSON field, never
+// rendered UI copy, so it doesn't need to track the sidebar's i18n keys.
+const VIEW_LABELS: Record<string, string> = {
+  ritual: 'Daily Ritual queue',
+  heatmap: 'Portfolio Heatmap',
+  accounts: 'Accounts',
+  retention: 'Retention queue',
+  outreach: 'Outreach',
+  ask: 'Ask',
+  matchmaking: 'Matchmaking',
+  sponsorship: 'Sponsorship pipeline',
+  committees: 'Committees',
+  intelligence: 'Intelligence',
+  flags: 'Flags queue',
+  approvals: 'Approvals queue',
+  'my-team': 'My Team',
+  'board-summary': 'Board Summary',
+  cover: 'Cover page',
+  digests: 'Digests',
+  analytics: 'Analytics',
+  reports: 'Reports',
+  brief: 'a company Brief',
+  network: 'Relationship Network graph',
+  integrations: 'Integrations',
+};
+
 interface CompassFabProps {
   view: string;
   selectedCompanyId: string | null;
@@ -117,7 +144,13 @@ export function CompassFab({ view, selectedCompanyId, roleParam, navigateTo, sho
     const placeholderId = `a-${Date.now()}`;
     const history = buildCompassHistory(messages);
     setMessages((prev) => [...prev, userMsg, { id: placeholderId, role: 'assistant', pending: true }]);
-    const groundingContext = pinnedCompanyId ? getCompanyGroundingContext(pinnedCompanyId) : buildBookContext();
+    const baseContext = pinnedCompanyId ? getCompanyGroundingContext(pinnedCompanyId) : buildBookContext();
+    const pinnedCompanyName = pinnedCompanyId ? platformData.allMembers.find((c) => c.id === pinnedCompanyId)?.name : undefined;
+    const pageLabel = VIEW_LABELS[view] ?? view.replace(/-/g, ' ');
+    const groundingContext = {
+      ...(baseContext ?? {}),
+      currentPage: pinnedCompanyName ? `${pageLabel} (dossier open for ${pinnedCompanyName})` : pageLabel,
+    };
     try {
       const text = await askCompassAI(query, groundingContext, history);
       setMessages((prev) => prev.map((m) => (m.id === placeholderId ? { ...m, pending: false, answer: { text } } : m)));
@@ -202,10 +235,14 @@ export function CompassFab({ view, selectedCompanyId, roleParam, navigateTo, sho
                 </div>
               )}
               {messages.map((m) => (
-                <div key={m.id} className={m.role === 'user' ? 'flex justify-end' : 'flex justify-start'}>
+                <div key={m.id} className={m.role === 'user' ? 'flex justify-end' : 'flex justify-start gap-2'}>
                   {m.role === 'user' ? (
                     <div className="bg-primary text-primary-foreground rounded-2xl rounded-br-sm px-4 py-2.5 text-sm max-w-[85%] shadow-sm">{m.text}</div>
                   ) : (
+                    <>
+                    <div className="w-6 h-6 rounded-full bg-primary/10 border border-primary/20 flex items-center justify-center shrink-0 mt-0.5">
+                      <Compass className="w-3.5 h-3.5 text-primary" />
+                    </div>
                     <div className="bg-card border border-border rounded-2xl rounded-bl-sm px-4 py-3 text-sm max-w-[92%] shadow-sm text-foreground space-y-2.5">
                       {m.pending ? <AiThinking /> : <TypewriterText text={m.answer?.text || ''} runKey={m.id} speedMs={6} />}
                       {m.answer?.companies && m.answer.companies.length > 0 && (
@@ -252,6 +289,7 @@ export function CompassFab({ view, selectedCompanyId, roleParam, navigateTo, sho
                         </div>
                       )}
                     </div>
+                    </>
                   )}
                 </div>
               ))}

@@ -21,11 +21,30 @@ interface PortalCompassMessage {
 // Phrased the way a member would actually ask, not in filter-syntax.
 const SUGGESTED_QUESTIONS = ['How\'s my score?', 'When do I renew?', 'Any recommended intros?', 'What events are open?'];
 
+// Lightweight page-awareness for the AI escalation path — a plain English
+// label is enough since this only ever reaches the model as a JSON field.
+const VIEW_LABELS: Record<string, string> = {
+  home: 'Home dashboard',
+  score: 'Membership Value (score breakdown)',
+  glance: 'At a Glance',
+  directory: 'the Member Directory',
+  laptime: 'Lap Time',
+  events: 'Events',
+  marketplace: 'the Opportunities marketplace',
+  committee: 'Committees',
+  onboarding: 'Onboarding',
+  seam: 'The Seam',
+  people: 'People',
+  billing: 'Billing',
+  notifications: 'Notifications',
+};
+
 interface PortalCompassFabProps {
   member: Company;
   billing: { renewalDate: string; paymentMethod: string; invoices: any[] };
   scoreNarrative?: { summary?: string } | null;
   roleParam: string;
+  view: string;
   navigateTo: (view: string) => void;
   open: boolean;
   setOpen: (open: boolean) => void;
@@ -36,7 +55,7 @@ interface PortalCompassFabProps {
 // numbers, plus the Directory's already-public peer fields (name, sector,
 // tier, recommended reason). Never manager, lifecycle, contactFreshness, or
 // another company's raw score — those stay staff-internal.
-export function PortalCompassFab({ member, billing, scoreNarrative, roleParam, navigateTo, open, setOpen }: PortalCompassFabProps) {
+export function PortalCompassFab({ member, billing, scoreNarrative, roleParam, view, navigateTo, open, setOpen }: PortalCompassFabProps) {
   const { directory, events, opportunities, committees } = usePortalState();
   const [messages, setMessages] = useState<PortalCompassMessage[]>([]);
   const [draft, setDraft] = useState('');
@@ -99,6 +118,7 @@ export function PortalCompassFab({ member, billing, scoreNarrative, roleParam, n
       member: toSafeMember(member),
       billing: roleParam === 'admin' ? billing : undefined,
       scoreNarrative,
+      currentPage: VIEW_LABELS[view] ?? view,
       relevantPeers: Array.from(relevantPeers.values()).slice(0, 8),
       openEvents: events
         .filter((e: PortalCompassContext['events'][number]) => e.capacity.booked < e.capacity.total)
@@ -173,10 +193,14 @@ export function PortalCompassFab({ member, billing, scoreNarrative, roleParam, n
                 </div>
               )}
               {messages.map((m) => (
-                <div key={m.id} className={m.role === 'user' ? 'flex justify-end' : 'flex justify-start'}>
+                <div key={m.id} className={m.role === 'user' ? 'flex justify-end' : 'flex justify-start gap-2'}>
                   {m.role === 'user' ? (
                     <div className="bg-primary text-primary-foreground rounded-2xl rounded-br-sm px-4 py-2.5 text-sm max-w-[85%] shadow-sm">{m.text}</div>
                   ) : (
+                    <>
+                    <div className="w-6 h-6 rounded-full bg-primary/10 border border-primary/20 flex items-center justify-center shrink-0 mt-0.5">
+                      <Compass className="w-3.5 h-3.5 text-primary" />
+                    </div>
                     <div className="bg-card border border-border rounded-2xl rounded-bl-sm px-4 py-3 text-sm max-w-[92%] shadow-sm text-foreground space-y-2.5">
                       {m.pending ? <AiThinking /> : <TypewriterText text={m.answer?.text || ''} runKey={m.id} speedMs={6} />}
                       {m.answer?.peers && m.answer.peers.length > 0 && (
@@ -204,6 +228,7 @@ export function PortalCompassFab({ member, billing, scoreNarrative, roleParam, n
                         </div>
                       )}
                     </div>
+                    </>
                   )}
                 </div>
               ))}
