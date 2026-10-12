@@ -1,15 +1,36 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useLocation } from 'wouter';
-import { Search, Menu, X, Globe } from 'lucide-react';
+import { Search, Menu, X, Globe, ChevronDown, LayoutDashboard, Map, Presentation } from 'lucide-react';
 import { useI18n } from '@/lib/i18n';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ThemeToggle } from '@/components/ui/theme-toggle';
+import { useShowcase } from '@/components/showcase-tour';
 
 export function Header() {
   const { lang, setLang, t } = useI18n();
   const [location, navigate] = useLocation();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
+  const [showcaseOpen, setShowcaseOpen] = useState(false);
+  const showcaseRef = React.useRef<HTMLDivElement>(null);
+  const { start: startShowcase } = useShowcase();
+
+  // The demo surfaces (platform mock, redesign blueprint, guided walkthrough)
+  // live under one menu so they don't crowd the real site navigation.
+  const showcaseLinks = [
+    { href: '/platform', icon: LayoutDashboard, label: t('nav.showcase_platform', 'Member Platform'), desc: t('nav.showcase_platform_desc', 'Staff console and member portal') },
+    { href: '/blueprint', icon: Map, label: t('nav.blueprint'), desc: t('nav.showcase_blueprint_desc', 'Why the site is built this way, and the roadmap') },
+  ];
+
+  useEffect(() => {
+    if (!showcaseOpen) return;
+    const onDown = (e: MouseEvent) => { if (!showcaseRef.current?.contains(e.target as Node)) setShowcaseOpen(false); };
+    const onKey = (e: KeyboardEvent) => { if (e.key === 'Escape') setShowcaseOpen(false); };
+    document.addEventListener('mousedown', onDown);
+    document.addEventListener('keydown', onKey);
+    return () => { document.removeEventListener('mousedown', onDown); document.removeEventListener('keydown', onKey); };
+  }, [showcaseOpen]);
+  useEffect(() => setShowcaseOpen(false), [location]);
 
   const navLinks = [
     { href: '/membership', label: t('nav.membership') },
@@ -19,7 +40,6 @@ export function Header() {
     { href: '/members', label: t('nav.members') },
     { href: '/news', label: t('nav.news') },
     { href: '/about', label: t('nav.about') },
-    { href: '/blueprint', label: t('nav.blueprint'), highlight: true },
   ];
 
   // Handle keyboard shortcut (Cmd+K or /)
@@ -56,7 +76,7 @@ export function Header() {
           <img 
             src={`${import.meta.env.BASE_URL}brand/amcham-logo-white.png`} 
             alt="AmCham Serbia" 
-            className="h-10 md:h-12 w-auto object-contain hidden dark:block"
+            className="h-7 md:h-[33px] w-auto object-contain hidden dark:block"
           />
         </Link>
 
@@ -68,7 +88,7 @@ export function Header() {
               href={link.href}
               className={`text-sm font-medium transition-colors hover:text-primary whitespace-nowrap ${
                 location.startsWith(link.href) && link.href !== '/' ? 'text-primary' : 'text-foreground'
-              } ${link.highlight ? 'border border-accent/50 text-accent-foreground px-3 py-1.5 rounded-sm hover:border-accent hover:bg-accent/5 bg-accent/5' : ''}`}
+              }`}
             >
               {link.label}
             </Link>
@@ -78,10 +98,47 @@ export function Header() {
         {/* Desktop Actions */}
         <div className="hidden lg:flex items-center gap-3 xl:gap-4 shrink-0">
 
-          <Link href="/platform" className="text-sm font-bold text-primary bg-primary/5 hover:bg-primary/10 px-3 py-1.5 rounded-sm transition-colors flex items-center gap-2 whitespace-nowrap">
-            <span className="w-2 h-2 rounded-full bg-primary animate-pulse shrink-0"></span>
-            {t('platform.nav')}
-          </Link>
+          <div className="relative" ref={showcaseRef}>
+            <button
+              onClick={() => setShowcaseOpen((o) => !o)}
+              aria-expanded={showcaseOpen}
+              aria-haspopup="menu"
+              className="text-sm font-bold text-primary bg-primary/5 hover:bg-primary/10 px-3 py-1.5 rounded-sm transition-colors flex items-center gap-2 whitespace-nowrap"
+            >
+              <span className="w-2 h-2 rounded-full bg-primary animate-pulse shrink-0"></span>
+              {t('nav.showcase', 'Showcase')}
+              <ChevronDown className={`w-3.5 h-3.5 transition-transform ${showcaseOpen ? 'rotate-180' : ''}`} />
+            </button>
+            <AnimatePresence>
+              {showcaseOpen && (
+                <motion.div
+                  role="menu"
+                  initial={{ opacity: 0, y: -6 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -6 }}
+                  transition={{ duration: 0.15 }}
+                  className="absolute right-0 top-full mt-2 w-80 bg-popover text-popover-foreground border border-border rounded-xl shadow-xl p-2 z-50"
+                >
+                  {showcaseLinks.map(({ href, icon: Icon, label, desc }) => (
+                    <Link key={href} href={href} role="menuitem" className="flex items-start gap-3 rounded-lg p-3 hover:bg-muted transition-colors">
+                      <Icon className="w-5 h-5 text-primary shrink-0 mt-0.5" />
+                      <span>
+                        <span className="block text-sm font-bold text-foreground">{label}</span>
+                        <span className="block text-xs text-muted-foreground">{desc}</span>
+                      </span>
+                    </Link>
+                  ))}
+                  <button role="menuitem" onClick={() => { setShowcaseOpen(false); startShowcase(); }} className="w-full flex items-start gap-3 rounded-lg p-3 hover:bg-muted transition-colors text-left border-t border-border mt-1">
+                    <Presentation className="w-5 h-5 text-primary shrink-0 mt-0.5" />
+                    <span>
+                      <span className="block text-sm font-bold text-foreground">{t('showcase.cta_button', 'Start Showcase')}</span>
+                      <span className="block text-xs text-muted-foreground">{t('nav.showcase_tour_desc', 'A scripted walk through the strongest moments')}</span>
+                    </span>
+                  </button>
+                </motion.div>
+              )}
+            </AnimatePresence>
+          </div>
 
           {/* Search (collapsed icon — expands via /search, matches mobile) */}
           <button
@@ -167,11 +224,14 @@ export function Header() {
                 </Link>
               ))}
               
-              <div className="flex items-center justify-between pt-4">
-                <Link href="/platform" onClick={() => setIsMobileMenuOpen(false)} className="text-sm font-bold text-primary flex items-center gap-2">
-                  <span className="w-2 h-2 rounded-full bg-primary animate-pulse"></span>
-                  {t('platform.nav')}
-                </Link>
+              <div className="pt-4 flex flex-col gap-1">
+                <span className="text-xs font-bold uppercase tracking-widest text-primary flex items-center gap-2 mb-1"><span className="w-2 h-2 rounded-full bg-primary animate-pulse"></span>{t('nav.showcase', 'Showcase')}</span>
+                {showcaseLinks.map(({ href, label }) => (
+                  <Link key={href} href={href} onClick={() => setIsMobileMenuOpen(false)} className="text-base font-bold text-foreground py-1.5">{label}</Link>
+                ))}
+              </div>
+
+              <div className="flex items-center justify-end pt-4">
 
                 <div className="flex items-center gap-3">
                   <button

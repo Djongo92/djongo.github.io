@@ -18,12 +18,12 @@ export function TourOverlay({ step, setStep, endTour, steps, labels, onBack, bad
 
   return (
     <div className="fixed inset-0 z-[100] pointer-events-none flex items-end justify-center pb-10 px-4">
-      <motion.div initial={{ opacity: 0, y: 50, scale: 0.95 }} animate={{ opacity: 1, y: 0, scale: 1 }} exit={{ opacity: 0, y: 20, scale: 0.95 }} transition={{ type: "spring", stiffness: 400, damping: 30 }} className="w-full max-w-md bg-foreground text-background rounded-3xl p-8 shadow-2xl pointer-events-auto border border-foreground/10 relative overflow-hidden font-sans">
+      <motion.div initial={{ opacity: 0, y: 50, scale: 0.95 }} animate={{ opacity: 1, y: 0, scale: 1 }} exit={{ opacity: 0, y: 20, scale: 0.95 }} transition={{ type: "spring", stiffness: 400, damping: 30 }} className="w-full max-w-md ink bg-foreground text-background rounded-3xl p-8 shadow-2xl pointer-events-auto border border-foreground/10 relative overflow-hidden font-sans">
         <svg className="absolute top-0 right-0 w-32 h-32 opacity-10 pointer-events-none" viewBox="0 0 100 100">
            <circle cx="80" cy="20" r="40" fill="currentColor" />
         </svg>
         {badge && (
-          <div className="flex items-center gap-2 text-[10px] font-bold uppercase tracking-widest text-accent mb-4">
+          <div className="flex items-center gap-2 text-[11px] font-bold uppercase tracking-widest text-accent mb-4">
             <badge.icon className="w-3.5 h-3.5" /> {badge.label}
           </div>
         )}
@@ -35,15 +35,15 @@ export function TourOverlay({ step, setStep, endTour, steps, labels, onBack, bad
           </div>
           <div className="flex items-center gap-4">
             {onBack && step > 0 && (
-              <button onClick={onBack} className="text-[10px] font-bold uppercase tracking-widest text-background/50 hover:text-background transition-colors">{labels.back || 'Back'}</button>
+              <button onClick={onBack} className="text-[11px] font-bold uppercase tracking-widest text-background/70 hover:text-background transition-colors">{labels.back || 'Back'}</button>
             )}
-            <button onClick={endTour} className="text-[10px] font-bold uppercase tracking-widest text-background/50 hover:text-background transition-colors">{labels.skip}</button>
+            <button onClick={endTour} className="text-[11px] font-bold uppercase tracking-widest text-background/70 hover:text-background transition-colors">{labels.skip}</button>
           </div>
         </div>
         <h3 className="text-3xl font-serif font-light mb-3">{steps[step].title}</h3>
-        <p className="text-sm font-medium text-background/70 mb-8 leading-relaxed">{steps[step].desc}</p>
+        <p className="text-sm font-medium text-background/80 mb-8 leading-relaxed">{steps[step].desc}</p>
         <div className="flex justify-between items-center">
-          <div className="text-xs font-bold text-background/40">{step + 1} / {total}</div>
+          <div className="text-xs font-bold text-background/60">{step + 1} / {total}</div>
           <button onClick={() => {
             if (step === total - 1) endTour();
             else setStep(step + 1);
@@ -105,7 +105,7 @@ export function CommandPalette({ close, navigateTo }: { close: () => void, navig
         animate={{ opacity: 1, scale: 1, y: 0 }}
         exit={{ opacity: 0, scale: 0.95, y: -20 }}
         transition={{ type: "spring", stiffness: 400, damping: 35 }}
-        className="w-full max-w-2xl bg-foreground text-background rounded-3xl shadow-2xl overflow-hidden relative z-10 border border-foreground/10"
+        className="w-full max-w-2xl ink bg-foreground text-background rounded-3xl shadow-2xl overflow-hidden relative z-10 border border-foreground/10"
       >
         <div className="flex items-center px-6 border-b border-background/10">
           <Search className="w-5 h-5 text-accent mr-4" />
@@ -117,13 +117,13 @@ export function CommandPalette({ close, navigateTo }: { close: () => void, navig
             value={query}
             onChange={e => setQuery(e.target.value)}
           />
-          <button onClick={close} className="text-[10px] font-bold text-foreground bg-background px-2 py-1 rounded-full uppercase tracking-wider">Esc</button>
+          <button onClick={close} className="text-[11px] font-bold text-foreground bg-background px-2 py-1 rounded-full uppercase tracking-wider">Esc</button>
         </div>
         
         <div className="max-h-[50vh] overflow-y-auto p-4 space-y-6">
           {compassAnswer && (
             <div className="bg-background/5 border border-accent/20 rounded-2xl p-5">
-              <div className="text-[10px] uppercase font-bold text-accent tracking-widest px-0 mb-3 flex items-center gap-2">
+              <div className="text-[11px] uppercase font-bold text-accent tracking-widest px-0 mb-3 flex items-center gap-2">
                 <Compass className="w-3.5 h-3.5" /> Ask {AI_NAME}
               </div>
               <p className="text-sm text-background/80 font-medium mb-4">{compassAnswer.explanation}</p>
@@ -141,7 +141,7 @@ export function CommandPalette({ close, navigateTo }: { close: () => void, navig
                   {compassAnswer.results.slice(0, 3).map(c => (
                     <button key={c.id} onClick={() => { navigateTo('accounts', c.id); close(); }} className="w-full flex items-center justify-between gap-3 px-3 py-2 rounded-xl bg-background/10 hover:bg-background/20 transition-colors group">
                       <span className="text-sm font-medium text-background group-hover:text-accent">{c.name}</span>
-                      <span className="text-xs text-background/50 font-medium">Score: {c.score}</span>
+                      <span className="text-xs text-background/70 font-medium">Score: {c.score}</span>
                     </button>
                   ))}
                 </div>
@@ -154,10 +154,10 @@ export function CommandPalette({ close, navigateTo }: { close: () => void, navig
 
           {matchedViews.length > 0 && (
             <div>
-              <div className="text-[10px] uppercase font-bold text-accent tracking-widest px-4 mb-2">Destinations</div>
+              <div className="text-[11px] uppercase font-bold text-accent tracking-widest px-4 mb-2">Destinations</div>
               {matchedViews.map(v => (
                 <button key={v.id} onClick={() => { navigateTo(v.id); close(); }} className="w-full text-left px-4 py-3 rounded-2xl hover:bg-background/10 transition-all flex items-center gap-3 group">
-                  <Command className="w-4 h-4 text-background/50 group-hover:text-accent" />
+                  <Command className="w-4 h-4 text-background/70 group-hover:text-accent" />
                   <span className="font-medium text-background group-hover:text-accent">{v.label}</span>
                 </button>
               ))}
@@ -166,14 +166,14 @@ export function CommandPalette({ close, navigateTo }: { close: () => void, navig
           
           {matchedCompanies.length > 0 && (
             <div>
-              <div className="text-[10px] uppercase font-bold text-accent tracking-widest px-4 mb-2">{t('platform.console.nav_relationships')}</div>
+              <div className="text-[11px] uppercase font-bold text-accent tracking-widest px-4 mb-2">{t('platform.console.nav_relationships')}</div>
               {matchedCompanies.slice(0,5).map(c => (
                 <button key={c.id} onClick={() => { navigateTo('accounts', c.id); close(); }} className="w-full text-left px-4 py-3 rounded-2xl hover:bg-background/10 transition-all flex items-center justify-between group">
                   <div className="flex items-center gap-4">
-                    <div className="w-8 h-8 rounded-full bg-background/5 flex items-center justify-center text-xs font-bold text-background/50 group-hover:bg-accent/20 group-hover:text-accent transition-colors">{c.avatar}</div>
+                    <div className="w-8 h-8 rounded-full bg-background/5 flex items-center justify-center text-xs font-bold text-background/70 group-hover:bg-accent/20 group-hover:text-accent transition-colors">{c.avatar}</div>
                     <span className="font-medium text-background group-hover:text-accent">{c.name}</span>
                   </div>
-                  <span className="text-xs text-background/50 font-medium">Score: {c.score}</span>
+                  <span className="text-xs text-background/70 font-medium">Score: {c.score}</span>
                 </button>
               ))}
             </div>
@@ -229,8 +229,10 @@ const SHORTCUTS: { keys: string[]; desc: string }[] = [
   { keys: ['⌘', 'K'], desc: 'Open the command palette / Ask Compass' },
   { keys: ['?'], desc: 'Open this shortcuts reference' },
   { keys: ['Esc'], desc: 'Close any open panel or overlay' },
-  { keys: ['↑', '↓'], desc: 'Move between rows in a list or table' },
-  { keys: ['Enter'], desc: 'Open the focused row or submit a form' },
+  { keys: ['J', 'K'], desc: 'Priorities: move up and down the list' },
+  { keys: ['E'], desc: 'Priorities: mark the selected item done' },
+  { keys: ['S'], desc: 'Priorities: snooze the selected item' },
+  { keys: ['O'], desc: 'Priorities: open the account' },
 ];
 
 export function ShortcutsOverlay({ close }: { close: () => void }) {

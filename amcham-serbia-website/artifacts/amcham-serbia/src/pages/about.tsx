@@ -84,21 +84,23 @@ export default function About() {
                 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                   {team.map((member) => (
-                    <div key={member.id} className="bg-card border border-border p-6 rounded-sm flex gap-6 hover:shadow-md transition-shadow group">
-                      <div className="w-24 h-24 shrink-0 relative rounded-sm overflow-hidden bg-background">
-                        <ImageWithSkeleton
-                          src={`${import.meta.env.BASE_URL}images/team/${member.img}`}
-                          alt={member.name}
-                          className="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all duration-500"
-                        />
+                    <div key={member.id} className="bg-card border border-border p-6 rounded-sm flex flex-col gap-4 hover:shadow-md transition-shadow group">
+                      <div className="flex items-center gap-4">
+                        <div className="w-16 h-16 shrink-0 relative rounded-full overflow-hidden bg-background ring-1 ring-border">
+                          <ImageWithSkeleton
+                            src={`${import.meta.env.BASE_URL}images/team/${member.img}`}
+                            alt={member.name}
+                            className="w-full h-full object-cover object-[50%_20%] scale-[1.7] origin-[47%_32%] grayscale group-hover:grayscale-0 transition-[filter] duration-500"
+                          />
+                        </div>
+                        <div className="min-w-0">
+                          <h3 className="font-bold text-lg leading-tight group-hover:text-primary transition-colors">{member.name}</h3>
+                          <p className="text-primary text-xs font-bold uppercase tracking-widest mt-1 leading-snug">{member.role}</p>
+                        </div>
                       </div>
-                      <div>
-                        <h3 className="font-bold text-xl mb-1 group-hover:text-primary transition-colors">{member.name}</h3>
-                        <p className="text-primary text-xs font-bold uppercase tracking-widest mb-3">{member.role}</p>
-                        <p className="text-sm text-muted-foreground leading-relaxed italic border-l-2 border-primary/20 pl-3">
-                          "{member.bio}"
-                        </p>
-                      </div>
+                      <p className="text-sm text-muted-foreground leading-relaxed italic border-l-2 border-primary/20 pl-3">
+                        "{member.bio}"
+                      </p>
                     </div>
                   ))}
                 </div>
@@ -140,7 +142,7 @@ export default function About() {
 
             {/* Sidebar Contact */}
             <div className="lg:col-span-4">
-              <div className="bg-secondary text-secondary-foreground p-8 md:p-10 rounded-sm sticky top-24 shadow-2xl">
+              <div className="bg-secondary text-secondary-foreground p-8 md:p-10 rounded-sm sticky top-24 z-10 shadow-2xl">
                 <div className="flex items-center gap-3 mb-8 pb-4 border-b border-secondary-foreground/10">
                   <Building className="w-6 h-6 text-secondary-foreground" />
                   <h3 className="text-2xl font-serif font-bold text-secondary-foreground">{t('about.contact')}</h3>
@@ -152,7 +154,7 @@ export default function About() {
                       <MapPin className="w-5 h-5" />
                     </div>
                     <div>
-                      <h4 className="font-bold text-xs uppercase tracking-widest text-secondary-foreground/50 mb-2">Address</h4>
+                      <h4 className="font-bold text-xs uppercase tracking-widest text-secondary-foreground/70 mb-2">Address</h4>
                       <p className="text-secondary-foreground text-sm font-medium">{t('footer.address')}</p>
                     </div>
                   </div>
@@ -162,7 +164,7 @@ export default function About() {
                       <Phone className="w-5 h-5" />
                     </div>
                     <div>
-                      <h4 className="font-bold text-xs uppercase tracking-widest text-secondary-foreground/50 mb-2">Phone</h4>
+                      <h4 className="font-bold text-xs uppercase tracking-widest text-secondary-foreground/70 mb-2">Phone</h4>
                       <p className="text-secondary-foreground text-sm font-medium">{t('footer.phone')}</p>
                     </div>
                   </div>
@@ -172,7 +174,7 @@ export default function About() {
                       <Mail className="w-5 h-5" />
                     </div>
                     <div>
-                      <h4 className="font-bold text-xs uppercase tracking-widest text-secondary-foreground/50 mb-2">Email</h4>
+                      <h4 className="font-bold text-xs uppercase tracking-widest text-secondary-foreground/70 mb-2">Email</h4>
                       <a href={`mailto:${t('footer.email')}`} className="text-secondary-foreground text-sm font-medium hover:text-primary transition-colors">{t('footer.email')}</a>
                     </div>
                   </div>

@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import { CompanyMark } from '@/components/ui/company-mark';
 import { useSearch } from 'wouter';
 import { useI18n } from '@/lib/i18n';
 import { platformData, Company, committeeRosters } from '@/data/platform';
@@ -313,7 +314,7 @@ export function AskView({ showToast }: { showToast: (m:string) => void }) {
 
                   {appliedFilters.length > 0 && (
                     <div className="flex flex-wrap items-center gap-2 mb-4">
-                      <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest mr-2">Filters Applied:</span>
+                      <span className="text-[11px] font-bold text-muted-foreground uppercase tracking-widest mr-2">Filters Applied:</span>
                       {appliedFilters.map(f => (
                         <div key={f.id} className="flex items-center gap-1 bg-primary/10 text-primary border border-primary/20 px-3 py-1.5 rounded-full text-xs font-bold shadow-sm">
                           {f.label}
@@ -325,8 +326,8 @@ export function AskView({ showToast }: { showToast: (m:string) => void }) {
                     </div>
                   )}
 
-                  <div className="flex items-center gap-6 text-[10px] font-bold text-muted-foreground uppercase tracking-widest">
-                     <span className="flex items-center gap-2 bg-muted px-3 py-1.5 rounded-md border border-border/50"><ShieldCheck className="w-3 h-3 text-emerald-500" /> Platform Fixture Data</span>
+                  <div className="flex items-center gap-6 text-[11px] font-bold text-muted-foreground uppercase tracking-widest">
+                     <span className="flex items-center gap-2 bg-muted px-3 py-1.5 rounded-md border border-border/50"><ShieldCheck className="w-3 h-3 text-emerald-500" /> Sample member data</span>
                   </div>
                 </div>
 
@@ -378,7 +379,7 @@ export function AskView({ showToast }: { showToast: (m:string) => void }) {
               ) : (
               <div className="flex-1 overflow-x-auto relative z-10 bg-background rounded-3xl border border-border">
                 <table className="w-full text-sm text-left">
-                  <thead className="bg-muted text-[10px] uppercase tracking-widest text-muted-foreground sticky top-0 backdrop-blur-xl">
+                  <thead className="bg-muted text-[11px] uppercase tracking-widest text-muted-foreground sticky top-0 backdrop-blur-xl">
                     <tr>
                       <th className="px-6 py-4 font-bold rounded-tl-3xl">Company</th>
                       <th className="px-6 py-4 font-bold">Details</th>
@@ -398,7 +399,7 @@ export function AskView({ showToast }: { showToast: (m:string) => void }) {
                       >
                         <td className="px-6 py-4">
                           <div className="flex items-center gap-4">
-                            <div className="w-10 h-10 bg-muted rounded-xl flex items-center justify-center text-sm font-bold text-muted-foreground shadow-inner border border-border shrink-0">{c.avatar}</div>
+                            <CompanyMark name={c.name} sector={c.sector} size="md" />
                             <div>
                               <div className="font-bold text-base text-foreground group-hover:text-primary transition-colors">{c.name}</div>
                               <div className="text-xs font-medium text-muted-foreground mt-0.5">{c.tier}</div>
@@ -412,7 +413,7 @@ export function AskView({ showToast }: { showToast: (m:string) => void }) {
                         <td className="px-6 py-4">
                           <div className="flex items-center gap-2">
                              <div className="font-serif text-xl tabular-nums leading-none">{c.score}</div>
-                             <div className={cn("text-[10px] font-bold uppercase tracking-widest px-1.5 py-0.5 rounded-md", c.scoreTrend > 0 ? "bg-emerald-500/10 text-emerald-600" : "bg-destructive/10 text-destructive")}>{c.scoreTrend > 0 ? `+${c.scoreTrend}` : c.scoreTrend}</div>
+                             <div className={cn("text-[11px] font-bold uppercase tracking-widest px-1.5 py-0.5 rounded-md", c.scoreTrend > 0 ? "bg-emerald-500/10 text-emerald-600" : "bg-destructive/10 text-destructive")}>{c.scoreTrend > 0 ? `+${c.scoreTrend}` : c.scoreTrend}</div>
                           </div>
                         </td>
                         <td className="px-6 py-4 text-right">
@@ -421,9 +422,9 @@ export function AskView({ showToast }: { showToast: (m:string) => void }) {
                                <Eye className="w-4 h-4"/>
                              </button>
                              {isQueued(c.id) ? (
-                               <span className="text-[10px] font-bold px-4 py-2 rounded-full bg-emerald-500/10 text-emerald-600 border border-emerald-500/20 flex items-center gap-1 uppercase tracking-widest"><Check className="w-3 h-3"/> Queued</span>
+                               <span className="text-[11px] font-bold px-4 py-2 rounded-full bg-emerald-500/10 text-emerald-600 border border-emerald-500/20 flex items-center gap-1 uppercase tracking-widest"><Check className="w-3 h-3"/> Queued</span>
                              ) : (
-                               <button onClick={() => { queueOutreach(c); showToast(`Added ${c.name} to Outreach queue`); }} className="text-[10px] font-bold uppercase tracking-widest bg-foreground px-4 py-2 rounded-full text-background hover:bg-foreground/90 transition-transform active:scale-95 shadow-md flex items-center gap-1">
+                               <button onClick={() => { queueOutreach(c); showToast(`Added ${c.name} to Outreach queue`); }} className="text-[11px] font-bold uppercase tracking-widest bg-foreground px-4 py-2 rounded-full text-background hover:bg-foreground/90 transition-transform active:scale-95 shadow-md flex items-center gap-1">
                                  Queue <ArrowRight className="w-3 h-3"/>
                                </button>
                              )}
@@ -438,7 +439,7 @@ export function AskView({ showToast }: { showToast: (m:string) => void }) {
 
               <div className="mt-8 bg-muted p-5 rounded-3xl border border-border/50 flex flex-col md:flex-row justify-between items-start md:items-center gap-4 relative z-10 shadow-sm">
                 <div>
-                  <div className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground mb-1 flex items-center gap-2"><Activity className="w-3 h-3"/> Provenance & Execution</div>
+                  <div className="text-[11px] font-bold uppercase tracking-widest text-muted-foreground mb-1 flex items-center gap-2"><Activity className="w-3 h-3"/> Provenance & Execution</div>
                   <div className="text-sm font-medium text-foreground min-h-[1.25em]"><TypewriterText text={explanation} runKey={query} speedMs={8} /></div>
                 </div>
                 <div className="flex items-center gap-3 shrink-0">
@@ -473,7 +474,7 @@ export function AskView({ showToast }: { showToast: (m:string) => void }) {
               <div className="p-6 border-b border-border flex justify-between items-start bg-muted/20 relative overflow-hidden">
                 <div className="absolute top-0 right-0 w-32 h-32 bg-primary/10 rounded-full blur-2xl pointer-events-none"></div>
                 <div className="relative z-10 flex items-center gap-4">
-                  <div className="w-16 h-16 rounded-3xl bg-background border border-border shadow-sm flex items-center justify-center text-2xl font-serif text-muted-foreground">{drawerCompany.avatar}</div>
+                  <CompanyMark name={drawerCompany.name} sector={drawerCompany.sector} size="lg" />
                   <div>
                     <h3 className="text-2xl font-serif font-light text-foreground">{drawerCompany.name}</h3>
                     <p className="text-sm font-bold text-primary">{drawerCompany.tier} Tier</p>
@@ -486,17 +487,17 @@ export function AskView({ showToast }: { showToast: (m:string) => void }) {
 
               <div className="p-6 flex-1 overflow-y-auto space-y-6">
                 <div>
-                   <div className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest mb-3 flex items-center gap-2"><Building className="w-3 h-3" /> Company Profile</div>
+                   <div className="text-[11px] font-bold text-muted-foreground uppercase tracking-widest mb-3 flex items-center gap-2"><Building className="w-3 h-3" /> Company Profile</div>
                    <p className="text-sm font-medium text-foreground leading-relaxed bg-muted/50 p-4 rounded-2xl border border-border/50">{drawerCompany.description}</p>
                 </div>
                 
                 <div className="grid grid-cols-2 gap-4">
                    <div className="bg-background border border-border p-4 rounded-2xl shadow-sm">
-                     <div className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest mb-1 flex items-center gap-1"><Calendar className="w-3 h-3"/> Renewal</div>
+                     <div className="text-[11px] font-bold text-muted-foreground uppercase tracking-widest mb-1 flex items-center gap-1"><Calendar className="w-3 h-3"/> Renewal</div>
                      <div className="font-serif text-lg text-foreground">{drawerCompany.renewalDate}</div>
                    </div>
                    <div className="bg-background border border-border p-4 rounded-2xl shadow-sm">
-                     <div className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest mb-1 flex items-center gap-1"><Activity className="w-3 h-3"/> Score</div>
+                     <div className="text-[11px] font-bold text-muted-foreground uppercase tracking-widest mb-1 flex items-center gap-1"><Activity className="w-3 h-3"/> Score</div>
                      <div className="flex items-center gap-2">
                        <span className="font-serif text-lg text-foreground">{drawerCompany.score}</span>
                        <span className={cn("text-xs font-bold", drawerCompany.scoreTrend > 0 ? "text-emerald-500" : "text-destructive")}>{drawerCompany.scoreTrend > 0 ? '+' : ''}{drawerCompany.scoreTrend}</span>
@@ -505,7 +506,7 @@ export function AskView({ showToast }: { showToast: (m:string) => void }) {
                 </div>
 
                 <div className="bg-primary/5 border border-primary/10 p-5 rounded-2xl">
-                  <div className="text-[10px] font-bold text-primary uppercase tracking-widest mb-3">Outreach Status</div>
+                  <div className="text-[11px] font-bold text-primary uppercase tracking-widest mb-3">Outreach Status</div>
                   {isQueued(drawerCompany.id) ? (
                     <div className="flex items-center gap-2 text-sm font-bold text-emerald-600"><Check className="w-4 h-4"/> Currently in Outreach Queue</div>
                   ) : (

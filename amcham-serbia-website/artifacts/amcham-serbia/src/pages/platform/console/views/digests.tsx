@@ -60,15 +60,15 @@ export function DigestsView({ showToast }: { showToast: (m:string) => void }) {
         <div className="space-y-8">
           <div className="bg-card rounded-[32px] border border-border p-8 shadow-sm flex items-center justify-between">
             <div>
-              <div className="text-[10px] uppercase font-bold text-muted-foreground tracking-widest mb-1">Status</div>
+              <div className="text-[11px] uppercase font-bold text-muted-foreground tracking-widest mb-1">Status</div>
               <div className="text-xl font-serif text-foreground">{t('platform.console.digest_sending', 'Sending {time}').replace('{time}', data.nextSend)}</div>
             </div>
             <div className="w-12 h-12 rounded-full bg-green-500/10 text-green-500 flex items-center justify-center"><Send className="w-5 h-5" /></div>
           </div>
           
-          <div className="bg-foreground text-background rounded-[32px] p-8 shadow-sm relative overflow-hidden">
+          <div className="ink bg-foreground text-background rounded-[32px] p-8 shadow-sm relative overflow-hidden">
              <div className="absolute top-0 right-0 w-32 h-32 bg-[#40D9F1] blur-[80px] opacity-20 pointer-events-none rounded-full"></div>
-             <div className="text-[10px] uppercase font-bold text-[#40D9F1] tracking-widest mb-6 flex items-center gap-2"><BarChart2 className="w-3 h-3"/> Performance Metrics</div>
+             <div className="text-[11px] uppercase font-bold text-[#40D9F1] tracking-widest mb-6 flex items-center gap-2"><BarChart2 className="w-3 h-3"/> Performance Metrics</div>
              
              <div className="space-y-6">
                 <div>
@@ -92,13 +92,13 @@ export function DigestsView({ showToast }: { showToast: (m:string) => void }) {
              </div>
              
              <div className="mt-6 pt-5 border-t border-background/20 flex items-center justify-between text-xs">
-                <span className="text-background/60">Bounce Rate</span>
+                <span className="text-background/75">Bounce Rate</span>
                 <span className="font-bold text-red-400">{data.deliveryMetrics.bounceRate}</span>
              </div>
           </div>
 
           <div>
-            <h3 className="text-[10px] uppercase font-bold text-muted-foreground tracking-widest mb-4 ml-2">{t('platform.console.digest_variants', 'Variants')}</h3>
+            <h3 className="text-[11px] uppercase font-bold text-muted-foreground tracking-widest mb-4 ml-2">{t('platform.console.digest_variants', 'Variants')}</h3>
             <div className="space-y-3">
               {variants.map((v:any) => (
                 <button 
@@ -125,7 +125,7 @@ export function DigestsView({ showToast }: { showToast: (m:string) => void }) {
              <div className="flex flex-col">
                <div className="text-sm font-bold text-foreground uppercase tracking-widest">{activeV.name}</div>
                <div className="text-xs text-muted-foreground mt-1 flex items-center gap-2">
-                 <span className={cn("px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-widest", activeV.draftStatus === 'schedule' ? 'bg-green-500/10 text-green-600' : 'bg-amber-500/10 text-amber-600')}>{activeV.draftStatus}</span>
+                 <span className={cn("px-2 py-0.5 rounded text-[11px] font-bold uppercase tracking-widest", activeV.draftStatus === 'schedule' ? 'bg-green-500/10 text-green-600' : 'bg-amber-500/10 text-amber-600')}>{activeV.draftStatus}</span>
                  • AI Generated Draft
                </div>
              </div>
@@ -199,7 +199,7 @@ export function DigestsView({ showToast }: { showToast: (m:string) => void }) {
                  <div className="absolute top-8 right-8 w-12 h-12 bg-blue-50 rounded-full flex items-center justify-center border border-blue-100">
                    <div className="font-serif text-blue-900 text-lg font-bold">A</div>
                  </div>
-                 <div className="text-[10px] font-bold tracking-widest uppercase text-gray-400 mb-10">AmCham Serbia Intelligence</div>
+                 <div className="text-[11px] font-bold tracking-widest uppercase text-gray-400 mb-10">AmCham Serbia Intelligence</div>
                  <h1 className="text-4xl font-serif font-light mb-8 text-gray-900 leading-tight">Weekly Executive Brief</h1>
                  <div className="text-gray-700 leading-relaxed mb-10 text-lg font-medium whitespace-pre-wrap">
                     {activeV.content}
@@ -209,12 +209,12 @@ export function DigestsView({ showToast }: { showToast: (m:string) => void }) {
                    {activeV.id === 'patron' ? (
                      <>
                        <div className="bg-gray-50 border border-gray-100 p-6 rounded-2xl border-l-4 border-l-blue-500">
-                         <div className="text-[10px] font-bold uppercase tracking-widest text-blue-500 mb-2">Policy Radar</div>
+                         <div className="text-[11px] font-bold uppercase tracking-widest text-blue-500 mb-2">Policy Radar</div>
                          <div className="font-bold text-gray-900 mb-1">New Supply Chain Draft Law</div>
                          <div className="text-sm text-gray-600">Expected to impact manufacturing exporters. Public consultation opens next week.</div>
                        </div>
                        <div className="bg-gray-50 border border-gray-100 p-6 rounded-2xl">
-                         <div className="text-[10px] font-bold uppercase tracking-widest text-gray-400 mb-2">Recommended Intro</div>
+                         <div className="text-[11px] font-bold uppercase tracking-widest text-gray-400 mb-2">Recommended Intro</div>
                          <div className="font-bold text-gray-900 mb-1">Nelt Co — Supply Chain Synergies</div>
                          <div className="text-sm text-gray-600 mb-3">Both active in Transport sub-committee with overlapping challenges.</div>
                          <button className="text-xs font-bold text-white bg-black px-4 py-2 rounded-full">Request Intro</button>
@@ -223,18 +223,18 @@ export function DigestsView({ showToast }: { showToast: (m:string) => void }) {
                    ) : (
                      <>
                        <div className="bg-gray-50 border border-gray-100 p-6 rounded-2xl border-l-4 border-l-purple-500">
-                         <div className="text-[10px] font-bold uppercase tracking-widest text-purple-500 mb-2">Committee Update</div>
+                         <div className="text-[11px] font-bold uppercase tracking-widest text-purple-500 mb-2">Committee Update</div>
                          <div className="font-bold text-gray-900 mb-1">Tech Committee Roadmap 2027</div>
                          <div className="text-sm text-gray-600">Review the draft agenda for the upcoming working group.</div>
                        </div>
                        <div className="grid grid-cols-2 gap-4">
                          <div className="bg-gray-50 border border-gray-100 p-5 rounded-2xl">
                            <div className="text-xs font-bold text-gray-900 mb-1">Office Space NBG</div>
-                           <div className="text-[10px] text-gray-500">From Microsoft</div>
+                           <div className="text-[11px] text-gray-500">From Microsoft</div>
                          </div>
                          <div className="bg-gray-50 border border-gray-100 p-5 rounded-2xl">
                            <div className="text-xs font-bold text-gray-900 mb-1">Fleet Financing</div>
-                           <div className="text-[10px] text-gray-500">From S-Leasing</div>
+                           <div className="text-[11px] text-gray-500">From S-Leasing</div>
                          </div>
                        </div>
                      </>
@@ -261,7 +261,7 @@ export function DigestsView({ showToast }: { showToast: (m:string) => void }) {
                 <div>
                   <h3 className="text-3xl font-serif font-light mb-2">{t('console_v2.edit_draft_title', 'Edit Digest Draft')}</h3>
                   <p className="text-sm text-muted-foreground flex items-center gap-2">
-                    <span className="px-2 py-0.5 rounded text-[10px] font-bold uppercase bg-muted tracking-widest">{activeVariant.name}</span>
+                    <span className="px-2 py-0.5 rounded text-[11px] font-bold uppercase bg-muted tracking-widest">{activeVariant.name}</span>
                     {activeVariant.id === 'patron' ? '42 Recipients' : '203 Recipients'}
                   </p>
                 </div>
@@ -270,7 +270,7 @@ export function DigestsView({ showToast }: { showToast: (m:string) => void }) {
               
               <div className="space-y-6 overflow-y-auto flex-1 pr-2 -mr-2">
                 <div>
-                  <label className="block text-[10px] font-bold text-muted-foreground uppercase tracking-widest mb-2">Subject Line</label>
+                  <label className="block text-[11px] font-bold text-muted-foreground uppercase tracking-widest mb-2">Subject Line</label>
                   <input
                     type="text"
                     value={editSubject}
@@ -279,7 +279,7 @@ export function DigestsView({ showToast }: { showToast: (m:string) => void }) {
                   />
                 </div>
                 <div>
-                  <label className="block text-[10px] font-bold text-muted-foreground uppercase tracking-widest mb-2">Introductory Content</label>
+                  <label className="block text-[11px] font-bold text-muted-foreground uppercase tracking-widest mb-2">Introductory Content</label>
                   <textarea
                     value={editContent}
                     onChange={e => setEditContent(e.target.value)}
@@ -288,7 +288,7 @@ export function DigestsView({ showToast }: { showToast: (m:string) => void }) {
                 </div>
                 
                 <div className="bg-muted/50 p-5 rounded-2xl border border-border/50">
-                  <div className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest mb-3 flex items-center gap-1.5"><FileText className="w-3 h-3" /> Dynamic Blocks</div>
+                  <div className="text-[11px] font-bold text-muted-foreground uppercase tracking-widest mb-3 flex items-center gap-1.5"><FileText className="w-3 h-3" /> Dynamic Blocks</div>
                   <p className="text-xs text-muted-foreground mb-4">The following blocks will be appended automatically based on the recipient's sector and activity:</p>
                   <div className="flex gap-2 flex-wrap">
                     <span className="px-3 py-1.5 bg-background rounded-full text-xs font-medium border border-border shadow-sm">Policy Radar</span>

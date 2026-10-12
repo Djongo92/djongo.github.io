@@ -75,7 +75,7 @@ export default function CommitteeView({ t, showToast }: any) {
           {/* KPI Header */}
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
             <div className="bg-card border border-border p-6 rounded-3xl shadow-sm flex flex-col justify-between group hover:border-primary/30 transition-colors">
-              <div className="text-[10px] uppercase font-bold text-muted-foreground tracking-widest mb-2 flex items-center justify-between">
+              <div className="text-[11px] uppercase font-bold text-muted-foreground tracking-widest mb-2 flex items-center justify-between">
                 {t('portal_participation_score', 'Participation Score')}
                 <BarChart3 className="w-3 h-3 text-primary opacity-50 group-hover:opacity-100 transition-opacity" />
               </div>
@@ -94,18 +94,18 @@ export default function CommitteeView({ t, showToast }: any) {
               </div>
             </div>
             <div className="bg-card border border-border p-6 rounded-3xl shadow-sm flex flex-col justify-between">
-              <div className="text-[10px] uppercase font-bold text-muted-foreground tracking-widest mb-2">{t('portal_time_invested', 'Time Invested')}</div>
+              <div className="text-[11px] uppercase font-bold text-muted-foreground tracking-widest mb-2">{t('portal_time_invested', 'Time Invested')}</div>
               <div className="flex items-end gap-3">
                 <div className="text-4xl font-serif tabular-nums">14h</div>
                 <div className="text-xs text-green-500 font-bold mb-1 bg-green-500/10 px-2 py-0.5 rounded-full flex items-center gap-1"><ArrowUpRight className="w-3 h-3"/> 2h</div>
               </div>
             </div>
             <div className="bg-card border border-border p-6 rounded-3xl shadow-sm flex flex-col justify-between">
-              <div className="text-[10px] uppercase font-bold text-muted-foreground tracking-widest mb-2">{t('portal_peers_engaged', 'Peers Engaged')}</div>
+              <div className="text-[11px] uppercase font-bold text-muted-foreground tracking-widest mb-2">{t('portal_peers_engaged', 'Peers Engaged')}</div>
               <div className="text-4xl font-serif tabular-nums">45</div>
             </div>
             <div className="bg-card border border-border p-6 rounded-3xl shadow-sm flex flex-col justify-between">
-              <div className="text-[10px] uppercase font-bold text-muted-foreground tracking-widest mb-2">{t('portal_docs_reviewed', 'Docs Reviewed')}</div>
+              <div className="text-[11px] uppercase font-bold text-muted-foreground tracking-widest mb-2">{t('portal_docs_reviewed', 'Docs Reviewed')}</div>
               <div className="flex items-end gap-3">
                 <div className="text-4xl font-serif tabular-nums">8</div>
                 <div className="text-xs text-muted-foreground mb-2">/ 12 total</div>
@@ -125,15 +125,15 @@ export default function CommitteeView({ t, showToast }: any) {
 
             return (
               <div key={c.id} className="space-y-6">
-                <div className="bg-foreground text-background rounded-[40px] p-8 md:p-12 shadow-xl relative overflow-hidden flex flex-col md:flex-row justify-between items-start md:items-center gap-8 group">
+                <div className="ink bg-foreground text-background rounded-[40px] p-8 md:p-12 shadow-xl relative overflow-hidden flex flex-col md:flex-row justify-between items-start md:items-center gap-8 group">
                   <div className="absolute -right-20 -top-20 w-72 h-72 rounded-full bg-[#40D9F1]/10 pointer-events-none" />
                   <div className="max-w-2xl relative z-10">
-                    <div className="text-[10px] uppercase font-bold text-[#40D9F1] tracking-widest mb-4">{t('portal_working_group', 'Working Group')}</div>
+                    <div className="text-[11px] uppercase font-bold text-[#40D9F1] tracking-widest mb-4">{t('portal_working_group', 'Working Group')}</div>
                     <h2 className="text-4xl md:text-5xl font-serif font-light mb-4">{c.name}</h2>
                     <p className="text-background/80 text-sm md:text-base leading-relaxed">{c.mandate}</p>
                   </div>
                   <div className="bg-background/10 backdrop-blur-md border border-background/20 rounded-[32px] p-6 shrink-0 text-center relative z-10 min-w-[200px]">
-                     <div className="text-[10px] uppercase font-bold text-[#40D9F1] tracking-widest mb-2">{t('portal_next_meeting', 'Next Meeting')}</div>
+                     <div className="text-[11px] uppercase font-bold text-[#40D9F1] tracking-widest mb-2">{t('portal_next_meeting', 'Next Meeting')}</div>
                      <div className="text-2xl font-serif font-light mb-1">{c.nextMeeting.date}</div>
                      <div className="text-xs text-background/80 font-medium mb-3">{c.nextMeeting.type} • {c.nextMeeting.topic}</div>
                      <button onClick={() => { setRsvp(p => ({ ...p, [c.id]: !p[c.id] })); showToast(rsvp[c.id] ? t('portal_rsvp_cancelled', 'RSVP cancelled') : t('portal_rsvp_confirmed', 'RSVP confirmed')); }} className={cn("w-full py-3 rounded-full text-xs font-bold shadow-sm hover:scale-95 transition-transform", rsvp[c.id] ? "bg-green-500/20 text-green-300 border border-green-500/30" : "bg-primary text-primary-foreground")}>
@@ -146,19 +146,19 @@ export default function CommitteeView({ t, showToast }: any) {
                    <div className="bg-card p-6 rounded-3xl border border-border shadow-sm flex items-center gap-4 md:col-span-2">
                      <div className="w-12 h-12 rounded-full bg-muted flex items-center justify-center font-bold text-muted-foreground">{c.chair.name.charAt(0)}</div>
                      <div>
-                       <div className="text-[10px] uppercase font-bold text-muted-foreground tracking-widest mb-1">{t('portal_chair', 'Chair')}</div>
+                       <div className="text-[11px] uppercase font-bold text-muted-foreground tracking-widest mb-1">{t('portal_chair', 'Chair')}</div>
                        <div className="text-sm font-bold text-foreground">{c.chair.name}</div>
                      </div>
                    </div>
                    
                    <div className="bg-card p-6 rounded-3xl border border-border shadow-sm flex flex-col justify-center">
-                     <div className="text-[10px] uppercase font-bold text-muted-foreground tracking-widest mb-2">{t('portal_my_status', 'My Status')}</div>
+                     <div className="text-[11px] uppercase font-bold text-muted-foreground tracking-widest mb-2">{t('portal_my_status', 'My Status')}</div>
                      <div className="text-sm font-bold text-primary flex items-center gap-2"><CheckCircle2 className="w-4 h-4"/> {t('portal_active_member', 'Active Member')}</div>
                    </div>
 
                    <button onClick={() => setExpandedCommittee(isExpanded ? null : c.id)} className="bg-card p-6 rounded-3xl border border-border shadow-sm flex items-center justify-between hover:bg-muted/50 transition-colors group">
                       <div className="flex flex-col items-start">
-                        <div className="text-[10px] uppercase font-bold text-muted-foreground tracking-widest mb-2">{t('portal_drilldown', 'Analytics')}</div>
+                        <div className="text-[11px] uppercase font-bold text-muted-foreground tracking-widest mb-2">{t('portal_drilldown', 'Analytics')}</div>
                         <div className="text-sm font-bold text-foreground group-hover:text-primary transition-colors">{t('portal_view_details', 'View Details')}</div>
                       </div>
                       {isExpanded ? <ChevronUp className="w-5 h-5 text-muted-foreground" /> : <ChevronDown className="w-5 h-5 text-muted-foreground" />}
@@ -170,7 +170,7 @@ export default function CommitteeView({ t, showToast }: any) {
                     <motion.div initial={{ height: 0, opacity: 0 }} animate={{ height: 'auto', opacity: 1 }} exit={{ height: 0, opacity: 0 }} className="overflow-hidden">
                        <div className="bg-muted/30 border border-border rounded-3xl p-8 grid grid-cols-1 md:grid-cols-3 gap-8 mb-6">
                          <div>
-                           <h4 className="text-[10px] uppercase font-bold text-muted-foreground tracking-widest mb-4">{t('portal_attendance_rate', 'Attendance Rate')}</h4>
+                           <h4 className="text-[11px] uppercase font-bold text-muted-foreground tracking-widest mb-4">{t('portal_attendance_rate', 'Attendance Rate')}</h4>
                            <div className="flex items-center gap-4">
                              <div className="relative w-16 h-16 flex items-center justify-center">
                                <svg className="w-16 h-16 transform -rotate-90" viewBox="0 0 36 36">
@@ -185,7 +185,7 @@ export default function CommitteeView({ t, showToast }: any) {
                            </div>
                          </div>
                          <div>
-                           <h4 className="text-[10px] uppercase font-bold text-muted-foreground tracking-widest mb-4">{t('portal_sector_mix', 'Sector Composition')}</h4>
+                           <h4 className="text-[11px] uppercase font-bold text-muted-foreground tracking-widest mb-4">{t('portal_sector_mix', 'Sector Composition')}</h4>
                            <div className="space-y-3">
                              {analytics.sectorMix.map((s:any, i:number) => (
                                <div key={i}>
@@ -201,7 +201,7 @@ export default function CommitteeView({ t, showToast }: any) {
                            </div>
                          </div>
                          <div>
-                           <h4 className="text-[10px] uppercase font-bold text-muted-foreground tracking-widest mb-4">{t('portal_recent_activity', 'Your Recent Activity')}</h4>
+                           <h4 className="text-[11px] uppercase font-bold text-muted-foreground tracking-widest mb-4">{t('portal_recent_activity', 'Your Recent Activity')}</h4>
                            <div className="space-y-4">
                              {analytics.recent.map((r:any, i:number) => (
                                <div key={i} className="flex gap-3">
@@ -210,7 +210,7 @@ export default function CommitteeView({ t, showToast }: any) {
                                  </div>
                                  <div>
                                    <div className="text-xs font-medium text-foreground">{r.desc}</div>
-                                   <div className="text-[10px] text-muted-foreground mt-0.5">{r.date}</div>
+                                   <div className="text-[11px] text-muted-foreground mt-0.5">{r.date}</div>
                                  </div>
                                </div>
                              ))}
@@ -240,13 +240,13 @@ export default function CommitteeView({ t, showToast }: any) {
                               <div className="text-sm font-bold text-foreground line-clamp-1">{doc.name}</div>
                               <div className="flex items-center gap-2 mt-1.5">
                                 {doc.isPublic ? <Eye className="w-3 h-3 text-green-500" /> : <EyeOff className="w-3 h-3 text-orange-500" />}
-                                <div className="text-[10px] text-muted-foreground uppercase tracking-widest">
+                                <div className="text-[11px] text-muted-foreground uppercase tracking-widest">
                                   {doc.isPublic ? t('portal_publishable', 'Publishable') : t('portal_internal', 'Internal Only')}
                                 </div>
                               </div>
                             </div>
                             {downloadedDocs.includes(doc.id) ? (
-                              <span className="p-2 text-[10px] font-bold text-green-600 uppercase tracking-widest whitespace-nowrap self-center">{t('portal_downloaded', 'Downloaded ✓')}</span>
+                              <span className="p-2 text-[11px] font-bold text-green-600 uppercase tracking-widest whitespace-nowrap self-center">{t('portal_downloaded', 'Downloaded ✓')}</span>
                             ) : (
                               <button onClick={() => { setDownloadedDocs(d => [...d, doc.id]); showToast(t('portal_doc_downloaded', 'Document downloaded')); }} className="p-2 hover:bg-background border border-transparent hover:border-border rounded-full transition-all shadow-sm self-center" aria-label={`Download ${doc.name}`}><Download className="w-4 h-4 text-foreground"/></button>
                             )}
@@ -314,7 +314,7 @@ export default function CommitteeView({ t, showToast }: any) {
           {discoverCommittees.map((c:any) => (
             <div key={c.id} className="bg-card p-8 rounded-[32px] border border-border shadow-sm flex flex-col group hover:border-primary/30 transition-colors relative">
                <div className="flex justify-between items-start mb-6">
-                 <div className="text-[10px] uppercase font-bold text-primary tracking-widest">{c.name}</div>
+                 <div className="text-[11px] uppercase font-bold text-primary tracking-widest">{c.name}</div>
                </div>
                <h3 className="text-3xl font-serif font-light text-foreground mb-4">{c.mandate}</h3>
                <div className="text-sm text-muted-foreground mb-8">

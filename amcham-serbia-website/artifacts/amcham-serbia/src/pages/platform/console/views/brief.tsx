@@ -78,28 +78,28 @@ export function BriefView({ companyId, navigateTo, showToast }: { companyId: str
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-16">
         <div className="bg-background p-8 rounded-[32px] border border-border shadow-sm">
-          <div className="text-[10px] uppercase font-bold tracking-widest text-muted-foreground mb-2">{t('platform.console.engagement_score', 'Score')}</div>
+          <div className="text-[11px] uppercase font-bold tracking-widest text-muted-foreground mb-2">{t('platform.console.engagement_score', 'Score')}</div>
           <div className="text-4xl font-serif font-light tabular-nums text-foreground"><ScoreExplanation companyId={c.id}>{c.score}</ScoreExplanation>/100</div>
           <div className={cn("mt-2 text-sm font-bold font-sans", c.scoreTrend > 0 ? "text-emerald-500" : "text-primary")}>{c.scoreTrend > 0 ? '+' : ''}{c.scoreTrend} 30d trend</div>
         </div>
         <div className="bg-background p-8 rounded-[32px] border border-border shadow-sm">
-          <div className="text-[10px] uppercase font-bold tracking-widest text-muted-foreground mb-2">{t('platform.console.annual_value', 'Value')}</div>
+          <div className="text-[11px] uppercase font-bold tracking-widest text-muted-foreground mb-2">{t('platform.console.annual_value', 'Value')}</div>
           <div className="text-4xl font-serif font-light tabular-nums text-foreground">{c.fee}</div>
         </div>
         <div className="bg-background p-8 rounded-[32px] border border-border shadow-sm">
-          <div className="text-[10px] uppercase font-bold tracking-widest text-muted-foreground mb-2">{t('platform.console.renewal_date', 'Renewal')}</div>
+          <div className="text-[11px] uppercase font-bold tracking-widest text-muted-foreground mb-2">{t('platform.console.renewal_date', 'Renewal')}</div>
           <div className="text-4xl font-serif font-light tabular-nums text-foreground">{c.renewalDate}</div>
         </div>
       </div>
 
       <div className="mb-16">
-        <h3 className="text-[10px] font-bold text-muted-foreground border-b border-border pb-3 mb-6 uppercase tracking-widest flex items-center justify-between gap-2">
+        <h3 className="text-[11px] font-bold text-muted-foreground border-b border-border pb-3 mb-6 uppercase tracking-widest flex items-center justify-between gap-2">
            <span className="flex items-center gap-2"><CheckCircle2 className="w-4 h-4"/> {t('platform.console.the_ask', 'The Ask')} & Desired Outcome</span>
            {brief && <AiBadge />}
         </h3>
         {brief ? (
           <div>
-            <div className="bg-foreground text-background p-10 rounded-[32px] mb-8 shadow-lg relative overflow-hidden">
+            <div className="ink bg-foreground text-background p-10 rounded-[32px] mb-8 shadow-lg relative overflow-hidden">
                <div className="absolute -right-10 -top-10 text-background/10"><Target className="w-64 h-64"/></div>
                <div className="relative z-10">
                  <div className="text-3xl font-serif font-light text-accent mb-6 leading-tight min-h-[1.2em]"><TypewriterText text={brief.ask} runKey={c.id} /></div>
@@ -113,7 +113,7 @@ export function BriefView({ companyId, navigateTo, showToast }: { companyId: str
             
             {brief.signals && brief.signals.length > 0 && (
               <div className="bg-muted/30 rounded-[32px] p-8 border border-border">
-                <div className="text-[10px] uppercase font-bold text-foreground tracking-widest mb-6">Supporting Signals</div>
+                <div className="text-[11px] uppercase font-bold text-foreground tracking-widest mb-6">Supporting Signals</div>
                 <div className="flex flex-col gap-3">
                   {brief.signals.map((sig: any, idx: number) => (
                     <div key={idx} className="bg-background border border-border px-5 py-4 rounded-2xl text-sm font-medium text-foreground flex items-center justify-between shadow-sm">
@@ -121,7 +121,7 @@ export function BriefView({ companyId, navigateTo, showToast }: { companyId: str
                         <div className={cn("w-2 h-2 rounded-full", sig.type === 'web' ? 'bg-blue-500' : sig.type === 'engagement' ? 'bg-emerald-500' : 'bg-primary')}></div>
                         {sig.text}
                       </div>
-                      <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest bg-muted px-3 py-1 rounded-full">{sig.type}</span>
+                      <span className="text-[11px] font-bold text-muted-foreground uppercase tracking-widest bg-muted px-3 py-1 rounded-full">{sig.type}</span>
                     </div>
                   ))}
                 </div>
@@ -136,7 +136,7 @@ export function BriefView({ companyId, navigateTo, showToast }: { companyId: str
       <div className="grid grid-cols-1 md:grid-cols-2 gap-12 mb-16">
          <div className="bg-card border border-border rounded-[32px] overflow-hidden shadow-sm">
             <div className="p-6 bg-muted/30 border-b border-border flex justify-between items-center cursor-pointer select-none" onClick={() => toggleSection('talkingPoints')}>
-              <h3 className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest flex items-center gap-2">
+              <h3 className="text-[11px] font-bold text-muted-foreground uppercase tracking-widest flex items-center gap-2">
                  <FileText className="w-4 h-4"/> {t('platform.console.talking_points', 'Talking Points')}
               </h3>
               {expandedSections.talkingPoints ? <ChevronUp className="w-4 h-4 text-muted-foreground"/> : <ChevronDown className="w-4 h-4 text-muted-foreground"/>}
@@ -166,7 +166,7 @@ export function BriefView({ companyId, navigateTo, showToast }: { companyId: str
 
          <div className="bg-card border border-border rounded-[32px] overflow-hidden shadow-sm">
             <div className="p-6 bg-muted/30 border-b border-border flex justify-between items-center cursor-pointer select-none" onClick={() => toggleSection('context')}>
-              <h3 className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest flex items-center gap-2">
+              <h3 className="text-[11px] font-bold text-muted-foreground uppercase tracking-widest flex items-center gap-2">
                  Agenda & Context
               </h3>
               {expandedSections.context ? <ChevronUp className="w-4 h-4 text-muted-foreground"/> : <ChevronDown className="w-4 h-4 text-muted-foreground"/>}
@@ -179,7 +179,7 @@ export function BriefView({ companyId, navigateTo, showToast }: { companyId: str
                     {brief ? (
                       <>
                          <div>
-                            <div className="text-[10px] uppercase font-bold text-muted-foreground tracking-widest mb-3">Agenda</div>
+                            <div className="text-[11px] uppercase font-bold text-muted-foreground tracking-widest mb-3">Agenda</div>
                             <div className="space-y-3">
                                {brief.agenda.map((a:string, i:number) => (
                                  <div key={i} className="text-sm font-medium text-foreground flex items-center gap-3"><div className="w-1.5 h-1.5 rounded-full bg-border"></div> {a}</div>
@@ -188,7 +188,7 @@ export function BriefView({ companyId, navigateTo, showToast }: { companyId: str
                          </div>
                          {brief.contradictions.length > 0 && (
                            <div>
-                              <div className="text-[10px] uppercase font-bold text-primary tracking-widest mb-3 flex items-center gap-2"><AlertTriangle className="w-3 h-3"/> Known Contradictions</div>
+                              <div className="text-[11px] uppercase font-bold text-primary tracking-widest mb-3 flex items-center gap-2"><AlertTriangle className="w-3 h-3"/> Known Contradictions</div>
                               <div className="bg-primary/5 border border-primary/20 p-5 rounded-2xl space-y-2">
                                  {brief.contradictions.map((c:string, i:number) => (
                                    <div key={i} className="text-sm font-medium text-foreground">{c}</div>
@@ -197,7 +197,7 @@ export function BriefView({ companyId, navigateTo, showToast }: { companyId: str
                            </div>
                          )}
                          <div>
-                            <div className="text-[10px] uppercase font-bold text-muted-foreground tracking-widest mb-3">Attendee Context</div>
+                            <div className="text-[11px] uppercase font-bold text-muted-foreground tracking-widest mb-3">Attendee Context</div>
                             <div className="text-sm font-medium text-foreground/80 bg-muted/50 p-5 rounded-2xl border border-border/50 italic">"{brief.attendeeContext}"</div>
                          </div>
                       </>
@@ -212,12 +212,12 @@ export function BriefView({ companyId, navigateTo, showToast }: { companyId: str
       </div>
 
       <div className="border-t border-border pt-12 flex flex-col gap-6">
-         <h3 className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest flex items-center gap-2">
+         <h3 className="text-[11px] font-bold text-muted-foreground uppercase tracking-widest flex items-center gap-2">
             Execution Workspace
          </h3>
          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
             <div className="bg-card p-8 rounded-[32px] border border-border shadow-sm">
-              <div className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground mb-6">Checklist</div>
+              <div className="text-[11px] font-bold uppercase tracking-widest text-muted-foreground mb-6">Checklist</div>
               <div className="space-y-3">
                 {brief?.followUpActions.map((a:string, i:number) => (
                   <label key={i} className={cn("flex items-center gap-4 cursor-pointer p-3 rounded-xl transition-colors border", completedActions[i] ? "bg-muted/50 border-transparent opacity-60" : "bg-background border-border hover:border-primary/30")}>
@@ -232,7 +232,7 @@ export function BriefView({ companyId, navigateTo, showToast }: { companyId: str
             </div>
             
             <div className="flex flex-col">
-              <div className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground mb-4">Notes & Commitments</div>
+              <div className="text-[11px] font-bold uppercase tracking-widest text-muted-foreground mb-4">Notes & Commitments</div>
               <textarea 
                 value={notes}
                 onChange={(e) => setNotes(e.target.value)}

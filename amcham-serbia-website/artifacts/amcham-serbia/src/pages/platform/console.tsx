@@ -219,10 +219,10 @@ export default function Console() {
     <>
       <div className="px-6 py-5 border-b border-border">
         <Link href="/platform" className="flex items-center gap-2.5 group">
-          <img src={`${import.meta.env.BASE_URL}brand/amcham-favicon.png`} alt="" className="w-7 h-7 object-contain" />
+          <span aria-hidden="true" className="w-8 h-9 overflow-hidden shrink-0"><img src={`${import.meta.env.BASE_URL}brand/amcham-logo.png`} alt="" className="h-9 w-auto max-w-none" /></span>
           <div>
             <div className="font-bold text-foreground tracking-widest uppercase text-sm leading-none group-hover:text-primary transition-colors">AmCham OS</div>
-            <div className="text-[10px] uppercase font-bold text-muted-foreground tracking-widest mt-1">{t('platform.hub.console_title')}</div>
+            <div className="text-[11px] uppercase font-bold text-muted-foreground tracking-widest mt-1">{t('platform.hub.console_title')}</div>
           </div>
         </Link>
       </div>
@@ -236,7 +236,7 @@ export default function Console() {
             <button
               onClick={() => setCollapsedGroups((p) => ({ ...p, [group.title]: !collapsed }))}
               aria-expanded={!collapsed}
-              className="w-full px-6 mb-1.5 flex items-center justify-between text-[10px] font-bold text-muted-foreground uppercase tracking-widest hover:text-foreground transition-colors"
+              className="w-full px-6 mb-1.5 flex items-center justify-between text-[11px] font-bold text-muted-foreground uppercase tracking-widest hover:text-foreground transition-colors"
             >
               {group.title}
               <ChevronDown className={cn("w-3 h-3 transition-transform", collapsed && "-rotate-90")} />
@@ -266,7 +266,7 @@ export default function Console() {
                           animate={{ scale: 1 }} 
                           exit={{ scale: 0 }}
                           className={cn(
-                            "text-[10px] font-bold px-1.5 py-0.5 rounded-full min-w-[20px] text-center",
+                            "text-[11px] font-bold px-1.5 py-0.5 rounded-full min-w-[20px] text-center",
                             isActive ? "bg-white/20 text-white" : "bg-primary text-primary-foreground shadow-sm"
                           )}
                         >
@@ -347,7 +347,7 @@ export default function Console() {
               <button onClick={(e) => { e.stopPropagation(); setNotifOpen(o => !o); }} className="w-10 h-10 rounded-full border border-border bg-background shadow-sm flex items-center justify-center text-muted-foreground hover:bg-muted transition-colors relative" title="Notifications">
                 <Bell className="w-4 h-4" />
                 {unreadCount > 0 && (
-                  <span className="absolute -top-1 -right-1 min-w-[18px] h-[18px] px-1 rounded-full bg-primary text-primary-foreground text-[10px] font-bold flex items-center justify-center shadow-sm">{unreadCount}</span>
+                  <span className="absolute -top-1 -right-1 min-w-[18px] h-[18px] px-1 rounded-full bg-primary text-primary-foreground text-[11px] font-bold flex items-center justify-center shadow-sm">{unreadCount}</span>
                 )}
               </button>
               <AnimatePresence>
@@ -363,7 +363,7 @@ export default function Console() {
                     >
                       <div className="p-4 border-b border-border flex items-center justify-between bg-muted/30">
                         <span className="text-xs font-bold uppercase tracking-widest text-foreground">Notifications</span>
-                        {unreadCount > 0 && <button onClick={markAllRead} className="text-[10px] font-bold text-primary hover:underline">Mark all read</button>}
+                        {unreadCount > 0 && <button onClick={markAllRead} className="text-[11px] font-bold text-primary hover:underline">Mark all read</button>}
                       </div>
                       <div className="max-h-80 overflow-y-auto">
                         {notifications.map(n => (
@@ -371,7 +371,7 @@ export default function Console() {
                             <div className={cn("w-1.5 h-1.5 rounded-full mt-1.5 shrink-0", n.read ? "bg-transparent" : "bg-primary")} />
                             <div className="flex-1">
                               <div className={cn("text-xs font-medium leading-relaxed", n.read ? "text-muted-foreground" : "text-foreground font-bold")}>{n.text}</div>
-                              <div className="text-[10px] text-muted-foreground mt-1">{n.time}</div>
+                              <div className="text-[11px] text-muted-foreground mt-1">{n.time}</div>
                             </div>
                           </button>
                         ))}
@@ -393,7 +393,7 @@ export default function Console() {
                 <div className="w-2 h-2 bg-primary rounded-full shadow-sm shadow-primary/50 animate-pulse"></div>
                 <div className="flex flex-col items-start leading-none mr-2">
                   <span className="text-foreground font-bold">{roleConfig.name}</span>
-                  <span className="text-[10px] uppercase tracking-widest">{roleConfig.title}</span>
+                  <span className="text-[11px] uppercase tracking-widest">{roleConfig.title}</span>
                 </div>
                 <div className="w-6 h-6 rounded-full bg-primary/10 text-primary flex items-center justify-center text-xs font-bold ml-1 shrink-0">{roleConfig.avatar}</div>
               </button>
@@ -547,7 +547,7 @@ export default function Console() {
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: 20, scale: 0.95 }}
             transition={{ type: "spring", stiffness: 400, damping: 30 }}
-            className="fixed bottom-6 right-6 md:right-10 bg-foreground text-background px-6 py-4 text-sm font-medium rounded-2xl shadow-xl z-[60] flex items-center gap-3"
+            className="fixed bottom-6 right-6 md:right-10 ink bg-foreground text-background px-6 py-4 text-sm font-medium rounded-2xl shadow-xl z-[60] flex items-center gap-3"
           >
             <div className="w-6 h-6 bg-background/20 rounded-full flex items-center justify-center">
               <Check className="w-4 h-4 text-background" />

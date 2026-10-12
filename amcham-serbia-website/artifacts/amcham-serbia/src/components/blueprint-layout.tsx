@@ -25,7 +25,7 @@ export function BlueprintLayout({ children, title }: { children: React.ReactNode
         <div className="container mx-auto px-4 md:px-8 relative z-10">
           <div className="flex items-center gap-3 mb-6">
             <span className="px-3 py-1 bg-accent text-accent-foreground text-xs font-bold uppercase tracking-wider rounded-sm">Deliverable</span>
-            {lang === 'sr' && <span className="text-xs text-secondary-foreground/60 italic">{t('blueprint.english_note')}</span>}
+            {lang === 'sr' && <span className="text-xs text-secondary-foreground/75 italic">{t('blueprint.english_note')}</span>}
           </div>
           
           <h1 className="text-4xl md:text-5xl font-serif font-bold mb-4">{t('blueprint.title')}</h1>

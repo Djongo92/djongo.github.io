@@ -1666,7 +1666,7 @@ export const platformData = {
     directory: [
       { id: "d1", name: "Banca Intesa", sector: "Finance", tier: "Patron", desc: "Leading retail and corporate bank in Serbia.", saved: true, recommended: false },
       { id: "d2", name: "Nelt Co", sector: "Logistics", tier: "Corporate", desc: "Supply chain and distribution experts.", saved: false, recommended: true, recReason: "Shared supply chain challenges" },
-      { id: "d3", name: "Microsoft", sector: "IT", tier: "Patron", desc: "Global technology and software provider.", saved: false, recommended: true, recReason: "Digital transformation synergy" }
+      { id: "d3", name: "Microsoft", sector: "IT", tier: "Patron", desc: "Global technology and software provider.", saved: false, recommended: true, recReason: "Both are investing in digital transformation" }
     ],
     homeInbox: [
       { id: "h1", type: "action", urgency: "high", text: "Complete your profile to unlock committee recommendations.", action: "Complete Profile", route: "onboarding" },

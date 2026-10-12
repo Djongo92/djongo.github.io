@@ -43,21 +43,21 @@ export function SponsorshipView({ navigateTo }: { navigateTo: (v: string, c?: st
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         <div className="bg-card rounded-[32px] border border-border p-6 shadow-sm flex items-center justify-between">
           <div>
-            <div className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest mb-1">Confirmed This Year</div>
+            <div className="text-[11px] font-bold text-muted-foreground uppercase tracking-widest mb-1">Confirmed This Year</div>
             <div className="text-4xl font-serif font-light tabular-nums text-emerald-600">{fmtEuro(confirmedValue)}</div>
           </div>
           <div className="w-12 h-12 rounded-full bg-emerald-500/10 flex items-center justify-center text-emerald-600"><TrendingUp className="w-5 h-5"/></div>
         </div>
         <div className="bg-card rounded-[32px] border border-border p-6 shadow-sm flex items-center justify-between">
           <div>
-            <div className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest mb-1">Open Pipeline</div>
+            <div className="text-[11px] font-bold text-muted-foreground uppercase tracking-widest mb-1">Open Pipeline</div>
             <div className="text-4xl font-serif font-light tabular-nums">{fmtEuro(pipelineValue)}</div>
           </div>
           <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center text-primary"><Target className="w-5 h-5"/></div>
         </div>
-        <div className="bg-foreground text-background rounded-[32px] border border-border p-6 shadow-lg flex items-center justify-between">
+        <div className="ink bg-foreground text-background rounded-[32px] border border-border p-6 shadow-lg flex items-center justify-between">
           <div>
-            <div className="text-[10px] font-bold text-accent uppercase tracking-widest mb-1">Active Deals</div>
+            <div className="text-[11px] font-bold text-accent uppercase tracking-widest mb-1">Active Deals</div>
             <div className="text-4xl font-serif font-light tabular-nums">{items.filter(i => i.stage !== 'declined').length}</div>
           </div>
           <div className="w-12 h-12 rounded-full bg-accent/20 flex items-center justify-center text-accent"><Award className="w-5 h-5"/></div>
@@ -70,7 +70,7 @@ export function SponsorshipView({ navigateTo }: { navigateTo: (v: string, c?: st
           return (
             <div key={stage} className="space-y-4">
               <div className="flex items-center justify-between px-1">
-                <span className={cn("text-[10px] font-bold uppercase tracking-widest px-3 py-1.5 rounded-full border", STAGE_COLOR[stage])}>{STAGE_LABEL[stage]}</span>
+                <span className={cn("text-[11px] font-bold uppercase tracking-widest px-3 py-1.5 rounded-full border", STAGE_COLOR[stage])}>{STAGE_LABEL[stage]}</span>
                 <span className="text-xs font-bold text-muted-foreground">{stageItems.length}</span>
               </div>
               <div className="space-y-4 min-h-[80px]">
@@ -83,7 +83,7 @@ export function SponsorshipView({ navigateTo }: { navigateTo: (v: string, c?: st
                         <div className="text-xs text-muted-foreground mb-3 leading-relaxed">{item.initiative}</div>
                         <div className="flex items-center justify-between mb-3">
                           <span className="text-lg font-serif tabular-nums text-foreground">{item.value}</span>
-                          <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">{item.owner}</span>
+                          <span className="text-[11px] font-bold text-muted-foreground uppercase tracking-widest">{item.owner}</span>
                         </div>
                         <p className="text-xs text-muted-foreground/80 border-t border-border/50 pt-3 mb-3">{item.notes}</p>
                         {stage !== 'confirmed' && stage !== 'declined' && (

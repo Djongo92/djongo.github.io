@@ -40,7 +40,7 @@ export function ChatBubble() {
             <div className="p-4 bg-secondary text-secondary-foreground flex items-center justify-between shrink-0">
               <div>
                 <div className="font-bold text-sm">AmCham Serbia</div>
-                <div className="text-[10px] uppercase tracking-widest text-secondary-foreground/60 flex items-center gap-1.5"><span className="w-1.5 h-1.5 rounded-full bg-emerald-400" /> Typically replies in &lt;2h</div>
+                <div className="text-[11px] uppercase tracking-widest text-secondary-foreground/75 flex items-center gap-1.5"><span className="w-1.5 h-1.5 rounded-full bg-emerald-400" /> Typically replies in &lt;2h</div>
               </div>
               <button onClick={() => setOpen(false)} className="w-8 h-8 rounded-full bg-secondary-foreground/10 flex items-center justify-center hover:bg-secondary-foreground/20 transition-colors"><X className="w-4 h-4" /></button>
             </div>

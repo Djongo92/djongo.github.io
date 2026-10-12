@@ -53,16 +53,16 @@ export function IntegrationsView({ showToast }: { showToast: (m: string) => void
                 <div>
                   <div className="font-bold text-foreground">{i.name}</div>
                   {i.connected ? (
-                    <div className="text-[10px] font-bold text-emerald-600 uppercase tracking-widest flex items-center gap-1 mt-0.5"><CheckCircle2 className="w-3 h-3" /> Connected</div>
+                    <div className="text-[11px] font-bold text-emerald-600 uppercase tracking-widest flex items-center gap-1 mt-0.5"><CheckCircle2 className="w-3 h-3" /> Connected</div>
                   ) : (
-                    <div className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest mt-0.5">Not connected</div>
+                    <div className="text-[11px] font-bold text-muted-foreground uppercase tracking-widest mt-0.5">Not connected</div>
                   )}
                 </div>
               </div>
               <Switch checked={i.connected} onCheckedChange={() => toggle(i.id)} />
             </div>
             <p className="text-xs text-muted-foreground leading-relaxed">{i.desc}</p>
-            <div className="pt-3 border-t border-border/50 flex items-center gap-1.5 text-[10px] font-bold text-muted-foreground uppercase tracking-widest">
+            <div className="pt-3 border-t border-border/50 flex items-center gap-1.5 text-[11px] font-bold text-muted-foreground uppercase tracking-widest">
               <RefreshCw className="w-3 h-3" /> Last synced: {i.lastSynced}
             </div>
           </div>

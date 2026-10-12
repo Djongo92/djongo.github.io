@@ -109,7 +109,7 @@ export function TrendChart({ data, className, height = 220, formatValue = (v) =>
       </svg>
       {hovered && (
         <div className="flex items-center justify-between text-xs font-bold mt-1 px-1">
-          <span className="text-muted-foreground uppercase tracking-widest text-[10px]">{hovered.label}</span>
+          <span className="text-muted-foreground uppercase tracking-widest text-[11px]">{hovered.label}</span>
           <span className="tabular-nums text-foreground">{dataRange < 2 ? hovered.value.toFixed(1) : formatValue(hovered.value)}</span>
         </div>
       )}

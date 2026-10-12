@@ -38,20 +38,20 @@ export default function LapTimeView({ t, showToast, member }: any) {
 
   return (
     <div className="space-y-8 pb-20 animate-in fade-in duration-500">
-      <div className="bg-foreground text-background rounded-[40px] p-8 md:p-12 shadow-xl relative overflow-hidden flex flex-col md:flex-row justify-between items-start md:items-end gap-8">
+      <div className="ink bg-foreground text-background rounded-[40px] p-8 md:p-12 shadow-xl relative overflow-hidden flex flex-col md:flex-row justify-between items-start md:items-end gap-8">
         <div className="absolute -right-20 -top-20 w-72 h-72 rounded-full bg-[#40D9F1]/10 pointer-events-none" />
         <div className="relative z-10 max-w-2xl">
-          <div className="text-[10px] uppercase font-bold text-[#40D9F1] tracking-widest mb-4 flex items-center gap-2">
+          <div className="text-[11px] uppercase font-bold text-[#40D9F1] tracking-widest mb-4 flex items-center gap-2">
              <Activity className="w-3 h-3" /> Research & Intelligence
           </div>
           <div className="flex items-center gap-4 mb-4">
              <h2 className="text-4xl md:text-6xl font-serif font-light">Lap Time</h2>
              <div className="bg-background/20 p-1 rounded-full flex gap-1">
-               <button onClick={() => setPeriod('2025')} className={cn("px-4 py-1.5 rounded-full text-xs font-bold transition-colors", period === '2025' ? "bg-background text-foreground shadow-sm" : "text-background/70 hover:text-background")}>2025</button>
-               <button onClick={() => setPeriod('2024')} className={cn("px-4 py-1.5 rounded-full text-xs font-bold transition-colors", period === '2024' ? "bg-background text-foreground shadow-sm" : "text-background/70 hover:text-background")}>2024</button>
+               <button onClick={() => setPeriod('2025')} className={cn("px-4 py-1.5 rounded-full text-xs font-bold transition-colors", period === '2025' ? "bg-background text-foreground shadow-sm" : "text-background/80 hover:text-background")}>2025</button>
+               <button onClick={() => setPeriod('2024')} className={cn("px-4 py-1.5 rounded-full text-xs font-bold transition-colors", period === '2024' ? "bg-background text-foreground shadow-sm" : "text-background/80 hover:text-background")}>2024</button>
              </div>
           </div>
-          <p className="text-background/70 text-sm md:text-base leading-relaxed mb-6">
+          <p className="text-background/80 text-sm md:text-base leading-relaxed mb-6">
             Anonymized, aggregated market sentiment as of late Q3 {period}. This is not an evaluation of any individual member, but a pulse check on the Serbian business environment.
           </p>
           <div className="flex flex-wrap gap-3">

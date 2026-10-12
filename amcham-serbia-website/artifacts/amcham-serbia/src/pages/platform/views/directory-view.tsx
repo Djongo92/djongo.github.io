@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { CompanyMark } from '@/components/ui/company-mark';
 import { usePortalState } from '../portal-state';
 import { platformData } from '@/data/platform';
 import { Search, Filter, Zap, Clock, ArrowRight, X, UserPlus, CheckCircle2, ChevronRight, BarChart3, ArrowUpRight, MapPin, Briefcase, Mail, Sparkles } from 'lucide-react';
@@ -74,18 +75,18 @@ export default function DirectoryView({ t, showToast, initialViewMode, member }:
        
        {/* KPI Toggle Strip */}
        <div className="grid grid-cols-3 gap-4 mb-8">
-         <button onClick={() => setViewMode('all')} className={cn("text-left p-6 rounded-[32px] border transition-all relative overflow-hidden", viewMode === 'all' ? "bg-foreground text-background border-foreground shadow-md" : "bg-card border-border hover:border-primary/30")}>
-           <div className={cn("text-[10px] uppercase font-bold tracking-widest mb-2 transition-opacity", viewMode === 'all' ? "text-background/80" : "text-muted-foreground")}>{t('portal_all_members', 'All Members')}</div>
+         <button onClick={() => setViewMode('all')} className={cn("text-left p-6 rounded-[32px] border transition-all relative overflow-hidden", viewMode === 'all' ? "ink bg-foreground text-background border-foreground shadow-md" : "bg-card border-border hover:border-primary/30")}>
+           <div className={cn("text-[11px] uppercase font-bold tracking-widest mb-2 transition-opacity", viewMode === 'all' ? "text-background/80" : "text-muted-foreground")}>{t('portal_all_members', 'All Members')}</div>
            <div className="text-4xl font-serif tabular-nums">{stats.total}</div>
            {viewMode === 'all' && <div className="absolute right-0 bottom-0 w-24 h-24 bg-background/10 rounded-full translate-x-8 translate-y-8" />}
          </button>
-         <button onClick={() => setViewMode('saved')} className={cn("text-left p-6 rounded-[32px] border transition-all relative overflow-hidden", viewMode === 'saved' ? "bg-foreground text-background border-foreground shadow-md" : "bg-card border-border hover:border-primary/30")}>
-           <div className={cn("text-[10px] uppercase font-bold tracking-widest mb-2 transition-opacity", viewMode === 'saved' ? "text-background/80" : "text-muted-foreground")}>{t('portal_saved_network', 'My Network')}</div>
+         <button onClick={() => setViewMode('saved')} className={cn("text-left p-6 rounded-[32px] border transition-all relative overflow-hidden", viewMode === 'saved' ? "ink bg-foreground text-background border-foreground shadow-md" : "bg-card border-border hover:border-primary/30")}>
+           <div className={cn("text-[11px] uppercase font-bold tracking-widest mb-2 transition-opacity", viewMode === 'saved' ? "text-background/80" : "text-muted-foreground")}>{t('portal_saved_network', 'My Network')}</div>
            <div className="text-4xl font-serif tabular-nums">{stats.saved}</div>
            {viewMode === 'saved' && <div className="absolute right-0 bottom-0 w-24 h-24 bg-background/10 rounded-full translate-x-8 translate-y-8" />}
          </button>
-         <button onClick={() => setViewMode('pending')} className={cn("text-left p-6 rounded-[32px] border transition-all relative overflow-hidden", viewMode === 'pending' ? "bg-foreground text-background border-foreground shadow-md" : "bg-card border-border hover:border-primary/30")}>
-           <div className={cn("text-[10px] uppercase font-bold tracking-widest mb-2 transition-opacity", viewMode === 'pending' ? "text-background/80" : "text-muted-foreground")}>{t('portal_pending_intros', 'Pending Intros')}</div>
+         <button onClick={() => setViewMode('pending')} className={cn("text-left p-6 rounded-[32px] border transition-all relative overflow-hidden", viewMode === 'pending' ? "ink bg-foreground text-background border-foreground shadow-md" : "bg-card border-border hover:border-primary/30")}>
+           <div className={cn("text-[11px] uppercase font-bold tracking-widest mb-2 transition-opacity", viewMode === 'pending' ? "text-background/80" : "text-muted-foreground")}>{t('portal_pending_intros', 'Pending Intros')}</div>
            <div className="text-4xl font-serif tabular-nums">{stats.pending}</div>
            {viewMode === 'pending' && <div className="absolute right-0 bottom-0 w-24 h-24 bg-background/10 rounded-full translate-x-8 translate-y-8" />}
          </button>
@@ -141,13 +142,13 @@ export default function DirectoryView({ t, showToast, initialViewMode, member }:
                   </button>
                   
                   <div className="flex justify-between items-start mb-4">
-                    <span className="text-[10px] uppercase font-bold tracking-widest bg-muted px-3 py-1 rounded-full">{d.sector}</span>
+                    <span className="text-[11px] uppercase font-bold tracking-widest bg-muted px-3 py-1 rounded-full">{d.sector}</span>
                     {d.recommended && (
-                      <span className="text-[10px] uppercase font-bold tracking-widest bg-primary/10 text-primary px-3 py-1 rounded-full flex items-center gap-1"><Sparkles className="w-3 h-3"/> {t('portal_recommended', 'Recommended')}</span>
+                      <span className="text-[11px] uppercase font-bold tracking-widest bg-primary/10 text-primary px-3 py-1 rounded-full flex items-center gap-1"><Sparkles className="w-3 h-3"/> {t('portal_recommended', 'Recommended')}</span>
                     )}
                   </div>
                   <h3 className="text-2xl font-serif font-light text-foreground mb-1 group-hover:text-primary transition-colors">{d.name}</h3>
-                  <div className="text-[10px] uppercase font-bold tracking-widest text-primary mb-4">{d.tier}</div>
+                  <div className="text-[11px] uppercase font-bold tracking-widest text-primary mb-4">{d.tier}</div>
 
                   <p className="text-sm text-muted-foreground flex-1 mb-4 leading-relaxed line-clamp-3">{d.description}</p>
                   {d.recommended && d.recReason && (
@@ -171,7 +172,7 @@ export default function DirectoryView({ t, showToast, initialViewMode, member }:
          {/* Sector Mini-bars Sidebar */}
          <div className="md:w-1/4">
             <div className="bg-card border border-border rounded-[32px] p-6 shadow-sm sticky top-8">
-               <div className="text-[10px] uppercase font-bold text-muted-foreground tracking-widest mb-6 flex items-center gap-2"><BarChart3 className="w-4 h-4"/> {t('portal_sector_distribution', 'Sector Distribution')}</div>
+               <div className="text-[11px] uppercase font-bold text-muted-foreground tracking-widest mb-6 flex items-center gap-2"><BarChart3 className="w-4 h-4"/> {t('portal_sector_distribution', 'Sector Distribution')}</div>
                <div className="space-y-4">
                  {topSectors.map(([sector, count]: any, i) => (
                    <div key={i}>
@@ -199,7 +200,7 @@ export default function DirectoryView({ t, showToast, initialViewMode, member }:
                <div className="p-8 border-b border-border bg-muted/10 relative">
                  <button onClick={() => { setSelectedMember(null); setRequestContext(''); }} className="absolute top-6 right-6 p-2 bg-background border border-border rounded-full hover:bg-muted transition-colors"><X className="w-4 h-4 text-muted-foreground"/></button>
                  
-                 <div className="w-16 h-16 rounded-full bg-primary/10 text-primary flex items-center justify-center text-2xl font-bold mb-6">{selectedMember.avatar || selectedMember.name.charAt(0)}</div>
+                 <CompanyMark name={selectedMember.name} sector={selectedMember.sector} size="lg" className="mb-6" />
                  <div className="flex items-center gap-2 mb-2">
                    <h2 className="text-3xl font-serif font-light">{selectedMember.name}</h2>
                    {selectedMember.tier === 'Patron' && <Zap className="w-5 h-5 text-yellow-500 fill-yellow-500/20"/>}
@@ -213,7 +214,7 @@ export default function DirectoryView({ t, showToast, initialViewMode, member }:
 
                <div className="p-8 space-y-8 flex-1">
                  <div>
-                   <h4 className="text-[10px] uppercase font-bold text-muted-foreground tracking-widest mb-3">{t('portal_about', 'About')}</h4>
+                   <h4 className="text-[11px] uppercase font-bold text-muted-foreground tracking-widest mb-3">{t('portal_about', 'About')}</h4>
                    <p className="text-sm text-foreground leading-relaxed">{selectedMember.description}</p>
                  </div>
 
@@ -221,14 +222,14 @@ export default function DirectoryView({ t, showToast, initialViewMode, member }:
                    <div className="bg-muted/30 p-4 rounded-2xl border border-border flex items-start gap-3">
                      <MapPin className="w-4 h-4 text-primary mt-0.5" />
                      <div>
-                       <div className="text-[10px] uppercase font-bold text-muted-foreground tracking-widest mb-1">{t('portal_location', 'Location')}</div>
+                       <div className="text-[11px] uppercase font-bold text-muted-foreground tracking-widest mb-1">{t('portal_location', 'Location')}</div>
                        <div className="text-sm font-bold">{selectedMember.location || 'Belgrade'}</div>
                      </div>
                    </div>
                    <div className="bg-muted/30 p-4 rounded-2xl border border-border flex items-start gap-3">
                      <Briefcase className="w-4 h-4 text-primary mt-0.5" />
                      <div>
-                       <div className="text-[10px] uppercase font-bold text-muted-foreground tracking-widest mb-1">{t('portal_employees', 'Employees')}</div>
+                       <div className="text-[11px] uppercase font-bold text-muted-foreground tracking-widest mb-1">{t('portal_employees', 'Employees')}</div>
                        <div className="text-sm font-bold tabular-nums">{selectedMember.employees || '500+'}</div>
                      </div>
                    </div>
@@ -236,7 +237,7 @@ export default function DirectoryView({ t, showToast, initialViewMode, member }:
 
                  {parseInt(selectedMember.score) >= 80 && (
                    <div className="p-5 bg-primary/5 border border-primary/10 rounded-2xl">
-                     <div className="text-[10px] uppercase font-bold text-primary tracking-widest mb-2 flex items-center gap-2"><Zap className="w-3 h-3"/> {t('portal_strong_overlap', 'Strong Match')}</div>
+                     <div className="text-[11px] uppercase font-bold text-primary tracking-widest mb-2 flex items-center gap-2"><Zap className="w-3 h-3"/> {t('portal_strong_overlap', 'Strong Match')}</div>
                      <p className="text-xs text-foreground font-medium">{t('portal_match_rationale', 'This member shares 3 advocacy priorities with your profile and is active in the same working groups.')}</p>
                    </div>
                  )}
@@ -254,7 +255,7 @@ export default function DirectoryView({ t, showToast, initialViewMode, member }:
                     </div>
                  ) : (
                     <div className="bg-card border border-border p-6 rounded-[24px] shadow-sm">
-                      <div className="text-[10px] uppercase font-bold text-primary tracking-widest mb-3 flex items-center gap-2"><Mail className="w-3 h-3"/> {t('portal_request_intro', 'Request Introduction')}</div>
+                      <div className="text-[11px] uppercase font-bold text-primary tracking-widest mb-3 flex items-center gap-2"><Mail className="w-3 h-3"/> {t('portal_request_intro', 'Request Introduction')}</div>
                       <p className="text-xs text-muted-foreground mb-4">{t('portal_intro_desc', 'AmCham staff will broker this connection based on shared interests. Mutual consent is required.')}</p>
                       <textarea 
                         className="w-full h-24 bg-muted/30 border border-border rounded-xl p-3 text-sm focus:outline-none focus:border-primary resize-none mb-4"

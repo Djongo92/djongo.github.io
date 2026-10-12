@@ -1,14 +1,16 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { Link } from 'wouter';
 import { useI18n } from '@/lib/i18n';
 import { SEO } from '@/components/seo';
-import { LayoutDashboard, Smartphone, Layers, Info, ArrowRight, X, Presentation, RotateCcw } from 'lucide-react';
-import { AnimatePresence, motion } from 'framer-motion';
+import { LayoutDashboard, Smartphone, Layers, ArrowRight, Presentation, RotateCcw, CalendarCheck, Handshake } from 'lucide-react';
+import { platformData } from '@/data/platform';
+import { parseEuro, fmtEuro, cn } from '@/lib/utils';
+import { CompanyMark } from '@/components/ui/company-mark';
+import { SeamFlow } from './components/seam-flow';
 import { useShowcase } from '@/components/showcase-tour';
 
 export default function PlatformHub() {
   const { t } = useI18n();
-  const [showTip, setShowTip] = useState(true);
   const { start: startShowcase } = useShowcase();
 
   return (
@@ -16,85 +18,44 @@ export default function PlatformHub() {
       <SEO title={t('platform.hub.title')} description={t('platform.hub.desc')} />
       
       {/* Header */}
-      <section className="bg-secondary text-secondary-foreground py-16 relative overflow-hidden">
+      <section className="bg-secondary text-secondary-foreground pt-14 pb-28 relative overflow-hidden">
         <div className="absolute inset-0 bg-network-pattern opacity-10 pointer-events-none"></div>
-        <div className="container mx-auto px-4 md:px-8 relative z-10 text-center max-w-3xl">
-          <h1 className="text-4xl md:text-5xl font-serif font-bold mb-6">{t('platform.hub.title')}</h1>
-          <p className="text-xl text-muted-foreground leading-relaxed">
-            {t('platform.hub.desc')}
-          </p>
+        <div className="container mx-auto px-4 md:px-8 relative z-10 max-w-5xl">
+          <span className="text-xs font-bold uppercase tracking-widest text-accent block mb-4">{t('platform.hub.title')}</span>
+          <h1 className="text-4xl md:text-6xl font-serif font-bold mb-5 text-balance">{t('platform.hub.choose_seat', 'Choose your seat.')}</h1>
+          <p className="text-lg md:text-xl text-secondary-foreground/85 leading-relaxed max-w-2xl mb-8">{t('platform.hub.desc')}</p>
+          <div className="flex flex-wrap items-center gap-4">
+            <button onClick={startShowcase} className="px-6 py-3 rounded-full bg-primary text-primary-foreground font-bold text-sm shadow-lg hover:bg-primary/90 transition-all active:scale-95 inline-flex items-center gap-2">
+              <Presentation className="w-4 h-4" /> {t('showcase.cta_button', 'Start Showcase')}
+            </button>
+            <span className="text-sm text-secondary-foreground/80">{t('showcase.cta_body', "Take the guided walkthrough — a scripted tour through the platform's strongest moments.")}</span>
+          </div>
         </div>
       </section>
 
       {/* Main Content */}
-      <section className="pt-12">
+      <section className="-mt-16 relative z-10">
         <div className="container mx-auto px-4 md:px-8 max-w-5xl">
-          
-          <AnimatePresence>
-            {showTip && (
-              <motion.div 
-                initial={{ opacity: 0, y: -10 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, height: 0, marginTop: 0 }}
-                className="bg-primary/5 border border-primary/20 rounded-2xl p-4 mb-12 flex items-start gap-3 relative overflow-hidden"
-              >
-                <Info className="w-5 h-5 text-primary shrink-0 mt-0.5" />
-                <div className="pr-8">
-                  <span className="text-xs font-bold text-primary uppercase tracking-widest block mb-1">{t('platform.hub.tip_label')}</span>
-                  <p className="text-sm text-foreground">{t('platform.hub.tip_body')}</p>
-                </div>
-                <button onClick={() => setShowTip(false)} className="absolute top-4 right-4 text-muted-foreground hover:text-foreground">
-                  <X className="w-4 h-4" />
-                </button>
-              </motion.div>
-            )}
-          </AnimatePresence>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-12">
-            
-            {/* Console */}
-            <Link href="/platform/console" className="bg-card border border-border rounded-3xl shadow-xl hover:shadow-2xl hover:border-primary/50 transition-all p-8 md:p-10 group flex flex-col items-start relative overflow-hidden">
-              <div className="w-16 h-16 bg-background border border-border rounded-2xl flex items-center justify-center text-foreground mb-8 group-hover:bg-primary group-hover:text-primary-foreground group-hover:border-primary transition-colors">
-                <LayoutDashboard className="w-8 h-8" />
-              </div>
-              <h2 className="text-3xl font-serif font-bold mb-4">{t('platform.hub.console_title')}</h2>
-              <p className="text-muted-foreground leading-relaxed mb-8">
-                {t('platform.hub.console_desc')}
-              </p>
-              <div className="mt-auto flex items-center gap-2 text-primary font-bold">
-                {t('platform.hub.open_console')} <ArrowRight className="w-4 h-4 transition-transform group-hover:translate-x-1" />
-              </div>
-            </Link>
-
-            {/* Portal */}
-            <Link href="/platform/portal" className="bg-card border border-border rounded-3xl shadow-xl hover:shadow-2xl hover:border-primary/50 transition-all p-8 md:p-10 group flex flex-col items-start relative overflow-hidden">
-              <div className="absolute top-0 right-0 w-32 h-32 bg-primary/5 rounded-bl-full pointer-events-none transition-transform group-hover:scale-110 group-hover:bg-primary/10"></div>
-              <div className="w-16 h-16 bg-background border border-border rounded-2xl flex items-center justify-center text-foreground mb-8 group-hover:bg-primary group-hover:text-primary-foreground group-hover:border-primary transition-colors relative z-10">
-                <Smartphone className="w-8 h-8" />
-              </div>
-              <h2 className="text-3xl font-serif font-bold mb-4 relative z-10">{t('platform.hub.portal_title')}</h2>
-              <p className="text-muted-foreground leading-relaxed mb-8 relative z-10">
-                {t('platform.hub.portal_desc')}
-              </p>
-              <div className="mt-auto flex items-center gap-2 text-primary font-bold relative z-10">
-                {t('platform.hub.open_portal')} <ArrowRight className="w-4 h-4 transition-transform group-hover:translate-x-1" />
-              </div>
-            </Link>
-
-          </div>
-
-          {/* Showcase CTA */}
-          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 bg-accent/10 border border-accent/20 rounded-2xl px-6 py-5 mb-8">
-            <div className="flex items-start gap-3">
-              <Presentation className="w-5 h-5 text-accent shrink-0 mt-0.5" />
-              <div>
-                <span className="text-xs font-bold text-accent uppercase tracking-widest block mb-1">{t('showcase.cta_label', 'Showing someone the platform?')}</span>
-                <p className="text-sm text-foreground">{t('showcase.cta_body', "Take the guided walkthrough — a scripted tour through the platform's strongest moments.")}</p>
-              </div>
-            </div>
-            <button onClick={startShowcase} className="shrink-0 px-6 py-3 rounded-full bg-accent text-accent-foreground font-bold text-sm shadow-md hover:shadow-lg transition-all active:scale-95 flex items-center gap-2">
-              {t('showcase.cta_button', 'Start Showcase')} <ArrowRight className="w-4 h-4" />
-            </button>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+            <SeatCard
+              href="/platform/console"
+              icon={LayoutDashboard}
+              title={t('platform.hub.console_title')}
+              persona={t('platform.hub.console_persona', "You're Stefan, team lead on the membership team.")}
+              desc={t('platform.hub.console_desc')}
+              cta={t('platform.hub.open_console')}
+              preview={<ConsolePreview />}
+            />
+            <SeatCard
+              href="/platform/portal"
+              icon={Smartphone}
+              title={t('platform.hub.portal_title')}
+              persona={t('platform.hub.portal_persona', "You're Marko at Adriatica Grupa, a Patron member.")}
+              desc={t('platform.hub.portal_desc')}
+              cta={t('platform.hub.open_portal')}
+              preview={<PortalPreview />}
+            />
           </div>
 
           {/* Seam */}
@@ -106,26 +67,122 @@ export default function PlatformHub() {
               </div>
               <div className="flex-1">
                 <h3 className="text-xl font-bold mb-2">{t('platform.hub.seam')}</h3>
-                <p className="text-secondary-foreground/70">{t('platform.hub.seam_desc')}</p>
+                <p className="text-secondary-foreground/80">{t('platform.hub.seam_desc')}</p>
               </div>
               <div className="shrink-0 flex items-center justify-center w-10 h-10 rounded-full border border-secondary-foreground/20 group-hover:border-secondary-foreground group-hover:bg-secondary-foreground text-secondary-foreground group-hover:text-secondary transition-all">
                 <ArrowRight className="w-5 h-5" />
               </div>
+            </div>
+            <div className="relative z-10 mt-8 pt-6 border-t border-secondary-foreground/15">
+              <SeamFlow />
             </div>
           </Link>
 
           <div className="flex justify-end mt-6">
             <a
               href="?reset=1"
-              title="Forget language, theme and finished tours, then reload"
+              title={t('platform.hub.reset_demo_hint', 'Forget language, theme and finished tours, then reload')}
               className="inline-flex items-center gap-1.5 text-xs font-semibold text-muted-foreground hover:text-foreground transition-colors"
             >
-              <RotateCcw className="w-3.5 h-3.5" /> Reset demo
+              <RotateCcw className="w-3.5 h-3.5" /> {t('platform.hub.reset_demo', 'Reset demo')}
             </a>
           </div>
 
         </div>
       </section>
+    </div>
+  );
+}
+
+function SeatCard({ href, icon: Icon, title, persona, desc, cta, preview }: { href: string; icon: React.ElementType; title: string; persona: string; desc: string; cta: string; preview: React.ReactNode }) {
+  return (
+    <Link href={href} className="bg-card border border-border rounded-3xl shadow-xl hover:shadow-2xl hover:-translate-y-0.5 hover:border-primary/40 transition-all group flex flex-col overflow-hidden">
+      <div className="bg-muted/60 border-b border-border px-5 pt-5 overflow-hidden">
+        <div className="rounded-t-xl border border-b-0 border-border bg-background shadow-sm group-hover:-translate-y-1 transition-transform duration-300">
+          <div className="flex gap-1.5 px-3 py-2 border-b border-border" aria-hidden="true">
+            <span className="w-2 h-2 rounded-full bg-border" /><span className="w-2 h-2 rounded-full bg-border" /><span className="w-2 h-2 rounded-full bg-border" />
+          </div>
+          <div className="p-4 h-[184px] overflow-hidden">{preview}</div>
+        </div>
+      </div>
+      <div className="p-7 md:p-8 flex flex-col flex-1">
+        <div className="flex items-center gap-3 mb-3">
+          <span className="w-10 h-10 rounded-xl bg-primary/10 text-primary flex items-center justify-center shrink-0"><Icon className="w-5 h-5" /></span>
+          <h2 className="text-2xl md:text-3xl font-serif font-bold">{title}</h2>
+        </div>
+        <p className="font-semibold text-foreground mb-2">{persona}</p>
+        <p className="text-muted-foreground leading-relaxed mb-6">{desc}</p>
+        <div className="mt-auto flex items-center gap-2 text-primary font-bold">
+          {cta} <ArrowRight className="w-4 h-4 transition-transform group-hover:translate-x-1" />
+        </div>
+      </div>
+    </Link>
+  );
+}
+
+const URGENCY_DOT: Record<string, string> = { Critical: 'bg-destructive', High: 'bg-amber-500', Medium: 'bg-sky-500', Low: 'bg-muted-foreground/50' };
+
+function ConsolePreview() {
+  const { t } = useI18n();
+  const items = [...platformData.console.ritual.items].sort((a, b) => parseEuro(b.expectedValue) - parseEuro(a.expectedValue));
+  const atStake = items.reduce((s, i) => s + parseEuro(i.expectedValue), 0);
+  return (
+    <div aria-hidden="true" className="text-left">
+      <div className="flex items-baseline justify-between mb-3">
+        <span className="font-serif text-lg text-foreground">{t('platform.console.ritual', 'Priorities')}</span>
+        <span className="text-[11px] font-bold text-muted-foreground tabular-nums">{items.length} {t('console_v2.open', 'Open').toLowerCase()} · {fmtEuro(atStake)}</span>
+      </div>
+      <div className="space-y-1.5">
+        {items.slice(0, 4).map((it) => {
+          const c = platformData.allMembers.find((m) => m.id === it.companyId);
+          return (
+            <div key={it.id} className="flex items-center gap-2.5 rounded-lg border border-border bg-card px-2.5 py-1.5">
+              <CompanyMark name={c?.name} sector={c?.sector} size="xs" />
+              <span className="text-xs font-bold text-foreground truncate flex-1">{c?.name}</span>
+              <span className={cn('w-1.5 h-1.5 rounded-full shrink-0', URGENCY_DOT[it.urgency])} />
+              <span className="text-xs font-bold tabular-nums text-foreground w-12 text-right">{it.expectedValue.split(' ')[0]}</span>
+            </div>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+
+function PortalPreview() {
+  const { t } = useI18n();
+  const member = platformData.member;
+  const ev = platformData.portal.events[0];
+  const r = 26, circ = 2 * Math.PI * r;
+  return (
+    <div aria-hidden="true" className="text-left">
+      <div className="flex items-center gap-3 mb-3">
+        <CompanyMark name={member.name} sector={member.sector} size="sm" />
+        <div className="min-w-0">
+          <div className="text-sm font-bold text-foreground truncate">{member.name}</div>
+          <div className="text-[11px] text-muted-foreground">{member.tier} · {t('platform.hub.member_since', 'Member since')} {member.since}</div>
+        </div>
+      </div>
+      <div className="grid grid-cols-[auto_1fr] gap-3">
+        <div className="rounded-xl border border-border bg-card p-2.5 flex items-center justify-center relative">
+          <svg width="64" height="64" viewBox="0 0 64 64" className="-rotate-90">
+            <circle cx="32" cy="32" r={r} fill="none" stroke="hsl(var(--muted))" strokeWidth="6" />
+            <circle cx="32" cy="32" r={r} fill="none" stroke="hsl(var(--primary))" strokeWidth="6" strokeLinecap="round" strokeDasharray={circ} strokeDashoffset={circ * (1 - member.score / 100)} />
+          </svg>
+          <span className="absolute inset-0 flex items-center justify-center text-sm font-bold text-foreground tabular-nums">{member.score}</span>
+        </div>
+        <div className="space-y-1.5 min-w-0">
+          <div className="flex items-center gap-2 rounded-lg border border-border bg-card px-2.5 py-1.5">
+            <CalendarCheck className="w-3.5 h-3.5 text-primary shrink-0" />
+            <span className="text-xs font-bold text-foreground truncate">{ev.title}</span>
+          </div>
+          <div className="flex items-center gap-2 rounded-lg border border-border bg-card px-2.5 py-1.5">
+            <Handshake className="w-3.5 h-3.5 text-primary shrink-0" />
+            <span className="text-xs font-bold text-foreground truncate">{t('platform.hub.preview_intros', '2 introductions waiting')}</span>
+          </div>
+          <div className="text-[11px] text-muted-foreground px-1">{ev.date} · {ev.location}</div>
+        </div>
+      </div>
     </div>
   );
 }

@@ -66,18 +66,18 @@ export default function MarketplaceView({ t, showToast }: any) {
        {/* KPI Header */}
        <div className="grid grid-cols-3 gap-4 mb-8">
          <div className="bg-card border border-border p-6 rounded-[32px] shadow-sm flex flex-col justify-between">
-           <div className="text-[10px] uppercase font-bold text-muted-foreground tracking-widest mb-2">{t('portal_active_listings', 'Active Listings')}</div>
+           <div className="text-[11px] uppercase font-bold text-muted-foreground tracking-widest mb-2">{t('portal_active_listings', 'Active Listings')}</div>
            <div className="flex items-end gap-3">
              <div className="text-4xl font-serif tabular-nums">{stats.active}</div>
              <div className="text-xs text-green-500 font-bold mb-1 bg-green-500/10 px-2 py-0.5 rounded-full flex items-center gap-1"><ArrowUpRight className="w-3 h-3"/> 12%</div>
            </div>
          </div>
          <div className="bg-card border border-border p-6 rounded-[32px] shadow-sm flex flex-col justify-between">
-           <div className="text-[10px] uppercase font-bold text-muted-foreground tracking-widest mb-2">{t('portal_my_listings', 'My Listings')}</div>
+           <div className="text-[11px] uppercase font-bold text-muted-foreground tracking-widest mb-2">{t('portal_my_listings', 'My Listings')}</div>
            <div className="text-4xl font-serif tabular-nums">{stats.mine}</div>
          </div>
          <div className="bg-card border border-border p-6 rounded-[32px] shadow-sm flex flex-col justify-between">
-           <div className="text-[10px] uppercase font-bold text-muted-foreground tracking-widest mb-2">{t('portal_my_responses', 'My Responses')}</div>
+           <div className="text-[11px] uppercase font-bold text-muted-foreground tracking-widest mb-2">{t('portal_my_responses', 'My Responses')}</div>
            <div className="text-4xl font-serif tabular-nums">{stats.responses}</div>
          </div>
        </div>
@@ -114,9 +114,9 @@ export default function MarketplaceView({ t, showToast }: any) {
                 <div onClick={() => setExpandedListing(isExpanded ? null : m.id)} className="p-6 md:p-8 cursor-pointer flex flex-col md:flex-row gap-6 items-start md:items-center justify-between group">
                   <div className="flex-1">
                     <div className="flex items-center gap-3 mb-3">
-                      <span className={cn("text-[10px] uppercase font-bold tracking-widest px-3 py-1 rounded-full", m.type === 'Offer' ? 'bg-green-500/10 text-green-600' : 'bg-primary/10 text-primary')}>{m.type}</span>
-                      <span className="text-[10px] uppercase font-bold tracking-widest text-muted-foreground">{m.category}</span>
-                      {m.status !== 'active' && <span className="text-[10px] uppercase font-bold tracking-widest text-muted-foreground bg-muted px-2 py-1 rounded-full ml-auto md:ml-0">{m.status}</span>}
+                      <span className={cn("text-[11px] uppercase font-bold tracking-widest px-3 py-1 rounded-full", m.type === 'Offer' ? 'bg-green-500/10 text-green-600' : 'bg-primary/10 text-primary')}>{m.type}</span>
+                      <span className="text-[11px] uppercase font-bold tracking-widest text-muted-foreground">{m.category}</span>
+                      {m.status !== 'active' && <span className="text-[11px] uppercase font-bold tracking-widest text-muted-foreground bg-muted px-2 py-1 rounded-full ml-auto md:ml-0">{m.status}</span>}
                     </div>
                     <h3 className="text-2xl font-serif font-light text-foreground group-hover:text-primary transition-colors">{m.title}</h3>
                     <div className="text-xs text-muted-foreground mt-2 flex items-center gap-2">
@@ -124,7 +124,7 @@ export default function MarketplaceView({ t, showToast }: any) {
                     </div>
                   </div>
                   <div className="shrink-0 flex items-center gap-4">
-                    {hasResponded && <span className="text-[10px] uppercase font-bold tracking-widest text-green-600 bg-green-500/10 px-3 py-1 rounded-full flex items-center gap-1"><CheckCircle2 className="w-3 h-3"/> {t('portal_responded', 'Responded')}</span>}
+                    {hasResponded && <span className="text-[11px] uppercase font-bold tracking-widest text-green-600 bg-green-500/10 px-3 py-1 rounded-full flex items-center gap-1"><CheckCircle2 className="w-3 h-3"/> {t('portal_responded', 'Responded')}</span>}
                     <div className="w-10 h-10 rounded-full bg-muted flex items-center justify-center text-muted-foreground group-hover:bg-primary/10 group-hover:text-primary transition-colors">
                       {isExpanded ? <ChevronUp className="w-5 h-5"/> : <ChevronDown className="w-5 h-5"/>}
                     </div>
@@ -136,13 +136,13 @@ export default function MarketplaceView({ t, showToast }: any) {
                     <motion.div initial={{ height: 0, opacity: 0 }} animate={{ height: 'auto', opacity: 1 }} exit={{ height: 0, opacity: 0 }} className="overflow-hidden bg-muted/10 border-t border-border">
                       <div className="p-6 md:p-8 space-y-6">
                         <div className="p-5 bg-background rounded-2xl border border-border shadow-sm">
-                          <div className="text-[10px] uppercase font-bold text-muted-foreground tracking-widest mb-3 flex items-center gap-2"><Target className="w-3 h-3"/> {t('portal_intent', 'Intent / Details')}</div>
+                          <div className="text-[11px] uppercase font-bold text-muted-foreground tracking-widest mb-3 flex items-center gap-2"><Target className="w-3 h-3"/> {t('portal_intent', 'Intent / Details')}</div>
                           <p className="text-sm text-foreground leading-relaxed">{m.intent}</p>
                         </div>
                         
                         {hasResponded && (
                           <div className="p-5 bg-background rounded-2xl border border-border shadow-sm">
-                            <div className="text-[10px] uppercase font-bold text-muted-foreground tracking-widest mb-3 flex items-center gap-2"><MessageSquare className="w-3 h-3"/> {t('portal_your_response', 'Your Response Thread')}</div>
+                            <div className="text-[11px] uppercase font-bold text-muted-foreground tracking-widest mb-3 flex items-center gap-2"><MessageSquare className="w-3 h-3"/> {t('portal_your_response', 'Your Response Thread')}</div>
                             <div className="bg-muted/50 p-4 rounded-xl text-sm italic text-muted-foreground">
                               {t('portal_response_sent_text', 'You securely responded to this listing. The author will follow up directly.')}
                             </div>

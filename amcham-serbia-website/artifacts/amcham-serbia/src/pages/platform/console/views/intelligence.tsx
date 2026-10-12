@@ -57,21 +57,21 @@ export function IntelligenceView({ navigateTo }: { navigateTo: (v:string, c?:str
         <div className="bg-card rounded-[32px] p-8 border border-border shadow-sm flex items-center justify-between relative overflow-hidden group">
           <div className="absolute top-0 right-0 w-32 h-32 bg-primary/5 rounded-full blur-2xl transition-all group-hover:scale-150"></div>
           <div className="relative z-10">
-            <div className="text-[10px] uppercase font-bold text-muted-foreground tracking-widest mb-2 flex items-center gap-2"><BarChart2 className="w-3 h-3"/> {t('platform.console.intel_total_signals', 'Total Signals')}</div>
+            <div className="text-[11px] uppercase font-bold text-muted-foreground tracking-widest mb-2 flex items-center gap-2"><BarChart2 className="w-3 h-3"/> {t('platform.console.intel_total_signals', 'Total Signals')}</div>
             <div className="text-5xl font-serif font-light tabular-nums">{data.pipeline.total}</div>
           </div>
         </div>
         <div className="bg-card rounded-[32px] p-8 border border-border shadow-sm flex items-center justify-between relative overflow-hidden group">
           <div className="absolute top-0 right-0 w-32 h-32 bg-emerald-500/5 rounded-full blur-2xl transition-all group-hover:scale-150"></div>
           <div className="relative z-10">
-            <div className="text-[10px] uppercase font-bold text-muted-foreground tracking-widest mb-2 flex items-center gap-2"><Users className="w-3 h-3"/> {t('platform.console.intel_companies_fresh', 'Companies Fresh')}</div>
+            <div className="text-[11px] uppercase font-bold text-muted-foreground tracking-widest mb-2 flex items-center gap-2"><Users className="w-3 h-3"/> {t('platform.console.intel_companies_fresh', 'Companies Fresh')}</div>
             <div className="text-5xl font-serif font-light tabular-nums">{data.pipeline.companiesFresh}</div>
           </div>
         </div>
         <div className="bg-card rounded-[32px] p-8 border border-border shadow-sm flex items-center justify-between relative overflow-hidden group">
           <div className="absolute top-0 right-0 w-32 h-32 bg-primary/5 rounded-full blur-2xl transition-all group-hover:scale-150"></div>
           <div className="relative z-10">
-            <div className="text-[10px] uppercase font-bold text-muted-foreground tracking-widest mb-2 flex items-center gap-2"><Activity className="w-3 h-3"/> {t('platform.console.intel_pipeline', 'Pipeline Health')}</div>
+            <div className="text-[11px] uppercase font-bold text-muted-foreground tracking-widest mb-2 flex items-center gap-2"><Activity className="w-3 h-3"/> {t('platform.console.intel_pipeline', 'Pipeline Health')}</div>
             <div className="text-5xl font-serif font-light tabular-nums text-emerald-500">{data.pipeline.health}%</div>
           </div>
         </div>
@@ -91,7 +91,7 @@ export function IntelligenceView({ navigateTo }: { navigateTo: (v:string, c?:str
                     <div className={cn("w-14 h-14 rounded-2xl flex items-center justify-center shadow-inner border border-white/10", source.bg, source.color)}>
                       <Icon className="w-6 h-6" />
                     </div>
-                    <div className={cn("px-3 py-1.5 rounded-full text-[10px] font-bold uppercase tracking-widest flex items-center gap-1.5 shadow-sm border", sData.status === 'Online' ? 'bg-emerald-500/10 text-emerald-600 border-emerald-500/20' : 'bg-destructive/10 text-destructive border-destructive/20')}>
+                    <div className={cn("px-3 py-1.5 rounded-full text-[11px] font-bold uppercase tracking-widest flex items-center gap-1.5 shadow-sm border", sData.status === 'Online' ? 'bg-emerald-500/10 text-emerald-600 border-emerald-500/20' : 'bg-destructive/10 text-destructive border-destructive/20')}>
                       <div className={cn("w-1.5 h-1.5 rounded-full", sData.status === 'Online' ? 'bg-emerald-500 animate-pulse' : 'bg-destructive')}></div>
                       {sData.status}
                     </div>
@@ -99,26 +99,26 @@ export function IntelligenceView({ navigateTo }: { navigateTo: (v:string, c?:str
                   <h3 className="text-2xl font-serif font-light mb-4">{source.title}</h3>
                   <div className="grid grid-cols-2 gap-4 text-sm bg-background p-4 rounded-2xl border border-border/50">
                     <div>
-                      <div className="text-[10px] uppercase font-bold text-muted-foreground tracking-widest mb-1 flex items-center gap-1"><RefreshCw className="w-3 h-3"/> Sync</div>
+                      <div className="text-[11px] uppercase font-bold text-muted-foreground tracking-widest mb-1 flex items-center gap-1"><RefreshCw className="w-3 h-3"/> Sync</div>
                       <div className="font-medium text-foreground">{sData.lastSync}</div>
                     </div>
                     <div>
-                      <div className="text-[10px] uppercase font-bold text-muted-foreground tracking-widest mb-1 flex items-center gap-1"><Activity className="w-3 h-3"/> Vol</div>
+                      <div className="text-[11px] uppercase font-bold text-muted-foreground tracking-widest mb-1 flex items-center gap-1"><Activity className="w-3 h-3"/> Vol</div>
                       <div className="font-medium text-foreground">{sData.ingested}</div>
                     </div>
                   </div>
                 </div>
                 <div className="px-6 py-4 bg-background border-b border-border text-center">
-                   <button onClick={() => setActiveSpec(activeSpec === source.key ? null : source.key)} className="text-[10px] uppercase font-bold tracking-widest text-primary hover:text-foreground transition-colors flex items-center justify-center gap-1 mx-auto">
+                   <button onClick={() => setActiveSpec(activeSpec === source.key ? null : source.key)} className="text-[11px] uppercase font-bold tracking-widest text-primary hover:text-foreground transition-colors flex items-center justify-center gap-1 mx-auto">
                      {t('platform.console.spec_how_it_works', 'Technical Specification')} {activeSpec === source.key ? <ChevronUp className="w-3 h-3"/> : <ChevronDown className="w-3 h-3"/>}
                    </button>
                    <AnimatePresence>
                      {activeSpec === source.key && (
                        <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: 'auto' }} exit={{ opacity: 0, height: 0 }} className="overflow-hidden mt-4 pt-4 border-t border-border space-y-3 text-left">
-                         <div className="flex justify-between items-center"><span className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">{t('platform.console.spec_refresh', 'Refresh Mode')}</span> <span className="text-xs font-medium text-foreground bg-muted px-2 py-1 rounded-md">{sData.auto}</span></div>
-                          <div className="flex justify-between items-center"><span className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">As Of</span> <span className="text-xs font-medium text-foreground bg-muted px-2 py-1 rounded-md">{sData.asOf}</span></div>
-                          <div className="flex justify-between items-start gap-4 flex-col mt-2"><span className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">Failure mode</span> <span className="text-xs font-medium text-foreground bg-muted p-2 rounded-lg w-full">{sData.failureMode}</span></div>
-                          <div className="flex justify-between items-start gap-4 flex-col mt-2"><span className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">Data class & GDPR</span> <span className="text-xs font-medium text-foreground bg-muted p-2 rounded-lg w-full">{sData.dataClassification} • {sData.gdprErasure}</span></div>
+                         <div className="flex justify-between items-center"><span className="text-[11px] font-bold text-muted-foreground uppercase tracking-widest">{t('platform.console.spec_refresh', 'Refresh Mode')}</span> <span className="text-xs font-medium text-foreground bg-muted px-2 py-1 rounded-md">{sData.auto}</span></div>
+                          <div className="flex justify-between items-center"><span className="text-[11px] font-bold text-muted-foreground uppercase tracking-widest">As Of</span> <span className="text-xs font-medium text-foreground bg-muted px-2 py-1 rounded-md">{sData.asOf}</span></div>
+                          <div className="flex justify-between items-start gap-4 flex-col mt-2"><span className="text-[11px] font-bold text-muted-foreground uppercase tracking-widest">Failure mode</span> <span className="text-xs font-medium text-foreground bg-muted p-2 rounded-lg w-full">{sData.failureMode}</span></div>
+                          <div className="flex justify-between items-start gap-4 flex-col mt-2"><span className="text-[11px] font-bold text-muted-foreground uppercase tracking-widest">Data class & GDPR</span> <span className="text-xs font-medium text-foreground bg-muted p-2 rounded-lg w-full">{sData.dataClassification} • {sData.gdprErasure}</span></div>
                        </motion.div>
                      )}
                    </AnimatePresence>
@@ -137,12 +137,12 @@ export function IntelligenceView({ navigateTo }: { navigateTo: (v:string, c?:str
                           
                           <div className="flex justify-between items-start mb-3 pl-2">
                             <button onClick={() => navigateTo('ritual', item.companyId)} className="font-bold text-foreground hover:text-primary transition-colors text-base text-left">{company?.name}</button>
-                            <span className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground bg-muted px-2 py-1 rounded-md">{item.date}</span>
+                            <span className="text-[11px] font-bold uppercase tracking-widest text-muted-foreground bg-muted px-2 py-1 rounded-md">{item.date}</span>
                           </div>
                           
                           <p className="text-muted-foreground font-medium mb-4 pl-2 text-sm">{item.text}</p>
                           
-                          <div className="flex flex-wrap gap-2 mb-4 pl-2 text-[10px] font-bold uppercase tracking-widest">
+                          <div className="flex flex-wrap gap-2 mb-4 pl-2 text-[11px] font-bold uppercase tracking-widest">
                             <span className={cn("px-2 py-1 rounded-md border", item.state === 'confirmed' ? "bg-emerald-500/10 text-emerald-600 border-emerald-500/20" : item.state === 'extracted' ? "bg-blue-500/10 text-blue-600 border-blue-500/20" : "bg-muted text-muted-foreground border-border")}>{item.state}</span>
                             {item.scoreImpact !== '0' && <span className={cn("px-2 py-1 rounded-md border", isPos ? 'bg-emerald-500/10 text-emerald-600 border-emerald-500/20' : 'bg-destructive/10 text-destructive border-destructive/20')}>{item.scoreImpact}</span>}
                             <span className="px-2 py-1 rounded-md bg-muted text-foreground border border-border shadow-sm" title="Confidence">{item.confidence}</span>
@@ -155,7 +155,7 @@ export function IntelligenceView({ navigateTo }: { navigateTo: (v:string, c?:str
                                   <div className="flex items-start gap-2">
                                      <AlertCircle className="w-4 h-4 text-primary shrink-0 mt-0.5" />
                                      <div>
-                                        <div className="text-[10px] font-bold text-primary uppercase tracking-widest mb-1">Suggested Action</div>
+                                        <div className="text-[11px] font-bold text-primary uppercase tracking-widest mb-1">Suggested Action</div>
                                         <div className="text-sm font-medium text-foreground">{isNeg ? `Queue high-priority check-in call with ${company?.manager}.` : `Log interaction and monitor for further growth signals.`}</div>
                                      </div>
                                   </div>

@@ -31,7 +31,7 @@ const SUGGESTED_QUESTIONS = ["Who's struggling right now?", 'Anyone I should cal
 // enough here — this only ever reaches the model as a JSON field, never
 // rendered UI copy, so it doesn't need to track the sidebar's i18n keys.
 const VIEW_LABELS: Record<string, string> = {
-  ritual: 'Daily Ritual queue',
+  ritual: 'Priorities list',
   heatmap: 'Portfolio Heatmap',
   accounts: 'Accounts',
   retention: 'Retention queue',
@@ -228,7 +228,7 @@ export function CompassFab({ view, dossierOpen = false, selectedCompanyId, roleP
                 <Compass className="w-4 h-4" />
                 <div className="font-bold text-sm">Ask Compass</div>
               </div>
-              <AiBadge className="bg-secondary-foreground/10 border-secondary-foreground/10 text-secondary-foreground/70" />
+              <AiBadge className="bg-secondary-foreground/10 border-secondary-foreground/10 text-secondary-foreground/80" />
             </div>
             <div className="flex-1 overflow-y-auto p-4 space-y-3 bg-muted/20">
               {!messages.some((m) => m.role === 'user') && (
@@ -274,7 +274,7 @@ export function CompassFab({ view, dossierOpen = false, selectedCompanyId, roleP
                             >
                               <div className="min-w-0">
                                 <div className="text-xs font-bold text-foreground truncate">{c.name}</div>
-                                <div className="text-[10px] text-muted-foreground uppercase tracking-wide">{c.sector} · {c.tier}</div>
+                                <div className="text-[11px] text-muted-foreground uppercase tracking-wide">{c.sector} · {c.tier}</div>
                               </div>
                               <div className="text-xs font-bold text-foreground shrink-0 tabular-nums">{c.score}</div>
                             </button>
@@ -286,7 +286,7 @@ export function CompassFab({ view, dossierOpen = false, selectedCompanyId, roleP
                           {m.answer.departed.map((d) => (
                             <div key={d.id} className="px-3 py-2 rounded-xl border border-border bg-background">
                               <div className="text-xs font-bold text-foreground">{d.name}</div>
-                              <div className="text-[10px] text-muted-foreground">{d.sector} · departed {d.departedDate}</div>
+                              <div className="text-[11px] text-muted-foreground">{d.sector} · departed {d.departedDate}</div>
                             </div>
                           ))}
                         </div>

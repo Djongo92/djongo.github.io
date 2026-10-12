@@ -18,10 +18,10 @@ export default function BlueprintDirection() {
               <div className="absolute top-0 right-0 bg-primary text-primary-foreground text-xs font-bold px-3 py-1 rounded-bl-sm">Chosen Lead</div>
               <BookOpen className="w-8 h-8 text-primary mb-6" />
               <h3 className="text-xl font-bold mb-3">Editorial authority</h3>
-              <p className="text-sm text-secondary-foreground/70 mb-6">Restrained navy / warm white / red; large headlines; generous spacing; real local photography; identity from people, language and evidence.</p>
+              <p className="text-sm text-secondary-foreground/80 mb-6">Restrained navy / warm white / red; large headlines; generous spacing; real local photography; identity from people, language and evidence.</p>
               <div className="mt-auto pt-4 border-t border-secondary-foreground/10">
                 <span className="text-xs font-bold text-accent uppercase tracking-wider block mb-1">Risk</span>
-                <p className="text-xs text-secondary-foreground/50">Feels generic without distinctive photography and disciplined editorial programme.</p>
+                <p className="text-xs text-secondary-foreground/70">Feels generic without distinctive photography and disciplined editorial programme.</p>
               </div>
             </div>
 

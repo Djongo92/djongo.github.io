@@ -84,21 +84,21 @@ export function MyTeamView({ navigateTo, showToast }: any) {
       <AnimatePresence>
         {showMath && (
           <motion.div initial={{ height: 0, opacity: 0 }} animate={{ height: 'auto', opacity: 1 }} exit={{ height: 0, opacity: 0 }} className="overflow-hidden">
-            <div className="bg-foreground text-background p-6 rounded-[32px] shadow-lg mb-6 flex flex-col md:flex-row gap-8 items-center border border-foreground">
+            <div className="ink bg-foreground text-background p-6 rounded-[32px] shadow-lg mb-6 flex flex-col md:flex-row gap-8 items-center border border-foreground">
               <div className="flex-1">
-                <div className="text-[10px] uppercase font-bold text-[#40D9F1] tracking-widest mb-2">Distribution Logic</div>
+                <div className="text-[11px] uppercase font-bold text-[#40D9F1] tracking-widest mb-2">Distribution Logic</div>
                 <h3 className="text-xl font-serif mb-2">How auto-balance works</h3>
                 <p className="text-background/80 text-sm leading-relaxed">The algorithm calculates the true team average workload and redistributes active cases to ensure no team member is more than <span className="font-bold text-background">±5%</span> away from the mean. It will refuse to run if the standard deviation results in a spread <span className="font-bold text-background">&gt; 10%</span> after adjustment.</p>
               </div>
               <div className="flex gap-6">
                 <div className="text-center">
                   <div className="text-3xl font-serif text-[#40D9F1]">±5</div>
-                  <div className="text-[10px] uppercase font-bold tracking-widest text-background/60">Clamp limit</div>
+                  <div className="text-[11px] uppercase font-bold tracking-widest text-background/75">Clamp limit</div>
                 </div>
                 <div className="w-px bg-background/20 h-12 self-center"></div>
                 <div className="text-center">
                   <div className="text-3xl font-serif text-[#40D9F1]">≤10</div>
-                  <div className="text-[10px] uppercase font-bold tracking-widest text-background/60">Max spread</div>
+                  <div className="text-[11px] uppercase font-bold tracking-widest text-background/75">Max spread</div>
                 </div>
               </div>
             </div>
@@ -118,7 +118,7 @@ export function MyTeamView({ navigateTo, showToast }: any) {
             <div className={`w-12 h-12 rounded-2xl mb-4 flex items-center justify-center ${stat.bg} ${stat.color} border border-${stat.color.split('-')[1]}-500/20 shadow-sm`}>
               <stat.icon className="w-5 h-5" />
             </div>
-            <div className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest mb-1.5">{stat.label}</div>
+            <div className="text-[11px] font-bold text-muted-foreground uppercase tracking-widest mb-1.5">{stat.label}</div>
             <div className="text-3xl font-serif tabular-nums flex items-end justify-between text-foreground">
               <AnimatedCounter value={stat.value} />
               <span className={`text-sm font-bold font-sans ${stat.color}`}>{stat.trend}</span>
@@ -157,7 +157,7 @@ export function MyTeamView({ navigateTo, showToast }: any) {
 
       <div className="bg-card border border-border rounded-[40px] overflow-hidden shadow-sm">
         <table className="w-full text-sm text-left">
-          <thead className="bg-muted/50 text-[10px] uppercase tracking-widest text-muted-foreground border-b border-border">
+          <thead className="bg-muted/50 text-[11px] uppercase tracking-widest text-muted-foreground border-b border-border">
             <tr>
               <th className="px-8 py-6 font-bold">Team Member</th>
               <th className="px-8 py-6 font-bold">Book Size</th>
@@ -222,7 +222,7 @@ export function MyTeamView({ navigateTo, showToast }: any) {
                         <td colSpan={6} className="p-0">
                           <div className="px-8 py-6 flex gap-8">
                             <div className="flex-1 bg-card border border-border rounded-3xl p-6 shadow-sm">
-                              <div className="text-[10px] uppercase font-bold tracking-widest text-muted-foreground mb-4">Capacity Breakdown</div>
+                              <div className="text-[11px] uppercase font-bold tracking-widest text-muted-foreground mb-4">Capacity Breakdown</div>
                               <div className="space-y-4">
                                 <div>
                                   <div className="flex justify-between text-xs font-bold mb-1"><span>Target Book</span> <span>{member.bookSize} / {targetBook}</span></div>
@@ -244,7 +244,7 @@ export function MyTeamView({ navigateTo, showToast }: any) {
                             </div>
                             
                             <div className="flex-1 bg-card border border-border rounded-3xl p-6 shadow-sm">
-                               <div className="text-[10px] uppercase font-bold tracking-widest text-muted-foreground mb-4">Member Temperature (Last 30d)</div>
+                               <div className="text-[11px] uppercase font-bold tracking-widest text-muted-foreground mb-4">Member Temperature (Last 30d)</div>
                                <div className="h-32 flex items-end gap-2 px-2 mt-8">
                                  {member.temperature.map((val: number, i: number) => (
                                    <div key={i} className="flex-1 bg-primary/20 hover:bg-primary transition-colors rounded-t-sm relative group flex justify-center" style={{ height: `${(val/30)*100}%`, minHeight: '4px' }}>
@@ -252,7 +252,7 @@ export function MyTeamView({ navigateTo, showToast }: any) {
                                    </div>
                                  ))}
                                </div>
-                               <div className="flex justify-between text-[10px] font-bold text-muted-foreground uppercase mt-2 px-2">
+                               <div className="flex justify-between text-[11px] font-bold text-muted-foreground uppercase mt-2 px-2">
                                  <span>Week 1</span>
                                  <span>Week 3</span>
                                </div>

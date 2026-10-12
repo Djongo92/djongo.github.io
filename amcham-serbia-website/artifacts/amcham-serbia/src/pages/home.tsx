@@ -4,7 +4,7 @@ import { useI18n } from '@/lib/i18n';
 import { SEO } from '@/components/seo';
 import { ArrowRight, ChevronRight, Newspaper, ArrowUpRight, CheckCircle2, Compass } from 'lucide-react';
 import { mockEvents, mockNews } from '@/data/mock';
-import { useScroll, useTransform, motion, AnimatePresence } from 'framer-motion';
+import { useScroll, useTransform, useInView, motion, AnimatePresence } from 'framer-motion';
 import { useGuidedTour } from '@/components/guided-tour';
 import { Skeleton } from '@/components/ui/skeleton';
 import { ImageWithSkeleton } from '@/components/ui/image-with-skeleton';
@@ -59,7 +59,7 @@ export default function Home() {
       <SEO title={t('home.hero_title')} description={t('home.hero_subtitle')} />
       
       {/* 1. Hero Section */}
-      <section className="relative w-full h-[90vh] min-h-[600px] flex items-center justify-center overflow-hidden bg-secondary">
+      <section className="relative w-full h-[80vh] min-h-[560px] max-h-[820px] flex items-center justify-center overflow-hidden bg-secondary">
         <div className="absolute inset-0 z-0">
           <Skeleton className="absolute inset-0 rounded-none" />
           <AnimatePresence>
@@ -68,22 +68,15 @@ export default function Home() {
               src={`${import.meta.env.BASE_URL}${heroImages[heroIndex]}`}
               alt="Business Moves Serbia"
               initial={{ opacity: 0 }}
-              animate={{ opacity: 0.75 }}
+              animate={{ opacity: 0.6 }}
               exit={{ opacity: 0 }}
               transition={{ duration: 1.5, ease: 'easeInOut' }}
               className="absolute inset-0 w-full h-full object-cover"
             />
           </AnimatePresence>
-          <div className="absolute inset-0 bg-gradient-to-b from-secondary/70 via-secondary/30 to-background"></div>
+          <div className="absolute inset-0 bg-gradient-to-b from-secondary/85 via-secondary/60 to-secondary/90"></div>
         </div>
         
-        {/* Soft decorative shape */}
-        <img 
-          src={`${import.meta.env.BASE_URL}images/real/morph-1.png`}
-          alt=""
-          className="absolute top-1/4 -left-32 w-[600px] opacity-20 pointer-events-none mix-blend-screen"
-        />
-
         <div className="container mx-auto px-4 md:px-8 relative z-10 text-center max-w-4xl pt-16">
           <h1 className="text-5xl md:text-7xl font-bold font-serif leading-tight text-white mb-6 drop-shadow-lg">
             {t('home.hero_title')}
@@ -113,9 +106,30 @@ export default function Home() {
               { label: t('home.stats.investments'), val: t('home.stats.investments_val') }
             ].map((stat, i) => (
               <div key={i} className="flex flex-col items-center md:items-start text-center md:text-left">
-                <span className="text-4xl lg:text-5xl font-serif font-bold text-secondary mb-2">{stat.val}</span>
+                <span className="text-4xl lg:text-5xl font-serif font-bold text-foreground mb-2 tabular-nums"><CountUp value={stat.val} /></span>
                 <span className="text-sm font-bold uppercase tracking-widest text-muted-foreground">{stat.label}</span>
               </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* 2b. Patron marquee */}
+      <section className="bg-background border-b border-border py-8 overflow-hidden" aria-label={t('home.patrons_subtitle')}>
+        <div className="container mx-auto px-4 md:px-8 mb-4 flex items-baseline justify-between gap-4">
+          <h2 className="text-xs font-bold uppercase tracking-widest text-muted-foreground">{t('home.patrons_subtitle')}</h2>
+          <span className="text-sm font-serif text-foreground hidden sm:block">{t('home.patrons_title')}</span>
+        </div>
+        <div className="marquee group relative bg-background">
+          <div className="marquee-track bg-background flex w-max items-center gap-4 md:gap-8 group-hover:[animation-play-state:paused]">
+            {[...patrons, ...patrons].map((logo, i) => (
+              <img
+                key={i}
+                src={`${import.meta.env.BASE_URL}images/patrons/${logo}`}
+                alt={i < patrons.length ? logo.replace(/\.(png|webp)$/, '').replace('-', ' ') : ''}
+                aria-hidden={i >= patrons.length}
+                className="h-20 md:h-24 w-auto object-contain grayscale opacity-70 hover:opacity-100 hover:grayscale-0 transition mix-blend-multiply dark:invert dark:mix-blend-screen"
+              />
             ))}
           </div>
         </div>
@@ -135,16 +149,16 @@ export default function Home() {
               </div>
               <div className="absolute -bottom-6 -right-6 w-48 h-48 bg-background border border-border p-6 shadow-xl hidden md:flex flex-col justify-center rounded-sm">
                 <span className="text-xs font-bold uppercase tracking-widest text-primary mb-2">{t('home.in_focus')}</span>
-                <span className="font-serif font-bold text-xl leading-tight">Twelfth Lap Time Survey Results</span>
+                <span className="font-serif font-bold text-xl leading-tight">{t('home.in_focus_badge', 'Fourteenth Lap Time Survey Results')}</span>
               </div>
             </div>
             
             <div className="lg:col-span-5 lg:col-start-8 flex flex-col justify-center">
               <h2 className="text-3xl md:text-4xl font-serif font-bold mb-6 text-foreground">
-                Lap Time 2023: Business Environment Assessment
+                {t('home.in_focus_title', 'Lap Time 2025: Business Environment Assessment')}
               </h2>
               <p className="text-lg text-muted-foreground mb-8 leading-relaxed">
-                Our annual comprehensive survey measuring investor confidence, identifying key regulatory challenges, and charting the course for structural reforms in the Serbian economy.
+                {t('home.in_focus_body', 'Our annual survey of members: how confident investors are, which regulations hold them back, and which reforms the Serbian economy needs next.')}
               </p>
               <Link href="/insights" className="inline-flex items-center gap-2 text-primary font-bold hover:underline w-fit">
                 {t('home.latest_research')} <ArrowRight className="w-4 h-4" />
@@ -188,25 +202,6 @@ export default function Home() {
                   {lang === 'sr' ? news.summarySr : news.summary}
                 </p>
               </Link>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* 5. Patron Members Logo Wall */}
-      <section className="py-24 bg-background border-t border-border">
-        <div className="container mx-auto px-4 md:px-8 text-center">
-          <h2 className="text-2xl md:text-3xl font-serif font-bold mb-4">{t('home.patrons_title')}</h2>
-          <p className="text-muted-foreground uppercase tracking-widest text-xs font-bold mb-16">{t('home.patrons_subtitle')}</p>
-          
-          <div className="flex flex-wrap justify-center items-center gap-8 md:gap-16 opacity-60 hover:opacity-100 transition-opacity duration-500 max-w-5xl mx-auto">
-            {patrons.map((logo, i) => (
-              <img 
-                key={i} 
-                src={`${import.meta.env.BASE_URL}images/patrons/${logo}`} 
-                alt="Patron Member" 
-                className="h-10 md:h-14 w-auto object-contain grayscale hover:grayscale-0 transition-all duration-300"
-              />
             ))}
           </div>
         </div>
@@ -370,20 +365,20 @@ export default function Home() {
           <div className="max-w-2xl mb-16">
             <span className="text-xs font-bold uppercase tracking-widest text-accent mb-4 block">{t('home.scorecard.eyebrow')}</span>
             <h2 className="text-3xl md:text-4xl font-serif font-bold mb-6">{t('home.scorecard.title')}</h2>
-            <p className="text-lg text-secondary-foreground/70 leading-relaxed">{t('home.scorecard.desc')}</p>
+            <p className="text-lg text-secondary-foreground/80 leading-relaxed">{t('home.scorecard.desc')}</p>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-12">
             <div className="bg-secondary-foreground/5 border border-secondary-foreground/10 rounded-sm p-8">
-              <span className="text-xs font-bold uppercase tracking-widest text-secondary-foreground/50 mb-6 block">{t('home.scorecard.old_label')}</span>
+              <span className="text-xs font-bold uppercase tracking-widest text-secondary-foreground/70 mb-6 block">{t('home.scorecard.old_label')}</span>
               <div className="flex gap-10">
                 <div>
-                  <div className="text-4xl font-serif font-bold text-secondary-foreground/70">8<span className="text-xl text-secondary-foreground/40">/12</span></div>
-                  <div className="text-xs font-bold uppercase tracking-widest text-secondary-foreground/40 mt-2">{t('home.scorecard.findability_label')}</div>
+                  <div className="text-4xl font-serif font-bold text-secondary-foreground/80">8<span className="text-xl text-secondary-foreground/60">/12</span></div>
+                  <div className="text-xs font-bold uppercase tracking-widest text-secondary-foreground/60 mt-2">{t('home.scorecard.findability_label')}</div>
                 </div>
                 <div>
-                  <div className="text-4xl font-serif font-bold text-secondary-foreground/70">4<span className="text-xl text-secondary-foreground/40">/6</span></div>
-                  <div className="text-xs font-bold uppercase tracking-widest text-secondary-foreground/40 mt-2">{t('home.scorecard.visual_label')}</div>
+                  <div className="text-4xl font-serif font-bold text-secondary-foreground/80">4<span className="text-xl text-secondary-foreground/60">/6</span></div>
+                  <div className="text-xs font-bold uppercase tracking-widest text-secondary-foreground/60 mt-2">{t('home.scorecard.visual_label')}</div>
                 </div>
               </div>
             </div>
@@ -391,19 +386,19 @@ export default function Home() {
               <span className="text-xs font-bold uppercase tracking-widest text-primary mb-6 block">{t('home.scorecard.new_label')}</span>
               <div className="flex gap-10">
                 <div>
-                  <div className="text-4xl font-serif font-bold text-secondary-foreground">11<span className="text-xl text-secondary-foreground/50">/12</span></div>
-                  <div className="text-xs font-bold uppercase tracking-widest text-secondary-foreground/50 mt-2">{t('home.scorecard.findability_label')}</div>
+                  <div className="text-4xl font-serif font-bold text-secondary-foreground">11<span className="text-xl text-secondary-foreground/70">/12</span></div>
+                  <div className="text-xs font-bold uppercase tracking-widest text-secondary-foreground/70 mt-2">{t('home.scorecard.findability_label')}</div>
                 </div>
                 <div>
-                  <div className="text-4xl font-serif font-bold text-secondary-foreground">5<span className="text-xl text-secondary-foreground/50">/6</span></div>
-                  <div className="text-xs font-bold uppercase tracking-widest text-secondary-foreground/50 mt-2">{t('home.scorecard.visual_label')}</div>
+                  <div className="text-4xl font-serif font-bold text-secondary-foreground">5<span className="text-xl text-secondary-foreground/70">/6</span></div>
+                  <div className="text-xs font-bold uppercase tracking-widest text-secondary-foreground/70 mt-2">{t('home.scorecard.visual_label')}</div>
                 </div>
               </div>
             </div>
           </div>
 
           <div className="bg-secondary-foreground/5 border border-secondary-foreground/10 rounded-sm p-8 mb-10">
-            <span className="text-xs font-bold uppercase tracking-widest text-secondary-foreground/50 mb-5 block">{t('home.scorecard.journeys_label')}</span>
+            <span className="text-xs font-bold uppercase tracking-widest text-secondary-foreground/70 mb-5 block">{t('home.scorecard.journeys_label')}</span>
             <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
               {[
                 t('home.scorecard.journey_1'),
@@ -428,4 +423,30 @@ export default function Home() {
 
     </div>
   );
+}
+
+// Counts a stat like "€21.2bn", "119,000" or "260+" up from zero once it scrolls
+// into view, keeping its prefix, suffix, decimals and thousands separators.
+function CountUp({ value }: { value: string }) {
+  const ref = useRef<HTMLSpanElement>(null);
+  const inView = useInView(ref, { once: true });
+  const m = value.match(/^([^\d]*)([\d.,]+)(.*)$/);
+  const [shown, setShown] = useState(m ? 0 : NaN);
+  const target = m ? parseFloat(m[2].replace(/,/g, '')) : NaN;
+  const decimals = m && m[2].includes('.') ? m[2].split('.')[1].length : 0;
+  useEffect(() => {
+    if (!inView || isNaN(target)) return;
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) { setShown(target); return; }
+    let raf = 0; const t0 = performance.now(), dur = 1400;
+    const tick = (now: number) => {
+      const p = Math.min(1, (now - t0) / dur), eased = 1 - Math.pow(1 - p, 3);
+      setShown(target * eased);
+      if (p < 1) raf = requestAnimationFrame(tick);
+    };
+    raf = requestAnimationFrame(tick);
+    return () => cancelAnimationFrame(raf);
+  }, [inView, target]);
+  if (!m) return <span>{value}</span>;
+  const num = shown.toLocaleString('en-US', { minimumFractionDigits: decimals, maximumFractionDigits: decimals, useGrouping: m[2].includes(',') });
+  return <span ref={ref}>{m[1]}{num}{m[3]}</span>;
 }

@@ -1,185 +1,319 @@
-import React, { useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { useI18n } from '@/lib/i18n';
 import { platformData } from '@/data/platform';
-import { Check, Clock, FileText, User, MessageSquare, AlertTriangle, ArrowRight, X, ChevronDown, CheckCircle, ShieldAlert } from 'lucide-react';
-import { cn } from '@/lib/utils';
+import { Check, Clock, FileText, User, ShieldAlert, Undo2, Phone, Mail, Linkedin, MessageSquare } from 'lucide-react';
+import { cn, parseEuro, fmtEuro } from '@/lib/utils';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ActivityTicker } from '../components/ActivityTicker';
 import { Confetti } from '@/components/ui/confetti';
+import { CompanyMark } from '@/components/ui/company-mark';
 
-export function RitualView({ navigateTo, showToast, updateBadge, roleParam }: any) {
-  const { t } = useI18n();
+type Item = (typeof platformData.console.ritual.items)[number];
+
+const URGENCY_RANK: Record<string, number> = { Critical: 0, High: 1, Medium: 2, Low: 3 };
+const URGENCY_STYLE: Record<string, { bar: string; dot: string; text: string }> = {
+  Critical: { bar: 'bg-destructive', dot: 'bg-destructive', text: 'text-destructive' },
+  High: { bar: 'bg-amber-500', dot: 'bg-amber-500', text: 'text-amber-700 dark:text-amber-300' },
+  Medium: { bar: 'bg-sky-500', dot: 'bg-sky-500', text: 'text-sky-700 dark:text-sky-300' },
+  Low: { bar: 'bg-muted-foreground/30', dot: 'bg-muted-foreground/50', text: 'text-muted-foreground' },
+};
+// Enumerated labels in the priority data are English; Serbian gets these.
+const SR_LABELS: Record<string, string> = {
+  'RENEWAL RISK': 'RIZIK OBNOVE', 'CHURN WARNING': 'UPOZORENJE O ODLASKU', OPPORTUNITY: 'PRILIKA',
+  Today: 'Danas', Tomorrow: 'Sutra', 'This Week': 'Ove nedelje', 'Next Week': 'Sledeće nedelje',
+  Phone: 'Telefon', Email: 'Email', LinkedIn: 'LinkedIn',
+  Critical: 'Kritično', High: 'Visok', Medium: 'Srednji', Low: 'Nizak',
+};
+
+const CHANNEL_ICON: Record<string, React.ElementType> = { Phone, Email: Mail, LinkedIn: Linkedin };
+
+// "Ranked by what's at stake": value first, urgency breaks ties.
+function rank(items: Item[]): Item[] {
+  return [...items].sort((a, b) => parseEuro(b.expectedValue) - parseEuro(a.expectedValue) || URGENCY_RANK[a.urgency] - URGENCY_RANK[b.urgency]);
+}
+
+export function RitualView({ navigateTo, showToast, updateBadge }: any) {
+  const { t, lang } = useI18n();
+  const L = (s: string) => (lang === 'sr' ? SR_LABELS[s] ?? s : s);
   const [completed, setCompleted] = useState<string[]>([]);
   const [snoozed, setSnoozed] = useState<string[]>([]);
-  const [snoozeModal, setSnoozeModal] = useState<string | null>(null);
-  const [snoozeReason, setSnoozeReason] = useState("");
-  const [expandedItem, setExpandedItem] = useState<string | null>(null);
+  const [snoozeFor, setSnoozeFor] = useState<string | null>(null);
+  const [snoozeNote, setSnoozeNote] = useState('');
+  const [selectedId, setSelectedId] = useState<string | null>(null);
   const [checkedPoints, setCheckedPoints] = useState<Record<string, boolean>>({});
   const [confettiTrigger, setConfettiTrigger] = useState(0);
+  const rowRefs = useRef<Record<string, HTMLButtonElement | null>>({});
 
-  const items = platformData.console.ritual.items;
-  const activeItems = items.filter(i => !completed.includes(i.id) && !snoozed.includes(i.id));
+  const ranked = useMemo(() => rank(platformData.console.ritual.items), []);
+  const open = ranked.filter((i) => !completed.includes(i.id) && !snoozed.includes(i.id));
+  const cleared = ranked.filter((i) => completed.includes(i.id) || snoozed.includes(i.id));
+  const selected = open.find((i) => i.id === selectedId) ?? open[0] ?? null;
+  const atStake = open.reduce((s, i) => s + parseEuro(i.expectedValue), 0);
 
-  const action = (id: string, type: 'complete' | 'snooze') => {
-    if (type === 'complete') {
-      setCompleted(p => [...p, id]);
-      showToast(t('console_v2.completed', 'Completed'));
-      setConfettiTrigger(n => n + 1);
+  useEffect(() => { updateBadge(open.length); }, [open.length]);
+
+  const resolve = (id: string, kind: 'done' | 'snooze') => {
+    const idx = open.findIndex((i) => i.id === id);
+    const next = open[idx + 1] ?? open[idx - 1] ?? null;
+    if (kind === 'done') {
+      setCompleted((p) => [...p, id]);
+      showToast(t('console_v2.priority_done', 'Done. Logged to the account timeline.'));
+      setConfettiTrigger((n) => n + 1);
     } else {
-      setSnoozed(p => [...p, id]);
-      showToast(t('console_v2.snoozed', 'Snoozed'));
+      setSnoozed((p) => [...p, id]);
+      showToast(t('console_v2.priority_snoozed', 'Snoozed. It comes back Monday.'));
     }
-    updateBadge(activeItems.length - 1);
-    if (expandedItem === id) setExpandedItem(null);
+    setSelectedId(next?.id ?? null);
   };
 
-  const toggleExpand = (id: string) => {
-    setExpandedItem(expandedItem === id ? null : id);
+  const undo = (id: string) => {
+    setCompleted((p) => p.filter((x) => x !== id));
+    setSnoozed((p) => p.filter((x) => x !== id));
+    setSelectedId(id);
   };
 
-  const togglePoint = (id: string) => {
-    setCheckedPoints(p => ({ ...p, [id]: !p[id] }));
+  const select = (id: string) => {
+    setSelectedId(id);
+    rowRefs.current[id]?.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+  };
+
+  // Inbox keys: j/k (or arrows) move, e marks done, s snoozes, o/Enter opens the account.
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      if (e.metaKey || e.ctrlKey || e.altKey || snoozeFor) return;
+      const el = e.target as HTMLElement | null;
+      if (el && (el.tagName === 'INPUT' || el.tagName === 'TEXTAREA' || el.isContentEditable)) return;
+      if (!selected) return;
+      const idx = open.findIndex((i) => i.id === selected.id);
+      const key = e.key.toLowerCase();
+      if (key === 'j' || e.key === 'ArrowDown') { e.preventDefault(); const n = open[Math.min(idx + 1, open.length - 1)]; if (n) select(n.id); }
+      else if (key === 'k' || e.key === 'ArrowUp') { e.preventDefault(); const n = open[Math.max(idx - 1, 0)]; if (n) select(n.id); }
+      else if (key === 'e') { e.preventDefault(); resolve(selected.id, 'done'); }
+      else if (key === 's') { e.preventDefault(); setSnoozeFor(selected.id); }
+      else if (key === 'o' || (e.key === 'Enter' && el?.tagName !== 'BUTTON')) { e.preventDefault(); navigateTo('heatmap', selected.companyId); }
+    };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  });
+
+  const detail = (item: Item, inline = false) => {
+    const company = platformData.allMembers.find((m) => m.id === item.companyId);
+    const brief = (platformData.console.briefs as any)[item.companyId];
+    const retentionCase = platformData.console.retention.find((r) => r.companyId === item.companyId);
+    const ChannelIcon = CHANNEL_ICON[item.channel] ?? MessageSquare;
+    const facts: [string, React.ReactNode][] = [
+      [t('console_v2.next_step', 'Next step'), item.action],
+      [t('console_v2.at_stake', 'At stake'), item.expectedValue],
+      [t('console_v2.due', 'Due'), L(item.dueDate)],
+      [t('console_v2.channel', 'Channel'), <span className="inline-flex items-center gap-1.5"><ChannelIcon className="w-3.5 h-3.5" />{L(item.channel)}</span>],
+      [t('console_v2.owner', 'Owner'), item.owner],
+      [t('console_v2.signal', 'Signal'), `${item.source} · ${item.confidence}`],
+    ];
+    return (
+      <div className="space-y-6">
+        <div className={cn('flex items-start gap-4', inline && 'hidden')}>
+          <CompanyMark name={company?.name} sector={company?.sector} size="lg" />
+          <div className="min-w-0">
+            <div className="flex flex-wrap items-center gap-2 mb-1">
+              <span className="text-lg font-bold text-foreground">{company?.name}</span>
+              <span className={cn('text-[11px] font-bold uppercase tracking-wider', URGENCY_STYLE[item.urgency].text)}>{L(item.tag)}</span>
+            </div>
+            <p className="text-sm text-muted-foreground">{company?.tier} · {company?.sector} · {t('console_v2.score', 'Score')} {company?.score}</p>
+          </div>
+        </div>
+
+        {!inline && <p className="text-xl font-serif leading-snug text-foreground text-balance">{item.text}</p>}
+
+        <dl className="grid grid-cols-2 gap-x-6 gap-y-4 text-sm">
+          {facts.map(([k, v]) => (
+            <div key={k}>
+              <dt className="text-[11px] font-bold uppercase tracking-wider text-muted-foreground mb-0.5">{k}</dt>
+              <dd className="font-semibold text-foreground">{v}</dd>
+            </div>
+          ))}
+        </dl>
+
+        <div className="flex flex-wrap gap-2">
+          <button onClick={() => resolve(item.id, 'done')} className="inline-flex items-center gap-2 bg-primary text-primary-foreground px-5 py-2.5 rounded-full text-sm font-bold shadow-sm hover:bg-primary/90 active:scale-95 transition-all">
+            <Check className="w-4 h-4" /> {t('console_v2.mark_done', 'Done')} <kbd className="hidden md:inline text-[11px] font-bold opacity-70 ml-1">E</kbd>
+          </button>
+          <button onClick={() => setSnoozeFor(item.id)} className="inline-flex items-center gap-2 bg-background border border-border px-5 py-2.5 rounded-full text-sm font-bold hover:bg-muted transition-colors">
+            <Clock className="w-4 h-4 text-muted-foreground" /> {t('console_v2.snooze', 'Snooze')} <kbd className="hidden md:inline text-[11px] font-bold text-muted-foreground ml-1">S</kbd>
+          </button>
+          <button onClick={() => navigateTo('heatmap', item.companyId)} className="inline-flex items-center gap-2 px-4 py-2.5 rounded-full text-sm font-bold text-muted-foreground hover:text-foreground hover:bg-muted transition-colors">
+            <User className="w-4 h-4" /> {t('console_v2.open_account', 'Open account')}
+          </button>
+          {brief && (
+            <button onClick={() => navigateTo('brief', item.companyId)} className="inline-flex items-center gap-2 px-4 py-2.5 rounded-full text-sm font-bold text-muted-foreground hover:text-foreground hover:bg-muted transition-colors">
+              <FileText className="w-4 h-4" /> {t('console_v2.brief', 'Brief')}
+            </button>
+          )}
+          {retentionCase && (
+            <button onClick={() => navigateTo('retention', item.companyId)} className="inline-flex items-center gap-2 px-4 py-2.5 rounded-full text-sm font-bold text-destructive bg-destructive/10 hover:bg-destructive/15 transition-colors">
+              <ShieldAlert className="w-4 h-4" /> {t('console_v2.save_case', 'Save case')} · {L(retentionCase.risk)}
+            </button>
+          )}
+        </div>
+
+        {brief && (
+          <div className="border-t border-border pt-5">
+            <h4 className="text-[11px] font-bold uppercase tracking-wider text-muted-foreground mb-3">{t('console_v2.before_you_call', 'Before you call')}</h4>
+            <div className="space-y-2">
+              {brief.talkingPoints.map((pt: string, i: number) => {
+                const ptId = `${item.id}-pt-${i}`;
+                const isChecked = !!checkedPoints[ptId];
+                return (
+                  <label key={i} className="flex items-start gap-3 cursor-pointer group">
+                    <input type="checkbox" checked={isChecked} onChange={() => setCheckedPoints((p) => ({ ...p, [ptId]: !p[ptId] }))} className="sr-only peer" />
+                    <span className={cn('w-4 h-4 mt-0.5 rounded border flex items-center justify-center shrink-0 transition-colors peer-focus-visible:ring-2 ring-primary/40', isChecked ? 'bg-primary border-primary text-primary-foreground' : 'border-border group-hover:border-foreground/40')}>
+                      {isChecked && <Check className="w-3 h-3" />}
+                    </span>
+                    <span className={cn('text-sm leading-relaxed', isChecked ? 'text-muted-foreground line-through' : 'text-foreground/90')}>{pt}</span>
+                  </label>
+                );
+              })}
+            </div>
+            {brief.attendeeContext && (
+              <p className="mt-4 text-sm text-muted-foreground leading-relaxed"><span className="font-bold text-foreground">{t('console_v2.who', 'Who you’re talking to')}:</span> {brief.attendeeContext}</p>
+            )}
+          </div>
+        )}
+      </div>
+    );
   };
 
   return (
-    <div className="space-y-8 max-w-4xl mx-auto pb-20 font-sans">
+    <div className="max-w-6xl mx-auto pb-20 font-sans space-y-6">
       <Confetti trigger={confettiTrigger} />
-      <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 border-b border-border pb-6">
+
+      <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
         <div>
-          <h2 className="text-4xl font-serif font-light tracking-tight text-foreground mb-2">Daily Ritual</h2>
-          <p className="text-muted-foreground">High-leverage actions surfaced by the OS Engine.</p>
+          <h2 className="text-4xl font-serif tracking-tight text-foreground mb-2">{t('platform.console.ritual', 'Priorities')}</h2>
+          <p className="text-muted-foreground">{t('platform.console.ritual_purpose', "The moves that matter most this week, ranked by what's at stake.")}</p>
         </div>
-        <div className="flex items-center gap-4">
-          <div className="flex flex-col text-right">
-            <span className="text-[10px] uppercase font-bold tracking-widest text-muted-foreground">Current Streak</span>
-            <span className="text-lg font-serif text-primary">{platformData.console.ritual.streak} Days</span>
+        <dl className="flex items-stretch divide-x divide-border rounded-2xl border border-border bg-card text-sm shrink-0">
+          <div className="px-4 py-2.5">
+            <dt className="text-[11px] font-bold uppercase tracking-wider text-muted-foreground">{t('console_v2.open', 'Open')}</dt>
+            <dd className="text-lg font-bold tabular-nums text-foreground">{open.length}</dd>
           </div>
-          <div className="text-sm font-bold px-6 py-3 bg-foreground text-background rounded-full shadow-md flex items-center gap-2">
-            {activeItems.length} Remaining
+          <div className="px-4 py-2.5">
+            <dt className="text-[11px] font-bold uppercase tracking-wider text-muted-foreground">{t('console_v2.at_stake', 'At stake')}</dt>
+            <dd className="text-lg font-bold tabular-nums text-foreground">{fmtEuro(atStake)}</dd>
           </div>
-        </div>
+          <div className="px-4 py-2.5">
+            <dt className="text-[11px] font-bold uppercase tracking-wider text-muted-foreground">{t('console_v2.on_time', 'On time')}</dt>
+            <dd className="text-lg font-bold tabular-nums text-foreground">{t('console_v2.days_running', '{n} days running').replace('{n}', String(platformData.console.ritual.streak))}</dd>
+          </div>
+        </dl>
       </div>
 
       <ActivityTicker />
 
-      <AnimatePresence>
-        {activeItems.length === 0 && (
-          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="py-32 flex flex-col items-center justify-center border-2 border-dashed border-border rounded-[32px] bg-card/50">
-            <div className="w-20 h-20 bg-green-500/10 rounded-full flex items-center justify-center mb-6">
-              <Check className="w-10 h-10 text-green-500" />
+      {open.length === 0 ? (
+        <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="py-24 flex flex-col items-center justify-center border border-dashed border-border rounded-3xl bg-card/50 text-center px-6">
+          <div className="w-16 h-16 bg-green-500/10 rounded-full flex items-center justify-center mb-5">
+            <Check className="w-8 h-8 text-green-600 dark:text-green-400" />
+          </div>
+          <h3 className="text-2xl font-serif text-foreground mb-2">{t('console_v2.all_clear', 'All clear')}</h3>
+          <p className="text-muted-foreground">{t('platform.console.ritual_done', 'All clear. New priorities appear as signals come in.')}</p>
+        </motion.div>
+      ) : (
+        <div className="grid grid-cols-1 lg:grid-cols-[minmax(0,1fr)_minmax(0,440px)] gap-6 items-start">
+          <div className="min-w-0">
+            <div className="hidden md:flex items-center gap-4 text-xs text-muted-foreground mb-2 px-1">
+              {[['J', 'K', t('console_v2.key_move', 'move')], ['E', t('console_v2.key_done', 'done')], ['S', t('console_v2.key_snooze', 'snooze')], ['O', t('console_v2.key_open', 'open account')]].map((g) => (
+                <span key={g.join()} className="inline-flex items-center gap-1">
+                  {g.slice(0, -1).map((k) => <kbd key={k} className="min-w-5 h-5 px-1 rounded border border-border bg-card text-[11px] font-bold text-foreground inline-flex items-center justify-center">{k}</kbd>)}
+                  <span className="ml-0.5">{g[g.length - 1]}</span>
+                </span>
+              ))}
             </div>
-            <h3 className="text-2xl font-serif text-foreground mb-2">Ritual Complete</h3>
-            <p className="text-muted-foreground font-medium">You've cleared your high-priority items for today.</p>
-          </motion.div>
-        )}
-      </AnimatePresence>
-
-      <div className="space-y-6">
-        <AnimatePresence>
-          {activeItems.map((item, idx) => {
-            const isExpanded = expandedItem === item.id;
-            const company = platformData.allMembers.find(m => m.id === item.companyId);
-            const brief = (platformData.console.briefs as any)[item.companyId];
-            const retentionCase = platformData.console.retention.find(r => r.companyId === item.companyId);
-
-            return (
-              <motion.div key={item.id} layout initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, scale: 0.95 }} className={cn("bg-card border rounded-[32px] overflow-hidden transition-all", isExpanded ? "border-foreground/30 shadow-md ring-1 ring-foreground/10" : "border-border shadow-sm")}>
-                <div className="p-6 cursor-pointer group relative" onClick={() => toggleExpand(item.id)}>
-                  <div className="absolute top-6 left-6 w-8 h-8 rounded-full bg-muted flex items-center justify-center text-xs font-bold text-muted-foreground font-serif">{idx + 1}</div>
-                  <div className="pl-12 flex justify-between items-start mb-4">
-                    <div className="flex items-center gap-3">
-                      <span className={cn("text-[10px] font-bold px-3 py-1 rounded-full uppercase tracking-widest border", item.urgency === 'Critical' ? 'bg-destructive/10 text-destructive border-destructive/20' : item.urgency === 'High' ? 'bg-amber-500/10 text-amber-600 border-amber-500/20' : 'bg-primary/10 text-primary border-primary/20')}>{item.tag}</span>
-                      <span className="text-xs font-medium text-muted-foreground">{item.source}</span>
-                    </div>
-                    <div className="flex items-center gap-3">
-                      <div className="text-xs font-bold text-foreground bg-muted px-3 py-1.5 rounded-full border border-border shadow-sm flex items-center gap-1.5">Value: {item.expectedValue}</div>
-                      <ChevronDown className={cn("w-5 h-5 text-muted-foreground transition-transform", isExpanded ? "rotate-180" : "opacity-0 group-hover:opacity-100")} />
-                    </div>
-                  </div>
-                  <div className="pl-12">
-                    <h3 className="text-2xl font-serif mb-2 text-foreground group-hover:text-primary transition-colors">{item.text}</h3>
-                    <p className="text-sm text-muted-foreground flex flex-wrap items-center gap-3 gap-y-1.5">
-                      <span className="font-bold text-foreground bg-background px-3 py-1 rounded-md border border-border shadow-sm text-xs flex items-center gap-1.5">Goal: {item.action}</span>
-                      <span className="flex items-center gap-1">Confidence: <span className="font-bold text-foreground">{item.confidence}</span></span>
-                      <span className="text-border hidden sm:inline">•</span>
-                      <span className="flex items-center gap-1">Target: <span className="font-bold text-foreground">{company?.name}</span></span>
-                    </p>
-                  </div>
-                </div>
-
-                <AnimatePresence>
-                  {isExpanded && (
-                    <motion.div initial={{ height: 0, opacity: 0 }} animate={{ height: 'auto', opacity: 1 }} exit={{ height: 0, opacity: 0 }} className="overflow-hidden border-t border-border/50 bg-muted/20">
-                      <div className="p-8 pl-18 space-y-8">
-                        {brief && (
-                          <div className="bg-card p-6 rounded-3xl border border-border shadow-sm">
-                            <h4 className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground mb-4">Preparation Checklist</h4>
-                            <div className="space-y-3">
-                              {brief.talkingPoints.map((pt: string, i: number) => {
-                                const ptId = `${item.id}-pt-${i}`;
-                                const isChecked = checkedPoints[ptId];
-                                return (
-                                  <label key={i} className={cn("flex items-start gap-3 p-3 rounded-xl border transition-colors cursor-pointer", isChecked ? "bg-muted/50 border-border" : "bg-background border-border hover:border-foreground/30")}>
-                                    <div className={cn("w-5 h-5 rounded-md border flex items-center justify-center shrink-0 mt-0.5 transition-colors", isChecked ? "bg-primary border-primary text-primary-foreground" : "bg-background border-border")}>
-                                      {isChecked && <Check className="w-3.5 h-3.5" />}
-                                    </div>
-                                    <span className={cn("text-sm font-medium transition-colors", isChecked ? "text-muted-foreground line-through" : "text-foreground")}>{pt}</span>
-                                  </label>
-                                );
-                              })}
+            <div role="listbox" aria-label={t('platform.console.ritual', 'Priorities')} className="rounded-2xl border border-border bg-card overflow-hidden divide-y divide-border">
+              <AnimatePresence initial={false}>
+                {open.map((item) => {
+                  const company = platformData.allMembers.find((m) => m.id === item.companyId);
+                  const isSel = selected?.id === item.id;
+                  const u = URGENCY_STYLE[item.urgency];
+                  return (
+                    <motion.div key={item.id} layout initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0, height: 0 }}>
+                      <div className={cn('relative group transition-colors', isSel ? 'bg-primary/[0.06]' : 'hover:bg-muted/40')}>
+                        <span aria-hidden className={cn('absolute left-0 top-0 bottom-0 w-1', u.bar, !isSel && 'opacity-60')} />
+                        <button
+                          ref={(el) => { rowRefs.current[item.id] = el; }}
+                          role="option"
+                          aria-selected={isSel}
+                          onClick={() => setSelectedId(item.id)}
+                          className="w-full text-left flex items-start gap-3 pl-5 pr-4 md:pr-24 py-4 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-primary/40"
+                        >
+                          <CompanyMark name={company?.name} sector={company?.sector} size="sm" className="mt-0.5" />
+                          <div className="min-w-0 flex-1">
+                            <div className="flex items-center gap-2 mb-0.5">
+                              <span className="font-bold text-foreground truncate">{company?.name}</span>
+                              <span className={cn('inline-flex items-center gap-1 text-[11px] font-bold uppercase tracking-wider shrink-0', u.text)}>
+                                <span className={cn('w-1.5 h-1.5 rounded-full', u.dot)} />{L(item.tag)}
+                              </span>
                             </div>
-                            
-                            <div className="mt-6 pt-5 border-t border-border flex items-start gap-3">
-                              <User className="w-4 h-4 text-primary shrink-0 mt-0.5" />
-                              <div>
-                                <div className="text-[10px] font-bold uppercase tracking-widest text-primary mb-1">Attendee Context</div>
-                                <div className="text-sm text-foreground/80 leading-relaxed">{brief.attendeeContext}</div>
-                              </div>
-                            </div>
+                            <p className={cn('text-sm text-muted-foreground', isSel ? 'line-clamp-2' : 'line-clamp-2 md:line-clamp-1')}>{item.text}</p>
                           </div>
-                        )}
-                        
-                        <div className="flex flex-wrap items-center gap-3">
-                          <button onClick={(e) => { e.stopPropagation(); action(item.id, 'complete'); }} className="flex items-center gap-2 bg-primary text-primary-foreground px-6 py-3 rounded-full text-sm font-bold shadow-md hover:bg-primary/90 hover:shadow-lg transform active:scale-95 transition-all">
-                            <CheckCircle className="w-4 h-4" /> {t('console_v2.mark_complete', 'Mark Complete')}
-                          </button>
-                          <button onClick={(e) => { e.stopPropagation(); setSnoozeModal(item.id); }} className="flex items-center gap-2 bg-background text-foreground border border-border px-6 py-3 rounded-full text-sm font-bold hover:bg-muted transition-colors shadow-sm">
-                            <Clock className="w-4 h-4 text-muted-foreground" /> {t('console_v2.snooze', 'Snooze')}
-                          </button>
-                          
-                          <div className="w-px h-8 bg-border mx-2 hidden sm:block"></div>
-                          
-                          <button onClick={(e) => { e.stopPropagation(); navigateTo('heatmap', item.companyId); }} className="flex items-center gap-2 text-muted-foreground hover:text-foreground text-sm font-bold px-4 py-2 rounded-full hover:bg-muted transition-colors border border-transparent hover:border-border">
-                            <User className="w-4 h-4" /> {t('console_v2.dossier', 'Dossier')}
-                          </button>
-                          <button onClick={(e) => { e.stopPropagation(); navigateTo('brief', item.companyId); }} className="flex items-center gap-2 text-muted-foreground hover:text-foreground text-sm font-bold px-4 py-2 rounded-full hover:bg-muted transition-colors border border-transparent hover:border-border">
-                            <FileText className="w-4 h-4" /> {t('console_v2.brief', 'Brief')}
-                          </button>
-                          {retentionCase && (
-                            <button onClick={(e) => { e.stopPropagation(); navigateTo('retention', item.companyId); }} className="flex items-center gap-2 text-destructive hover:text-destructive text-sm font-bold px-4 py-2 rounded-full bg-destructive/10 hover:bg-destructive/20 transition-colors border border-destructive/20">
-                              <ShieldAlert className="w-4 h-4" /> Active Retention Case ({retentionCase.risk})
-                            </button>
-                          )}
+                          <div className="text-right shrink-0 md:group-hover:opacity-0 md:transition-opacity">
+                            <div className="text-sm font-bold tabular-nums text-foreground">{item.expectedValue.split(' ')[0]}</div>
+                            <div className={cn('text-xs', item.dueDate === 'Today' ? 'text-destructive font-bold' : 'text-muted-foreground')}>{L(item.dueDate)}</div>
+                          </div>
+                        </button>
+                        <div className="hidden md:flex absolute right-3 top-1/2 -translate-y-1/2 gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                          <button onClick={() => resolve(item.id, 'done')} title={t('console_v2.mark_done', 'Done')} aria-label={`${t('console_v2.mark_done', 'Done')}: ${company?.name}`} className="w-9 h-9 rounded-full bg-background border border-border flex items-center justify-center hover:bg-primary hover:text-primary-foreground hover:border-primary transition-colors"><Check className="w-4 h-4" /></button>
+                          <button onClick={() => setSnoozeFor(item.id)} title={t('console_v2.snooze', 'Snooze')} aria-label={`${t('console_v2.snooze', 'Snooze')}: ${company?.name}`} className="w-9 h-9 rounded-full bg-background border border-border flex items-center justify-center hover:bg-muted transition-colors"><Clock className="w-4 h-4" /></button>
                         </div>
                       </div>
+                      {isSel && <div className="lg:hidden px-5 pb-6 pt-2 bg-primary/[0.03]">{detail(item, true)}</div>}
                     </motion.div>
-                  )}
-                </AnimatePresence>
-              </motion.div>
-            );
-          })}
-        </AnimatePresence>
-      </div>
+                  );
+                })}
+              </AnimatePresence>
+            </div>
 
-      {snoozeModal && (
-        <div className="fixed inset-0 bg-background/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-          <motion.div initial={{ opacity: 0, scale: 0.95, y: 20 }} animate={{ opacity: 1, scale: 1, y: 0 }} className="bg-card border border-border rounded-[32px] p-8 w-full max-w-md shadow-2xl font-sans relative overflow-hidden">
-            <h3 className="text-2xl font-serif mb-2 text-foreground">{t('console_v2.snooze_reason', 'Snooze item')}</h3>
-            <p className="text-sm text-muted-foreground mb-6">Briefly explain why you're delaying this action.</p>
-            <textarea autoFocus value={snoozeReason} onChange={e => setSnoozeReason(e.target.value)} className="w-full bg-background border border-border rounded-2xl p-4 text-sm font-medium outline-none focus:border-primary focus:ring-2 ring-primary/20 mb-6 resize-none h-28 shadow-inner transition-all" placeholder="E.g., Waiting for Q4 budgets to finalize..." />
-            <div className="flex gap-3 justify-end">
-              <button onClick={() => setSnoozeModal(null)} className="px-5 py-2.5 rounded-full text-sm font-bold text-muted-foreground hover:bg-muted transition-colors hover:text-foreground">Cancel</button>
-              <button onClick={() => { action(snoozeModal, 'snooze'); setSnoozeModal(null); }} disabled={!snoozeReason.trim()} className="px-6 py-2.5 rounded-full text-sm font-bold bg-primary text-primary-foreground shadow-md hover:bg-primary/90 transition-transform active:scale-95 disabled:opacity-50">{t('console_v2.snooze', 'Snooze')}</button>
+            {cleared.length > 0 && (
+              <div className="mt-6">
+                <h4 className="text-[11px] font-bold uppercase tracking-wider text-muted-foreground mb-2 px-1">{t('console_v2.cleared_today', 'Cleared today')} · {cleared.length}</h4>
+                <div className="rounded-2xl border border-border divide-y divide-border">
+                  {cleared.map((item) => {
+                    const company = platformData.allMembers.find((m) => m.id === item.companyId);
+                    const wasDone = completed.includes(item.id);
+                    return (
+                      <div key={item.id} className="flex items-center gap-3 px-4 py-2.5 text-sm">
+                        {wasDone ? <Check className="w-4 h-4 text-green-600 dark:text-green-400 shrink-0" /> : <Clock className="w-4 h-4 text-muted-foreground shrink-0" />}
+                        <span className="font-semibold text-muted-foreground truncate flex-1">{company?.name} <span className="font-normal">· {wasDone ? t('console_v2.done_label', 'Done') : t('console_v2.snoozed', 'Snoozed')}</span></span>
+                        <button onClick={() => undo(item.id)} className="inline-flex items-center gap-1 text-xs font-bold text-muted-foreground hover:text-foreground"><Undo2 className="w-3.5 h-3.5" /> {t('console_v2.undo', 'Undo')}</button>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
+          </div>
+
+          {selected && (
+            <motion.aside key={selected.id} initial={{ opacity: 0, x: 8 }} animate={{ opacity: 1, x: 0 }} transition={{ duration: 0.18 }} className="hidden lg:block sticky top-4 rounded-3xl border border-border bg-card p-7 shadow-sm">
+              {detail(selected)}
+            </motion.aside>
+          )}
+        </div>
+      )}
+
+      {snoozeFor && (
+        <div className="fixed inset-0 bg-background/80 backdrop-blur-sm z-50 flex items-center justify-center p-4" onKeyDown={(e) => e.key === 'Escape' && setSnoozeFor(null)}>
+          <motion.div role="dialog" aria-modal="true" aria-labelledby="snooze-title" initial={{ opacity: 0, scale: 0.96, y: 12 }} animate={{ opacity: 1, scale: 1, y: 0 }} className="bg-card border border-border rounded-3xl p-7 w-full max-w-md shadow-2xl">
+            <h3 id="snooze-title" className="text-2xl font-serif mb-1 text-foreground">{t('console_v2.snooze_title', 'Snooze until Monday')}</h3>
+            <p className="text-sm text-muted-foreground mb-5">{t('console_v2.snooze_help', 'Pick a reason so the account owner knows why it moved.')}</p>
+            <div className="flex flex-wrap gap-2 mb-4">
+              {[t('console_v2.snooze_r1', 'Waiting on their reply'), t('console_v2.snooze_r2', 'Their budget cycle'), t('console_v2.snooze_r3', 'Owner is out this week')].map((r) => (
+                <button key={r} onClick={() => setSnoozeNote(r)} className={cn('px-3 py-1.5 rounded-full text-xs font-bold border transition-colors', snoozeNote === r ? 'bg-primary text-primary-foreground border-primary' : 'border-border hover:bg-muted')}>{r}</button>
+              ))}
+            </div>
+            <textarea id="snooze-note" autoFocus value={snoozeNote} onChange={(e) => setSnoozeNote(e.target.value)} className="w-full bg-background border border-border rounded-2xl p-3 text-sm outline-none focus:border-primary focus:ring-2 ring-primary/20 mb-5 resize-none h-20" placeholder={t('console_v2.snooze_placeholder', 'Or add a note (optional)')} />
+            <div className="flex gap-2 justify-end">
+              <button onClick={() => { setSnoozeFor(null); setSnoozeNote(''); }} className="px-5 py-2.5 rounded-full text-sm font-bold text-muted-foreground hover:bg-muted hover:text-foreground transition-colors">{t('console_v2.cancel', 'Cancel')}</button>
+              <button onClick={() => { resolve(snoozeFor, 'snooze'); setSnoozeFor(null); setSnoozeNote(''); }} className="px-6 py-2.5 rounded-full text-sm font-bold bg-primary text-primary-foreground shadow-sm hover:bg-primary/90 active:scale-95 transition-all">{t('console_v2.snooze', 'Snooze')}</button>
             </div>
           </motion.div>
         </div>

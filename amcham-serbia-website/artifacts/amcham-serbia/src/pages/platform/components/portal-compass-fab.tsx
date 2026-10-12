@@ -184,7 +184,7 @@ export function PortalCompassFab({ member, billing, scoreNarrative, roleParam, v
                 <Compass className="w-4 h-4" />
                 <div className="font-bold text-sm">Ask Compass</div>
               </div>
-              <AiBadge className="bg-secondary-foreground/10 border-secondary-foreground/10 text-secondary-foreground/70" />
+              <AiBadge className="bg-secondary-foreground/10 border-secondary-foreground/10 text-secondary-foreground/80" />
             </div>
             <div className="flex-1 overflow-y-auto p-4 space-y-3 bg-muted/20">
               {!messages.some((m) => m.role === 'user') && (
@@ -224,7 +224,7 @@ export function PortalCompassFab({ member, billing, scoreNarrative, roleParam, v
                           {m.answer.peers.map((p) => (
                             <div key={p.id} className="px-3 py-2 rounded-xl border border-border bg-background">
                               <div className="text-xs font-bold text-foreground">{p.name}</div>
-                              <div className="text-[10px] text-muted-foreground uppercase tracking-wide">{p.sector} · {p.tier}</div>
+                              <div className="text-[11px] text-muted-foreground uppercase tracking-wide">{p.sector} · {p.tier}</div>
                               {p.recReason && <div className="text-[11px] text-muted-foreground mt-1">{p.recReason}</div>}
                             </div>
                           ))}

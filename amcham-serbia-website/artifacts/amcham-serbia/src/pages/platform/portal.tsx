@@ -128,17 +128,17 @@ function PortalContent({ viewAs }: { viewAs: ReturnType<typeof resolveViewAsMemb
     <>
       <div className="px-6 py-5 border-b border-border">
         <Link href="/platform" className="flex items-center gap-2.5 group">
-          <img src={`${import.meta.env.BASE_URL}brand/amcham-favicon.png`} alt="" className="w-7 h-7 object-contain" />
+          <span aria-hidden="true" className="w-8 h-9 overflow-hidden shrink-0"><img src={`${import.meta.env.BASE_URL}brand/amcham-logo.png`} alt="" className="h-9 w-auto max-w-none" /></span>
           <div>
             <div className="font-bold text-foreground tracking-widest uppercase text-sm leading-none group-hover:text-primary transition-colors">AmCham OS</div>
-            <div className="text-[10px] uppercase font-bold text-muted-foreground tracking-widest mt-1">{t('platform.hub.portal_title')}</div>
+            <div className="text-[11px] uppercase font-bold text-muted-foreground tracking-widest mt-1">{t('platform.hub.portal_title')}</div>
           </div>
         </Link>
       </div>
       <div className="flex-1 overflow-y-auto py-5 space-y-5 px-4 no-scrollbar">
         {navGroups.map((group) => (
           <div key={group.title}>
-            <div className="px-4 mb-1.5 text-[10px] font-bold text-muted-foreground uppercase tracking-widest">{group.title}</div>
+            <div className="px-4 mb-1.5 text-[11px] font-bold text-muted-foreground uppercase tracking-widest">{group.title}</div>
             <div className="space-y-0.5">
               {group.items.map(item => {
                 const isActive = view === item.id;
@@ -149,7 +149,7 @@ function PortalContent({ viewAs }: { viewAs: ReturnType<typeof resolveViewAsMemb
                     aria-current={isActive ? 'page' : undefined}
                     className={cn(
                       "w-full flex items-center gap-3 px-4 py-2 rounded-full transition-all duration-200",
-                      isActive ? "bg-foreground text-background shadow-md" : "text-foreground/75 hover:bg-muted/60 hover:text-foreground"
+                      isActive ? "ink bg-foreground text-background shadow-md" : "text-foreground/75 hover:bg-muted/60 hover:text-foreground"
                     )}
                   >
                     <item.icon className={cn("w-4 h-4", isActive ? "text-background" : "text-muted-foreground")} />
@@ -223,7 +223,7 @@ function PortalContent({ viewAs }: { viewAs: ReturnType<typeof resolveViewAsMemb
               {notificationsOpen && (
                 <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: 10 }} className="absolute top-full right-12 mt-2 w-80 bg-card border border-border shadow-xl rounded-3xl overflow-hidden z-50 flex flex-col max-h-[400px]">
                   <div className="p-4 border-b border-border flex justify-between items-center bg-muted/20">
-                    <span className="text-[10px] uppercase font-bold tracking-widest">{t('portal_notifications', 'Notifications')}</span>
+                    <span className="text-[11px] uppercase font-bold tracking-widest">{t('portal_notifications', 'Notifications')}</span>
                     <button onClick={() => { setNotificationsOpen(false); navigateTo('notifications'); }} className="text-xs text-primary font-bold hover:underline">View All</button>
                   </div>
                   <div className="overflow-y-auto flex-1 p-2 space-y-2">
@@ -250,7 +250,7 @@ function PortalContent({ viewAs }: { viewAs: ReturnType<typeof resolveViewAsMemb
               <button onClick={() => setRoleMenuOpen(o => !o)} className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-background border border-border shadow-sm hover:bg-muted transition-colors">
                 <div className="flex flex-col items-start leading-none mr-2 hidden md:flex">
                   <span className="text-foreground font-bold">{roleConfig.name}</span>
-                  <span className="text-[10px] uppercase tracking-widest">{roleConfig.roleStr}</span>
+                  <span className="text-[11px] uppercase tracking-widest">{roleConfig.roleStr}</span>
                 </div>
                 <div className="w-8 h-8 rounded-full bg-primary/10 text-primary flex items-center justify-center text-sm font-bold shrink-0">{roleConfig.avatar}</div>
               </button>
@@ -271,7 +271,7 @@ function PortalContent({ viewAs }: { viewAs: ReturnType<typeof resolveViewAsMemb
           <div className="max-w-6xl mx-auto space-y-12 pb-32">
              <AnimatePresence mode="wait">
                <motion.div key={view} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }} transition={{ duration: 0.2 }}>
-                 {view === 'home' && <HomeView t={t} navigateTo={navigateTo} roleConfig={roleConfig} showToast={showToast} valueReceipt={viewAs.valueReceipt} />}
+                 {view === 'home' && <HomeView t={t} navigateTo={navigateTo} roleConfig={roleConfig} showToast={showToast} valueReceipt={viewAs.valueReceipt} member={viewAs.member} />}
                  {view === 'score' && <ScoreView t={t} navigateTo={navigateTo} showToast={showToast} member={viewAs.member} valueReceipt={viewAs.valueReceipt} scoreNarrative={viewAs.scoreNarrative} peerBenchmark={viewAs.peerBenchmark} />}
                  {view === 'glance' && <GlanceView t={t} navigateTo={navigateTo} roleParam={roleParam} member={viewAs.member} billing={viewAs.billing} glanceData={viewAs.glance} />}
                  {view === 'directory' && <DirectoryView t={t} showToast={showToast} initialViewMode={tourStep === 2 ? 'pending' : undefined} member={viewAs.member} />}
@@ -307,7 +307,7 @@ function PortalContent({ viewAs }: { viewAs: ReturnType<typeof resolveViewAsMemb
       {/* Toast */}
       <AnimatePresence>
         {toast && (
-          <motion.div initial={{ opacity: 0, y: 50, scale: 0.95 }} animate={{ opacity: 1, y: 0, scale: 1 }} exit={{ opacity: 0, y: 20, scale: 0.95 }} className="fixed bottom-6 right-6 z-[60] bg-foreground text-background px-6 py-4 text-sm font-medium rounded-2xl shadow-xl flex items-center gap-3">
+          <motion.div initial={{ opacity: 0, y: 50, scale: 0.95 }} animate={{ opacity: 1, y: 0, scale: 1 }} exit={{ opacity: 0, y: 20, scale: 0.95 }} className="fixed bottom-6 right-6 z-[60] ink bg-foreground text-background px-6 py-4 text-sm font-medium rounded-2xl shadow-xl flex items-center gap-3">
             <Activity className="w-5 h-5 text-background" /> {toast}
           </motion.div>
         )}

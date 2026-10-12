@@ -3,6 +3,7 @@ import { platformData, committeeRosters, Company } from '@/data/platform';
 import { cn } from '@/lib/utils';
 import { Network, Handshake, Landmark, X } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { useSearch } from 'wouter';
 
 type EdgeType = 'matchmaking' | 'committee';
 interface GraphEdge { source: string; target: string; type: EdgeType; label: string }
@@ -11,76 +12,39 @@ interface GraphNode { id: string; x: number; y: number; company: Company }
 const LIFECYCLE_COLOR: Record<string, string> = {
   active: '#10b981',
   renewing: '#f59e0b',
-  'at-risk': 'var(--destructive)',
-  onboarding: 'var(--accent)',
+  'at-risk': 'hsl(var(--destructive))',
+  onboarding: 'hsl(var(--accent))',
 };
 
 const WIDTH = 900;
 const HEIGHT = 560;
 
-// Sector-clustered, force-relaxed layout — hand-rolled rather than a graph
-// library, in the same dependency-free spirit as Sparkline/TrendChart. Nodes
-// start jittered around their sector's cluster point (a far better seed than
-// pure random) and a short repulsion/attraction/centering relaxation settles
-// them once; the result is memoized so it never re-runs mid-interaction.
-function layoutGraph(nodes: Company[], edges: GraphEdge[]): GraphNode[] {
-  const sectors = Array.from(new Set(nodes.map(n => n.sector)));
-  const clusterCenters = new Map<string, { x: number; y: number }>();
-  sectors.forEach((s, i) => {
-    const angle = (i / sectors.length) * Math.PI * 2;
-    clusterCenters.set(s, {
-      x: WIDTH / 2 + Math.cos(angle) * (WIDTH * 0.32),
-      y: HEIGHT / 2 + Math.sin(angle) * (HEIGHT * 0.32),
+// Sector clusters on a ring. Each sector's members sit on a small circle of
+// their own, so names never pile up in the middle and the sector reads at a
+// glance; cross-sector ties are drawn as curves bowed toward the centre.
+// Deterministic, so the picture is identical every time it is presented.
+const clusterKey = (c: Company) => (c.sector === 'Banking' ? 'Finance' : c.sector);
+
+function layoutGraph(nodes: Company[]): { nodes: GraphNode[]; sectors: { name: string; x: number; y: number; anchor: 'start' | 'middle' | 'end' }[] } {
+  const groups = new Map<string, Company[]>();
+  for (const c of nodes) groups.set(clusterKey(c), [...(groups.get(clusterKey(c)) || []), c]);
+  const ordered = Array.from(groups.entries()).sort((a, b) => b[1].length - a[1].length || a[0].localeCompare(b[0]));
+  const cx = WIDTH / 2, cy = HEIGHT / 2, rx = WIDTH / 2 - 120, ry = HEIGHT / 2 - 95;
+  const out: GraphNode[] = [];
+  const sectors: { name: string; x: number; y: number; anchor: 'start' | 'middle' | 'end' }[] = [];
+  ordered.forEach(([name, members], i) => {
+    const angle = (i / ordered.length) * Math.PI * 2 - Math.PI / 2;
+    const ux = Math.cos(angle), uy = Math.sin(angle);
+    const gx = cx + ux * rx, gy = cy + uy * ry;
+    const r = members.length === 1 ? 0 : Math.min(62, 16 + members.length * 6);
+    [...members].sort((a, b) => b.score - a.score).forEach((c, j) => {
+      const a = (j / members.length) * Math.PI * 2 + angle;
+      out.push({ id: c.id, company: c, x: gx + Math.cos(a) * r, y: gy + Math.sin(a) * r });
     });
+    const lr = r + 30;
+    sectors.push({ name, x: gx + ux * lr, y: gy + uy * lr + 4, anchor: Math.abs(ux) < 0.3 ? 'middle' : ux > 0 ? 'start' : 'end' });
   });
-
-  const hash = (s: string) => { let h = 0; for (let i = 0; i < s.length; i++) h = (h * 31 + s.charCodeAt(i)) >>> 0; return h; };
-  const positions: GraphNode[] = nodes.map(c => {
-    const center = clusterCenters.get(c.sector)!;
-    const jitterAngle = (hash(c.id) % 360) * (Math.PI / 180);
-    const jitterR = 40 + (hash(c.id + 'r') % 60);
-    return { id: c.id, company: c, x: center.x + Math.cos(jitterAngle) * jitterR, y: center.y + Math.sin(jitterAngle) * jitterR };
-  });
-
-  const byId = new Map(positions.map(p => [p.id, p]));
-  const REPULSION = 1800;
-  const SPRING = 0.02;
-  const REST_LENGTH = 90;
-  const CENTER_PULL = 0.01;
-
-  for (let iter = 0; iter < 120; iter++) {
-    for (let i = 0; i < positions.length; i++) {
-      for (let j = i + 1; j < positions.length; j++) {
-        const a = positions[i], b = positions[j];
-        let dx = a.x - b.x, dy = a.y - b.y;
-        let dist = Math.sqrt(dx * dx + dy * dy) || 1;
-        if (dist < 140) {
-          const force = REPULSION / (dist * dist);
-          const fx = (dx / dist) * force, fy = (dy / dist) * force;
-          a.x += fx; a.y += fy;
-          b.x -= fx; b.y -= fy;
-        }
-      }
-    }
-    for (const e of edges) {
-      const a = byId.get(e.source), b = byId.get(e.target);
-      if (!a || !b) continue;
-      const dx = b.x - a.x, dy = b.y - a.y;
-      const dist = Math.sqrt(dx * dx + dy * dy) || 1;
-      const force = (dist - REST_LENGTH) * SPRING;
-      const fx = (dx / dist) * force, fy = (dy / dist) * force;
-      a.x += fx; a.y += fy;
-      b.x -= fx; b.y -= fy;
-    }
-    for (const p of positions) {
-      p.x += (WIDTH / 2 - p.x) * CENTER_PULL;
-      p.y += (HEIGHT / 2 - p.y) * CENTER_PULL;
-      p.x = Math.max(30, Math.min(WIDTH - 30, p.x));
-      p.y = Math.max(30, Math.min(HEIGHT - 30, p.y));
-    }
-  }
-
-  return positions;
+  return { nodes: out, sectors };
 }
 
 function buildEdges(): GraphEdge[] {
@@ -99,12 +63,15 @@ function buildEdges(): GraphEdge[] {
 
 export function NetworkView({ navigateTo }: { navigateTo: (v: string, c?: string) => void }) {
   const [filter, setFilter] = useState<'all' | EdgeType>('all');
-  const [hoveredId, setHoveredId] = useState<string | null>(null);
+  const [hoverId, setHoveredId] = useState<string | null>(null);
+  // ?focus=<id> pins a member's ties on arrival (the Showcase uses this).
+  const pinnedId = new URLSearchParams(useSearch()).get('focus');
+  const hoveredId = hoverId ?? pinnedId;
   const [selected, setSelected] = useState<{ node: GraphNode; connections: { id: string; name: string; label: string }[] } | null>(null);
 
   const members = platformData.allMembers;
   const allEdges = useMemo(buildEdges, []);
-  const nodes = useMemo(() => layoutGraph(members, allEdges), [members, allEdges]);
+  const { nodes, sectors } = useMemo(() => layoutGraph(members), [members]);
   const byId = useMemo(() => new Map(nodes.map(n => [n.id, n])), [nodes]);
 
   const visibleEdges = filter === 'all' ? allEdges : allEdges.filter(e => e.type === filter);
@@ -156,19 +123,27 @@ export function NetworkView({ navigateTo }: { navigateTo: (v: string, c?: string
             const a = byId.get(e.source), b = byId.get(e.target);
             if (!a || !b) return null;
             const dim = connectedIds && !(connectedIds.has(e.source) && connectedIds.has(e.target));
+            const mx = (a.x + b.x) / 2, my = (a.y + b.y) / 2;
+            const qx = mx + (WIDTH / 2 - mx) * 0.45, qy = my + (HEIGHT / 2 - my) * 0.45;
+            const lit = connectedIds && !dim;
             return (
-              <line
+              <path
                 key={i}
-                x1={a.x} y1={a.y} x2={b.x} y2={b.y}
+                d={`M${a.x},${a.y} Q${qx},${qy} ${b.x},${b.y}`}
+                fill="none"
                 stroke={e.type === 'matchmaking' ? '#3b82f6' : '#a855f7'}
-                strokeWidth={dim ? 1 : 1.75}
-                opacity={dim ? 0.08 : 0.45}
+                strokeWidth={lit ? 2.5 : 1.5}
+                opacity={dim ? 0.06 : lit ? 0.9 : 0.4}
               />
             );
           })}
+          {sectors.map(sec => (
+            <text key={sec.name} x={sec.x} y={sec.y} textAnchor={sec.anchor} className="fill-muted-foreground text-[11px] font-bold uppercase tracking-wider pointer-events-none" opacity={hoveredId ? 0.35 : 1}>{sec.name}</text>
+          ))}
           {nodes.map(n => {
             const dim = connectedIds && !connectedIds.has(n.id);
-            const radius = 7 + (n.company.score / 100) * 11;
+            const radius = 5 + (n.company.score / 100) * 8;
+            const showLabel = hoveredId === n.id || (connectedIds?.has(n.id) ?? false);
             return (
               <g
                 key={n.id}
@@ -176,26 +151,35 @@ export function NetworkView({ navigateTo }: { navigateTo: (v: string, c?: string
                 className="cursor-pointer"
                 onMouseEnter={() => setHoveredId(n.id)}
                 onMouseLeave={() => setHoveredId(null)}
+                onFocus={() => setHoveredId(n.id)}
+                onBlur={() => setHoveredId(null)}
                 onClick={() => openNode(n)}
+                onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); openNode(n); } }}
+                tabIndex={0}
+                role="button"
+                aria-label={`${n.company.name}, ${n.company.sector}, score ${n.company.score}`}
+                style={{ outline: 'none' }}
                 opacity={dim ? 0.25 : 1}
               >
                 <circle r={radius} fill={LIFECYCLE_COLOR[n.company.lifecycle] || '#9ca3af'} fillOpacity={0.18} stroke={LIFECYCLE_COLOR[n.company.lifecycle] || '#9ca3af'} strokeWidth={1.5} />
                 <circle r={2.5} fill={LIFECYCLE_COLOR[n.company.lifecycle] || '#9ca3af'} />
-                {(hoveredId === n.id || !hoveredId) && radius > 12 && (
-                  <text y={radius + 13} textAnchor="middle" className="fill-foreground text-[9px] font-bold pointer-events-none">{n.company.name.length > 18 ? n.company.name.slice(0, 16) + '…' : n.company.name}</text>
+                <circle r={radius + 6} fill="transparent" />
+                {showLabel && (
+                  <text y={-radius - 7} textAnchor="middle" paintOrder="stroke" stroke="hsl(var(--card))" strokeWidth={4} className="fill-foreground text-[12px] font-bold pointer-events-none">{n.company.name}</text>
                 )}
               </g>
             );
           })}
         </svg>
 
-        <div className="flex flex-wrap items-center gap-x-6 gap-y-2 mt-4 pt-4 border-t border-border/50 text-[10px] font-bold text-muted-foreground uppercase tracking-widest">
+        <div className="flex flex-wrap items-center gap-x-6 gap-y-2 mt-4 pt-4 border-t border-border/50 text-[11px] font-bold text-muted-foreground uppercase tracking-widest">
           {Object.entries(LIFECYCLE_COLOR).map(([key, color]) => (
             <span key={key} className="flex items-center gap-1.5"><span className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: color }} /> {key}</span>
           ))}
           <span className="flex items-center gap-1.5 ml-auto"><span className="w-4 h-0.5 bg-blue-500" /> Matchmaking</span>
           <span className="flex items-center gap-1.5"><span className="w-4 h-0.5 bg-purple-500" /> Committee</span>
           <span>Node size = score</span>
+          <span className="w-full normal-case tracking-normal font-medium">Hover or tab to a member to see its name and ties; click for the full list.</span>
         </div>
       </div>
 
@@ -212,7 +196,7 @@ export function NetworkView({ navigateTo }: { navigateTo: (v: string, c?: string
                   </div>
                   <button onClick={() => setSelected(null)} className="w-9 h-9 rounded-full bg-muted flex items-center justify-center text-muted-foreground hover:bg-border transition-colors shrink-0"><X className="w-4 h-4" /></button>
                 </div>
-                <div className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground mb-3">{selected.connections.length} Connection{selected.connections.length === 1 ? '' : 's'}</div>
+                <div className="text-[11px] font-bold uppercase tracking-widest text-muted-foreground mb-3">{selected.connections.length} Connection{selected.connections.length === 1 ? '' : 's'}</div>
                 <div className="space-y-2 max-h-64 overflow-y-auto mb-6">
                   {selected.connections.length === 0 && <div className="text-sm text-muted-foreground italic">No matchmaking or committee ties recorded.</div>}
                   {selected.connections.map((c, i) => (

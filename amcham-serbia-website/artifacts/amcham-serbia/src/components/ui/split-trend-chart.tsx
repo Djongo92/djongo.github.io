@@ -78,18 +78,18 @@ export function SplitTrendChart({ labels, series, marker, height = 300, formatVa
         {ticks.map((t) => (
           <g key={t}>
             <line x1={PAD.left} x2={PAD.left + plotW} y1={y(t)} y2={y(t)} className="stroke-foreground" strokeOpacity={t === lo ? 0.18 : 0.07} strokeWidth={1} />
-            <text x={PAD.left - 8} y={y(t) + 3} textAnchor="end" className="fill-muted-foreground text-[10px] font-semibold tabular-nums">{t}</text>
+            <text x={PAD.left - 8} y={y(t) + 3} textAnchor="end" className="fill-muted-foreground text-[11px] font-semibold tabular-nums">{t}</text>
           </g>
         ))}
 
         {labels.map((l, i) => (i === 0 || i === n - 1 || (i % labelEvery === 0 && x(i) - x(0) >= MIN_TICK_GAP && x(n - 1) - x(i) >= MIN_TICK_GAP)) && (
-          <text key={l} x={x(i)} y={height - 8} textAnchor={i === 0 ? 'start' : i === n - 1 ? 'end' : 'middle'} className="fill-muted-foreground text-[10px] font-semibold uppercase tracking-wider">{l}</text>
+          <text key={l} x={x(i)} y={height - 8} textAnchor={i === 0 ? 'start' : i === n - 1 ? 'end' : 'middle'} className="fill-muted-foreground text-[11px] font-semibold uppercase tracking-wider">{l}</text>
         ))}
 
         {marker && (
           <g>
             <line x1={x(marker.index)} x2={x(marker.index)} y1={PAD.top - 6} y2={PAD.top + plotH} className="stroke-foreground" strokeOpacity={0.35} strokeWidth={1} strokeDasharray="2 4" />
-            <text x={x(marker.index)} y={PAD.top - 12} textAnchor="middle" className="fill-foreground text-[10px] font-bold uppercase tracking-widest">{marker.text}</text>
+            <text x={x(marker.index)} y={PAD.top - 12} textAnchor="middle" className="fill-foreground text-[11px] font-bold uppercase tracking-widest">{marker.text}</text>
           </g>
         )}
 
@@ -105,8 +105,10 @@ export function SplitTrendChart({ labels, series, marker, height = 300, formatVa
             strokeDasharray={s.reference ? '5 5' : undefined}
             strokeLinecap="round"
             strokeLinejoin="round"
-            initial={reduceMotion ? false : { pathLength: 0 }}
-            animate={{ pathLength: 1 }}
+            // pathLength drives stroke-dasharray, which would erase the
+            // reference line's dashes, so that one fades in instead.
+            initial={reduceMotion ? false : s.reference ? { opacity: 0 } : { pathLength: 0 }}
+            animate={s.reference ? { opacity: 1 } : { pathLength: 1 }}
             transition={{ duration: 1.4, delay: 0.15 * si, ease: 'easeInOut' }}
           />
         ))}
@@ -132,7 +134,7 @@ export function SplitTrendChart({ labels, series, marker, height = 300, formatVa
 
       {hover !== null && (
         <div className="pointer-events-none absolute top-6 w-[180px] rounded-xl border border-border bg-card/95 backdrop-blur px-3 py-2 shadow-lg text-xs" style={{ left: tooltipLeft }}>
-          <div className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground mb-1">{labels[hover]}</div>
+          <div className="text-[11px] font-bold uppercase tracking-widest text-muted-foreground mb-1">{labels[hover]}</div>
           {series.map((s) => (
             <div key={s.key} className="flex items-center justify-between gap-3 py-0.5">
               <span className="flex items-center gap-1.5 text-foreground font-semibold">

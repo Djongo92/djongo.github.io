@@ -4,6 +4,7 @@ import { mockMembers } from '@/data/mock';
 import { useI18n } from '@/lib/i18n';
 import { SEO } from '@/components/seo';
 import { ArrowLeft, Globe, Building2, Info, Calendar, LayoutDashboard } from 'lucide-react';
+import { CompanyMark } from '@/components/ui/company-mark';
 
 export default function MemberDetail() {
   const [, params] = useRoute('/members/:id');
@@ -35,8 +36,8 @@ export default function MemberDetail() {
         
         <div className="bg-card border border-border rounded-sm shadow-xl p-8 md:p-12 mb-8 relative z-10 flex flex-col md:flex-row gap-8 items-start">
 
-          <div className="w-32 h-32 md:w-48 md:h-48 bg-background border border-border shadow-sm flex items-center justify-center shrink-0 -mt-20 md:-mt-24">
-            <span className="text-5xl md:text-7xl font-serif font-bold text-primary">{member.name.charAt(0)}</span>
+          <div className="w-32 h-32 md:w-48 md:h-48 bg-card border border-border shadow-sm flex items-center justify-center shrink-0">
+            <CompanyMark name={member.name} sector={member.sector} className="w-full h-full rounded-none ring-0 text-5xl md:text-7xl font-serif" />
           </div>
           
           <div className="flex-1 w-full">
