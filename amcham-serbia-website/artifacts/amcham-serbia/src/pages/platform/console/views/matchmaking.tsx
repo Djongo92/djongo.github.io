@@ -53,7 +53,7 @@ export function MatchmakingView({ showToast }: { showToast: (m:string) => void }
       <Confetti trigger={confettiTrigger} />
       <div className="mb-12 flex flex-col md:flex-row justify-between items-start md:items-end gap-6 border-b border-border pb-6">
         <div>
-          <h2 className="text-4xl font-serif font-light tracking-tight text-foreground mb-4">Mutual-Consent Broker</h2>
+          <h2 className="text-4xl font-serif font-light tracking-tight text-foreground mb-4">{t('platform.console.matchmaking')}</h2>
           <p className="text-sm font-medium text-muted-foreground max-w-2xl">{t('platform.console.match_desc', 'Approve overlaps to trigger double-opt-in workflows.')}</p>
         </div>
         <div className="flex items-center gap-4 bg-card p-2 rounded-full border border-border shadow-sm">

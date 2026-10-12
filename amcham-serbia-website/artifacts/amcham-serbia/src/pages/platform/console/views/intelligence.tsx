@@ -37,7 +37,7 @@ export function IntelligenceView({ navigateTo }: { navigateTo: (v:string, c?:str
     <div className="space-y-10 font-sans pb-20 max-w-7xl mx-auto">
       <div className="mb-4 flex flex-col md:flex-row justify-between items-start md:items-end gap-6 border-b border-border pb-6">
         <div>
-          <h2 className="text-4xl font-serif font-light tracking-tight text-foreground mb-2">Intelligence Engine</h2>
+          <h2 className="text-4xl font-serif font-light tracking-tight text-foreground mb-2">{t('platform.console.intelligence_title')}</h2>
           <p className="text-sm font-medium text-muted-foreground">{t('platform.console.intelligence_purpose', 'Pipeline health, extraction states, and manual override.')}</p>
         </div>
         <div className="flex flex-wrap gap-2">

@@ -14,11 +14,9 @@ export interface TrendPoint {
   avgEngagement: number;
 }
 
-// The original 20 companies' history runs Oct '24 - Sep '26; the 20 added in
-// the data-depth pass run Jan '25 - Dec '26. Averaging across all of them is
-// only meaningful where every company actually has a value, so this only
+// Averaging is only meaningful where every company has a value, so this only
 // returns months present in every company's history rather than silently
-// blending a 20-company average with a 40-company one at the edges.
+// blending averages over different company sets at the edges.
 export function commonMonthlyTrend(companies: Company[]): TrendPoint[] {
   const byMonth = new Map<string, { scoreSum: number; engSum: number; count: number }>();
   for (const c of companies) {

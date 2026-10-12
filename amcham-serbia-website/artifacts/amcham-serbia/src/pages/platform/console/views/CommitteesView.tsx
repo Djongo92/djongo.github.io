@@ -16,7 +16,7 @@ export function CommitteesView({ navigateTo }: { navigateTo: (v: string, c?: str
     <div className="space-y-8 max-w-6xl mx-auto pb-20 font-sans">
       <div className="border-b border-border pb-6">
         <h2 className="text-4xl font-serif font-light tracking-tight text-foreground mb-2">Committees</h2>
-        <p className="text-sm font-medium text-muted-foreground max-w-2xl">Real rosters, not just names and icons — who chairs, who shows up, and which policy wins their work drove.</p>
+        <p className="text-sm font-medium text-muted-foreground max-w-2xl">Who chairs, who shows up, and which policy wins each committee's work drove.</p>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">

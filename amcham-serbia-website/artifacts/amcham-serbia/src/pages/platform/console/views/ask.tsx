@@ -259,7 +259,7 @@ export function AskView({ showToast }: { showToast: (m:string) => void }) {
     <div className="max-w-6xl mx-auto font-sans pb-20 flex flex-col h-full">
       <div className="mb-12">
         <h2 className="text-5xl font-serif font-light tracking-tight text-foreground mb-4">{t('platform.console.ask')}</h2>
-        <p className="text-sm font-medium text-muted-foreground max-w-2xl">Governed analyst assistant. Results are strictly bounded by active permissions and cited to verifiable platform data.</p>
+        <p className="text-sm font-medium text-muted-foreground max-w-2xl">Ask about your members in plain language. Every answer shows the filters it used.</p>
       </div>
       
       <form onSubmit={(e) => handleSearch(e)} className="mb-8 relative group">

@@ -51,8 +51,8 @@ export function AccountsView({ navigateTo }: any) {
     <div className="space-y-6 max-w-7xl mx-auto pb-20 font-sans h-full flex flex-col">
       <div className="flex flex-col md:flex-row justify-between items-center gap-4 shrink-0">
         <div>
-          <h2 className="text-4xl font-serif font-light mb-2 tracking-tight">Accounts Database</h2>
-          <p className="text-sm font-medium text-muted-foreground">Filter, segment, and action the entire member list.</p>
+          <h2 className="text-4xl font-serif font-light mb-2 tracking-tight">Accounts</h2>
+          <p className="text-sm font-medium text-muted-foreground">Filter, segment and act on the full member list.</p>
         </div>
         <div className="flex gap-3 h-12">
           <AnimatePresence>

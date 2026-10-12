@@ -34,7 +34,7 @@ const VIEW_LABELS: Record<string, string> = {
   marketplace: 'the Opportunities marketplace',
   committee: 'Committees',
   onboarding: 'Onboarding',
-  seam: 'The Seam',
+  seam: 'Privacy & Sharing',
   people: 'People',
   billing: 'Billing',
   notifications: 'Notifications',

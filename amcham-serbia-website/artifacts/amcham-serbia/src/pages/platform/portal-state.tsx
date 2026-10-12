@@ -10,24 +10,31 @@ export function PortalStateProvider({ children, viewAs }: { children: React.Reac
   ]);
   
   const viewAsId = viewAs?.member?.id;
+  // A member who has used the portal for a while: a few saved profiles and the
+  // Nelt introduction the inbox says is being brokered.
+  const SEED_SAVED = ['hmo', 'msft', 'nkt', 'dlz'];
+  const SEED_PENDING = ['nkt', 'mcb'];
   const [directory, setDirectory] = useState(() => {
     const pairs = platformData.console.matchmaking.pairs as any[];
     return platformData.allMembers
       .filter(m => m.id !== viewAsId)
       .map(m => {
         const match = pairs.find(p => (p.from === viewAsId && p.to === m.id) || (p.to === viewAsId && p.from === m.id));
-        return { ...m, saved: false, reqStatus: 'none', recommended: !!match, recReason: match?.rationale };
+        return { ...m, saved: SEED_SAVED.includes(m.id), reqStatus: SEED_PENDING.includes(m.id) ? 'pending' : 'none', recommended: !!match, recReason: match?.rationale };
       });
   });
   
   const [events, setEvents] = useState([
-    { id: 'e1', title: 'Energy Transition Roundtable', date: 'Tomorrow, 10:00', location: 'Hyatt Regency', capacity: { total: 50, booked: 50 }, registered: false, attendees: [], waitlist: false, agenda: [{ time: '10:00', desc: 'Opening Remarks' }, { time: '10:15', desc: 'Panel Discussion' }], speakers: ['Ana Brnabic', 'Milan Petrovic'], audience: ['Energy Sector', 'Patrons'] },
-    { id: 'e2', title: 'Tax Policy Briefing', date: 'Oct 25, 14:00', location: 'AmCham Office', capacity: { total: 20, booked: 12 }, registered: false, attendees: [], waitlist: false, agenda: [{ time: '14:00', desc: 'Tax Update' }], speakers: ['MinFin Rep'], audience: ['CFOs', 'Finance Committee'] }
+    { id: 'e1', title: 'Energy Transition Roundtable', date: 'Tomorrow, 10:00', location: 'Hyatt Regency', capacity: { total: 50, booked: 50 }, registered: true, attendees: ['Marko R.', 'Ana Jokić'], waitlist: false, agenda: [{ time: '10:00', desc: 'Opening Remarks' }, { time: '10:15', desc: 'Panel Discussion' }], speakers: ['Ana Brnabic', 'Milan Petrovic'], audience: ['Energy Sector', 'Patrons'] },
+    { id: 'e2', title: 'Tax Policy Briefing', date: 'Oct 25, 14:00', location: 'AmCham Office', capacity: { total: 20, booked: 12 }, registered: false, attendees: ['Ana Jokić'], waitlist: false, agenda: [{ time: '14:00', desc: 'Tax Update' }], speakers: ['MinFin Rep'], audience: ['CFOs', 'Finance Committee'] }
   ]);
 
   const [opportunities, setOpportunities] = useState([
     { id: 'o1', type: 'Offer', title: 'Premium Office Space in NBG', intent: 'Looking for a sub-tenant for 500sqm.', author: 'Microsoft', date: '2d ago', status: 'active', category: 'Real Estate' },
-    { id: 'o2', type: 'Ask', title: 'Seeking Logistics Partner', intent: 'Need reliable last-mile delivery in South Serbia.', author: 'S-Leasing', date: '5d ago', status: 'active', category: 'Logistics' }
+    { id: 'o2', type: 'Ask', title: 'Seeking Logistics Partner', intent: 'Need reliable last-mile delivery in South Serbia.', author: 'S-Leasing', date: '5d ago', status: 'active', category: 'Logistics' },
+    { id: 'o3', type: 'Offer', title: 'ESG Reporting Workshop for Suppliers', intent: 'Two free seats per member company at our CSRD readiness workshop in November.', author: 'PwC Serbia', date: '1w ago', status: 'active', category: 'Training' },
+    { id: 'o4', type: 'Ask', title: 'Energy Supply for a New Production Line', intent: 'Our new Kragujevac line needs a multi-year corporate energy contract from Q1.', author: 'You', date: '3d ago', status: 'active', category: 'Energy' },
+    { id: 'o5', type: 'Offer', title: 'Cloud Migration Assessment', intent: 'A no-cost two-week assessment for member companies moving core systems to the cloud.', author: 'NCR Atleos', date: '2w ago', status: 'active', category: 'Technology' }
   ]);
 
   const [committees, setCommittees] = useState([

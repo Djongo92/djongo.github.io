@@ -13,6 +13,12 @@ export function Shell({ children }: { children: React.ReactNode }) {
     window.scrollTo(0, 0);
   }, [location]);
 
+  // The console and portal are apps with their own chrome; the site header,
+  // footer and chat bubble would stack a second navigation bar on top.
+  if (/^\/platform\/(console|portal)/.test(location)) {
+    return <div className="min-h-[100dvh] bg-background selection:bg-primary/20 selection:text-primary">{children}</div>;
+  }
+
   return (
     <div className="min-h-[100dvh] flex flex-col bg-background selection:bg-primary/20 selection:text-primary">
       <Header />

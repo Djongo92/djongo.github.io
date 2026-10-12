@@ -5,6 +5,12 @@ import { cn } from '@/lib/utils';
 import { motion, AnimatePresence } from 'framer-motion';
 
 export default function GlanceView({ t, navigateTo, roleParam, member, billing, glanceData }: any) {
+  // Same score bands the staff console uses (80+ / 60-79 / under 60), phrased for the member.
+  const health = member.score >= 80
+    ? { label: 'Strong', color: 'text-green-600' }
+    : member.score >= 60
+      ? { label: member.scoreTrend < 0 ? 'Worth a look' : 'Steady', color: 'text-amber-600' }
+      : { label: 'Needs attention', color: 'text-destructive' };
   const { people, notifications } = usePortalState();
   const glance = glanceData;
   const tier = glance.tier;
@@ -54,7 +60,7 @@ export default function GlanceView({ t, navigateTo, roleParam, member, billing, 
           { label: 'Next Renewal', value: billing.renewalDate, icon: <Clock className="w-4 h-4" /> },
           { label: 'Seats Used', value: billing.seatsUsed, icon: <Users className="w-4 h-4" /> },
           { label: 'Team Size', value: people.length || 5, icon: <Users className="w-4 h-4" /> },
-          { label: 'Account Health', value: 'Excellent', icon: <ShieldCheck className="w-4 h-4" />, color: 'text-green-600' }
+          { label: 'Account Health', value: health.label, icon: <ShieldCheck className="w-4 h-4" />, color: health.color }
         ].map((kpi, i) => (
           <div key={i} className="bg-card p-5 rounded-[32px] border border-border flex flex-col gap-2">
             <div className="text-[10px] uppercase font-bold text-muted-foreground tracking-widest flex items-center gap-2">

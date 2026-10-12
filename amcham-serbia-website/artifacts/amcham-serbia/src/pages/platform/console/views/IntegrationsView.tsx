@@ -15,7 +15,7 @@ interface Integration {
 const INITIAL: Integration[] = [
   { id: 'linkedin', name: 'LinkedIn', desc: 'Company page follower counts and post engagement for Social Presence scoring.', icon: Linkedin, connected: true, lastSynced: '4 hours ago' },
   { id: 'gcal', name: 'Google Calendar', desc: 'Syncs committee meetings and events into your staff calendar.', icon: Calendar, connected: true, lastSynced: '11 minutes ago' },
-  { id: 'slack', name: 'Slack', desc: 'Posts Ritual queue alerts and renewal-risk flags into #membership-team.', icon: MessageCircle, connected: true, lastSynced: '2 hours ago' },
+  { id: 'slack', name: 'Slack', desc: 'Posts new priorities and renewal-risk flags into #membership-team.', icon: MessageCircle, connected: true, lastSynced: '2 hours ago' },
   { id: 'places', name: 'Google Places', desc: 'Business profile presence checks for the directory.', icon: MapPin, connected: true, lastSynced: '1 day ago' },
   { id: 'mailchimp', name: 'Mailchimp', desc: 'Outreach queue sync for email campaign follow-ups.', icon: Mail, connected: false, lastSynced: '—' },
   { id: 'ga', name: 'Google Analytics', desc: 'Member-site traffic signals feeding Market Signals scoring.', icon: BarChart3, connected: true, lastSynced: '38 minutes ago' },

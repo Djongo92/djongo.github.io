@@ -46,15 +46,15 @@ export function RetentionView({ navigateTo }: any) {
     <div className="space-y-8 max-w-7xl mx-auto pb-20 font-sans">
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 border-b border-border pb-6">
         <div>
-          <h2 className="text-4xl font-serif text-foreground tracking-tight mb-2">Retention Control</h2>
-          <p className="text-muted-foreground">Manage at-risk accounts through targeted intervention pipelines.</p>
+          <h2 className="text-4xl font-serif text-foreground tracking-tight mb-2">Retention</h2>
+          <p className="text-muted-foreground">At-risk accounts and the plan to keep each one.</p>
         </div>
         <div className="px-5 py-3 rounded-[24px] bg-destructive/10 text-destructive border border-destructive/20 shadow-sm flex items-center gap-4">
           <div className="w-10 h-10 rounded-full bg-destructive/20 flex items-center justify-center">
             <AlertTriangle className="w-5 h-5" />
           </div>
           <div className="flex flex-col leading-none">
-            <span className="text-[10px] font-bold uppercase tracking-widest mb-1">Value At Risk</span>
+            <span className="text-[10px] font-bold uppercase tracking-widest mb-1">In open save cases</span>
             <span className="text-2xl font-serif tabular-nums tracking-tight">{fmtEuro(activeAtRiskValue)}</span>
           </div>
         </div>

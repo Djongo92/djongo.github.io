@@ -41,7 +41,7 @@ export function BriefView({ companyId, navigateTo, showToast }: { companyId: str
       <div className="max-w-4xl mx-auto py-24 text-center">
         <div className="w-14 h-14 rounded-full bg-muted mx-auto mb-6 flex items-center justify-center"><FileText className="w-6 h-6 text-muted-foreground" /></div>
         <h2 className="text-3xl font-serif font-light mb-3">No company selected</h2>
-        <p className="text-muted-foreground mb-8">Open a brief from a company's dossier or the Ritual queue.</p>
+        <p className="text-muted-foreground mb-8">Open a brief from a company's dossier or from Priorities.</p>
         <button onClick={() => navigateTo('accounts')} className="px-5 py-3 rounded-full bg-primary text-primary-foreground text-sm font-bold">Return to Accounts</button>
       </div>
     );

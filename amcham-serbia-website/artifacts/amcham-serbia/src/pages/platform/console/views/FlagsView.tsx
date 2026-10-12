@@ -49,8 +49,8 @@ export function FlagsView({ showToast, updateBadge }: any) {
     <div className="space-y-8 max-w-5xl mx-auto pb-20 font-sans">
       <div className="flex flex-col md:flex-row md:items-end justify-between border-b border-border pb-6 gap-4">
         <div>
-          <h2 className="text-4xl font-serif font-light tracking-tight text-foreground mb-2">Flags & Support</h2>
-          <p className="text-muted-foreground">Member inquiries and system-generated alerts requiring resolution.</p>
+          <h2 className="text-4xl font-serif font-light tracking-tight text-foreground mb-2">Flags</h2>
+          <p className="text-muted-foreground">Member requests and system alerts waiting on a response.</p>
         </div>
         <div className="flex items-center gap-3 bg-muted/50 rounded-full p-1.5 border border-border/50">
            <Filter className="w-4 h-4 text-muted-foreground ml-3 mr-1" />

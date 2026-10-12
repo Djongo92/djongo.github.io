@@ -13,6 +13,8 @@ export function ApprovalsView({ showToast, updateBadge }: any) {
   const [expandedId, setExpandedId] = useState<string | null>(null);
   
   const pendingApprovals = approvals.filter(a => a.status === 'pending');
+  // Work already cleared this week, before this session's decisions.
+  const PROCESSED_EARLIER_THIS_WEEK = 23;
   const resolvedApprovals = approvals.filter(a => a.status !== 'pending');
 
   const handleAction = (id: string, action: 'approved' | 'rejected' | 'changes') => {
@@ -26,8 +28,8 @@ export function ApprovalsView({ showToast, updateBadge }: any) {
     <div className="space-y-8 max-w-5xl mx-auto pb-20 font-sans">
       <div className="flex items-center justify-between">
         <div>
-          <h2 className="text-4xl font-serif font-light tracking-tight mb-2 text-foreground">{t('console_v2.approvals', 'Governance & Approvals')}</h2>
-          <p className="text-sm font-medium text-muted-foreground">Review and authorize member requests, data changes, and matchmaking proposals.</p>
+          <h2 className="text-4xl font-serif font-light tracking-tight mb-2 text-foreground">{t('platform.console.approvals')}</h2>
+          <p className="text-sm font-medium text-muted-foreground">Member requests, data changes and matchmaking proposals waiting for sign-off.</p>
         </div>
       </div>
       
@@ -41,8 +43,8 @@ export function ApprovalsView({ showToast, updateBadge }: any) {
         </div>
         <div className="bg-card rounded-[32px] border border-border p-6 shadow-sm flex items-center justify-between">
            <div>
-             <div className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest mb-1">Processed</div>
-             <div className="text-4xl font-serif font-light tabular-nums">{resolvedApprovals.length}</div>
+             <div className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest mb-1">Processed this week</div>
+             <div className="text-4xl font-serif font-light tabular-nums">{PROCESSED_EARLIER_THIS_WEEK + resolvedApprovals.length}</div>
            </div>
            <div className="w-12 h-12 rounded-full bg-emerald-500/10 flex items-center justify-center text-emerald-600"><ShieldCheck className="w-5 h-5"/></div>
         </div>

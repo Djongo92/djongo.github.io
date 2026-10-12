@@ -36,7 +36,7 @@ export function SponsorshipView({ navigateTo }: { navigateTo: (v: string, c?: st
       <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-6 border-b border-border pb-6">
         <div>
           <h2 className="text-4xl font-serif font-light tracking-tight text-foreground mb-2 flex items-center gap-3"><Award className="w-8 h-8 text-primary"/> Sponsorship Pipeline</h2>
-          <p className="text-sm font-medium text-muted-foreground max-w-2xl">Non-dues revenue from members sponsoring events and initiatives — sold against who's sponsored before.</p>
+          <p className="text-sm font-medium text-muted-foreground max-w-2xl">Revenue from members sponsoring events and initiatives, tracked from first pitch to signed deal.</p>
         </div>
       </div>
 

@@ -56,6 +56,8 @@ const VIEW_LABELS: Record<string, string> = {
 
 interface CompassFabProps {
   view: string;
+  // The dossier panel covers the right 600px on desktop; sit beside it, not on it.
+  dossierOpen?: boolean;
   selectedCompanyId: string | null;
   roleParam: string;
   navigateTo: (view: string, companyId?: string, extraParams?: Record<string, string>) => void;
@@ -68,7 +70,7 @@ interface CompassFabProps {
 // analysis, full table, bulk actions) and Cmd+K (ephemeral preview while
 // typing): a persistent, multi-turn transcript that resolves instantly —
 // no fake "thinking" delay, that theater already belongs to Ask.
-export function CompassFab({ view, selectedCompanyId, roleParam, navigateTo, showToast, open, setOpen }: CompassFabProps) {
+export function CompassFab({ view, dossierOpen = false, selectedCompanyId, roleParam, navigateTo, showToast, open, setOpen }: CompassFabProps) {
   const { t } = useI18n();
   const { queueOutreach } = useConsoleState();
   const [messages, setMessages] = useState<CompassMessage[]>([]);
@@ -210,7 +212,7 @@ export function CompassFab({ view, selectedCompanyId, roleParam, navigateTo, sho
   };
 
   return (
-    <div className="fixed bottom-24 right-6 md:right-10 z-[65] print:hidden">
+    <div className={cn("fixed bottom-24 right-6 md:right-10 z-[65] print:hidden transition-[right] duration-300", dossierOpen && "md:right-[624px]")}>
       <AnimatePresence>
         {open && (
           <motion.div

@@ -3,7 +3,7 @@ import { useI18n } from '@/lib/i18n';
 import { platformData } from '@/data/platform';
 import { motion, AnimatePresence } from 'framer-motion';
 import { FileText, ShieldAlert, ChevronDown, ChevronUp, TrendingUp, TrendingDown, Users, BarChart3, Building } from 'lucide-react';
-import { cn } from '@/lib/utils';
+import { cn, parseEuro, fmtEuro } from '@/lib/utils';
 
 const TIER_SPLIT = { events: [0.5736, 0.3208, 0.1057], intros: [0.4433, 0.5567], marketplace: [0.4167, 0.5833] };
 
@@ -14,7 +14,22 @@ export function BoardSummaryView() {
   const [expandedKpi, setExpandedKpi] = useState<string | null>(null);
   const [expandedSections, setExpandedSections] = useState<Record<string, boolean>>({ wins: true, risks: true });
 
-  const data = (platformData.console as any).rollup[quarter];
+  const rollup = (platformData.console as any).rollup[quarter];
+  // The live quarter is computed from the member book, so it always matches
+  // the at-risk figure on Analytics, Reports and Retention.
+  const members = platformData.allMembers;
+  const atRisk = members.filter((c) => c.lifecycle === 'at-risk').reduce((sum, c) => sum + parseEuro(c.fee), 0);
+  const bookTotal = members.reduce((sum, c) => sum + parseEuro(c.fee), 0);
+  const pct = (k: number) => Math.round((k / members.length) * 100);
+  const high = pct(members.filter((c) => c.score >= 80).length);
+  const mid = pct(members.filter((c) => c.score >= 60 && c.score < 80).length);
+  const data = quarter === 'Q3 2026'
+    ? {
+        ...rollup,
+        retention: { protected: fmtEuro(bookTotal - atRisk), atRisk: fmtEuro(atRisk) },
+        healthTrend: { ...rollup.healthTrend, scoreBands: { high, mid, low: 100 - high - mid } },
+      }
+    : rollup;
 
   const toggleSection = (sec: string) => {
     setExpandedSections(prev => ({ ...prev, [sec]: !prev[sec] }));

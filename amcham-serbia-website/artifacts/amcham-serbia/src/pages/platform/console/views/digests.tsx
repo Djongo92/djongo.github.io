@@ -51,8 +51,8 @@ export function DigestsView({ showToast }: { showToast: (m:string) => void }) {
     <div className="space-y-8 font-sans pb-20 max-w-6xl mx-auto">
       <div className="mb-8 flex justify-between items-end">
          <div>
-           <h2 className="text-4xl font-serif font-light tracking-tight text-foreground mb-2">Automated Digests</h2>
-           <p className="text-sm font-medium text-muted-foreground">{t('platform.console.digests_purpose', 'Review and approve automatically generated email briefings.')} Governed publication workflow.</p>
+           <h2 className="text-4xl font-serif font-light tracking-tight text-foreground mb-2">{t('platform.console.nav_digests')}</h2>
+           <p className="text-sm font-medium text-muted-foreground">{t('platform.console.digests_purpose', 'Review and approve automatically generated email briefings.')}</p>
          </div>
       </div>
 
@@ -244,7 +244,7 @@ export function DigestsView({ showToast }: { showToast: (m:string) => void }) {
                  <div className="h-px w-full bg-gray-200 mb-8"></div>
                  <div className="text-xs text-gray-500 font-medium leading-relaxed">
                    Personalized for <span className="font-bold text-black">{activeV.name}</span> companies.<br/>
-                   Prepared automatically by AmCham OS Engine v4.
+                   Prepared by Compass for the AmCham team.
                  </div>
               </div>
             </div>

@@ -20,6 +20,9 @@ export function MyTeamView({ navigateTo, showToast }: any) {
   // never actually accounts for. Scoped to Patron tier ("key accounts")
   // so the alert stays actionable rather than flagging every member company.
   const teamNames = new Set(team.map(m => m.name));
+  const teamBook = team.reduce((sum, m) => sum + m.bookSize, 0);
+  // An even split of the whole member book across the team.
+  const targetBook = Math.ceil(platformData.allMembers.length / team.length);
   const coverageGaps = platformData.allMembers.filter(c => c.tier === 'Patron' && !teamNames.has(c.manager) && !reassignments[c.id]);
 
   const reassign = (companyId: string, staffName: string) => {
@@ -66,7 +69,7 @@ export function MyTeamView({ navigateTo, showToast }: any) {
       <div className="flex items-center justify-between">
         <div>
           <h2 className="text-4xl font-serif font-light tracking-tight text-foreground mb-2">My Team</h2>
-          <p className="text-muted-foreground">Manage workload and member success operations.</p>
+          <p className="text-muted-foreground">{t('platform.console.my_team_purpose')}</p>
         </div>
         <div className="flex items-center gap-3">
           <button onClick={() => setShowMath(!showMath)} className={cn("w-10 h-10 rounded-full flex items-center justify-center transition-colors border", showMath ? "bg-foreground text-background border-foreground shadow-md" : "bg-card text-muted-foreground border-border hover:border-foreground/30")}>
@@ -105,9 +108,9 @@ export function MyTeamView({ navigateTo, showToast }: any) {
 
       <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
         {[
-          { label: "Total Book Size", value: "172", trend: "+17", icon: Users, color: "text-blue-500", bg: "bg-blue-500/10" },
+          { label: t('platform.console.team_book_size', "Accounts Owned"), value: String(teamBook), trend: `${platformData.allMembers.length - teamBook} unowned`, icon: Users, color: "text-blue-500", bg: "bg-blue-500/10" },
           { label: "Avg Compliance", value: "92%", trend: "+2%", icon: ShieldCheck, color: "text-emerald-500", bg: "bg-emerald-500/10" },
-          { label: "Rituals Completed", value: "91", trend: "Today", icon: CheckCircle, color: "text-primary", bg: "bg-primary/10" },
+          { label: t('platform.console.rituals_completed'), value: "91", trend: "Today", icon: CheckCircle, color: "text-primary", bg: "bg-primary/10" },
           { label: "SLA Aging", value: "1.2d", trend: "-0.3d", icon: Clock, color: "text-amber-500", bg: "bg-amber-500/10" }
         ].map((stat, i) => (
           <div key={i} className="bg-card border border-border p-6 rounded-[32px] shadow-sm relative overflow-hidden group">
@@ -222,15 +225,15 @@ export function MyTeamView({ navigateTo, showToast }: any) {
                               <div className="text-[10px] uppercase font-bold tracking-widest text-muted-foreground mb-4">Capacity Breakdown</div>
                               <div className="space-y-4">
                                 <div>
-                                  <div className="flex justify-between text-xs font-bold mb-1"><span>Target Book</span> <span>{member.bookSize} / 50</span></div>
-                                  <div className="w-full bg-muted rounded-full h-1.5"><div className="bg-primary h-full rounded-full" style={{width: `${(member.bookSize/50)*100}%`}}></div></div>
+                                  <div className="flex justify-between text-xs font-bold mb-1"><span>Target Book</span> <span>{member.bookSize} / {targetBook}</span></div>
+                                  <div className="w-full bg-muted rounded-full h-1.5"><div className="bg-primary h-full rounded-full" style={{width: `${Math.min(100, (member.bookSize/targetBook)*100)}%`}}></div></div>
                                 </div>
                                 <div>
                                   <div className="flex justify-between text-xs font-bold mb-1"><span>SLA Compliance</span> <span>{member.compliance}%</span></div>
                                   <div className="w-full bg-muted rounded-full h-1.5"><div className="bg-emerald-500 h-full rounded-full" style={{width: `${member.compliance}%`}}></div></div>
                                 </div>
                                 <div className="pt-4 mt-4 border-t border-border flex justify-between text-xs">
-                                  <span className="text-muted-foreground">Rituals Completed</span>
+                                  <span className="text-muted-foreground">{t('platform.console.rituals_completed')}</span>
                                   <span className="font-bold">{member.ritualsCompleted} this month</span>
                                 </div>
                                 <div className="flex justify-between text-xs">

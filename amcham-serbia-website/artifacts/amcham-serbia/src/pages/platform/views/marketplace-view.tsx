@@ -18,7 +18,7 @@ export default function MarketplaceView({ t, showToast }: any) {
   const [newIntent, setNewIntent] = useState('');
   
   const [responseText, setResponseText] = useState('');
-  const [respondedListings, setRespondedListings] = useState<string[]>([]);
+  const [respondedListings, setRespondedListings] = useState<string[]>(['o3']);
 
   const currentListings = opportunities.filter((o: any) => {
     if (activeTab === 'mine' && o.author !== 'You') return false;

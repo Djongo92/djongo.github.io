@@ -25,7 +25,7 @@ function buildEvents(): string[] {
     `Outreach queue cleared 3 overdue touchpoints`,
     `${b} was nominated for the Board of Governors`,
     `${c}'s renewal moved into the 90-day window`,
-    `Ritual streak extended to day 5`,
+    `Priorities cleared on time, 5 days running`,
   ];
 }
 
