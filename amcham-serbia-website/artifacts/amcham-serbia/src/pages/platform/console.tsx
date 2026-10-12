@@ -9,7 +9,7 @@ import {
   CheckSquare, Inbox, Repeat, ArrowRight,
   Search, X, Check, Eye, Download, ChevronLeft,
   Command, Menu, Phone, Activity, Globe, Mail, Plus, Book, Award, Landmark,
-  BarChart3, FileBarChart2, Bell, Keyboard, Network, Radar, UserCog, ChevronDown, Languages
+  BarChart3, FileBarChart2, Bell, Keyboard, Network, Radar, UserCog, ChevronDown, Languages, Compass
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Link } from 'wouter';
@@ -19,8 +19,9 @@ import {
   FlagsView, ApprovalsView, CoverView, DossierView,
   BriefView, MyTeamView, BoardSummaryView, DigestsView,
   SponsorshipView, CommitteesView, AnalyticsView, ReportsView,
-  NetworkView, IntegrationsView
+  NetworkView, IntegrationsView, CompassView
 } from './console/views';
+import { useCompassStore } from './console/compass-store';
 import { CommandPalette, GlossaryDrawer, TourOverlay, ShortcutsOverlay } from './console/components/Overlays';
 import { CompassFab } from './console/components/compass-fab';
 import { ConsoleStateProvider } from './console/console-state';
@@ -111,6 +112,7 @@ export default function Console() {
     if (tourStep === 5 && view !== 'flags') { setCmdOpen(false); setLocation(`/platform/console?view=flags&role=${roleParam}`); }
   }, [tourStep]);
 
+  const compassOpenCount = useCompassStore().visible.length;
   const [navBadges, setNavBadges] = useState({
     ritual: platformData.console.ritual.items.length,
     flags: platformData.console.flags.length,
@@ -150,6 +152,7 @@ export default function Console() {
         title: t('platform.console.nav_today'),
         items: [
           item('ritual', Target, t('platform.console.ritual'), navBadges.ritual),
+          item('compass', Compass, t('platform.console.nav_compass', 'Compass'), compassOpenCount),
           item('flags', Flag, t('platform.console.flags'), navBadges.flags),
           item('approvals', CheckSquare, t('platform.console.approvals'), navBadges.approvals),
         ],
@@ -431,6 +434,7 @@ export default function Console() {
                     <button onClick={() => navigateTo(defaultView)} className="px-5 py-3 rounded-full bg-primary text-primary-foreground text-sm font-bold">Return to workspace</button>
                   </div>
                 ) : <>
+                  {view === 'compass' && <CompassView navigateTo={navigateTo} showToast={showToast} />}
                   {view === 'ritual' && <RitualView navigateTo={navigateTo} showToast={showToast} updateBadge={(v: any) => setNavBadges(p => ({...p, ritual: v}))} roleParam={roleParam} />}
                   {view === 'heatmap' && <HeatmapView navigateTo={navigateTo} roleParam={roleParam} />}
                   {view === 'accounts' && <AccountsView navigateTo={navigateTo} />}
@@ -452,7 +456,7 @@ export default function Console() {
                   {view === 'brief' && <BriefView companyId={selectedCompanyId} navigateTo={navigateTo} showToast={showToast} />}
                   {view === 'network' && <NetworkView navigateTo={navigateTo} />}
                   {view === 'integrations' && <IntegrationsView showToast={showToast} />}
-                  {!['ritual','heatmap','accounts','retention','outreach','ask','matchmaking','sponsorship','committees','intelligence','flags','approvals','my-team','board-summary','cover','digests','analytics','reports','brief','network','integrations'].includes(view) && (
+                  {!['compass','ritual','heatmap','accounts','retention','outreach','ask','matchmaking','sponsorship','committees','intelligence','flags','approvals','my-team','board-summary','cover','digests','analytics','reports','brief','network','integrations'].includes(view) && (
                     <div className="max-w-xl mx-auto py-24 text-center">
                       <div className="w-14 h-14 rounded-full bg-muted mx-auto mb-6 flex items-center justify-center"><Eye className="w-6 h-6 text-muted-foreground" /></div>
                       <h2 className="text-3xl font-serif font-light mb-3">Page Not Found</h2>

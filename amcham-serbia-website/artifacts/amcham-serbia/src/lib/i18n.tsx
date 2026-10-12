@@ -8,6 +8,34 @@ interface Translations {
 
 const dictionary: Record<Language, Translations> = {
 en: {
+    compass_hub: {
+      noticed: "What Compass noticed",
+      why: "Why you're seeing this",
+      tab_signals: "Signals",
+      tab_activity: "Activity log",
+      tab_prefs: "Preferences",
+      subtitle: "What Compass has noticed across the book, ranked by what's at stake. It drafts and suggests; nothing goes out without you.",
+      stat_open: "Open",
+      stat_week: "Due this week",
+      stat_stake: "Revenue in play",
+      stat_acted: "Handled today",
+      all: "Everything",
+      showing: "Showing",
+      where: "Where this runs",
+      empty_title: "Nothing here right now",
+      empty_body: "Compass will flag anything new as it comes in.",
+      log_intro: "Every suggestion Compass made and everything done with it: what data it read, where it ran and who acted. This is the audit trail the board can inspect.",
+      delivery_title: "How Compass reaches you",
+      delivery_body: "Real time puts it in Compass as it happens; morning brief and weekly bundle it; off stops that kind of suggestion entirely.",
+      learned_title: "What Compass has learned",
+      learned_body: "Kinds of suggestion you asked to see less of.",
+      learned_empty: "Nothing yet. Choose “Fewer like this” on any suggestion and it will appear here.",
+      rules_title: "Ground rules",
+      rule1: "Compass drafts, queues and suggests. It never sends anything on its own.",
+      rule2: "Every suggestion shows where its facts came from.",
+      rule3: "Anything about a member runs on AmCham's private model.",
+      rule4: "Everything it does is in the activity log.",
+    },
     console_v2: {
       ritual_empty: "You're all caught up for today.",
       priority_done: "Done. Logged to the account timeline.",
@@ -815,6 +843,7 @@ en: {
           "tip_body": "Explore both sides. Actions in the member portal show up in the staff console, and Privacy & Sharing shows exactly what flows between them."
         },
         "console": {
+          "nav_compass": "Compass",
           "hub": "Hub",
           "nav": {
             "intelligence": "Intelligence"
@@ -1120,6 +1149,34 @@ nav_today: "Today",
     }
   },
 sr: {
+    compass_hub: {
+      noticed: "Šta je Compass primetio",
+      why: "Zašto ovo vidite",
+      tab_signals: "Signali",
+      tab_activity: "Dnevnik aktivnosti",
+      tab_prefs: "Podešavanja",
+      subtitle: "Šta je Compass primetio u portfoliju, rangirano prema tome šta je u igri. Priprema nacrte i predloge; ništa ne izlazi bez vas.",
+      stat_open: "Otvoreno",
+      stat_week: "Rok ove nedelje",
+      stat_stake: "Prihod u igri",
+      stat_acted: "Rešeno danas",
+      all: "Sve",
+      showing: "Prikaz",
+      where: "Gde se obrađuje",
+      empty_title: "Trenutno ništa",
+      empty_body: "Compass će označiti sve novo čim se pojavi.",
+      log_intro: "Svaki predlog koji je Compass dao i sve što je urađeno s njim: koje podatke je pročitao, gde je obrađeno i ko je postupio. Ovo je revizorski trag koji upravni odbor može da pregleda.",
+      delivery_title: "Kako vas Compass obaveštava",
+      delivery_body: "U realnom vremenu prikazuje odmah; jutarnji pregled i nedeljni ih grupišu; isključeno potpuno zaustavlja tu vrstu predloga.",
+      learned_title: "Šta je Compass naučio",
+      learned_body: "Vrste predloga koje želite da vidite ređe.",
+      learned_empty: "Još ništa. Izaberite „Ređe ovakve” na bilo kom predlogu i pojaviće se ovde.",
+      rules_title: "Osnovna pravila",
+      rule1: "Compass priprema nacrte, redove i predloge. Nikada ništa ne šalje sam.",
+      rule2: "Svaki predlog pokazuje odakle potiču činjenice.",
+      rule3: "Sve što se tiče člana obrađuje se na privatnom modelu AmCham-a.",
+      rule4: "Sve što radi nalazi se u dnevniku aktivnosti.",
+    },
     console_v2: {
       ritual_empty: "Sve ste završili za danas.",
       heatmap_title: "Mapa odnosa",
@@ -2054,6 +2111,7 @@ sr: {
           "tip_body": "Istražite obe strane. Radnje u portalu za članove vide se u konzoli za tim, a Privatnost i deljenje pokazuje tačno šta teče između njih."
         },
         "console": {
+          "nav_compass": "Compass",
           "team_book_size": "Dodeljeni nalozi",
           "nav_analytics": "Analitika",
           "nav_network": "Mreža",
