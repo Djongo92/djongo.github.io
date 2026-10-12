@@ -20,3 +20,4 @@ export { AnalyticsView } from './AnalyticsView';
 export { ReportsView } from './ReportsView';
 export { NetworkView } from './NetworkView';
 export { IntegrationsView } from './IntegrationsView';
+export { CompassView } from './CompassView';

@@ -1,11 +1,13 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
-import { Compass, X, Send, ArrowUpRight, Cpu, Laptop, Cloud, Copy, Handshake, Mail, UserCog, CheckSquare, CalendarClock, Sun, MessageSquare, ChevronRight } from 'lucide-react';
+import { Compass, X, Send, ArrowUpRight, Cpu, Laptop, Cloud, Copy, BadgeEuro, CalendarDays, Landmark, Inbox, Users, Sun, MessageSquare, ChevronRight } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useI18n } from '@/lib/i18n';
 import { platformData } from '@/data/platform';
 import { useConsoleState } from '../console-state';
 import { answerCompassQuery, getProactiveNudge, getCompanyGroundingContext, CompassAnswer, CompassAction } from '../compass-engine';
-import { buildBriefing, BriefingAction, BriefingSignal } from '../compass-briefing';
+import { buildBriefing, BriefingAction } from '../compass-briefing';
+import { compassStore, useCompassStore } from '../compass-store';
+import { CATEGORY_LABEL, SignalCategory } from '../compass-signals';
 import { AiSuggestionChip, AiThinking, TypewriterText } from '@/components/ui/ai-badge';
 import { CompanyMark } from '@/components/ui/company-mark';
 import { askCompassAI, buildCompassHistory, CompassAiError } from '@/lib/compass-ai';
@@ -44,6 +46,7 @@ const SUGGESTED_QUESTIONS = ["Who's struggling right now?", 'Anyone I should cal
 // rendered UI copy, so it doesn't need to track the sidebar's i18n keys.
 const VIEW_LABELS: Record<string, string> = {
   ritual: 'Priorities list',
+  compass: 'Compass signals page',
   heatmap: 'Portfolio Heatmap',
   accounts: 'Accounts',
   retention: 'Retention queue',
@@ -67,7 +70,7 @@ const VIEW_LABELS: Record<string, string> = {
 };
 
 const FIRST_NAMES: Record<string, string> = { lead: 'Stefan', staffer: 'Milica', exec: 'Ana' };
-const SIGNAL_ICON: Record<BriefingSignal['icon'], React.ElementType> = { handshake: Handshake, mail: Mail, cover: UserCog, approvals: CheckSquare, promise: CalendarClock };
+const CATEGORY_ICON: Record<SignalCategory, React.ElementType> = { membership: BadgeEuro, events: CalendarDays, advocacy: Landmark, service: Inbox, team: Users };
 const URGENCY_DOT: Record<string, string> = { Critical: 'bg-destructive', High: 'bg-amber-500', Medium: 'bg-sky-500', Low: 'bg-muted-foreground/50' };
 const BRIEF_SEEN_KEY = 'amcham_compass_brief_seen';
 
@@ -125,7 +128,6 @@ export function CompassFab({ view, dossierOpen = false, selectedCompanyId, roleP
   const [messages, setMessages] = useState<CompassMessage[]>([]);
   const [draft, setDraft] = useState('');
   const [tab, setTab] = useState<'today' | 'ask'>('today');
-  const [dismissed, setDismissed] = useState<string[]>([]);
   const [provider, setProviderState] = useState<CompassProvider>(getProvider);
   const [localStatus, setLocalStatus] = useState<LocalStatus>({ state: 'checking' });
   const [bubble, setBubble] = useState(false);
@@ -137,7 +139,7 @@ export function CompassFab({ view, dossierOpen = false, selectedCompanyId, roleP
 
   const nudge = useMemo(() => getProactiveNudge(), []);
   const briefing = useMemo(() => buildBriefing(), []);
-  const signals = briefing.signals.filter((s) => !dismissed.includes(s.id));
+  const { visible: signals } = useCompassStore();
   const transcriptEndRef = useRef<HTMLDivElement>(null);
   const firstName = FIRST_NAMES[roleParam] ?? 'there';
   const canShowDeepLinks = roleParam !== 'exec';
@@ -164,7 +166,7 @@ export function CompassFab({ view, dossierOpen = false, selectedCompanyId, roleP
 
   // Proactive: once per session, Compass offers the morning brief unprompted.
   useEffect(() => {
-    if (suppressNudge || showcaseActive || open) return;
+    if (suppressNudge || showcaseActive || open || view === 'compass') return;
     let seen = false;
     try { seen = sessionStorage.getItem(BRIEF_SEEN_KEY) === '1'; } catch { /* ignore */ }
     if (seen) return;
@@ -173,13 +175,13 @@ export function CompassFab({ view, dossierOpen = false, selectedCompanyId, roleP
       try { sessionStorage.setItem(BRIEF_SEEN_KEY, '1'); } catch { /* ignore */ }
     }, 1600);
     return () => clearTimeout(show);
-  }, [suppressNudge, showcaseActive, open]);
+  }, [suppressNudge, showcaseActive, open, view]);
   useEffect(() => {
     if (!bubble) return;
     const hide = setTimeout(() => setBubble(false), 15000);
     return () => clearTimeout(hide);
   }, [bubble]);
-  useEffect(() => { if (open || showcaseActive || suppressNudge) setBubble(false); }, [open, showcaseActive, suppressNudge]);
+  useEffect(() => { if (open || showcaseActive || suppressNudge || view === 'compass') setBubble(false); }, [open, showcaseActive, suppressNudge, view]);
 
   const chooseProvider = (p: CompassProvider) => {
     setProviderState(p);
@@ -364,7 +366,7 @@ export function CompassFab({ view, dossierOpen = false, selectedCompanyId, roleP
               <span className="text-xs font-bold text-foreground">Compass</span>
             </div>
             <p className="text-sm text-foreground leading-snug pr-4">
-              {greeting()}, {firstName}. {briefing.priorities.length} priorities need you today ({briefing.atStake} at stake), and I noticed {briefing.signals.length} other things.
+              {greeting()}, {firstName}. {briefing.priorities.length} priorities need you today ({briefing.atStake} at stake), and {signals.length} suggestions are waiting in Compass.
             </p>
             <button onClick={() => openPanel('today')} className="mt-3 inline-flex items-center gap-1.5 text-xs font-bold text-primary hover:underline">
               Open my brief <ArrowUpRight className="w-3.5 h-3.5" />
@@ -466,24 +468,29 @@ export function CompassFab({ view, dossierOpen = false, selectedCompanyId, roleP
                   </section>
 
                   <section>
-                    <h3 className="text-[11px] font-bold uppercase tracking-wider text-muted-foreground mb-2">Compass noticed</h3>
+                    <div className="flex items-baseline justify-between mb-2">
+                      <h3 className="text-[11px] font-bold uppercase tracking-wider text-muted-foreground">Compass noticed</h3>
+                      {canShowDeepLinks && signals.length > 0 && (
+                        <button onClick={() => { navigateTo('compass'); setOpen(false); }} className="text-[11px] font-bold text-primary hover:underline">See all {signals.length}</button>
+                      )}
+                    </div>
                     <div className="space-y-2">
                       <AnimatePresence initial={false}>
-                        {signals.map((s) => {
-                          const Icon = SIGNAL_ICON[s.icon];
+                        {signals.slice(0, 4).map((s) => {
+                          const Icon = CATEGORY_ICON[s.category];
                           return (
                             <motion.div key={s.id} layout exit={{ opacity: 0, height: 0 }} className="rounded-2xl border border-border bg-card p-3">
                               <div className="flex gap-2.5">
                                 <span className="w-7 h-7 rounded-lg bg-primary/10 text-primary flex items-center justify-center shrink-0"><Icon className="w-3.5 h-3.5" /></span>
                                 <div className="min-w-0 flex-1">
                                   <div className="text-sm font-bold text-foreground leading-snug">{s.title}</div>
-                                  <p className="text-xs text-muted-foreground leading-relaxed mt-0.5">{s.body}</p>
+                                  <p className="text-xs text-muted-foreground leading-relaxed mt-0.5 line-clamp-2">{s.summary}</p>
                                   <div className="flex items-center gap-2 mt-2">
-                                    {(s.action.kind === 'ask' || canShowDeepLinks) && (
-                                      <button onClick={() => runBriefingAction(s.action)} className="text-[11px] font-bold px-2.5 py-1 rounded-full bg-primary/10 text-primary hover:bg-primary/20">{s.action.label}</button>
+                                    {canShowDeepLinks && (
+                                      <button onClick={() => { navigateTo('compass', undefined, { signal: s.id }); setOpen(false); }} className="text-[11px] font-bold px-2.5 py-1 rounded-full bg-primary/10 text-primary hover:bg-primary/20">{s.action.label}</button>
                                     )}
-                                    <button onClick={() => setDismissed((d) => [...d, s.id])} className="text-[11px] font-semibold text-muted-foreground hover:text-foreground">Dismiss</button>
-                                    <span className="ml-auto text-[10.5px] text-muted-foreground truncate">{s.source}</span>
+                                    <button onClick={() => compassStore.setStatus(s, 'dismissed', `Dismissed “${s.title}”`)} className="text-[11px] font-semibold text-muted-foreground hover:text-foreground">Dismiss</button>
+                                    <span className="ml-auto text-[10.5px] text-muted-foreground truncate">{CATEGORY_LABEL[s.category]}</span>
                                   </div>
                                 </div>
                               </div>
