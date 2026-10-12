@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { Link } from 'wouter';
 import { useI18n } from '@/lib/i18n';
 import { SEO } from '@/components/seo';
-import { LayoutDashboard, Smartphone, Layers, Info, ArrowRight, X, Presentation } from 'lucide-react';
+import { LayoutDashboard, Smartphone, Layers, Info, ArrowRight, X, Presentation, RotateCcw } from 'lucide-react';
 import { AnimatePresence, motion } from 'framer-motion';
 import { useShowcase } from '@/components/showcase-tour';
 
@@ -113,6 +113,16 @@ export default function PlatformHub() {
               </div>
             </div>
           </Link>
+
+          <div className="flex justify-end mt-6">
+            <a
+              href="?reset=1"
+              title="Forget language, theme and finished tours, then reload"
+              className="inline-flex items-center gap-1.5 text-xs font-semibold text-muted-foreground hover:text-foreground transition-colors"
+            >
+              <RotateCcw className="w-3.5 h-3.5" /> Reset demo
+            </a>
+          </div>
 
         </div>
       </section>

@@ -1,4 +1,21 @@
-import React, { useRef, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
+
+// Charts draw in real pixels at the container's measured width. A fixed
+// viewBox scaled to a fixed height shrinks to a centred strip on wide cards.
+export function useElementWidth<T extends HTMLElement>(fallback = 600) {
+  const ref = useRef<T>(null);
+  const [width, setWidth] = useState(fallback);
+  useEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+    const update = () => setWidth(Math.max(240, Math.round(el.getBoundingClientRect().width)));
+    update();
+    const ro = new ResizeObserver(update);
+    ro.observe(el);
+    return () => ro.disconnect();
+  }, []);
+  return { ref, width };
+}
 
 interface TrendChartProps {
   data: { label: string; value: number }[];
@@ -21,10 +38,10 @@ interface TrendChartProps {
 export function TrendChart({ data, className, height = 220, formatValue = (v) => `${Math.round(v)}`, minRange = 10 }: TrendChartProps) {
   const [hoverIndex, setHoverIndex] = useState<number | null>(null);
   const svgRef = useRef<SVGSVGElement>(null);
+  const { ref: wrapRef, width: W } = useElementWidth<HTMLDivElement>();
 
   if (!data || data.length < 2) return null;
 
-  const W = 600;
   const H = height;
   const padTop = 24;
   const padBottom = 28;
@@ -61,7 +78,7 @@ export function TrendChart({ data, className, height = 220, formatValue = (v) =>
   const formatAxis = (v: number) => (dataRange < 2 ? v.toFixed(1) : formatValue(v));
 
   return (
-    <div className={className}>
+    <div ref={wrapRef} className={className}>
       <svg
         ref={svgRef}
         viewBox={`0 0 ${W} ${H}`}

@@ -2,7 +2,8 @@
 @import 'tw-animate-css';
 @plugin "@tailwindcss/typography";
 
-@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;1,400;1,600&family=Plus+Jakarta+Sans:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500&display=swap');
+/* Brand fonts are loaded via <link> in index.html: a remote @import placed
+   here lands after Tailwind's generated rules and the build drops it. */
 
 @custom-variant dark (&:is(.dark *));
 
@@ -92,7 +93,11 @@
   
   --destructive: 0 84% 60%;
   --destructive-foreground: 0 0% 100%;
-  
+
+  /* Two-series chart pair, validated for CVD separation + contrast on the card surface */
+  --chart-engaged: #0E8FA3;
+  --chart-at-risk: #EB1E23;
+
   --input: 40 10% 85%;
   --ring: 221 50% 9%;
   
@@ -169,7 +174,10 @@
   
   --destructive: 0 84% 60%;
   --destructive-foreground: 0 0% 100%;
-  
+
+  --chart-engaged: #169DB3;
+  --chart-at-risk: #EF4447;
+
   --input: 221 30% 18%;
   --ring: 40 20% 96%;
 }

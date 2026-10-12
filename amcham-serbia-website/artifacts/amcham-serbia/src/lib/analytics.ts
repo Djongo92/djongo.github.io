@@ -37,6 +37,15 @@ export function commonMonthlyTrend(companies: Company[]): TrendPoint[] {
     .sort((a, b) => monthSortKey(a.month) - monthSortKey(b.month));
 }
 
+// Average score per month for a subset of companies, over a fixed month list
+// (normally commonMonthlyTrend's comparable window).
+export function groupMonthlyAverage(companies: Company[], months: string[]): number[] {
+  return months.map((month) => {
+    const scores = companies.map((c) => c.history.find((h) => h.month === month)?.score).filter((s): s is number => s !== undefined);
+    return scores.length ? scores.reduce((a, b) => a + b, 0) / scores.length : NaN;
+  });
+}
+
 export interface SegmentStat {
   key: string;
   count: number;
