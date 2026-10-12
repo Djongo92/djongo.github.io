@@ -30,7 +30,7 @@ export default function StatusPage() {
             <span className="text-xs font-bold uppercase tracking-widest text-emerald-400">All Systems Operational</span>
           </div>
           <h1 className="text-4xl md:text-5xl font-serif font-light tracking-tight mb-4">System Status</h1>
-          <p className="text-base md:text-lg text-secondary-foreground/70 max-w-2xl">Live status for the AmCham OS platform — member portal, staff console, and the services behind them.</p>
+          <p className="text-base md:text-lg text-secondary-foreground/80 max-w-2xl">Live status for the AmCham OS platform — member portal, staff console, and the services behind them.</p>
         </div>
       </section>
 
@@ -49,7 +49,7 @@ export default function StatusPage() {
                 </div>
                 <div className="flex items-center gap-4">
                   <span className="text-xs font-bold text-muted-foreground tabular-nums">{s.uptime}</span>
-                  <span className="text-[10px] font-bold uppercase tracking-widest text-emerald-600 bg-emerald-500/10 border border-emerald-500/20 px-2.5 py-1 rounded-full">Operational</span>
+                  <span className="text-[11px] font-bold uppercase tracking-widest text-emerald-600 bg-emerald-500/10 border border-emerald-500/20 px-2.5 py-1 rounded-full">Operational</span>
                 </div>
               </div>
             ))}
@@ -65,7 +65,7 @@ export default function StatusPage() {
                   <div className="text-sm font-bold text-foreground">{inc.title}</div>
                   <div className="text-xs text-muted-foreground mt-1">{inc.date} · {inc.duration}</div>
                 </div>
-                <span className="inline-flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-widest text-emerald-600 bg-emerald-500/10 border border-emerald-500/20 px-2.5 py-1 rounded-full w-fit"><CheckCircle2 className="w-3 h-3" /> {inc.status}</span>
+                <span className="inline-flex items-center gap-1.5 text-[11px] font-bold uppercase tracking-widest text-emerald-600 bg-emerald-500/10 border border-emerald-500/20 px-2.5 py-1 rounded-full w-fit"><CheckCircle2 className="w-3 h-3" /> {inc.status}</span>
               </div>
             ))}
           </div>

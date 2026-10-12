@@ -1,10 +1,11 @@
 import React, { useState } from 'react';
 import { usePortalState } from '../portal-state';
 import { cn } from '@/lib/utils';
-import { ArrowRight, CheckCircle2, ChevronDown, ChevronUp, Clock, Activity, TrendingUp, Users, Calendar } from 'lucide-react';
+import { ArrowRight, CheckCircle2, ChevronDown, ChevronUp, Clock, Activity, TrendingUp, TrendingDown, Users, Calendar } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
-export default function HomeView({ t, navigateTo, roleConfig, showToast, valueReceipt }: any) {
+export default function HomeView({ t, navigateTo, roleConfig, showToast, valueReceipt, member }: any) {
+  const trend: number = member?.scoreTrend ?? 0;
   const introsBrokered = valueReceipt?.introsBrokered ?? 3;
   const eventsAttended = valueReceipt?.eventsAttended ?? 12;
   const { inbox, setInbox } = usePortalState();
@@ -35,16 +36,21 @@ export default function HomeView({ t, navigateTo, roleConfig, showToast, valueRe
     <div className="space-y-8 animate-in fade-in duration-500">
       <div className="bg-primary/5 border border-primary/10 rounded-[40px] p-8 md:p-12 shadow-sm flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
         <div>
-           <div className="text-[10px] uppercase font-bold text-primary tracking-widest mb-2">{t('portal_since_visit', 'Since your last visit')}</div>
+           <div className="text-[11px] uppercase font-bold text-primary tracking-widest mb-2">{t('portal_since_visit', 'Since your last visit')}</div>
            <h2 className="text-3xl md:text-5xl font-serif font-light text-foreground">{getTimeGreeting()}, {roleConfig.name}</h2>
         </div>
         <div className="flex gap-4 items-center bg-background/50 rounded-full p-2 pr-6 border border-primary/10">
           <div className="w-12 h-12 rounded-full bg-primary/10 text-primary flex items-center justify-center">
-            <TrendingUp className="w-5 h-5" />
+            {trend < 0 ? <TrendingDown className="w-5 h-5" /> : <TrendingUp className="w-5 h-5" />}
           </div>
           <div>
-             <div className="text-[10px] uppercase font-bold text-muted-foreground tracking-widest">Engagement Trend</div>
-             <div className="text-sm font-bold text-foreground">Top 15% of Cohort <span className="text-green-600 ml-1">↑</span></div>
+             <div className="text-[11px] uppercase font-bold text-muted-foreground tracking-widest">{t('portal_engagement_trend', 'Engagement trend')}</div>
+             <div className="text-sm font-bold text-foreground tabular-nums">
+               {t('portal_score_short', 'Score')} {member?.score ?? '—'}
+               <span className={trend < 0 ? 'text-destructive ml-1.5' : trend > 0 ? 'text-green-600 dark:text-green-400 ml-1.5' : 'text-muted-foreground ml-1.5'}>
+                 {trend > 0 ? '↑' : trend < 0 ? '↓' : '→'} {trend === 0 ? t('portal_flat', 'steady') : `${Math.abs(trend)} ${t('portal_pts', 'pts')}`}
+               </span>
+             </div>
           </div>
         </div>
       </div>
@@ -54,13 +60,13 @@ export default function HomeView({ t, navigateTo, roleConfig, showToast, valueRe
          <div className="lg:col-span-2 space-y-6">
             <div className="bg-card rounded-[40px] border border-border shadow-sm flex flex-col overflow-hidden h-[600px]">
                <div className="p-6 md:p-8 border-b border-border flex justify-between items-center bg-muted/20 shrink-0">
-                  <div className="text-[10px] uppercase font-bold text-muted-foreground tracking-widest flex items-center gap-2">
+                  <div className="text-[11px] uppercase font-bold text-muted-foreground tracking-widest flex items-center gap-2">
                     <Clock className="w-4 h-4"/> {t('portal_home_inbox', 'Action Inbox')}
                   </div>
                   <div className="flex gap-2 bg-background border border-border rounded-full p-1">
-                    <button onClick={() => setTab('active')} className={cn("text-[10px] font-bold px-4 py-1.5 rounded-full uppercase tracking-widest transition-colors", tab === 'active' ? "bg-primary text-primary-foreground shadow-sm" : "text-muted-foreground hover:bg-muted")}>Active</button>
-                    <button onClick={() => setTab('snoozed')} className={cn("text-[10px] font-bold px-4 py-1.5 rounded-full uppercase tracking-widest transition-colors", tab === 'snoozed' ? "bg-foreground text-background shadow-sm" : "text-muted-foreground hover:bg-muted")}>Snoozed</button>
-                    <button onClick={() => setTab('done')} className={cn("text-[10px] font-bold px-4 py-1.5 rounded-full uppercase tracking-widest transition-colors", tab === 'done' ? "bg-foreground text-background shadow-sm" : "text-muted-foreground hover:bg-muted")}>Done</button>
+                    <button onClick={() => setTab('active')} className={cn("text-[11px] font-bold px-4 py-1.5 rounded-full uppercase tracking-widest transition-colors", tab === 'active' ? "bg-primary text-primary-foreground shadow-sm" : "text-muted-foreground hover:bg-muted")}>Active</button>
+                    <button onClick={() => setTab('snoozed')} className={cn("text-[11px] font-bold px-4 py-1.5 rounded-full uppercase tracking-widest transition-colors", tab === 'snoozed' ? "bg-foreground text-background shadow-sm" : "text-muted-foreground hover:bg-muted")}>Snoozed</button>
+                    <button onClick={() => setTab('done')} className={cn("text-[11px] font-bold px-4 py-1.5 rounded-full uppercase tracking-widest transition-colors", tab === 'done' ? "bg-foreground text-background shadow-sm" : "text-muted-foreground hover:bg-muted")}>Done</button>
                   </div>
                </div>
                
@@ -88,10 +94,10 @@ export default function HomeView({ t, navigateTo, roleConfig, showToast, valueRe
                              <div className={cn("w-2.5 h-2.5 rounded-full mt-1.5 shrink-0 shadow-sm", item.status === 'done' ? 'bg-green-500' : item.urgency === 'high' ? "bg-primary animate-pulse" : "bg-muted-foreground")} />
                              <div className="flex-1 min-w-0">
                                <div className="flex justify-between items-start mb-2">
-                                 <span className={cn("text-[10px] uppercase font-bold tracking-widest", item.status === 'done' ? "text-green-600" : item.urgency === 'high' ? "text-primary" : "text-muted-foreground")}>
+                                 <span className={cn("text-[11px] uppercase font-bold tracking-widest", item.status === 'done' ? "text-green-600" : item.urgency === 'high' ? "text-primary" : "text-muted-foreground")}>
                                    {item.status === 'snoozed' ? 'Snoozed' : item.status === 'done' ? 'Completed' : item.urgency === 'high' ? 'High Priority' : 'Normal'}
                                  </span>
-                                 <span className="text-[10px] text-muted-foreground whitespace-nowrap ml-4">{item.date}</span>
+                                 <span className="text-[11px] text-muted-foreground whitespace-nowrap ml-4">{item.date}</span>
                                </div>
                                <p className={cn("text-sm font-medium text-foreground leading-relaxed pr-8", item.status === 'done' && 'line-through opacity-50')}>{item.text}</p>
                              </div>
@@ -140,12 +146,12 @@ export default function HomeView({ t, navigateTo, roleConfig, showToast, valueRe
 
          {/* Value Receipt */}
          <div className="lg:col-span-2 space-y-6">
-            <div className="bg-foreground text-background rounded-[40px] shadow-xl relative overflow-hidden flex flex-col group h-[600px] transition-all">
+            <div className="ink bg-foreground text-background rounded-[40px] shadow-xl relative overflow-hidden flex flex-col group h-[600px] transition-all">
                <div className="absolute inset-0 bg-gradient-to-b from-[#40D9F1]/5 to-transparent pointer-events-none" />
                
                <div className="p-8 md:p-10 flex-1 flex flex-col">
                  <div className="flex justify-between items-start mb-8 relative z-10">
-                   <div className="text-[10px] uppercase font-bold text-[#40D9F1] tracking-widest flex items-center gap-2">
+                   <div className="text-[11px] uppercase font-bold text-[#40D9F1] tracking-widest flex items-center gap-2">
                      <Activity className="w-4 h-4"/> {t('portal_value_receipt', 'Your membership this quarter')}
                    </div>
                    <button onClick={() => navigateTo('score')} className="w-10 h-10 rounded-full bg-background/10 flex items-center justify-center hover:bg-background/20 transition-colors">
@@ -159,11 +165,11 @@ export default function HomeView({ t, navigateTo, roleConfig, showToast, valueRe
                     <div className="grid grid-cols-2 gap-6 pt-6 border-t border-background/20">
                       <div>
                         <div className="text-4xl font-serif font-light tabular-nums mb-1 text-[#40D9F1]">{introsBrokered}</div>
-                        <div className="text-[10px] font-bold text-background/60 uppercase tracking-widest">Intros Brokered</div>
+                        <div className="text-[11px] font-bold text-background/75 uppercase tracking-widest">Intros Brokered</div>
                       </div>
                       <div>
                         <div className="text-4xl font-serif font-light tabular-nums mb-1 text-[#40D9F1]">{eventsAttended}</div>
-                        <div className="text-[10px] font-bold text-background/60 uppercase tracking-widest">Events Attended</div>
+                        <div className="text-[11px] font-bold text-background/75 uppercase tracking-widest">Events Attended</div>
                       </div>
                     </div>
                  </div>

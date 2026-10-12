@@ -69,20 +69,20 @@ export default function ScoreView({ t, navigateTo, showToast, member, valueRecei
 
   return (
     <div className="space-y-8 animate-in fade-in duration-500">
-      <section className="bg-foreground text-background rounded-[40px] p-8 md:p-12 shadow-xl relative overflow-hidden flex flex-col md:flex-row justify-between items-start md:items-end gap-6">
+      <section className="ink bg-foreground text-background rounded-[40px] p-8 md:p-12 shadow-xl relative overflow-hidden flex flex-col md:flex-row justify-between items-start md:items-end gap-6">
         <div className="absolute -right-20 -top-20 w-72 h-72 rounded-full bg-[#40D9F1]/10 pointer-events-none" />
         <div className="relative max-w-3xl z-10">
-          <div className="text-[10px] uppercase font-bold text-[#40D9F1] tracking-widest mb-4 flex items-center gap-2">
+          <div className="text-[11px] uppercase font-bold text-[#40D9F1] tracking-widest mb-4 flex items-center gap-2">
             <Activity className="w-3 h-3"/> {t('portal_value_receipt', 'Membership Value')} — Q3 2026{member?.name ? ` · ${member.name}` : ''}
           </div>
           <h2 className="text-4xl md:text-6xl font-serif font-light mb-6">{t('portal_value_title', 'What your membership made possible')}</h2>
-          <p className="text-base md:text-lg text-background/70 leading-relaxed max-w-xl mb-6">
+          <p className="text-base md:text-lg text-background/80 leading-relaxed max-w-xl mb-6">
             A record of concrete outcomes and interactions. This activity log helps your team spot useful opportunities and ensures you are getting value from your tier.
           </p>
           {badges.length > 0 && (
             <div className="flex flex-wrap gap-2">
               {badges.map((b, i) => (
-                <span key={i} className="inline-flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-widest bg-background/10 border border-background/20 text-[#40D9F1] px-3 py-1.5 rounded-full">
+                <span key={i} className="inline-flex items-center gap-1.5 text-[11px] font-bold uppercase tracking-widest bg-background/10 border border-background/20 text-[#40D9F1] px-3 py-1.5 rounded-full">
                   <b.icon className="w-3 h-3" /> {b.label}
                 </span>
               ))}
@@ -113,7 +113,7 @@ export default function ScoreView({ t, navigateTo, showToast, member, valueRecei
                   {metric.icon}
                 </div>
                 {!isExpanded && (
-                  <div className="text-[10px] font-bold text-green-600 bg-green-500/10 px-2 py-1 rounded-full flex items-center gap-1">
+                  <div className="text-[11px] font-bold text-green-600 bg-green-500/10 px-2 py-1 rounded-full flex items-center gap-1">
                     <TrendingUp className="w-3 h-3"/> {metric.trend}
                   </div>
                 )}
@@ -122,9 +122,9 @@ export default function ScoreView({ t, navigateTo, showToast, member, valueRecei
               <div className="flex items-end gap-3 mb-2">
                 <div className="text-5xl md:text-6xl font-serif font-light tabular-nums text-foreground">{metric.value}</div>
               </div>
-              <div className="text-[10px] uppercase font-bold text-muted-foreground tracking-widest leading-relaxed">{metric.label}</div>
+              <div className="text-[11px] uppercase font-bold text-muted-foreground tracking-widest leading-relaxed">{metric.label}</div>
               {metric.peerAvg != null && (
-                <div className="text-[10px] font-bold text-muted-foreground/70 mt-1.5">{member?.tier || 'Peer'} avg: {metric.peerAvg}</div>
+                <div className="text-[11px] font-bold text-muted-foreground/70 mt-1.5">{member?.tier || 'Peer'} avg: {metric.peerAvg}</div>
               )}
 
               <AnimatePresence>
@@ -132,7 +132,7 @@ export default function ScoreView({ t, navigateTo, showToast, member, valueRecei
                   <motion.div initial={{ height: 0, opacity: 0 }} animate={{ height: 'auto', opacity: 1 }} exit={{ height: 0, opacity: 0 }} className="mt-8 pt-6 border-t border-border w-full">
                     <p className="text-sm text-muted-foreground mb-6 leading-relaxed">{metric.desc}</p>
                     <div className="space-y-4">
-                      <div className="text-[10px] uppercase font-bold text-foreground tracking-widest">Quarterly Trend</div>
+                      <div className="text-[11px] uppercase font-bold text-foreground tracking-widest">Quarterly Trend</div>
                       <div className="flex items-end gap-4 h-24 pb-4">
                         {[
                           { label: 'Q1', val: metric.details.q1 },
@@ -143,7 +143,7 @@ export default function ScoreView({ t, navigateTo, showToast, member, valueRecei
                             <div className="w-full bg-primary/20 rounded-t-lg transition-all duration-500 group-hover:bg-primary/40 relative" style={{ height: `${(bar.val / Math.max(metric.details.q1, metric.details.q2, metric.details.q3)) * 100}%` }}>
                                <span className="absolute -top-6 left-1/2 -translate-x-1/2 text-xs font-bold opacity-0 group-hover:opacity-100 transition-opacity">{bar.val}</span>
                             </div>
-                            <div className="text-[10px] font-bold text-muted-foreground">{bar.label}</div>
+                            <div className="text-[11px] font-bold text-muted-foreground">{bar.label}</div>
                           </div>
                         ))}
                       </div>
@@ -158,7 +158,7 @@ export default function ScoreView({ t, navigateTo, showToast, member, valueRecei
 
       <section className="grid grid-cols-1 lg:grid-cols-5 gap-8">
         <div className="lg:col-span-3 bg-card rounded-[40px] p-8 border border-border shadow-sm flex flex-col">
-          <div className="text-[10px] uppercase font-bold text-muted-foreground tracking-widest mb-8 flex items-center gap-2">
+          <div className="text-[11px] uppercase font-bold text-muted-foreground tracking-widest mb-8 flex items-center gap-2">
             <CheckCircle2 className="w-4 h-4"/> Recent Outcomes
           </div>
           <div className="space-y-6 flex-1">
@@ -175,7 +175,7 @@ export default function ScoreView({ t, navigateTo, showToast, member, valueRecei
 
         <div className="lg:col-span-2 space-y-6">
           <div className="bg-primary/5 rounded-[40px] p-8 border border-primary/10 h-full flex flex-col">
-            <div className="text-[10px] uppercase font-bold text-primary tracking-widest mb-3">Activity snapshot</div>
+            <div className="text-[11px] uppercase font-bold text-primary tracking-widest mb-3">Activity snapshot</div>
             <p className="text-sm text-muted-foreground leading-relaxed mb-6">Context for your team to understand engagement levels.</p>
             <div className="space-y-3 flex-1">
               <div className="bg-background border border-primary/10 rounded-2xl p-5 text-sm font-medium text-foreground flex gap-3 shadow-sm">
@@ -200,7 +200,7 @@ export default function ScoreView({ t, navigateTo, showToast, member, valueRecei
                       {scoreCorrection.map((sc: any, i: number) => (
                         <div key={i} className="flex justify-between items-center bg-background p-3 rounded-xl border border-primary/10 text-xs shadow-sm">
                           <span className="truncate flex-1 font-medium pr-4">{sc.text}</span>
-                          <span className="text-[10px] font-bold bg-muted px-2 py-1 rounded-md text-muted-foreground shrink-0 uppercase tracking-wider">{sc.status}</span>
+                          <span className="text-[11px] font-bold bg-muted px-2 py-1 rounded-md text-muted-foreground shrink-0 uppercase tracking-wider">{sc.status}</span>
                         </div>
                       ))}
                     </div>
@@ -240,7 +240,7 @@ export default function ScoreView({ t, navigateTo, showToast, member, valueRecei
                   <div key={i} className="p-5 bg-background border border-border rounded-2xl text-sm shadow-sm hover:border-primary/30 transition-colors">
                     <div className="font-bold mb-2 text-base">{ev.action}</div>
                     <div className="text-xs text-muted-foreground mb-3 flex items-center gap-2"><Users className="w-3 h-3"/> {ev.person}</div>
-                    <div className="flex justify-between items-center text-[10px] uppercase font-bold tracking-widest text-muted-foreground pt-3 border-t border-border">
+                    <div className="flex justify-between items-center text-[11px] uppercase font-bold tracking-widest text-muted-foreground pt-3 border-t border-border">
                       <span>{ev.date}</span>
                       <span className="flex items-center gap-1"><Info className="w-3 h-3"/> {ev.source}</span>
                     </div>
@@ -254,9 +254,9 @@ export default function ScoreView({ t, navigateTo, showToast, member, valueRecei
                   <div key={i} className="p-5 bg-background border border-border rounded-2xl text-sm shadow-sm hover:border-primary/30 transition-colors">
                     <div className="flex justify-between items-start mb-2">
                        <div className="font-bold text-base">{ev.action}</div>
-                       <span className={cn("text-[10px] uppercase font-bold px-2 py-1 rounded-full", ev.status === 'Completed' ? "bg-green-500/10 text-green-600" : "bg-primary/10 text-primary")}>{ev.status}</span>
+                       <span className={cn("text-[11px] uppercase font-bold px-2 py-1 rounded-full", ev.status === 'Completed' ? "bg-green-500/10 text-green-600" : "bg-primary/10 text-primary")}>{ev.status}</span>
                     </div>
-                    <div className="flex justify-between items-center text-[10px] uppercase font-bold tracking-widest text-muted-foreground pt-3 border-t border-border mt-3">
+                    <div className="flex justify-between items-center text-[11px] uppercase font-bold tracking-widest text-muted-foreground pt-3 border-t border-border mt-3">
                       <span>{ev.date}</span>
                       <span className="flex items-center gap-1"><Info className="w-3 h-3"/> {ev.source}</span>
                     </div>
@@ -269,7 +269,7 @@ export default function ScoreView({ t, navigateTo, showToast, member, valueRecei
                   <div key={i} className="p-5 bg-background border border-border rounded-2xl text-sm shadow-sm hover:border-primary/30 transition-colors">
                     <div className="font-bold mb-2 text-base">{ev.action}</div>
                     <div className="text-xs text-muted-foreground mb-3 flex items-center gap-2"><Activity className="w-3 h-3"/> {ev.views} views from verified members</div>
-                    <div className="flex justify-between items-center text-[10px] uppercase font-bold tracking-widest text-muted-foreground pt-3 border-t border-border">
+                    <div className="flex justify-between items-center text-[11px] uppercase font-bold tracking-widest text-muted-foreground pt-3 border-t border-border">
                       <span>{ev.date}</span>
                       <span className="flex items-center gap-1"><Info className="w-3 h-3"/> {ev.source}</span>
                     </div>
@@ -288,13 +288,13 @@ export default function ScoreView({ t, navigateTo, showToast, member, valueRecei
             <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="absolute inset-0 bg-background/80 backdrop-blur-sm print:hidden" onClick={() => setStatementOpen(false)} />
             <motion.div initial={{ opacity: 0, scale: 0.97 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.97 }} className="bg-card w-full max-w-2xl max-h-[90vh] overflow-y-auto relative z-10 border border-border shadow-2xl rounded-[40px] p-8 md:p-14 print:max-h-none print:overflow-visible print:border-none print:shadow-none print:rounded-none print:p-0 print:max-w-none">
               <div className="hidden print:block border-b-4 border-black pb-4 mb-8">
-                <div className="text-[10px] font-bold uppercase tracking-widest text-gray-500 mb-2">AmCham Serbia</div>
+                <div className="text-[11px] font-bold uppercase tracking-widest text-gray-500 mb-2">AmCham Serbia</div>
                 <h1 className="text-3xl font-serif font-light text-black">Annual Value Statement — {member?.name}</h1>
               </div>
 
               <div className="flex justify-between items-start mb-8 print:hidden">
                 <div>
-                  <div className="text-[10px] uppercase font-bold text-primary tracking-widest mb-2">{member?.tier} · {member?.sector}</div>
+                  <div className="text-[11px] uppercase font-bold text-primary tracking-widest mb-2">{member?.tier} · {member?.sector}</div>
                   <h3 className="font-serif text-3xl font-light">Annual Value Statement</h3>
                 </div>
                 <button onClick={() => setStatementOpen(false)} className="w-10 h-10 rounded-full bg-background flex items-center justify-center border border-border hover:bg-muted transition-colors shadow-sm shrink-0"><X className="w-5 h-5"/></button>
@@ -307,7 +307,7 @@ export default function ScoreView({ t, navigateTo, showToast, member, valueRecei
               <div className="grid grid-cols-2 gap-4 mb-8">
                 {metrics.map(m => (
                   <div key={m.id} className="border border-border rounded-2xl p-5 print:border-gray-300 print:rounded-none">
-                    <div className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground print:text-gray-600 mb-2">{m.label}</div>
+                    <div className="text-[11px] font-bold uppercase tracking-widest text-muted-foreground print:text-gray-600 mb-2">{m.label}</div>
                     <div className="text-3xl font-serif tabular-nums print:text-black">{m.value}</div>
                     {m.peerAvg != null && <div className="text-xs text-muted-foreground print:text-gray-600 mt-1">{member?.tier} avg: {m.peerAvg}</div>}
                   </div>
@@ -315,7 +315,7 @@ export default function ScoreView({ t, navigateTo, showToast, member, valueRecei
               </div>
 
               <div className="mb-8">
-                <div className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground print:text-gray-600 mb-4">Outcomes this year</div>
+                <div className="text-[11px] font-bold uppercase tracking-widest text-muted-foreground print:text-gray-600 mb-4">Outcomes this year</div>
                 <ul className="space-y-2">
                   {outcomes.map((o: string, i: number) => (
                     <li key={i} className="text-sm text-foreground print:text-black flex gap-2"><CheckCircle2 className="w-4 h-4 text-primary print:hidden shrink-0 mt-0.5" /> {o}</li>

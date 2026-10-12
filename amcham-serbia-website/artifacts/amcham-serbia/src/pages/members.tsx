@@ -3,6 +3,7 @@ import { Link, useSearch, useLocation } from 'wouter';
 import { useI18n } from '@/lib/i18n';
 import { SEO } from '@/components/seo';
 import { mockMembers } from '@/data/mock';
+import { CompanyMark } from '@/components/ui/company-mark';
 import { Search, Building2, ExternalLink } from 'lucide-react';
 
 export default function Members() {
@@ -132,9 +133,7 @@ export default function Members() {
                   <div key={member.id} className="bg-card border border-border rounded-sm p-6 hover:shadow-lg hover:border-primary/50 transition-all group flex flex-col relative">
                     
                     <div className="flex justify-between items-start mb-4">
-                      <div className="w-16 h-16 bg-background border border-border rounded-sm flex items-center justify-center text-primary font-serif font-bold text-2xl group-hover:bg-primary/5 transition-colors">
-                        {member.name.charAt(0)}
-                      </div>
+                      <CompanyMark name={member.name} sector={member.sector} size="lg" className="w-16 h-16 rounded-sm text-xl" />
                       <span className="text-xs font-bold px-2 py-1 bg-background border border-border rounded-sm text-muted-foreground">
                         {member.category}
                       </span>

@@ -20,6 +20,9 @@ export function MyTeamView({ navigateTo, showToast }: any) {
   // never actually accounts for. Scoped to Patron tier ("key accounts")
   // so the alert stays actionable rather than flagging every member company.
   const teamNames = new Set(team.map(m => m.name));
+  const teamBook = team.reduce((sum, m) => sum + m.bookSize, 0);
+  // An even split of the whole member book across the team.
+  const targetBook = Math.ceil(platformData.allMembers.length / team.length);
   const coverageGaps = platformData.allMembers.filter(c => c.tier === 'Patron' && !teamNames.has(c.manager) && !reassignments[c.id]);
 
   const reassign = (companyId: string, staffName: string) => {
@@ -66,7 +69,7 @@ export function MyTeamView({ navigateTo, showToast }: any) {
       <div className="flex items-center justify-between">
         <div>
           <h2 className="text-4xl font-serif font-light tracking-tight text-foreground mb-2">My Team</h2>
-          <p className="text-muted-foreground">Manage workload and member success operations.</p>
+          <p className="text-muted-foreground">{t('platform.console.my_team_purpose')}</p>
         </div>
         <div className="flex items-center gap-3">
           <button onClick={() => setShowMath(!showMath)} className={cn("w-10 h-10 rounded-full flex items-center justify-center transition-colors border", showMath ? "bg-foreground text-background border-foreground shadow-md" : "bg-card text-muted-foreground border-border hover:border-foreground/30")}>
@@ -81,21 +84,21 @@ export function MyTeamView({ navigateTo, showToast }: any) {
       <AnimatePresence>
         {showMath && (
           <motion.div initial={{ height: 0, opacity: 0 }} animate={{ height: 'auto', opacity: 1 }} exit={{ height: 0, opacity: 0 }} className="overflow-hidden">
-            <div className="bg-foreground text-background p-6 rounded-[32px] shadow-lg mb-6 flex flex-col md:flex-row gap-8 items-center border border-foreground">
+            <div className="ink bg-foreground text-background p-6 rounded-[32px] shadow-lg mb-6 flex flex-col md:flex-row gap-8 items-center border border-foreground">
               <div className="flex-1">
-                <div className="text-[10px] uppercase font-bold text-[#40D9F1] tracking-widest mb-2">Distribution Logic</div>
+                <div className="text-[11px] uppercase font-bold text-[#40D9F1] tracking-widest mb-2">Distribution Logic</div>
                 <h3 className="text-xl font-serif mb-2">How auto-balance works</h3>
                 <p className="text-background/80 text-sm leading-relaxed">The algorithm calculates the true team average workload and redistributes active cases to ensure no team member is more than <span className="font-bold text-background">±5%</span> away from the mean. It will refuse to run if the standard deviation results in a spread <span className="font-bold text-background">&gt; 10%</span> after adjustment.</p>
               </div>
               <div className="flex gap-6">
                 <div className="text-center">
                   <div className="text-3xl font-serif text-[#40D9F1]">±5</div>
-                  <div className="text-[10px] uppercase font-bold tracking-widest text-background/60">Clamp limit</div>
+                  <div className="text-[11px] uppercase font-bold tracking-widest text-background/75">Clamp limit</div>
                 </div>
                 <div className="w-px bg-background/20 h-12 self-center"></div>
                 <div className="text-center">
                   <div className="text-3xl font-serif text-[#40D9F1]">≤10</div>
-                  <div className="text-[10px] uppercase font-bold tracking-widest text-background/60">Max spread</div>
+                  <div className="text-[11px] uppercase font-bold tracking-widest text-background/75">Max spread</div>
                 </div>
               </div>
             </div>
@@ -105,9 +108,9 @@ export function MyTeamView({ navigateTo, showToast }: any) {
 
       <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
         {[
-          { label: "Total Book Size", value: "172", trend: "+17", icon: Users, color: "text-blue-500", bg: "bg-blue-500/10" },
+          { label: t('platform.console.team_book_size', "Accounts Owned"), value: String(teamBook), trend: `${platformData.allMembers.length - teamBook} unowned`, icon: Users, color: "text-blue-500", bg: "bg-blue-500/10" },
           { label: "Avg Compliance", value: "92%", trend: "+2%", icon: ShieldCheck, color: "text-emerald-500", bg: "bg-emerald-500/10" },
-          { label: "Rituals Completed", value: "91", trend: "Today", icon: CheckCircle, color: "text-primary", bg: "bg-primary/10" },
+          { label: t('platform.console.rituals_completed'), value: "91", trend: "Today", icon: CheckCircle, color: "text-primary", bg: "bg-primary/10" },
           { label: "SLA Aging", value: "1.2d", trend: "-0.3d", icon: Clock, color: "text-amber-500", bg: "bg-amber-500/10" }
         ].map((stat, i) => (
           <div key={i} className="bg-card border border-border p-6 rounded-[32px] shadow-sm relative overflow-hidden group">
@@ -115,7 +118,7 @@ export function MyTeamView({ navigateTo, showToast }: any) {
             <div className={`w-12 h-12 rounded-2xl mb-4 flex items-center justify-center ${stat.bg} ${stat.color} border border-${stat.color.split('-')[1]}-500/20 shadow-sm`}>
               <stat.icon className="w-5 h-5" />
             </div>
-            <div className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest mb-1.5">{stat.label}</div>
+            <div className="text-[11px] font-bold text-muted-foreground uppercase tracking-widest mb-1.5">{stat.label}</div>
             <div className="text-3xl font-serif tabular-nums flex items-end justify-between text-foreground">
               <AnimatedCounter value={stat.value} />
               <span className={`text-sm font-bold font-sans ${stat.color}`}>{stat.trend}</span>
@@ -154,7 +157,7 @@ export function MyTeamView({ navigateTo, showToast }: any) {
 
       <div className="bg-card border border-border rounded-[40px] overflow-hidden shadow-sm">
         <table className="w-full text-sm text-left">
-          <thead className="bg-muted/50 text-[10px] uppercase tracking-widest text-muted-foreground border-b border-border">
+          <thead className="bg-muted/50 text-[11px] uppercase tracking-widest text-muted-foreground border-b border-border">
             <tr>
               <th className="px-8 py-6 font-bold">Team Member</th>
               <th className="px-8 py-6 font-bold">Book Size</th>
@@ -219,18 +222,18 @@ export function MyTeamView({ navigateTo, showToast }: any) {
                         <td colSpan={6} className="p-0">
                           <div className="px-8 py-6 flex gap-8">
                             <div className="flex-1 bg-card border border-border rounded-3xl p-6 shadow-sm">
-                              <div className="text-[10px] uppercase font-bold tracking-widest text-muted-foreground mb-4">Capacity Breakdown</div>
+                              <div className="text-[11px] uppercase font-bold tracking-widest text-muted-foreground mb-4">Capacity Breakdown</div>
                               <div className="space-y-4">
                                 <div>
-                                  <div className="flex justify-between text-xs font-bold mb-1"><span>Target Book</span> <span>{member.bookSize} / 50</span></div>
-                                  <div className="w-full bg-muted rounded-full h-1.5"><div className="bg-primary h-full rounded-full" style={{width: `${(member.bookSize/50)*100}%`}}></div></div>
+                                  <div className="flex justify-between text-xs font-bold mb-1"><span>Target Book</span> <span>{member.bookSize} / {targetBook}</span></div>
+                                  <div className="w-full bg-muted rounded-full h-1.5"><div className="bg-primary h-full rounded-full" style={{width: `${Math.min(100, (member.bookSize/targetBook)*100)}%`}}></div></div>
                                 </div>
                                 <div>
                                   <div className="flex justify-between text-xs font-bold mb-1"><span>SLA Compliance</span> <span>{member.compliance}%</span></div>
                                   <div className="w-full bg-muted rounded-full h-1.5"><div className="bg-emerald-500 h-full rounded-full" style={{width: `${member.compliance}%`}}></div></div>
                                 </div>
                                 <div className="pt-4 mt-4 border-t border-border flex justify-between text-xs">
-                                  <span className="text-muted-foreground">Rituals Completed</span>
+                                  <span className="text-muted-foreground">{t('platform.console.rituals_completed')}</span>
                                   <span className="font-bold">{member.ritualsCompleted} this month</span>
                                 </div>
                                 <div className="flex justify-between text-xs">
@@ -241,7 +244,7 @@ export function MyTeamView({ navigateTo, showToast }: any) {
                             </div>
                             
                             <div className="flex-1 bg-card border border-border rounded-3xl p-6 shadow-sm">
-                               <div className="text-[10px] uppercase font-bold tracking-widest text-muted-foreground mb-4">Member Temperature (Last 30d)</div>
+                               <div className="text-[11px] uppercase font-bold tracking-widest text-muted-foreground mb-4">Member Temperature (Last 30d)</div>
                                <div className="h-32 flex items-end gap-2 px-2 mt-8">
                                  {member.temperature.map((val: number, i: number) => (
                                    <div key={i} className="flex-1 bg-primary/20 hover:bg-primary transition-colors rounded-t-sm relative group flex justify-center" style={{ height: `${(val/30)*100}%`, minHeight: '4px' }}>
@@ -249,7 +252,7 @@ export function MyTeamView({ navigateTo, showToast }: any) {
                                    </div>
                                  ))}
                                </div>
-                               <div className="flex justify-between text-[10px] font-bold text-muted-foreground uppercase mt-2 px-2">
+                               <div className="flex justify-between text-[11px] font-bold text-muted-foreground uppercase mt-2 px-2">
                                  <span>Week 1</span>
                                  <span>Week 3</span>
                                </div>

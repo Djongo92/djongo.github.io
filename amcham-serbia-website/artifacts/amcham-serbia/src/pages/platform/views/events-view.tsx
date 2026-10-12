@@ -61,7 +61,7 @@ export default function EventsView({ t, showToast }: any) {
              <Calendar className="w-7 h-7" />
           </div>
           <div>
-            <div className="text-[10px] uppercase font-bold text-primary tracking-widest mb-1">Attendance Analytics</div>
+            <div className="text-[11px] uppercase font-bold text-primary tracking-widest mb-1">Attendance Analytics</div>
             <div className="text-xl font-serif font-medium text-foreground">Your team attended 12 events this year.</div>
             <div className="text-sm text-muted-foreground mt-1">4 out of 10 base seats remaining for Q4.</div>
           </div>
@@ -89,14 +89,14 @@ export default function EventsView({ t, showToast }: any) {
                 <div className="absolute top-6 right-6 w-10 h-10 rounded-full bg-background border border-border flex items-center justify-center shadow-sm group-hover:bg-primary group-hover:text-primary-foreground group-hover:border-primary transition-all duration-300">
                   <ArrowRight className="w-4 h-4"/>
                 </div>
-                <div className="text-[10px] uppercase font-bold text-primary tracking-widest mb-3 flex items-center gap-2"><Calendar className="w-3 h-3"/> {e.date}</div>
+                <div className="text-[11px] uppercase font-bold text-primary tracking-widest mb-3 flex items-center gap-2"><Calendar className="w-3 h-3"/> {e.date}</div>
                 <h3 className="text-2xl md:text-3xl font-serif font-light text-foreground mb-3 pr-12 leading-tight">{e.title}</h3>
                 <div className="text-sm font-medium text-muted-foreground">{e.location}</div>
               </div>
               <div className="p-8 flex-1 flex flex-col justify-between gap-6">
                  <div>
                    <div className="flex justify-between items-end mb-3">
-                     <div className="text-[10px] uppercase font-bold text-muted-foreground tracking-widest">Registered Attendees</div>
+                     <div className="text-[11px] uppercase font-bold text-muted-foreground tracking-widest">Registered Attendees</div>
                      <div className={cn("text-xs font-bold", e.capacity.total - e.capacity.booked > 0 ? "text-primary" : "text-orange-500")}>
                        {e.capacity.total - e.capacity.booked > 0 ? `${e.capacity.total - e.capacity.booked} spots left` : 'Capacity Reached'}
                      </div>
@@ -109,7 +109,7 @@ export default function EventsView({ t, showToast }: any) {
 
                    {e.attendees.length > 0 ? (
                      <div className="flex flex-wrap gap-2 mt-4">
-                       {e.attendees.map((a:string, i:number) => <span key={i} className="text-[10px] uppercase tracking-wider font-bold bg-muted text-muted-foreground px-3 py-1.5 rounded-full border border-border/50">{a}</span>)}
+                       {e.attendees.map((a:string, i:number) => <span key={i} className="text-[11px] uppercase tracking-wider font-bold bg-muted text-muted-foreground px-3 py-1.5 rounded-full border border-border/50">{a}</span>)}
                      </div>
                    ) : (
                      <span className="text-sm text-muted-foreground italic">No colleagues registered yet.</span>
@@ -136,7 +136,7 @@ export default function EventsView({ t, showToast }: any) {
                  
                  <div className="p-8 md:p-12 border-b border-border bg-muted/20 relative shrink-0">
                    <button onClick={() => setActiveEvent(null)} aria-label="Close event details" className="absolute top-8 right-8 w-10 h-10 rounded-full bg-background flex items-center justify-center shadow-sm text-muted-foreground hover:text-foreground border border-border transition-colors hover:bg-muted"><X className="w-5 h-5"/></button>
-                   <div className="text-[10px] uppercase font-bold text-primary tracking-widest mb-3 flex items-center gap-2"><Calendar className="w-3 h-3"/> {e.date} • {e.location}</div>
+                   <div className="text-[11px] uppercase font-bold text-primary tracking-widest mb-3 flex items-center gap-2"><Calendar className="w-3 h-3"/> {e.date} • {e.location}</div>
                    <h2 className="text-3xl md:text-5xl font-serif font-light pr-12 leading-tight">{e.title}</h2>
                  </div>
 
@@ -148,7 +148,7 @@ export default function EventsView({ t, showToast }: any) {
                    
                    <div className="grid grid-cols-1 md:grid-cols-2 gap-12">
                      <div>
-                       <h4 className="text-[10px] uppercase font-bold tracking-widest text-muted-foreground mb-6 flex items-center gap-2"><Clock className="w-4 h-4"/> Agenda</h4>
+                       <h4 className="text-[11px] uppercase font-bold tracking-widest text-muted-foreground mb-6 flex items-center gap-2"><Clock className="w-4 h-4"/> Agenda</h4>
                        <div className="space-y-6">
                          {e.agenda?.map((ag:any, i:number) => (
                            <div key={i} className="flex gap-4 items-start group">
@@ -160,7 +160,7 @@ export default function EventsView({ t, showToast }: any) {
                      </div>
                      <div className="space-y-10">
                        <div>
-                         <h4 className="text-[10px] uppercase font-bold tracking-widest text-muted-foreground mb-4 flex items-center gap-2"><Users className="w-4 h-4"/> Speakers</h4>
+                         <h4 className="text-[11px] uppercase font-bold tracking-widest text-muted-foreground mb-4 flex items-center gap-2"><Users className="w-4 h-4"/> Speakers</h4>
                          <ul className="space-y-3">
                            {e.speakers?.map((s:string, i:number) => (
                              <li key={i} className="flex items-center gap-3">
@@ -171,7 +171,7 @@ export default function EventsView({ t, showToast }: any) {
                          </ul>
                        </div>
                        <div>
-                         <h4 className="text-[10px] uppercase font-bold tracking-widest text-muted-foreground mb-4 flex items-center gap-2"><Target className="w-4 h-4"/> Audience</h4>
+                         <h4 className="text-[11px] uppercase font-bold tracking-widest text-muted-foreground mb-4 flex items-center gap-2"><Target className="w-4 h-4"/> Audience</h4>
                          <div className="flex flex-wrap gap-2">
                            {e.audience?.map((a:string, i:number) => <span key={i} className="text-xs font-bold bg-muted px-4 py-1.5 rounded-full border border-border/50">{a}</span>)}
                          </div>
@@ -187,7 +187,7 @@ export default function EventsView({ t, showToast }: any) {
                        <span className="text-xs font-bold text-foreground">{e.capacity.booked}/{e.capacity.total}</span>
                      </div>
                      <div>
-                       <div className="text-[10px] uppercase font-bold text-muted-foreground tracking-widest">Capacity</div>
+                       <div className="text-[11px] uppercase font-bold text-muted-foreground tracking-widest">Capacity</div>
                        <div className={cn("text-sm font-bold", e.capacity.total - e.capacity.booked > 0 ? "text-primary" : "text-orange-500")}>{e.capacity.total - e.capacity.booked > 0 ? `${e.capacity.total - e.capacity.booked} spots left` : 'Full'}</div>
                      </div>
                    </div>

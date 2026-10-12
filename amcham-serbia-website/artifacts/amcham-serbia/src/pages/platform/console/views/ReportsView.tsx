@@ -2,8 +2,8 @@ import React, { useMemo, useState } from 'react';
 import { platformData, Company } from '@/data/platform';
 import { FileBarChart2, Users, TrendingUp, TrendingDown, AlertTriangle, Activity } from 'lucide-react';
 import { cn, parseEuro, fmtEuro } from '@/lib/utils';
-import { commonMonthlyTrend } from '@/lib/analytics';
-import { TrendChart } from '@/components/ui/trend-chart';
+import { commonMonthlyTrend, groupMonthlyAverage } from '@/lib/analytics';
+import { SplitTrendChart } from '@/components/ui/split-trend-chart';
 import { DataFreshness } from '@/components/ui/data-freshness';
 
 type Dimension = 'all' | 'sector' | 'tier' | 'lifecycle' | 'manager';
@@ -43,6 +43,7 @@ export function ReportsView() {
 
   const scopedTrend = useMemo(() => commonMonthlyTrend(scoped.length ? scoped : members), [scoped, members]);
   const scopedPeriod = periodMonths === 0 ? scopedTrend : scopedTrend.slice(-periodMonths);
+  const chartMonths = scopedPeriod.map(t => t.month);
 
   const avgScore = Math.round(scoped.reduce((s, c) => s + c.score, 0) / (scoped.length || 1));
   const scoreChange = scopedPeriod.length > 1 ? Math.round(scopedPeriod[scopedPeriod.length - 1].avgScore - scopedPeriod[0].avgScore) : 0;
@@ -98,7 +99,7 @@ export function ReportsView() {
 
       {/* Print-only header */}
       <div className="hidden print:block border-b-4 border-black pb-4 mb-8">
-        <div className="text-[10px] font-bold uppercase tracking-widest text-gray-500 mb-2">AmCham Serbia · Membership Report</div>
+        <div className="text-[11px] font-bold uppercase tracking-widest text-gray-500 mb-2">AmCham Serbia · Membership Report</div>
         <h1 className="text-4xl font-serif font-light text-black">{scopeLabel}</h1>
         <div className="text-sm text-gray-600 mt-1">{periodLabel} · Generated {new Date().toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' })}</div>
       </div>
@@ -106,14 +107,14 @@ export function ReportsView() {
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6 mb-8 print:grid print:grid-cols-4 print:gap-4">
         <div className="bg-card rounded-[32px] border border-border p-6 shadow-sm flex items-center justify-between print:border print:border-black print:rounded-none print:shadow-none">
           <div>
-            <div className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest mb-1 print:text-gray-600">Members</div>
+            <div className="text-[11px] font-bold text-muted-foreground uppercase tracking-widest mb-1 print:text-gray-600">Members</div>
             <div className="text-4xl font-serif font-light tabular-nums print:text-black">{scoped.length}</div>
           </div>
           <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center text-primary shrink-0 print:hidden"><Users className="w-5 h-5" /></div>
         </div>
         <div className="bg-card rounded-[32px] border border-border p-6 shadow-sm flex items-center justify-between print:border print:border-black print:rounded-none print:shadow-none">
           <div>
-            <div className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest mb-1 print:text-gray-600">Avg Score</div>
+            <div className="text-[11px] font-bold text-muted-foreground uppercase tracking-widest mb-1 print:text-gray-600">Avg Score</div>
             <div className="flex items-baseline gap-2">
               <div className="text-4xl font-serif font-light tabular-nums print:text-black">{avgScore}</div>
               <span className={cn("text-xs font-bold flex items-center gap-0.5 print:text-gray-600", scoreChange >= 0 ? "text-emerald-600" : "text-destructive")}>
@@ -125,15 +126,15 @@ export function ReportsView() {
         </div>
         <div className="bg-card rounded-[32px] border border-border p-6 shadow-sm flex items-center justify-between print:border print:border-black print:rounded-none print:shadow-none">
           <div>
-            <div className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest mb-1 print:text-gray-600">At-Risk</div>
+            <div className="text-[11px] font-bold text-muted-foreground uppercase tracking-widest mb-1 print:text-gray-600">At-Risk</div>
             <div className="text-4xl font-serif font-light tabular-nums text-destructive print:text-black">{fmtEuro(atRiskValue)}</div>
-            <div className="text-[10px] font-bold text-muted-foreground mt-0.5 print:text-gray-600">{atRisk.length} accounts</div>
+            <div className="text-[11px] font-bold text-muted-foreground mt-0.5 print:text-gray-600">{atRisk.length} accounts</div>
           </div>
           <div className="w-12 h-12 rounded-full bg-destructive/10 flex items-center justify-center text-destructive shrink-0 print:hidden"><AlertTriangle className="w-5 h-5" /></div>
         </div>
-        <div className="bg-foreground text-background rounded-[32px] border border-border p-6 shadow-lg flex items-center justify-between print:border print:border-black print:rounded-none print:shadow-none print:bg-white print:text-black">
+        <div className="ink bg-foreground text-background rounded-[32px] border border-border p-6 shadow-lg flex items-center justify-between print:border print:border-black print:rounded-none print:shadow-none print:bg-white print:text-black">
           <div>
-            <div className="text-[10px] font-bold text-accent uppercase tracking-widest mb-1 print:text-gray-600">Avg Engagement</div>
+            <div className="text-[11px] font-bold text-accent uppercase tracking-widest mb-1 print:text-gray-600">Avg Engagement</div>
             <div className="text-4xl font-serif font-light tabular-nums">{avgEngagement}%</div>
           </div>
           <div className="w-12 h-12 rounded-full bg-accent/20 flex items-center justify-center text-accent shrink-0 print:hidden"><Activity className="w-5 h-5" /></div>
@@ -143,7 +144,24 @@ export function ReportsView() {
       {scopedPeriod.length > 1 && (
         <div className="bg-card rounded-[32px] border border-border p-8 shadow-sm mb-8 print:border print:border-black print:rounded-none print:shadow-none print:break-inside-avoid">
           <h3 className="text-lg font-bold text-foreground mb-6 print:text-black">Score Trend — {periodLabel}</h3>
-          <TrendChart data={scopedPeriod.map(t => ({ label: t.month, value: t.avgScore }))} className="text-primary print:text-black" />
+          <SplitTrendChart
+            labels={chartMonths}
+            series={dimension === 'all' || !effectiveValue
+              ? [
+                  { key: 'engaged', label: 'Engaged', values: groupMonthlyAverage(members.filter(c => c.lifecycle !== 'at-risk'), chartMonths), color: 'var(--chart-engaged)' },
+                  { key: 'at-risk', label: 'At-risk', values: groupMonthlyAverage(members.filter(c => c.lifecycle === 'at-risk'), chartMonths), color: 'var(--chart-at-risk)' },
+                  { key: 'book', label: 'Book avg', values: groupMonthlyAverage(members, chartMonths), color: '', reference: true },
+                ]
+              : [
+                  { key: 'scope', label: String(effectiveValue), values: groupMonthlyAverage(scoped, chartMonths), color: 'var(--chart-engaged)' },
+                  { key: 'book', label: 'Book avg', values: groupMonthlyAverage(members, chartMonths), color: '', reference: true },
+                ]}
+          />
+          <p className="mt-3 text-xs font-semibold text-muted-foreground print:text-gray-600">
+            {dimension === 'all' || !effectiveValue
+              ? 'Engaged vs at-risk accounts, against the book average (dashed).'
+              : `${effectiveValue} against the book average (dashed).`}
+          </p>
         </div>
       )}
 
@@ -151,7 +169,7 @@ export function ReportsView() {
         <h3 className="text-lg font-bold text-foreground mb-6 print:text-black">Member Detail ({scoped.length})</h3>
         <table className="w-full text-sm">
           <thead>
-            <tr className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground border-b border-border print:text-gray-600 print:border-black">
+            <tr className="text-[11px] font-bold uppercase tracking-widest text-muted-foreground border-b border-border print:text-gray-600 print:border-black">
               <th className="text-left py-2 pr-2">Company</th>
               <th className="text-left py-2 pr-2 hidden sm:table-cell">Sector</th>
               <th className="text-left py-2 pr-2 hidden md:table-cell">Tier</th>

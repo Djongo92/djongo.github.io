@@ -52,7 +52,7 @@ export default function NotificationsView({ t, showToast, navigateTo }: any) {
            <div className="flex gap-4 items-start md:items-center justify-between cursor-pointer" onClick={() => toggleExpand(n)}>
              <div className="flex-1 text-left">
                <div className="flex items-center gap-3 mb-2">
-                 <span className={cn("text-[10px] uppercase font-bold tracking-widest px-2 py-0.5 rounded", n.type === 'intro' ? 'bg-blue-500/10 text-blue-500' : n.type === 'event' ? 'bg-orange-500/10 text-orange-500' : 'bg-green-500/10 text-green-500')}>{n.type}</span>
+                 <span className={cn("text-[11px] uppercase font-bold tracking-widest px-2 py-0.5 rounded", n.type === 'intro' ? 'bg-blue-500/10 text-blue-500' : n.type === 'event' ? 'bg-orange-500/10 text-orange-500' : 'bg-green-500/10 text-green-500')}>{n.type}</span>
                  <span className="text-xs text-muted-foreground flex items-center gap-1"><Clock className="w-3 h-3"/> {n.time}</span>
                </div>
                <p className={cn("text-sm", n.status === 'unread' ? "font-bold text-foreground" : "font-medium text-foreground")}>{n.text}</p>
@@ -141,10 +141,10 @@ export default function NotificationsView({ t, showToast, navigateTo }: any) {
                   <table className="w-full text-left">
                     <thead className="border-b border-border">
                       <tr>
-                        <th className="pb-4 text-[10px] uppercase font-bold text-muted-foreground tracking-widest">{t('portal_topic', 'Topic')}</th>
-                        <th className="pb-4 text-[10px] uppercase font-bold text-muted-foreground tracking-widest text-center">{t('portal_in_app', 'In-App')}</th>
-                        <th className="pb-4 text-[10px] uppercase font-bold text-muted-foreground tracking-widest text-center">{t('portal_email_instant', 'Email (Instant)')}</th>
-                        <th className="pb-4 text-[10px] uppercase font-bold text-muted-foreground tracking-widest text-center">{t('portal_weekly_digest', 'Weekly Digest')}</th>
+                        <th className="pb-4 text-[11px] uppercase font-bold text-muted-foreground tracking-widest">{t('portal_topic', 'Topic')}</th>
+                        <th className="pb-4 text-[11px] uppercase font-bold text-muted-foreground tracking-widest text-center">{t('portal_in_app', 'In-App')}</th>
+                        <th className="pb-4 text-[11px] uppercase font-bold text-muted-foreground tracking-widest text-center">{t('portal_email_instant', 'Email (Instant)')}</th>
+                        <th className="pb-4 text-[11px] uppercase font-bold text-muted-foreground tracking-widest text-center">{t('portal_weekly_digest', 'Weekly Digest')}</th>
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-border">
@@ -189,7 +189,7 @@ export default function NotificationsView({ t, showToast, navigateTo }: any) {
               </div>
 
               <div className="bg-card border border-border rounded-[32px] p-8 shadow-sm">
-                <div className="text-[10px] uppercase font-bold text-muted-foreground tracking-widest mb-4">{t('portal_live_preview', 'Live Preview')}</div>
+                <div className="text-[11px] uppercase font-bold text-muted-foreground tracking-widest mb-4">{t('portal_live_preview', 'Live Preview')}</div>
                 <p className="text-xs text-muted-foreground mb-6">{t('portal_based_on_settings', 'Based on your settings, you will receive:')}</p>
                 <ul className="space-y-4 text-sm font-medium text-foreground">
                   <li className="flex items-center gap-3"><div className="w-2 h-2 rounded-full bg-blue-500" /> {t('portal_preview_intros', 'Instant Emails for Intros')}</li>

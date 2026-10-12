@@ -13,6 +13,8 @@ export function ApprovalsView({ showToast, updateBadge }: any) {
   const [expandedId, setExpandedId] = useState<string | null>(null);
   
   const pendingApprovals = approvals.filter(a => a.status === 'pending');
+  // Work already cleared this week, before this session's decisions.
+  const PROCESSED_EARLIER_THIS_WEEK = 23;
   const resolvedApprovals = approvals.filter(a => a.status !== 'pending');
 
   const handleAction = (id: string, action: 'approved' | 'rejected' | 'changes') => {
@@ -26,29 +28,29 @@ export function ApprovalsView({ showToast, updateBadge }: any) {
     <div className="space-y-8 max-w-5xl mx-auto pb-20 font-sans">
       <div className="flex items-center justify-between">
         <div>
-          <h2 className="text-4xl font-serif font-light tracking-tight mb-2 text-foreground">{t('console_v2.approvals', 'Governance & Approvals')}</h2>
-          <p className="text-sm font-medium text-muted-foreground">Review and authorize member requests, data changes, and matchmaking proposals.</p>
+          <h2 className="text-4xl font-serif font-light tracking-tight mb-2 text-foreground">{t('platform.console.approvals')}</h2>
+          <p className="text-sm font-medium text-muted-foreground">Member requests, data changes and matchmaking proposals waiting for sign-off.</p>
         </div>
       </div>
       
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         <div className="bg-card rounded-[32px] border border-border p-6 shadow-sm flex items-center justify-between">
            <div>
-             <div className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest mb-1">Pending</div>
+             <div className="text-[11px] font-bold text-muted-foreground uppercase tracking-widest mb-1">Pending</div>
              <div className="text-4xl font-serif font-light tabular-nums">{pendingApprovals.length}</div>
            </div>
            <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center text-primary"><Clock className="w-5 h-5"/></div>
         </div>
         <div className="bg-card rounded-[32px] border border-border p-6 shadow-sm flex items-center justify-between">
            <div>
-             <div className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest mb-1">Processed</div>
-             <div className="text-4xl font-serif font-light tabular-nums">{resolvedApprovals.length}</div>
+             <div className="text-[11px] font-bold text-muted-foreground uppercase tracking-widest mb-1">Processed this week</div>
+             <div className="text-4xl font-serif font-light tabular-nums">{PROCESSED_EARLIER_THIS_WEEK + resolvedApprovals.length}</div>
            </div>
            <div className="w-12 h-12 rounded-full bg-emerald-500/10 flex items-center justify-center text-emerald-600"><ShieldCheck className="w-5 h-5"/></div>
         </div>
-        <div className="bg-foreground text-background rounded-[32px] border border-border p-6 shadow-lg flex items-center justify-between">
+        <div className="ink bg-foreground text-background rounded-[32px] border border-border p-6 shadow-lg flex items-center justify-between">
            <div>
-             <div className="text-[10px] font-bold text-accent uppercase tracking-widest mb-1">SLA Target</div>
+             <div className="text-[11px] font-bold text-accent uppercase tracking-widest mb-1">SLA Target</div>
              <div className="text-4xl font-serif font-light tabular-nums">98<span className="text-2xl text-accent">%</span></div>
            </div>
            <div className="w-12 h-12 rounded-full bg-accent/20 flex items-center justify-center text-accent"><Check className="w-5 h-5"/></div>
@@ -56,7 +58,7 @@ export function ApprovalsView({ showToast, updateBadge }: any) {
       </div>
 
       <div className="space-y-6 mt-12">
-        <h3 className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest border-b border-border pb-2">Action Required ({pendingApprovals.length})</h3>
+        <h3 className="text-[11px] font-bold text-muted-foreground uppercase tracking-widest border-b border-border pb-2">Action Required ({pendingApprovals.length})</h3>
         {pendingApprovals.length === 0 ? (
           <div className="py-24 text-center text-muted-foreground border border-dashed border-border rounded-[32px] bg-card flex flex-col items-center gap-4">
              <div className="w-16 h-16 rounded-full bg-muted flex items-center justify-center"><Check className="w-8 h-8 text-muted-foreground/50"/></div>
@@ -72,7 +74,7 @@ export function ApprovalsView({ showToast, updateBadge }: any) {
                       <div className="w-12 h-12 rounded-full bg-muted flex items-center justify-center font-bold text-lg text-foreground shrink-0">{app.staff.charAt(0)}</div>
                       <div>
                         <div className="flex items-center gap-3 mb-1">
-                          <span className="text-[10px] font-bold text-primary px-2.5 py-1 bg-primary/10 rounded-full uppercase tracking-widest">{app.type}</span>
+                          <span className="text-[11px] font-bold text-primary px-2.5 py-1 bg-primary/10 rounded-full uppercase tracking-widest">{app.type}</span>
                           <span className="text-xs font-bold text-muted-foreground">Requested by {app.staff}</span>
                         </div>
                         <h3 className="text-lg font-bold text-foreground leading-tight">{app.desc}</h3>
@@ -89,12 +91,12 @@ export function ApprovalsView({ showToast, updateBadge }: any) {
                         <div className="p-6 pt-0 border-t border-border mt-2">
                           <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mt-6">
                             <div>
-                              <div className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest mb-3 flex items-center gap-2"><FileDiff className="w-3 h-3"/> Context & History</div>
+                              <div className="text-[11px] font-bold text-muted-foreground uppercase tracking-widest mb-3 flex items-center gap-2"><FileDiff className="w-3 h-3"/> Context & History</div>
                               <p className="text-sm font-medium text-foreground/80 mb-4 bg-muted/50 p-4 rounded-2xl border border-border/50">{app.context}</p>
                               <p className="text-xs font-bold text-muted-foreground italic px-4">History: {app.history}</p>
                             </div>
                             <div>
-                              <div className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest mb-3 flex items-center gap-2"><ShieldCheck className="w-3 h-3"/> Policy Checks</div>
+                              <div className="text-[11px] font-bold text-muted-foreground uppercase tracking-widest mb-3 flex items-center gap-2"><ShieldCheck className="w-3 h-3"/> Policy Checks</div>
                               <ul className="space-y-3 bg-muted/30 p-4 rounded-2xl border border-border/50">
                                 {app.policyChecks.map((chk, i) => (
                                   <li key={i} className="text-sm font-bold text-foreground/80 flex items-center gap-3"><div className="w-5 h-5 rounded-full bg-emerald-500/20 flex items-center justify-center shrink-0"><Check className="w-3 h-3 text-emerald-600"/></div> {chk}</li>
@@ -117,11 +119,11 @@ export function ApprovalsView({ showToast, updateBadge }: any) {
                           
                           {app.diffs.length > 0 && (
                             <div className="mt-6">
-                              <div className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest mb-3 flex items-center gap-2"><FileDiff className="w-3 h-3"/> Proposed State Changes</div>
+                              <div className="text-[11px] font-bold text-muted-foreground uppercase tracking-widest mb-3 flex items-center gap-2"><FileDiff className="w-3 h-3"/> Proposed State Changes</div>
                               <div className="bg-foreground text-background p-4 rounded-2xl font-mono text-xs shadow-inner">
                                 {app.diffs.map((d, i) => (
                                   <div key={i} className="flex items-center gap-4 py-1">
-                                    <span className="text-background/50 font-bold w-32">{d.field}:</span>
+                                    <span className="text-background/70 font-bold w-32">{d.field}:</span>
                                     <span className="text-destructive/80 line-through decoration-destructive">{d.old}</span>
                                     <ArrowRight className="w-3 h-3 text-background/30"/>
                                     <span className="text-emerald-400 font-bold">{d.new}</span>
@@ -150,7 +152,7 @@ export function ApprovalsView({ showToast, updateBadge }: any) {
 
       {resolvedApprovals.length > 0 && (
         <div className="space-y-6 mt-16">
-          <h3 className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest border-b border-border pb-2">Recently Resolved ({resolvedApprovals.length})</h3>
+          <h3 className="text-[11px] font-bold text-muted-foreground uppercase tracking-widest border-b border-border pb-2">Recently Resolved ({resolvedApprovals.length})</h3>
           <div className="space-y-3">
              {resolvedApprovals.map(app => (
                <div key={app.id} className="bg-muted/30 border border-border rounded-2xl p-4 flex items-center justify-between">
@@ -160,7 +162,7 @@ export function ApprovalsView({ showToast, updateBadge }: any) {
                    </div>
                    <div>
                      <h4 className="text-sm font-bold text-foreground line-clamp-1">{app.desc}</h4>
-                     <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">Requested by {app.staff} · {app.type}</p>
+                     <p className="text-[11px] font-bold text-muted-foreground uppercase tracking-widest">Requested by {app.staff} · {app.type}</p>
                    </div>
                  </div>
                  <div className="text-xs font-bold px-3 py-1 bg-background border border-border rounded-full capitalize">

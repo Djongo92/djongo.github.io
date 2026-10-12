@@ -45,10 +45,10 @@ export default function OnboardingView({ t, navigateTo, showToast, member }: any
   return (
     <div className="space-y-8 animate-in fade-in duration-500 pb-20">
       
-      <div className="bg-foreground text-background p-8 md:p-12 rounded-[40px] shadow-xl flex flex-col md:flex-row gap-8 justify-between items-start md:items-center relative overflow-hidden">
+      <div className="ink bg-foreground text-background p-8 md:p-12 rounded-[40px] shadow-xl flex flex-col md:flex-row gap-8 justify-between items-start md:items-center relative overflow-hidden">
         <div className="absolute -right-20 -top-20 w-72 h-72 rounded-full bg-[#40D9F1]/10 pointer-events-none" />
         <div className="relative z-10 max-w-2xl">
-          <div className="text-[10px] uppercase font-bold text-[#40D9F1] tracking-widest mb-4">Day {oData.day}</div>
+          <div className="text-[11px] uppercase font-bold text-[#40D9F1] tracking-widest mb-4">Day {oData.day}</div>
           <h2 className="text-4xl md:text-5xl font-serif font-light mb-4">Your First 90 Days</h2>
           <p className="text-background/80 text-sm md:text-base leading-relaxed">
             A guided plan to integrate your team and start seeing concrete value from membership.
@@ -56,9 +56,9 @@ export default function OnboardingView({ t, navigateTo, showToast, member }: any
         </div>
         
         <div className="relative z-10 bg-background/10 backdrop-blur-md rounded-[32px] p-6 border border-background/20 min-w-[250px] shrink-0 flex flex-col items-center gap-4">
-          <div className="text-[10px] uppercase font-bold text-[#40D9F1] tracking-widest">Overall Progress</div>
+          <div className="text-[11px] uppercase font-bold text-[#40D9F1] tracking-widest">Overall Progress</div>
           <ProgressRing percent={progress} size={128} stroke={11} />
-          <div className="text-xs text-background/60 font-medium">{completedSteps} of {totalSteps} steps complete</div>
+          <div className="text-xs text-background/75 font-medium">{completedSteps} of {totalSteps} steps complete</div>
         </div>
       </div>
 
@@ -78,8 +78,8 @@ export default function OnboardingView({ t, navigateTo, showToast, member }: any
           {/* FUNNEL VIZ */}
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
             {phases.map((ph:any, i:number) => (
-              <div key={ph.id} onClick={() => setSelectedPhaseId(ph.id)} className={cn("p-6 rounded-[32px] border cursor-pointer transition-all flex flex-col h-full relative group", selectedPhaseId === ph.id ? "bg-foreground text-background border-foreground shadow-lg scale-[1.02]" : "bg-card border-border hover:border-primary/50 text-foreground")}>
-                <div className="text-[10px] uppercase font-bold tracking-widest mb-1 opacity-70">{ph.timeframe}</div>
+              <div key={ph.id} onClick={() => setSelectedPhaseId(ph.id)} className={cn("p-6 rounded-[32px] border cursor-pointer transition-all flex flex-col h-full relative group", selectedPhaseId === ph.id ? "ink bg-foreground text-background border-foreground shadow-lg scale-[1.02]" : "bg-card border-border hover:border-primary/50 text-foreground")}>
+                <div className="text-[11px] uppercase font-bold tracking-widest mb-1 opacity-70">{ph.timeframe}</div>
                 <div className="font-serif text-xl mb-4">{ph.title}</div>
                 
                 <div className="flex items-center justify-between mt-auto pt-4 border-t border-current/10">
@@ -100,7 +100,7 @@ export default function OnboardingView({ t, navigateTo, showToast, member }: any
 
           {/* ACTIVE PHASE DETAILS */}
           <div className="bg-card border border-border rounded-[40px] p-8 shadow-sm mt-6">
-            <h3 className="text-[10px] uppercase font-bold text-muted-foreground tracking-widest mb-6">Action Plan: {activePhase.title}</h3>
+            <h3 className="text-[11px] uppercase font-bold text-muted-foreground tracking-widest mb-6">Action Plan: {activePhase.title}</h3>
             
             <AnimatePresence mode="wait">
               <motion.div key={activePhase.id} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }} className="space-y-4">
@@ -108,7 +108,7 @@ export default function OnboardingView({ t, navigateTo, showToast, member }: any
                   <div key={g.id} className={cn("flex flex-col sm:flex-row gap-4 p-6 rounded-3xl border transition-all", g.done ? "bg-primary/5 border-primary/20" : g.skipped ? "bg-muted/50 border-border opacity-60" : "bg-background border-border shadow-sm")}>
                      <div className="flex gap-4 flex-1">
                        <div className="mt-1 shrink-0">
-                         {g.done ? <CheckCircle2 className="w-6 h-6 text-primary" /> : <div className="w-6 h-6 rounded-full border-2 border-muted-foreground flex items-center justify-center text-[10px] font-bold text-muted-foreground">{i + 1}</div>}
+                         {g.done ? <CheckCircle2 className="w-6 h-6 text-primary" /> : <div className="w-6 h-6 rounded-full border-2 border-muted-foreground flex items-center justify-center text-[11px] font-bold text-muted-foreground">{i + 1}</div>}
                        </div>
                        <div className="flex-1">
                          <h4 className={cn("text-lg font-bold mb-1", g.done || g.skipped ? "text-muted-foreground" : "text-foreground")}>{g.title}</h4>
@@ -141,7 +141,7 @@ export default function OnboardingView({ t, navigateTo, showToast, member }: any
               <div className="absolute bottom-0 right-0 w-6 h-6 bg-green-500 border-4 border-card rounded-full"></div>
             </div>
             <h3 className="text-2xl font-serif font-medium mb-1">{oData.manager.name}</h3>
-            <div className="text-[10px] uppercase font-bold text-muted-foreground tracking-widest mb-6">{oData.manager.role}</div>
+            <div className="text-[11px] uppercase font-bold text-muted-foreground tracking-widest mb-6">{oData.manager.role}</div>
             <p className="text-sm text-muted-foreground leading-relaxed mb-8">
               "I'm here to ensure you get the most out of your membership. If you're not sure where to start, reach out."
             </p>

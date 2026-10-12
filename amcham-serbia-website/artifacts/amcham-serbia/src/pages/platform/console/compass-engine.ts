@@ -50,7 +50,7 @@ export function getCompanyContextSummary(companyId: string): CompassAnswer | nul
   if (explanation) parts.push(explanation.text);
 
   const ritualItem = platformData.console.ritual.items.find((i) => i.companyId === companyId);
-  if (ritualItem) parts.push(`Open ritual item: ${ritualItem.tag} — ${ritualItem.text} (${ritualItem.urgency}, due ${ritualItem.dueDate}).`);
+  if (ritualItem) parts.push(`Open priority: ${ritualItem.tag} — ${ritualItem.text} (${ritualItem.urgency}, due ${ritualItem.dueDate}).`);
 
   const retentionCase = platformData.console.retention.find((r) => r.companyId === companyId);
   if (retentionCase) parts.push(`Retention: ${retentionCase.risk} risk — ${retentionCase.reason}. Stage: ${retentionCase.stage}, deadline ${retentionCase.deadline}.`);
@@ -63,7 +63,7 @@ export function getCompanyContextSummary(companyId: string): CompassAnswer | nul
   if (isCoverageGap) parts.push(`${company.name} is a Patron account managed by ${company.manager}, who isn't on the active team roster — worth flagging for reassignment.`);
 
   if (parts.length === 0) {
-    parts.push(`${company.name} — no open ritual items, retention cases, or pending flags right now. Score ${company.score} (${company.scoreTrend >= 0 ? '+' : ''}${company.scoreTrend}).`);
+    parts.push(`${company.name} — no open priorities, retention cases, or pending flags right now. Score ${company.score} (${company.scoreTrend >= 0 ? '+' : ''}${company.scoreTrend}).`);
   }
 
   const actions: CompassAction[] = [{ type: 'openBrief', label: 'Open Brief', companyId }];

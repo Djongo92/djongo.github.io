@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { CompanyMark } from '@/components/ui/company-mark';
 import { useI18n } from '@/lib/i18n';
 import { platformData } from '@/data/platform';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -24,7 +25,7 @@ export function DossierView({ companyId, close, navigateTo, showToast }: { compa
       <div className="p-6 md:p-8 flex justify-between items-center shrink-0 border-b border-border bg-card gap-3">
         <h3 className="font-bold text-foreground uppercase tracking-widest text-xs flex items-center gap-2"><FileBadge className="w-4 h-4"/> Role-Scoped Dossier</h3>
         <div className="flex items-center gap-3">
-          <PresenceIndicator companyId={c.id} className="hidden sm:inline-flex items-center gap-2 text-[10px] font-bold text-muted-foreground bg-muted px-3 py-1.5 rounded-full border border-border/50" />
+          <PresenceIndicator companyId={c.id} className="hidden sm:inline-flex items-center gap-2 text-[11px] font-bold text-muted-foreground bg-muted px-3 py-1.5 rounded-full border border-border/50" />
           <button onClick={close} className="w-10 h-10 rounded-full bg-muted flex items-center justify-center text-muted-foreground hover:bg-border transition-colors shrink-0"><X className="w-5 h-5" /></button>
         </div>
       </div>
@@ -35,13 +36,13 @@ export function DossierView({ companyId, close, navigateTo, showToast }: { compa
             <div>
               <h2 className="text-5xl md:text-6xl font-serif font-light tracking-tight text-foreground mb-4">{c.name}</h2>
               <div className="flex flex-wrap gap-2 mb-6">
-                <span className="px-4 py-1.5 bg-muted text-foreground rounded-full text-[10px] font-bold uppercase tracking-widest">{c.sector}</span>
-                <span className="px-4 py-1.5 bg-muted text-foreground rounded-full text-[10px] font-bold uppercase tracking-widest">{c.tier}</span>
-                <span className="px-4 py-1.5 bg-muted text-foreground rounded-full text-[10px] font-bold uppercase tracking-widest">{t('platform.console.member_since', 'Since')} {c.since}</span>
-                <span className={cn("px-4 py-1.5 rounded-full text-[10px] font-bold uppercase tracking-widest", c.lifecycle === 'at-risk' ? "bg-primary/10 text-primary" : c.lifecycle === 'renewing' ? "bg-orange-500/10 text-orange-600" : "bg-emerald-500/10 text-emerald-600")}>{c.lifecycle} priority</span>
+                <span className="px-4 py-1.5 bg-muted text-foreground rounded-full text-[11px] font-bold uppercase tracking-widest">{c.sector}</span>
+                <span className="px-4 py-1.5 bg-muted text-foreground rounded-full text-[11px] font-bold uppercase tracking-widest">{c.tier}</span>
+                <span className="px-4 py-1.5 bg-muted text-foreground rounded-full text-[11px] font-bold uppercase tracking-widest">{t('platform.console.member_since', 'Since')} {c.since}</span>
+                <span className={cn("px-4 py-1.5 rounded-full text-[11px] font-bold uppercase tracking-widest", c.lifecycle === 'at-risk' ? "bg-primary/10 text-primary" : c.lifecycle === 'renewing' ? "bg-orange-500/10 text-orange-600" : "bg-emerald-500/10 text-emerald-600")}>{c.lifecycle} priority</span>
               </div>
             </div>
-            <div className="w-24 h-24 rounded-[32px] bg-card shadow-sm border border-border flex items-center justify-center font-bold text-4xl text-muted-foreground shrink-0 shadow-inner">{c.avatar}</div>
+            <CompanyMark name={c.name} sector={c.sector} size="2xl" />
           </div>
           
           <p className="text-foreground/70 font-medium leading-relaxed text-lg max-w-3xl mb-8">{c.description}</p>
@@ -52,7 +53,7 @@ export function DossierView({ companyId, close, navigateTo, showToast }: { compa
               <button 
                 key={tab} 
                 onClick={() => setActiveTab(tab)}
-                className={cn("pb-4 text-[10px] font-bold uppercase tracking-widest transition-colors relative", activeTab === tab ? "text-foreground" : "text-muted-foreground hover:text-foreground/80")}
+                className={cn("pb-4 text-[11px] font-bold uppercase tracking-widest transition-colors relative", activeTab === tab ? "text-foreground" : "text-muted-foreground hover:text-foreground/80")}
               >
                 {tab}
                 {activeTab === tab && <motion.div layoutId="dossier-tab" className="absolute bottom-0 left-0 right-0 h-1 bg-foreground rounded-t-full" />}
@@ -69,9 +70,9 @@ export function DossierView({ companyId, close, navigateTo, showToast }: { compa
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div className="bg-card rounded-[32px] p-8 border border-border shadow-sm flex flex-col justify-between">
                     <div className="flex justify-between items-start mb-6">
-                      <div className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">Health Score</div>
+                      <div className="text-[11px] font-bold text-muted-foreground uppercase tracking-widest">Health Score</div>
                       {scoreData && (
-                        <div className="text-[10px] font-bold bg-primary/10 text-primary px-3 py-1 rounded-full">{scoreData.confidence} Confidence</div>
+                        <div className="text-[11px] font-bold bg-primary/10 text-primary px-3 py-1 rounded-full">{scoreData.confidence} Confidence</div>
                       )}
                     </div>
                     <div className="text-6xl font-serif font-light tabular-nums text-foreground flex items-baseline gap-3 mb-8">
@@ -81,7 +82,7 @@ export function DossierView({ companyId, close, navigateTo, showToast }: { compa
                     {/* CSS Metric Visualization for Score Factors */}
                     {scoreData && (
                       <div className="space-y-4 border-t border-border pt-6">
-                        <div className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">Score Factors</div>
+                        <div className="text-[11px] font-bold text-muted-foreground uppercase tracking-widest">Score Factors</div>
                         <div className="space-y-3">
                           {scoreData.factors.map((f:any, i:number) => (
                             <div key={i}>
@@ -101,7 +102,7 @@ export function DossierView({ companyId, close, navigateTo, showToast }: { compa
                   
                   <div className="space-y-6 flex flex-col">
                     <div className="bg-card rounded-[32px] p-8 border border-border shadow-sm flex-1">
-                      <div className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest mb-6">Commercial Terms</div>
+                      <div className="text-[11px] font-bold text-muted-foreground uppercase tracking-widest mb-6">Commercial Terms</div>
                       <div className="space-y-6">
                         <div>
                           <div className="text-xs font-bold text-muted-foreground mb-1">Annual Value</div>
@@ -139,8 +140,8 @@ export function DossierView({ companyId, close, navigateTo, showToast }: { compa
             {activeTab === 'timeline' && (
               <motion.div key="timeline" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }} className="space-y-6">
                 <div className="flex items-center justify-between mb-8">
-                   <h4 className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">Activity Feed</h4>
-                   <button className="text-[10px] font-bold text-primary px-4 py-2 bg-primary/10 rounded-full flex items-center gap-1 hover:bg-primary/20 transition-colors"><Plus className="w-3 h-3"/> Add Manual Log</button>
+                   <h4 className="text-[11px] font-bold text-muted-foreground uppercase tracking-widest">Activity Feed</h4>
+                   <button className="text-[11px] font-bold text-primary px-4 py-2 bg-primary/10 rounded-full flex items-center gap-1 hover:bg-primary/20 transition-colors"><Plus className="w-3 h-3"/> Add Manual Log</button>
                 </div>
                 
                 {intelFeed.length > 0 ? (
@@ -158,10 +159,10 @@ export function DossierView({ companyId, close, navigateTo, showToast }: { compa
                           <div className="flex justify-between items-start mb-3">
                             <div className="flex flex-col">
                               <span className="text-sm font-bold text-foreground capitalize">{item.source} Signal</span>
-                              <span className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">{item.date} · Status: {item.state}</span>
+                              <span className="text-[11px] font-bold uppercase tracking-widest text-muted-foreground">{item.date} · Status: {item.state}</span>
                             </div>
                             {item.scoreImpact !== '0' && (
-                              <div className={cn("text-[10px] font-bold px-3 py-1.5 rounded-full", item.sentiment === 'positive' ? 'bg-emerald-500/10 text-emerald-600' : item.sentiment === 'negative' ? 'bg-primary/10 text-primary' : 'bg-muted text-muted-foreground')}>
+                              <div className={cn("text-[11px] font-bold px-3 py-1.5 rounded-full", item.sentiment === 'positive' ? 'bg-emerald-500/10 text-emerald-600' : item.sentiment === 'negative' ? 'bg-primary/10 text-primary' : 'bg-muted text-muted-foreground')}>
                                 {item.scoreImpact}
                               </div>
                             )}
@@ -179,7 +180,7 @@ export function DossierView({ companyId, close, navigateTo, showToast }: { compa
 
             {activeTab === 'opportunities' && (
               <motion.div key="opportunities" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }} className="space-y-6">
-                <div className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest mb-6">Matchmaking & Intro Opportunities</div>
+                <div className="text-[11px] font-bold text-muted-foreground uppercase tracking-widest mb-6">Matchmaking & Intro Opportunities</div>
                 {matchmakingPairs.length > 0 ? (
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     {matchmakingPairs.map((pair:any, i:number) => {
@@ -189,16 +190,16 @@ export function DossierView({ companyId, close, navigateTo, showToast }: { compa
                         <div key={i} className="bg-card border border-border p-6 rounded-[32px] shadow-sm flex flex-col justify-between hover:shadow-md transition-shadow">
                           <div>
                             <div className="flex items-center gap-3 mb-4">
-                              <div className="w-10 h-10 rounded-full bg-muted flex items-center justify-center font-bold">{c.avatar}</div>
+                              <CompanyMark name={c.name} sector={c.sector} size="md" />
                               <ArrowRight className="w-4 h-4 text-muted-foreground" />
-                              <div className="w-10 h-10 rounded-full bg-primary/10 text-primary flex items-center justify-center font-bold">{otherComp?.avatar || '?'}</div>
+                              <CompanyMark name={otherComp?.name} sector={otherComp?.sector} size="md" />
                               <span className="text-sm font-bold ml-2">Intro to {otherComp?.name}</span>
                             </div>
                             <p className="text-sm font-medium text-foreground/80 mb-4">{pair.rationale}</p>
                             <div className="bg-muted/50 p-3 rounded-xl text-xs font-medium text-muted-foreground mb-4">Evidence: {pair.overlapEvidence}</div>
                           </div>
                           <div className="flex justify-between items-center border-t border-border pt-4">
-                            <span className="text-[10px] font-bold uppercase tracking-widest bg-muted px-3 py-1 rounded-full">{pair.outcomeState}</span>
+                            <span className="text-[11px] font-bold uppercase tracking-widest bg-muted px-3 py-1 rounded-full">{pair.outcomeState}</span>
                             <button onClick={() => showToast(`Initiated intro logic for ${otherComp?.name}`)} className="text-xs font-bold text-primary hover:text-primary/80 transition-colors">Broker Intro</button>
                           </div>
                         </div>
@@ -216,7 +217,7 @@ export function DossierView({ companyId, close, navigateTo, showToast }: { compa
 
             {activeTab === 'risks' && (
               <motion.div key="risks" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }} className="space-y-6">
-                <div className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest mb-6 flex items-center gap-2"><ShieldAlert className="w-4 h-4"/> Account Risk Factors</div>
+                <div className="text-[11px] font-bold text-muted-foreground uppercase tracking-widest mb-6 flex items-center gap-2"><ShieldAlert className="w-4 h-4"/> Account Risk Factors</div>
                 <div className="bg-primary/5 border border-primary/20 rounded-[32px] p-8">
                   {c.lifecycle === 'at-risk' ? (
                     <div className="space-y-6">
@@ -230,11 +231,11 @@ export function DossierView({ companyId, close, navigateTo, showToast }: { compa
                       
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-6">
                          <div className="bg-background border border-primary/10 p-5 rounded-2xl shadow-sm">
-                           <div className="text-[10px] font-bold uppercase tracking-widest text-primary mb-2">Primary Factor</div>
+                           <div className="text-[11px] font-bold uppercase tracking-widest text-primary mb-2">Primary Factor</div>
                            <div className="text-sm font-medium">Declining engagement score (-{Math.abs(c.scoreTrend)} over 30 days).</div>
                          </div>
                          <div className="bg-background border border-primary/10 p-5 rounded-2xl shadow-sm">
-                           <div className="text-[10px] font-bold uppercase tracking-widest text-primary mb-2">Secondary Factor</div>
+                           <div className="text-[11px] font-bold uppercase tracking-widest text-primary mb-2">Secondary Factor</div>
                            <div className="text-sm font-medium">Contact freshness is marked as '{c.contactFreshness}'. Last interaction {c.lastInteraction}.</div>
                          </div>
                       </div>

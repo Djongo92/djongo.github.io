@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { CompanyMark } from '@/components/ui/company-mark';
 import { useI18n } from '@/lib/i18n';
 import { platformData } from '@/data/platform';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -53,7 +54,7 @@ export function MatchmakingView({ showToast }: { showToast: (m:string) => void }
       <Confetti trigger={confettiTrigger} />
       <div className="mb-12 flex flex-col md:flex-row justify-between items-start md:items-end gap-6 border-b border-border pb-6">
         <div>
-          <h2 className="text-4xl font-serif font-light tracking-tight text-foreground mb-4">Mutual-Consent Broker</h2>
+          <h2 className="text-4xl font-serif font-light tracking-tight text-foreground mb-4">{t('platform.console.matchmaking')}</h2>
           <p className="text-sm font-medium text-muted-foreground max-w-2xl">{t('platform.console.match_desc', 'Approve overlaps to trigger double-opt-in workflows.')}</p>
         </div>
         <div className="flex items-center gap-4 bg-card p-2 rounded-full border border-border shadow-sm">
@@ -97,10 +98,10 @@ export function MatchmakingView({ showToast }: { showToast: (m:string) => void }
                 
                 <div className="flex flex-col md:flex-row items-center gap-8 mb-8 relative z-10">
                   <div className="flex-1 text-center md:text-right">
-                    <div className="w-24 h-24 mx-auto md:ml-auto md:mr-0 rounded-3xl bg-background border border-border flex items-center justify-center text-4xl font-serif mb-4 shadow-sm">{from?.avatar}</div>
+                    <CompanyMark name={from?.name} sector={from?.sector} size="2xl" className="mx-auto md:ml-auto md:mr-0 mb-4 flex" />
                     <div className="font-bold text-2xl text-foreground mb-1">{from?.name}</div>
                     <div className="text-xs font-bold text-muted-foreground uppercase tracking-widest">{from?.sector} · {from?.tier}</div>
-                      <div className={cn("mt-4 inline-flex items-center gap-2 text-[10px] font-bold uppercase tracking-widest px-3 py-1.5 rounded-full border shadow-sm", pair.fromApproved ? "bg-emerald-500/10 text-emerald-600 border-emerald-500/20" : "bg-amber-500/10 text-amber-600 border-amber-500/20")}>
+                      <div className={cn("mt-4 inline-flex items-center gap-2 text-[11px] font-bold uppercase tracking-widest px-3 py-1.5 rounded-full border shadow-sm", pair.fromApproved ? "bg-emerald-500/10 text-emerald-600 border-emerald-500/20" : "bg-amber-500/10 text-amber-600 border-amber-500/20")}>
                        {pair.fromApproved ? <CheckCircle2 className="w-3 h-3" /> : <Clock className="w-3 h-3" />} {pair.fromApproved ? t('console_v2.match_optin_confirmed', 'Opt-in Confirmed') : t('console_v2.match_optin_pending', 'Opt-in Pending')}
                     </div>
                   </div>
@@ -110,14 +111,14 @@ export function MatchmakingView({ showToast }: { showToast: (m:string) => void }
                     <div className="w-14 h-14 rounded-full bg-background border border-border shadow-sm flex items-center justify-center mb-3 relative z-10">
                       <Handshake className="w-6 h-6 text-primary" />
                     </div>
-                    <div className="text-[10px] font-bold text-primary uppercase tracking-widest bg-primary/10 px-3 py-1 rounded-full border border-primary/20 shadow-sm">Suggested Match</div>
+                    <div className="text-[11px] font-bold text-primary uppercase tracking-widest bg-primary/10 px-3 py-1 rounded-full border border-primary/20 shadow-sm">Suggested Match</div>
                   </div>
 
                   <div className="flex-1 text-center md:text-left">
-                    <div className="w-24 h-24 mx-auto md:mr-auto md:ml-0 rounded-3xl bg-background border border-border flex items-center justify-center text-4xl font-serif mb-4 shadow-sm">{to?.avatar}</div>
+                    <CompanyMark name={to?.name} sector={to?.sector} size="2xl" className="mx-auto md:mr-auto md:ml-0 mb-4 flex" />
                     <div className="font-bold text-2xl text-foreground mb-1">{to?.name}</div>
                     <div className="text-xs font-bold text-muted-foreground uppercase tracking-widest">{to?.sector} · {to?.tier}</div>
-                      <div className={cn("mt-4 inline-flex items-center gap-2 text-[10px] font-bold uppercase tracking-widest px-3 py-1.5 rounded-full border shadow-sm", pair.toApproved ? "bg-emerald-500/10 text-emerald-600 border-emerald-500/20" : "bg-amber-500/10 text-amber-600 border-amber-500/20")}>
+                      <div className={cn("mt-4 inline-flex items-center gap-2 text-[11px] font-bold uppercase tracking-widest px-3 py-1.5 rounded-full border shadow-sm", pair.toApproved ? "bg-emerald-500/10 text-emerald-600 border-emerald-500/20" : "bg-amber-500/10 text-amber-600 border-amber-500/20")}>
                        {pair.toApproved ? <CheckCircle2 className="w-3 h-3" /> : <Clock className="w-3 h-3" />} {pair.toApproved ? 'Opt-in Confirmed' : 'Opt-in Pending'}
                     </div>
                   </div>
@@ -135,26 +136,26 @@ export function MatchmakingView({ showToast }: { showToast: (m:string) => void }
                       <div className="grid grid-cols-1 md:grid-cols-3 gap-6 pt-2">
                          <div className="bg-background border border-border p-6 rounded-3xl md:col-span-2 shadow-sm space-y-4">
                             <div>
-                              <div className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground mb-2 flex items-center gap-2"><Target className="w-3 h-3"/> Overlap Evidence</div>
+                              <div className="text-[11px] font-bold uppercase tracking-widest text-muted-foreground mb-2 flex items-center gap-2"><Target className="w-3 h-3"/> Overlap Evidence</div>
                               <div className="text-sm font-medium text-foreground leading-relaxed bg-muted/40 p-3 rounded-xl border border-border/50">{pair.overlapEvidence}</div>
                             </div>
                             <div className="grid grid-cols-2 gap-4">
                                <div>
-                                 <div className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground mb-2 flex items-center gap-2"><Layers className="w-3 h-3"/> Shared Committees</div>
+                                 <div className="text-[11px] font-bold uppercase tracking-widest text-muted-foreground mb-2 flex items-center gap-2"><Layers className="w-3 h-3"/> Shared Committees</div>
                                  <div className="text-sm font-bold text-foreground">Transport & Logistics</div>
                                </div>
                                <div>
-                                 <div className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground mb-2 flex items-center gap-2"><History className="w-3 h-3"/> Past Interaction</div>
+                                 <div className="text-[11px] font-bold uppercase tracking-widest text-muted-foreground mb-2 flex items-center gap-2"><History className="w-3 h-3"/> Past Interaction</div>
                                  <div className="text-sm font-medium text-foreground">Met at Q1 Tech Roundtable</div>
                                </div>
                             </div>
                             <div className="pt-4 border-t border-border">
-                              <div className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground mb-2">Rationale</div>
+                              <div className="text-[11px] font-bold uppercase tracking-widest text-muted-foreground mb-2">Rationale</div>
                               <div className="text-sm text-foreground">{pair.rationale}</div>
                             </div>
                          </div>
                          <div className={cn("border p-6 rounded-3xl shadow-sm flex flex-col justify-center", pair.conflicts === 'None' ? "bg-emerald-500/5 border-emerald-500/20" : "bg-primary/5 border-primary/20")}>
-                            <div className="text-[10px] font-bold uppercase tracking-widest mb-3 flex items-center justify-center gap-2 text-foreground">
+                            <div className="text-[11px] font-bold uppercase tracking-widest mb-3 flex items-center justify-center gap-2 text-foreground">
                               <AlertTriangle className={cn("w-4 h-4", pair.conflicts === 'None' ? 'text-emerald-500' : 'text-primary')} /> Conflicts Check
                             </div>
                             <div className="text-base text-center font-medium text-foreground leading-relaxed">{pair.conflicts}</div>
@@ -165,7 +166,7 @@ export function MatchmakingView({ showToast }: { showToast: (m:string) => void }
                 </AnimatePresence>
 
                 <div className="flex flex-col sm:flex-row justify-between items-center gap-4 pt-6 border-t border-border relative z-10">
-                  <div className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest flex items-center gap-2 bg-muted px-3 py-1.5 rounded-md border border-border/50">
+                  <div className="text-[11px] font-bold text-muted-foreground uppercase tracking-widest flex items-center gap-2 bg-muted px-3 py-1.5 rounded-md border border-border/50">
                     <Clock className="w-3 h-3"/> Expires in: {pair.expiry}
                   </div>
                   {pair.outcomeState === 'scheduled' ? (
@@ -209,7 +210,7 @@ export function MatchmakingView({ showToast }: { showToast: (m:string) => void }
 
       {deals.length > 0 && (
         <div className="mt-16 pt-8 border-t border-border">
-          <div className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground mb-6 flex items-center gap-2"><History className="w-4 h-4"/> Recent Deal Outcomes</div>
+          <div className="text-[11px] font-bold uppercase tracking-widest text-muted-foreground mb-6 flex items-center gap-2"><History className="w-4 h-4"/> Recent Deal Outcomes</div>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {deals.slice(0, 6).map((d, i) => {
               const from = platformData.allMembers.find(c => c.id === d.from);
@@ -218,7 +219,7 @@ export function MatchmakingView({ showToast }: { showToast: (m:string) => void }
                 <div key={d.id ?? i} className="bg-card border border-border rounded-2xl p-5 text-sm shadow-sm">
                   <div className="flex justify-between items-start gap-3 mb-1.5">
                     <span className="font-bold text-foreground">{from?.name} × {to?.name}</span>
-                    <span className={cn("text-[10px] font-bold uppercase tracking-widest px-2 py-0.5 rounded-md border shrink-0", d.outcome === 'closed' ? "bg-emerald-500/10 text-emerald-600 border-emerald-500/20" : "bg-destructive/10 text-destructive border-destructive/20")}>{d.outcome}{d.outcome === 'closed' ? ` · ${d.value}` : ''}</span>
+                    <span className={cn("text-[11px] font-bold uppercase tracking-widest px-2 py-0.5 rounded-md border shrink-0", d.outcome === 'closed' ? "bg-emerald-500/10 text-emerald-600 border-emerald-500/20" : "bg-destructive/10 text-destructive border-destructive/20")}>{d.outcome}{d.outcome === 'closed' ? ` · ${d.value}` : ''}</span>
                   </div>
                   <div className="text-xs text-muted-foreground">{d.note} — {d.closedDate}</div>
                 </div>

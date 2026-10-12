@@ -40,7 +40,7 @@ export default function SeamView({ t, showToast }: any) {
           </div>
 
           <div className="space-y-6">
-            <h3 className="text-[10px] uppercase font-bold text-muted-foreground tracking-widest">{t('portal_field_sharing', 'Field-Level Sharing')}</h3>
+            <h3 className="text-[11px] uppercase font-bold text-muted-foreground tracking-widest">{t('portal_field_sharing', 'Field-Level Sharing')}</h3>
             
             <div className="space-y-4">
               <ToggleRow 
@@ -78,13 +78,13 @@ export default function SeamView({ t, showToast }: any) {
                  <Globe className="w-5 h-5 text-primary" />
                  <h3 className="font-serif text-xl font-medium">{t('portal_public_preview', 'Public Preview')}</h3>
                </div>
-               <span className="text-[10px] uppercase font-bold tracking-widest text-primary bg-primary/10 px-2 py-1 rounded-full">{t('portal_live', 'Live')}</span>
+               <span className="text-[11px] uppercase font-bold tracking-widest text-primary bg-primary/10 px-2 py-1 rounded-full">{t('portal_live', 'Live')}</span>
              </div>
              
              <div className="bg-card border border-border shadow-md p-6 rounded-[24px] relative z-10 transition-all duration-500">
                <div className="w-12 h-12 rounded-full bg-primary/10 text-primary flex items-center justify-center font-bold text-lg mb-4">A</div>
                <h4 className="text-lg font-serif font-medium mb-1">Adriatica Grupa</h4>
-               <div className="text-[10px] uppercase font-bold tracking-widest text-muted-foreground mb-4">Manufacturing</div>
+               <div className="text-[11px] uppercase font-bold tracking-widest text-muted-foreground mb-4">Manufacturing</div>
                
                <div className="space-y-3 pt-4 border-t border-border">
                  {localProfile.shareCommittees ? (
@@ -118,7 +118,7 @@ export default function SeamView({ t, showToast }: any) {
                  <div key={i} className="relative">
                    <div className="absolute -left-[29px] top-1.5 w-2.5 h-2.5 rounded-full bg-background border-2 border-primary z-10"/>
                    <div className="text-xs font-bold text-foreground mb-0.5">{h.action}</div>
-                   <div className="text-[10px] text-muted-foreground font-medium">{h.date}</div>
+                   <div className="text-[11px] text-muted-foreground font-medium">{h.date}</div>
                  </div>
                ))}
              </div>

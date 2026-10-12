@@ -3,7 +3,7 @@ import { useI18n } from '@/lib/i18n';
 import { platformData } from '@/data/platform';
 import { motion, AnimatePresence } from 'framer-motion';
 import { FileText, ShieldAlert, ChevronDown, ChevronUp, TrendingUp, TrendingDown, Users, BarChart3, Building } from 'lucide-react';
-import { cn } from '@/lib/utils';
+import { cn, parseEuro, fmtEuro } from '@/lib/utils';
 
 const TIER_SPLIT = { events: [0.5736, 0.3208, 0.1057], intros: [0.4433, 0.5567], marketplace: [0.4167, 0.5833] };
 
@@ -14,7 +14,22 @@ export function BoardSummaryView() {
   const [expandedKpi, setExpandedKpi] = useState<string | null>(null);
   const [expandedSections, setExpandedSections] = useState<Record<string, boolean>>({ wins: true, risks: true });
 
-  const data = (platformData.console as any).rollup[quarter];
+  const rollup = (platformData.console as any).rollup[quarter];
+  // The live quarter is computed from the member book, so it always matches
+  // the at-risk figure on Analytics, Reports and Retention.
+  const members = platformData.allMembers;
+  const atRisk = members.filter((c) => c.lifecycle === 'at-risk').reduce((sum, c) => sum + parseEuro(c.fee), 0);
+  const bookTotal = members.reduce((sum, c) => sum + parseEuro(c.fee), 0);
+  const pct = (k: number) => Math.round((k / members.length) * 100);
+  const high = pct(members.filter((c) => c.score >= 80).length);
+  const mid = pct(members.filter((c) => c.score >= 60 && c.score < 80).length);
+  const data = quarter === 'Q3 2026'
+    ? {
+        ...rollup,
+        retention: { protected: fmtEuro(bookTotal - atRisk), atRisk: fmtEuro(atRisk) },
+        healthTrend: { ...rollup.healthTrend, scoreBands: { high, mid, low: 100 - high - mid } },
+      }
+    : rollup;
 
   const toggleSection = (sec: string) => {
     setExpandedSections(prev => ({ ...prev, [sec]: !prev[sec] }));
@@ -57,14 +72,14 @@ export function BoardSummaryView() {
 
       {data.isForecast && (
         <div className="mb-8 print:mb-4 px-6 py-4 rounded-2xl border-2 border-dashed border-amber-500/40 bg-amber-500/5 flex items-center gap-3 text-sm">
-          <span className="px-3 py-1 rounded-full bg-amber-500/15 text-amber-700 text-[10px] font-bold uppercase tracking-widest shrink-0">Forecast</span>
+          <span className="px-3 py-1 rounded-full bg-amber-500/15 text-amber-700 text-[11px] font-bold uppercase tracking-widest shrink-0">Forecast</span>
           <span className="text-muted-foreground font-medium print:text-gray-700">{data.methodology} Figures below are projected, not measured.</span>
         </div>
       )}
 
       {/* Print Header */}
       <div className="hidden print:block border-b-4 border-black pb-4 mb-8">
-        <div className="text-[10px] font-bold uppercase tracking-widest text-gray-500 mb-2">AmCham Serbia{data.isForecast ? ' · Forecast — Not Measured Data' : ''}</div>
+        <div className="text-[11px] font-bold uppercase tracking-widest text-gray-500 mb-2">AmCham Serbia{data.isForecast ? ' · Forecast — Not Measured Data' : ''}</div>
         <h1 className="text-4xl font-serif font-light text-black">Board Summary — {quarter}</h1>
       </div>
 
@@ -79,7 +94,7 @@ export function BoardSummaryView() {
           {/* Top Level KPIs */}
           <div className="bg-card rounded-[40px] border border-border p-10 md:p-14 shadow-sm flex flex-col justify-center print:border-none print:shadow-none print:p-0">
              <div className="flex justify-between items-start mb-8">
-               <div className="text-[10px] uppercase font-bold text-muted-foreground tracking-widest print:text-black">{t('platform.console.health_trend', 'Member Health Trend')}</div>
+               <div className="text-[11px] uppercase font-bold text-muted-foreground tracking-widest print:text-black">{t('platform.console.health_trend', 'Member Health Trend')}</div>
                <div className="flex items-center gap-1 text-xs font-bold text-green-500 bg-green-500/10 px-3 py-1 rounded-full"><TrendingUp className="w-3 h-3"/> {data.healthTrend.delta} pts</div>
              </div>
              <div className="text-7xl md:text-9xl font-serif font-light tabular-nums tracking-tight mb-10 text-foreground print:text-black">
@@ -87,7 +102,7 @@ export function BoardSummaryView() {
              </div>
              
              <div className="space-y-2">
-               <div className="flex justify-between text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
+               <div className="flex justify-between text-[11px] font-bold uppercase tracking-widest text-muted-foreground">
                  <span>High ({data.healthTrend.scoreBands.high}%)</span>
                  <span>Mid ({data.healthTrend.scoreBands.mid}%)</span>
                  <span>Low ({data.healthTrend.scoreBands.low}%)</span>
@@ -100,18 +115,18 @@ export function BoardSummaryView() {
              </div>
           </div>
 
-          <div className="bg-foreground text-background rounded-[40px] p-10 md:p-14 shadow-lg relative overflow-hidden print:bg-white print:text-black print:border-none print:shadow-none print:p-0 print:border-t-2 print:border-black print:rounded-none">
+          <div className="ink bg-foreground text-background rounded-[40px] p-10 md:p-14 shadow-lg relative overflow-hidden print:bg-white print:text-black print:border-none print:shadow-none print:p-0 print:border-t-2 print:border-black print:rounded-none">
             <svg className="absolute bottom-0 right-0 w-80 h-40 opacity-20 pointer-events-none print:hidden" viewBox="0 0 100 50">
               <path d="M0,45 Q15,45 25,30 T50,35 T75,15 T100,20" fill="none" stroke="currentColor" className="text-accent" strokeWidth="4" strokeLinecap="round" />
             </svg>
-            <div className="text-[10px] uppercase font-bold text-accent tracking-widest mb-10 print:text-black flex justify-between items-center">
+            <div className="text-[11px] uppercase font-bold text-accent tracking-widest mb-10 print:text-black flex justify-between items-center">
               <span>Retention Outlook</span>
               <span className="bg-background/20 px-3 py-1 rounded-full text-background">Coverage: 100%</span>
             </div>
             
             <div className="space-y-8">
               <div>
-                <div className="text-xs font-medium text-background/70 uppercase tracking-widest mb-2 print:text-gray-600">{t('platform.console.protected_revenue', 'Protected Revenue')}</div>
+                <div className="text-xs font-medium text-background/80 uppercase tracking-widest mb-2 print:text-gray-600">{t('platform.console.protected_revenue', 'Protected Revenue')}</div>
                 <div className="text-6xl font-serif font-light tabular-nums print:text-black">{data.retention.protected}</div>
               </div>
               <div className="pt-8 border-t border-background/20 print:border-gray-300">
@@ -124,7 +139,7 @@ export function BoardSummaryView() {
           </div>
 
           <div className="lg:col-span-2 bg-card rounded-[40px] border border-border p-10 md:p-14 shadow-sm print:border-none print:shadow-none print:p-0 print:border-t-2 print:border-black print:rounded-none">
-            <div className="text-[10px] uppercase font-bold text-muted-foreground tracking-widest mb-10 print:text-black flex items-center gap-2"><BarChart3 className="w-4 h-4"/> {t('platform.console.engagement_kpis', 'Core Engagement KPIs')}</div>
+            <div className="text-[11px] uppercase font-bold text-muted-foreground tracking-widest mb-10 print:text-black flex items-center gap-2"><BarChart3 className="w-4 h-4"/> {t('platform.console.engagement_kpis', 'Core Engagement KPIs')}</div>
             <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
                {Object.entries(data.kpis).map(([key, value]) => {
                  const isExpanded = expandedKpi === key;
@@ -169,7 +184,7 @@ export function BoardSummaryView() {
 
           <div className="bg-card rounded-[40px] border border-border overflow-hidden shadow-sm print:border-none print:shadow-none print:p-0 flex flex-col">
              <div className="p-8 bg-green-500/10 border-b border-border print:bg-white print:border-b-2 print:border-black flex justify-between items-center cursor-pointer select-none" onClick={() => toggleSection('wins')}>
-               <div className="text-[10px] uppercase font-bold text-green-600 tracking-widest print:text-black">{t('platform.console.top_wins', 'Top Wins')}</div>
+               <div className="text-[11px] uppercase font-bold text-green-600 tracking-widest print:text-black">{t('platform.console.top_wins', 'Top Wins')}</div>
                <div className="text-green-600 print:hidden">{expandedSections.wins ? <ChevronUp className="w-4 h-4"/> : <ChevronDown className="w-4 h-4"/>}</div>
              </div>
              <AnimatePresence>
@@ -192,7 +207,7 @@ export function BoardSummaryView() {
 
           <div className="bg-card rounded-[40px] border border-border overflow-hidden shadow-sm print:border-none print:shadow-none print:p-0 flex flex-col">
              <div className="p-8 bg-primary/10 border-b border-border print:bg-white print:border-b-2 print:border-black flex justify-between items-center cursor-pointer select-none" onClick={() => toggleSection('risks')}>
-               <div className="text-[10px] uppercase font-bold text-primary tracking-widest print:text-black flex items-center gap-2">
+               <div className="text-[11px] uppercase font-bold text-primary tracking-widest print:text-black flex items-center gap-2">
                  <ShieldAlert className="w-4 h-4"/> {t('platform.console.top_risks', 'Active Risks')}
                </div>
                <div className="text-primary print:hidden">{expandedSections.risks ? <ChevronUp className="w-4 h-4"/> : <ChevronDown className="w-4 h-4"/>}</div>

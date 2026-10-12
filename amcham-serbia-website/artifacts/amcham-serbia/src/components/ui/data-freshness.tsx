@@ -22,7 +22,7 @@ export function DataFreshness({ className }: { className?: string }) {
   }, []);
 
   return (
-    <span className={className || "inline-flex items-center gap-1.5 text-[10px] font-bold text-muted-foreground uppercase tracking-widest"}>
+    <span className={className || "inline-flex items-center gap-1.5 text-[11px] font-bold text-muted-foreground uppercase tracking-widest"}>
       <RefreshCw className="w-3 h-3" />
       Synced {formatElapsed(seconds)}
     </span>

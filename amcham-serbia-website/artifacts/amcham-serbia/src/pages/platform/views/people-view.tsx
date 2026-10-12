@@ -74,11 +74,11 @@ export default function PeopleView({ t, showToast }: any) {
           <table className="w-full text-left border-collapse">
             <thead className="bg-muted/20 border-b border-border">
               <tr>
-                <th className="p-6 text-[10px] uppercase font-bold text-muted-foreground tracking-widest">Name</th>
-                <th className="p-6 text-[10px] uppercase font-bold text-muted-foreground tracking-widest">Role</th>
-                <th className="p-6 text-[10px] uppercase font-bold text-muted-foreground tracking-widest">Status</th>
-                <th className="p-6 text-[10px] uppercase font-bold text-muted-foreground tracking-widest">Last Access</th>
-                <th className="p-6 text-[10px] uppercase font-bold text-muted-foreground tracking-widest text-right">Actions</th>
+                <th className="p-6 text-[11px] uppercase font-bold text-muted-foreground tracking-widest">Name</th>
+                <th className="p-6 text-[11px] uppercase font-bold text-muted-foreground tracking-widest">Role</th>
+                <th className="p-6 text-[11px] uppercase font-bold text-muted-foreground tracking-widest">Status</th>
+                <th className="p-6 text-[11px] uppercase font-bold text-muted-foreground tracking-widest">Last Access</th>
+                <th className="p-6 text-[11px] uppercase font-bold text-muted-foreground tracking-widest text-right">Actions</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-border">
@@ -93,7 +93,7 @@ export default function PeopleView({ t, showToast }: any) {
                       </div>
                     </td>
                     <td className="p-6">
-                      <span className={cn("text-[10px] uppercase font-bold tracking-widest px-3 py-1 rounded-full", p.role === 'admin' ? "bg-primary/10 text-primary" : "bg-muted text-muted-foreground")}>
+                      <span className={cn("text-[11px] uppercase font-bold tracking-widest px-3 py-1 rounded-full", p.role === 'admin' ? "bg-primary/10 text-primary" : "bg-muted text-muted-foreground")}>
                         {p.role}
                       </span>
                     </td>
@@ -125,7 +125,7 @@ export default function PeopleView({ t, showToast }: any) {
                             <div className="p-6 md:p-10 grid grid-cols-1 md:grid-cols-2 gap-8 md:gap-12">
                               {/* Permissions Summary */}
                               <div>
-                                 <div className="text-[10px] uppercase font-bold text-muted-foreground tracking-widest mb-4">Permissions Overview</div>
+                                 <div className="text-[11px] uppercase font-bold text-muted-foreground tracking-widest mb-4">Permissions Overview</div>
                                  <ul className="space-y-3">
                                    <li className="flex items-center gap-2 text-sm"><CheckCircle className="w-4 h-4 text-green-500"/> View Member Directory</li>
                                    <li className="flex items-center gap-2 text-sm"><CheckCircle className="w-4 h-4 text-green-500"/> Register for Events</li>
@@ -144,7 +144,7 @@ export default function PeopleView({ t, showToast }: any) {
                               </div>
                               {/* Access Logs */}
                               <div>
-                                 <div className="text-[10px] uppercase font-bold text-muted-foreground tracking-widest mb-4">Recent Activity</div>
+                                 <div className="text-[11px] uppercase font-bold text-muted-foreground tracking-widest mb-4">Recent Activity</div>
                                  {p.status === 'pending' ? (
                                    <div className="text-sm text-muted-foreground italic">User has not activated their account yet.</div>
                                  ) : (

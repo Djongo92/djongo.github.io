@@ -5,11 +5,16 @@ import { useI18n } from '@/lib/i18n';
 import { SEO } from '@/components/seo';
 import { ArrowLeft, Calendar, Tag } from 'lucide-react';
 
+const NEWS_IMAGES = ['images/real/event.jpg', 'images/event-panel.jpg', 'images/office-meeting.jpg'];
+
 export default function NewsDetail() {
   const [, params] = useRoute('/news/:id');
   const { lang, t } = useI18n();
   
-  const news = mockNews.find(n => n.id === params?.id);
+  const newsIndex = mockNews.findIndex(n => n.id === params?.id);
+  const news = mockNews[newsIndex];
+  // Same rotation the home page uses for its news thumbnails, so a story keeps its picture.
+  const heroImage = NEWS_IMAGES[Math.max(newsIndex, 0) % NEWS_IMAGES.length];
 
   if (!news) {
     return <div className="p-24 text-center">{t('common.no_results')}</div>;
@@ -26,7 +31,7 @@ export default function NewsDetail() {
       {/* Header */}
       <section className="bg-secondary text-secondary-foreground pt-12 pb-24">
         <div className="container mx-auto px-4 md:px-8">
-          <Link href="/news" className="inline-flex items-center gap-2 text-sm font-semibold hover:text-secondary-foreground mb-12 text-muted-foreground transition-colors">
+          <Link href="/news" className="inline-flex items-center gap-2 text-sm font-semibold hover:text-secondary-foreground mb-12 text-secondary-foreground/80 transition-colors">
             <ArrowLeft className="w-4 h-4" /> {t('news.back')}
           </Link>
           
@@ -47,7 +52,9 @@ export default function NewsDetail() {
 
       {/* Main Content */}
       <section className="container mx-auto px-4 md:px-8 -mt-12">
-        <div className="bg-card border border-border p-8 md:p-16 shadow-xl rounded-sm max-w-4xl mx-auto">
+        <div className="bg-card border border-border shadow-xl rounded-sm max-w-4xl mx-auto overflow-hidden">
+          <img src={`${import.meta.env.BASE_URL}${heroImage}`} alt="" className="w-full aspect-[16/7] object-cover" />
+          <div className="p-8 md:p-16">
           <div className="prose prose-stone prose-lg max-w-none text-foreground leading-relaxed">
             <p className="lead text-xl font-medium text-muted-foreground mb-8">
               {lang === 'sr' ? news.summarySr : news.summary}
@@ -55,6 +62,7 @@ export default function NewsDetail() {
             {content.split('\n\n').map((paragraph, idx) => (
               <p key={idx}>{paragraph}</p>
             ))}
+          </div>
           </div>
         </div>
       </section>

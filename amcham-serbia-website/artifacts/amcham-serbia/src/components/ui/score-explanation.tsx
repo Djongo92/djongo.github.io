@@ -35,7 +35,7 @@ export function ScoreExplanation({ companyId, children }: { companyId: string; c
       </TooltipTrigger>
       <TooltipContent className="max-w-xs bg-foreground text-background p-4 rounded-2xl text-xs leading-relaxed space-y-2 shadow-xl">
         <p className="font-medium">{explanation.text}</p>
-        <AiBadge className="bg-background/10 border-background/10 text-background/70" />
+        <AiBadge className="bg-background/10 border-background/10 text-background/80" />
       </TooltipContent>
     </Tooltip>
   );

@@ -15,7 +15,7 @@ interface Integration {
 const INITIAL: Integration[] = [
   { id: 'linkedin', name: 'LinkedIn', desc: 'Company page follower counts and post engagement for Social Presence scoring.', icon: Linkedin, connected: true, lastSynced: '4 hours ago' },
   { id: 'gcal', name: 'Google Calendar', desc: 'Syncs committee meetings and events into your staff calendar.', icon: Calendar, connected: true, lastSynced: '11 minutes ago' },
-  { id: 'slack', name: 'Slack', desc: 'Posts Ritual queue alerts and renewal-risk flags into #membership-team.', icon: MessageCircle, connected: true, lastSynced: '2 hours ago' },
+  { id: 'slack', name: 'Slack', desc: 'Posts new priorities and renewal-risk flags into #membership-team.', icon: MessageCircle, connected: true, lastSynced: '2 hours ago' },
   { id: 'places', name: 'Google Places', desc: 'Business profile presence checks for the directory.', icon: MapPin, connected: true, lastSynced: '1 day ago' },
   { id: 'mailchimp', name: 'Mailchimp', desc: 'Outreach queue sync for email campaign follow-ups.', icon: Mail, connected: false, lastSynced: '—' },
   { id: 'ga', name: 'Google Analytics', desc: 'Member-site traffic signals feeding Market Signals scoring.', icon: BarChart3, connected: true, lastSynced: '38 minutes ago' },
@@ -53,16 +53,16 @@ export function IntegrationsView({ showToast }: { showToast: (m: string) => void
                 <div>
                   <div className="font-bold text-foreground">{i.name}</div>
                   {i.connected ? (
-                    <div className="text-[10px] font-bold text-emerald-600 uppercase tracking-widest flex items-center gap-1 mt-0.5"><CheckCircle2 className="w-3 h-3" /> Connected</div>
+                    <div className="text-[11px] font-bold text-emerald-600 uppercase tracking-widest flex items-center gap-1 mt-0.5"><CheckCircle2 className="w-3 h-3" /> Connected</div>
                   ) : (
-                    <div className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest mt-0.5">Not connected</div>
+                    <div className="text-[11px] font-bold text-muted-foreground uppercase tracking-widest mt-0.5">Not connected</div>
                   )}
                 </div>
               </div>
               <Switch checked={i.connected} onCheckedChange={() => toggle(i.id)} />
             </div>
             <p className="text-xs text-muted-foreground leading-relaxed">{i.desc}</p>
-            <div className="pt-3 border-t border-border/50 flex items-center gap-1.5 text-[10px] font-bold text-muted-foreground uppercase tracking-widest">
+            <div className="pt-3 border-t border-border/50 flex items-center gap-1.5 text-[11px] font-bold text-muted-foreground uppercase tracking-widest">
               <RefreshCw className="w-3 h-3" /> Last synced: {i.lastSynced}
             </div>
           </div>

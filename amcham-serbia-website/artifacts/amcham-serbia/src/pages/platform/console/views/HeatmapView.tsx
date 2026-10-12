@@ -60,7 +60,7 @@ export function HeatmapView({ navigateTo, roleParam }: any) {
         </div>
       </div>
 
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 text-[10px] font-bold text-muted-foreground uppercase tracking-widest px-2">
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 text-[11px] font-bold text-muted-foreground uppercase tracking-widest px-2">
         <div className="flex items-center gap-6">
           <span className="flex items-center gap-2"><div className="w-3.5 h-3.5 rounded-full bg-emerald-500/20 border border-emerald-500/40 shadow-sm"></div> Healthy (80+)</span>
           <span className="flex items-center gap-2"><div className="w-3.5 h-3.5 rounded-full bg-amber-500/20 border border-amber-500/40 shadow-sm"></div> Monitor (60-79)</span>
@@ -102,7 +102,7 @@ export function HeatmapView({ navigateTo, roleParam }: any) {
                   <div className="text-xs font-bold truncate mb-3 text-foreground tracking-tight">{c.name}</div>
                   <div className="flex justify-between items-end">
                     <span className="text-3xl font-serif font-medium leading-none tracking-tighter tabular-nums">{c.score}</span>
-                    <span className="text-[10px] font-bold uppercase tracking-widest px-1.5 py-0.5 rounded-md bg-white/40 shadow-sm tabular-nums">{c.scoreTrend > 0 ? `+${c.scoreTrend}` : c.scoreTrend}</span>
+                    <span className="text-[11px] font-bold uppercase tracking-widest px-1.5 py-0.5 rounded-md bg-white/40 shadow-sm tabular-nums">{c.scoreTrend > 0 ? `+${c.scoreTrend}` : c.scoreTrend}</span>
                   </div>
                 </button>
               ))}
@@ -160,12 +160,12 @@ export function HeatmapView({ navigateTo, roleParam }: any) {
                              <ScoreExplanation companyId={c.id}>
                                <div className="text-3xl font-serif leading-none tabular-nums">{c.score}</div>
                              </ScoreExplanation>
-                             <div className={cn("text-[10px] font-bold uppercase tracking-widest mt-1", c.scoreTrend > 0 ? "text-emerald-500" : "text-destructive")}>{c.scoreTrend > 0 ? `+${c.scoreTrend}` : c.scoreTrend}</div>
+                             <div className={cn("text-[11px] font-bold uppercase tracking-widest mt-1", c.scoreTrend > 0 ? "text-emerald-500" : "text-destructive")}>{c.scoreTrend > 0 ? `+${c.scoreTrend}` : c.scoreTrend}</div>
                            </div>
                          </div>
 
                          <div className="mb-4">
-                           <div className="flex justify-between items-center text-[10px] font-bold uppercase tracking-widest text-muted-foreground mb-1.5">
+                           <div className="flex justify-between items-center text-[11px] font-bold uppercase tracking-widest text-muted-foreground mb-1.5">
                              <span>{c.history.length}-Month Trend</span>
                              <span className="tabular-nums">{c.history[0].score} → {c.score}</span>
                            </div>
@@ -177,7 +177,7 @@ export function HeatmapView({ navigateTo, roleParam }: any) {
 
                          <div className="space-y-3">
                            <div>
-                             <div className="flex justify-between text-[10px] font-bold uppercase tracking-widest text-muted-foreground mb-1">
+                             <div className="flex justify-between text-[11px] font-bold uppercase tracking-widest text-muted-foreground mb-1">
                                <span>Events & Committees</span>
                                <span>{Math.min(c.score + 10, 100)}%</span>
                              </div>
@@ -186,7 +186,7 @@ export function HeatmapView({ navigateTo, roleParam }: any) {
                              </div>
                            </div>
                            <div>
-                             <div className="flex justify-between text-[10px] font-bold uppercase tracking-widest text-muted-foreground mb-1">
+                             <div className="flex justify-between text-[11px] font-bold uppercase tracking-widest text-muted-foreground mb-1">
                                <span>Portal Activity</span>
                                <span>{Math.max(c.score - 20, 10)}%</span>
                              </div>

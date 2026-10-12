@@ -19,7 +19,7 @@ interface ShowcaseStep {
 const STEPS: ShowcaseStep[] = [
   { path: '/platform/console?view=ritual&role=lead&tour=off', titleKey: 'showcase.step1_title', descKey: 'showcase.step1_desc' },
   { path: '/platform/console?view=heatmap&company=adr&role=lead&tour=off', titleKey: 'showcase.step2_title', descKey: 'showcase.step2_desc' },
-  { path: '/platform/console?view=network&role=lead&tour=off', titleKey: 'showcase.step3_title', descKey: 'showcase.step3_desc' },
+  { path: '/platform/console?view=network&focus=adr&role=lead&tour=off', titleKey: 'showcase.step3_title', descKey: 'showcase.step3_desc' },
   { path: '/platform/console?view=retention&role=lead&tour=off', titleKey: 'showcase.step4_title', descKey: 'showcase.step4_desc' },
   { path: '/platform/console?view=ask&role=lead&tour=off', titleKey: 'showcase.step5_title', descKey: 'showcase.step5_desc' },
   { path: '/platform/console?view=matchmaking&role=lead&tour=off', titleKey: 'showcase.step6_title', descKey: 'showcase.step6_desc' },

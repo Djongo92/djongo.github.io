@@ -10,11 +10,11 @@ function TicketDrawer({ ticket, onClose }: { ticket: any, onClose: () => void })
       <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="absolute inset-0 bg-background/80 backdrop-blur-sm" onClick={onClose} />
       <motion.div initial={{ x: '100%' }} animate={{ x: 0 }} exit={{ x: '100%' }} transition={{ type: 'spring', damping: 25, stiffness: 200 }} className="relative z-10 w-full max-w-md bg-card border-l border-border h-full overflow-y-auto shadow-2xl p-8">
         <button onClick={onClose} className="absolute top-8 right-8 text-muted-foreground hover:text-foreground"><X className="w-5 h-5"/></button>
-        <div className="text-[10px] uppercase font-bold text-muted-foreground tracking-widest mb-2">{ticket.id}</div>
+        <div className="text-[11px] uppercase font-bold text-muted-foreground tracking-widest mb-2">{ticket.id}</div>
         <h3 className="text-2xl font-serif font-light mb-6 pr-8">{ticket.title}</h3>
         
         <div className="bg-muted/30 rounded-3xl p-6 border border-border mb-8">
-           <div className="text-[10px] uppercase font-bold text-muted-foreground tracking-widest mb-4">Status Timeline</div>
+           <div className="text-[11px] uppercase font-bold text-muted-foreground tracking-widest mb-4">Status Timeline</div>
            <div className="space-y-6 relative before:absolute before:inset-0 before:left-3 before:h-full before:w-px before:bg-border">
              {ticket.timeline.map((event:any, idx:number) => (
                 <div key={idx} className="relative flex gap-4">
@@ -95,7 +95,7 @@ export default function BillingView({ t, showToast }: any) {
       <div className="bg-card border border-border p-8 md:p-10 rounded-[40px] shadow-sm cursor-pointer hover:shadow-md transition-all group" onClick={() => setSpendExpanded(!spendExpanded)}>
         <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
           <div>
-            <div className="text-[10px] uppercase font-bold text-muted-foreground tracking-widest mb-2">YTD Spend Analytics</div>
+            <div className="text-[11px] uppercase font-bold text-muted-foreground tracking-widest mb-2">YTD Spend Analytics</div>
             <div className="flex items-end gap-4">
               <h2 className="text-4xl md:text-5xl font-serif font-light tabular-nums">{spendData.total}</h2>
               <span className="text-sm font-bold text-green-500 mb-2 flex items-center gap-1"><TrendingUp className="w-4 h-4"/> {spendData.trend}</span>
@@ -136,10 +136,10 @@ export default function BillingView({ t, showToast }: any) {
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         
-        <div className="bg-foreground text-background p-8 md:p-12 rounded-[40px] shadow-xl relative overflow-hidden flex flex-col justify-between group">
+        <div className="ink bg-foreground text-background p-8 md:p-12 rounded-[40px] shadow-xl relative overflow-hidden flex flex-col justify-between group">
           <div className="absolute -right-20 -top-20 w-72 h-72 rounded-full bg-[#40D9F1]/10 pointer-events-none" />
           <div className="relative z-10 mb-8">
-            <div className="text-[10px] uppercase font-bold text-[#40D9F1] tracking-widest mb-4 flex items-center gap-2"><ShieldCheck className="w-4 h-4"/> Renewal Status</div>
+            <div className="text-[11px] uppercase font-bold text-[#40D9F1] tracking-widest mb-4 flex items-center gap-2"><ShieldCheck className="w-4 h-4"/> Renewal Status</div>
             <h2 className="text-4xl md:text-5xl font-serif font-light mb-2">Oct 15, 2026</h2>
             <p className="text-background/80 text-sm">Your next renewal date. (42 days away)</p>
           </div>
@@ -154,7 +154,7 @@ export default function BillingView({ t, showToast }: any) {
 
         <div className="bg-card border border-border p-8 md:p-10 rounded-[40px] shadow-sm flex flex-col justify-between">
            <div>
-             <div className="text-[10px] uppercase font-bold text-muted-foreground tracking-widest mb-6">Payment Method</div>
+             <div className="text-[11px] uppercase font-bold text-muted-foreground tracking-widest mb-6">Payment Method</div>
              <div className="flex items-center gap-4 bg-muted/30 p-4 rounded-2xl border border-border">
                <CreditCard className="w-6 h-6 text-primary" />
                <div className="font-bold text-sm text-foreground">{billing.paymentMethod}</div>
@@ -173,17 +173,17 @@ export default function BillingView({ t, showToast }: any) {
         <div className="lg:col-span-2 bg-card border border-border rounded-[40px] shadow-sm overflow-hidden flex flex-col">
           <div className="p-8 border-b border-border flex items-center justify-between">
             <h3 className="font-serif text-2xl font-light">Invoice History</h3>
-            <div className="text-[10px] uppercase font-bold text-muted-foreground tracking-widest">Click row to expand</div>
+            <div className="text-[11px] uppercase font-bold text-muted-foreground tracking-widest">Click row to expand</div>
           </div>
           <div className="overflow-x-auto flex-1">
             <table className="w-full text-left border-collapse">
               <thead className="bg-muted/20 border-b border-border">
                 <tr>
-                  <th className="p-6 text-[10px] uppercase font-bold text-muted-foreground tracking-widest">Date</th>
-                  <th className="p-6 text-[10px] uppercase font-bold text-muted-foreground tracking-widest">Invoice #</th>
-                  <th className="p-6 text-[10px] uppercase font-bold text-muted-foreground tracking-widest">Amount</th>
-                  <th className="p-6 text-[10px] uppercase font-bold text-muted-foreground tracking-widest">Status</th>
-                  <th className="p-6 text-[10px] uppercase font-bold text-muted-foreground tracking-widest text-right">Actions</th>
+                  <th className="p-6 text-[11px] uppercase font-bold text-muted-foreground tracking-widest">Date</th>
+                  <th className="p-6 text-[11px] uppercase font-bold text-muted-foreground tracking-widest">Invoice #</th>
+                  <th className="p-6 text-[11px] uppercase font-bold text-muted-foreground tracking-widest">Amount</th>
+                  <th className="p-6 text-[11px] uppercase font-bold text-muted-foreground tracking-widest">Status</th>
+                  <th className="p-6 text-[11px] uppercase font-bold text-muted-foreground tracking-widest text-right">Actions</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-border">
@@ -197,7 +197,7 @@ export default function BillingView({ t, showToast }: any) {
                       <td className="p-6 text-sm text-muted-foreground">{inv.id}</td>
                       <td className="p-6 text-sm font-medium tabular-nums">{inv.amount}</td>
                       <td className="p-6">
-                        <span className="text-[10px] uppercase font-bold tracking-widest bg-green-500/10 text-green-600 px-3 py-1 rounded-full">{inv.status}</span>
+                        <span className="text-[11px] uppercase font-bold tracking-widest bg-green-500/10 text-green-600 px-3 py-1 rounded-full">{inv.status}</span>
                       </td>
                       <td className="p-6 text-right">
                         {downloadedInvoices.includes(inv.id) ? (
@@ -235,7 +235,7 @@ export default function BillingView({ t, showToast }: any) {
 
         {/* SUPPORT TICKETS */}
         <div className="bg-card border border-border rounded-[40px] shadow-sm overflow-hidden p-8 flex flex-col">
-           <div className="text-[10px] uppercase font-bold text-muted-foreground tracking-widest mb-6">Support Tickets</div>
+           <div className="text-[11px] uppercase font-bold text-muted-foreground tracking-widest mb-6">Support Tickets</div>
            <div className="space-y-4 flex-1">
              {supportTickets.map(ticket => (
                <div key={ticket.id} onClick={() => setSelectedTicket(ticket)} className="p-4 rounded-2xl border border-border hover:border-primary/50 cursor-pointer transition-colors flex flex-col gap-3 group">
@@ -244,7 +244,7 @@ export default function BillingView({ t, showToast }: any) {
                      <div className="font-bold text-sm text-foreground mb-1 group-hover:text-primary transition-colors">{ticket.title}</div>
                      <div className="text-xs text-muted-foreground">{ticket.id} &bull; {ticket.date}</div>
                    </div>
-                   <span className={cn("text-[10px] uppercase font-bold tracking-widest px-2 py-1 rounded-full shrink-0", ticket.status === 'Resolved' ? "bg-green-500/10 text-green-600" : "bg-orange-500/10 text-orange-600")}>{ticket.status}</span>
+                   <span className={cn("text-[11px] uppercase font-bold tracking-widest px-2 py-1 rounded-full shrink-0", ticket.status === 'Resolved' ? "bg-green-500/10 text-green-600" : "bg-orange-500/10 text-orange-600")}>{ticket.status}</span>
                  </div>
                </div>
              ))}

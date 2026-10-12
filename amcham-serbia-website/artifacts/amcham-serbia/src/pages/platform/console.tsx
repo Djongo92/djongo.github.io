@@ -9,7 +9,7 @@ import {
   CheckSquare, Inbox, Repeat, ArrowRight,
   Search, X, Check, Eye, Download, ChevronLeft,
   Command, Menu, Phone, Activity, Globe, Mail, Plus, Book, Award, Landmark,
-  BarChart3, FileBarChart2, Bell, Keyboard, Network
+  BarChart3, FileBarChart2, Bell, Keyboard, Network, Radar, UserCog, ChevronDown, Languages
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Link } from 'wouter';
@@ -27,7 +27,7 @@ import { ConsoleStateProvider } from './console/console-state';
 import { ThemeToggle } from '@/components/ui/theme-toggle';
 
 export default function Console() {
-  const { t } = useI18n();
+  const { t, lang, setLang } = useI18n();
   const searchString = useSearch();
   const [location, setLocation] = useLocation();
   const searchParams = new URLSearchParams(searchString);
@@ -127,66 +127,82 @@ export default function Console() {
     ? roleParam === 'lead' || !['my-team', 'board-summary'].includes(view)
     : ['board-summary', 'retention', 'heatmap', 'analytics', 'network'].includes(view);
 
-  const navGroups = [];
+  type NavItem = { id: string; icon: React.ComponentType<{ className?: string }>; label: string; badge: number };
+  const navGroups: { title: string; items: NavItem[] }[] = [];
+  const item = (id: string, icon: NavItem['icon'], label: string, badge = 0): NavItem => ({ id, icon, label, badge });
 
   if (roleParam === 'exec') {
     navGroups.push(
+      { title: t('platform.console.nav_today'), items: [item('board-summary', FileText, t('platform.console.nav_board_summary'))] },
       {
-        title: t('platform.console.nav_daily'),
+        title: t('platform.console.nav_relationships'),
         items: [
-          { id: 'board-summary', icon: FileText, label: t('platform.console.nav_board_summary'), badge: 0 }
-        ]
+          item('heatmap', BarChart, t('platform.console.heatmap')),
+          item('retention', AlertTriangle, t('platform.console.retention')),
+          item('analytics', BarChart3, t('platform.console.nav_analytics', 'Analytics')),
+          item('network', Network, t('platform.console.nav_network', 'Network')),
+        ],
       },
-      {
-        title: t('platform.console.nav_tools'),
-        items: [
-          { id: 'heatmap', icon: BarChart, label: t('platform.console.heatmap'), badge: 0 },
-          { id: 'retention', icon: AlertTriangle, label: t('platform.console.retention'), badge: 0 },
-          { id: 'analytics', icon: BarChart3, label: t('platform.console.nav_analytics', 'Analytics'), badge: 0 },
-          { id: 'network', icon: Network, label: 'Network', badge: 0 }
-        ]
-      }
     );
   } else {
     navGroups.push(
       {
-        title: t('platform.console.nav_daily'),
+        title: t('platform.console.nav_today'),
         items: [
-          { id: 'ritual', icon: Target, label: t('platform.console.ritual'), badge: navBadges.ritual },
-          { id: 'flags', icon: Flag, label: t('platform.console.flags'), badge: navBadges.flags },
-          { id: 'approvals', icon: CheckSquare, label: t('platform.console.approvals'), badge: navBadges.approvals },
-        ]
-      }
+          item('ritual', Target, t('platform.console.ritual'), navBadges.ritual),
+          item('flags', Flag, t('platform.console.flags'), navBadges.flags),
+          item('approvals', CheckSquare, t('platform.console.approvals'), navBadges.approvals),
+        ],
+      },
+      {
+        title: t('platform.console.nav_relationships'),
+        items: [
+          item('heatmap', BarChart, t('platform.console.heatmap')),
+          item('accounts', Users, t('platform.console.accounts')),
+          item('ask', Search, t('platform.console.ask')),
+          item('retention', AlertTriangle, t('platform.console.retention')),
+          item('analytics', BarChart3, t('platform.console.nav_analytics', 'Analytics')),
+          item('network', Network, t('platform.console.nav_network', 'Network')),
+        ],
+      },
+      {
+        title: t('platform.console.nav_operations'),
+        items: [
+          item('outreach', MessageSquare, t('platform.console.outreach')),
+          item('matchmaking', Handshake, t('platform.console.matchmaking')),
+          item('sponsorship', Award, t('platform.console.nav_sponsorship', 'Sponsorship')),
+          item('committees', Landmark, t('platform.console.nav_committees', 'Committees')),
+          item('intelligence', Radar, t('platform.console.nav.intelligence')),
+        ],
+      },
     );
-    const toolsItems = [
-      { id: 'heatmap', icon: BarChart, label: t('platform.console.heatmap'), badge: 0 },
-      { id: 'accounts', icon: Users, label: t('platform.console.accounts'), badge: 0 },
-      { id: 'outreach', icon: MessageSquare, label: t('platform.console.outreach'), badge: 0 },
-      { id: 'ask', icon: Search, label: t('platform.console.ask'), badge: 0 },
-      { id: 'matchmaking', icon: Handshake, label: t('platform.console.matchmaking'), badge: 0 },
-      { id: 'sponsorship', icon: Award, label: t('platform.console.nav_sponsorship', 'Sponsorship'), badge: 0 },
-      { id: 'committees', icon: Landmark, label: t('platform.console.nav_committees', 'Committees'), badge: 0 },
-      { id: 'intelligence', icon: Search, label: t('platform.console.nav.intelligence'), badge: 0 },
-      { id: 'retention', icon: AlertTriangle, label: t('platform.console.retention'), badge: 0 },
-      { id: 'analytics', icon: BarChart3, label: t('platform.console.nav_analytics', 'Analytics'), badge: 0 },
-      { id: 'network', icon: Network, label: 'Network', badge: 0 },
-    ];
     if (roleParam === 'lead') {
-      toolsItems.push({ id: 'my-team', icon: Users, label: t('platform.console.nav_my_team'), badge: 0 });
+      navGroups.push({
+        title: t('platform.console.nav_leadership'),
+        items: [item('my-team', UserCog, t('platform.console.nav_my_team')), item('board-summary', FileText, t('platform.console.nav_board_summary'))],
+      });
     }
-    navGroups.push({ title: t('platform.console.nav_tools'), items: toolsItems });
-
-    const reportsItems = [
-      { id: 'reports', icon: FileBarChart2, label: t('platform.console.nav_reports_generator', 'Reports'), badge: 0 },
-      { id: 'digests', icon: FileText, label: t('platform.console.nav_digests'), badge: 0 },
-      { id: 'cover', icon: Repeat, label: t('platform.console.cover'), badge: 0 },
-    ];
-    navGroups.push({ title: t('platform.console.nav_reports'), items: reportsItems });
-
-    navGroups.push({ title: 'Settings', items: [
-      { id: 'integrations', icon: Globe, label: 'Integrations', badge: 0 },
-    ] });
+    navGroups.push(
+      {
+        title: t('platform.console.nav_reports'),
+        items: [
+          item('reports', FileBarChart2, t('platform.console.nav_reports_generator', 'Reports')),
+          item('digests', Mail, t('platform.console.nav_digests')),
+          item('cover', Repeat, t('platform.console.cover')),
+        ],
+      },
+      { title: t('platform.console.nav_settings', 'Settings'), items: [item('integrations', Globe, t('platform.console.nav_integrations', 'Integrations'))] },
+    );
   }
+
+  // Views reachable without a sidebar entry still need a real title.
+  const extraTitles: Record<string, string> = {
+    brief: t('platform.console.brief_title'),
+    'board-summary': t('platform.console.nav_board_summary'),
+    'my-team': t('platform.console.nav_my_team'),
+  };
+  const viewTitle = navGroups.flatMap((g) => g.items).find((i) => i.id === view)?.label || extraTitles[view] || view;
+  const [collapsedGroups, setCollapsedGroups] = useState<Record<string, boolean>>({});
 
   const navigateTo = (newView: string, companyId?: string, extraParams?: Record<string, string>) => {
     let url = `/platform/console?view=${newView}&role=${roleParam}`;
@@ -201,25 +217,42 @@ export default function Console() {
 
   const navContent = (
     <>
-      <div className="p-6 border-b border-border">
-        <Link href="/platform" className="font-bold text-foreground tracking-widest uppercase mb-1 block hover:text-primary transition-colors">AmCham OS</Link>
-        <div className="text-[10px] uppercase font-bold text-muted-foreground tracking-widest">Staff Console v4.2</div>
+      <div className="px-6 py-5 border-b border-border">
+        <Link href="/platform" className="flex items-center gap-2.5 group">
+          <span aria-hidden="true" className="w-8 h-9 overflow-hidden shrink-0"><img src={`${import.meta.env.BASE_URL}brand/amcham-logo.png`} alt="" className="h-9 w-auto max-w-none" /></span>
+          <div>
+            <div className="font-bold text-foreground tracking-widest uppercase text-sm leading-none group-hover:text-primary transition-colors">AmCham OS</div>
+            <div className="text-[11px] uppercase font-bold text-muted-foreground tracking-widest mt-1">{t('platform.hub.console_title')}</div>
+          </div>
+        </Link>
       </div>
-      
-      <div className="flex-1 overflow-y-auto py-6 space-y-8 no-scrollbar">
-        {navGroups.map((group, gIdx) => (
-          <div key={gIdx}>
-            <div className="px-6 mb-3 text-[10px] font-bold text-muted-foreground uppercase tracking-widest">{group.title}</div>
-            <div className="space-y-1 px-3">
+
+      <div className="flex-1 overflow-y-auto py-4 space-y-4 no-scrollbar">
+        {navGroups.map((group) => {
+          const hasActive = group.items.some((i) => i.id === view);
+          const collapsed = !!collapsedGroups[group.title] && !hasActive;
+          return (
+          <div key={group.title}>
+            <button
+              onClick={() => setCollapsedGroups((p) => ({ ...p, [group.title]: !collapsed }))}
+              aria-expanded={!collapsed}
+              className="w-full px-6 mb-1.5 flex items-center justify-between text-[11px] font-bold text-muted-foreground uppercase tracking-widest hover:text-foreground transition-colors"
+            >
+              {group.title}
+              <ChevronDown className={cn("w-3 h-3 transition-transform", collapsed && "-rotate-90")} />
+            </button>
+            {!collapsed && (
+            <div className="space-y-0.5 px-3">
               {group.items.map(item => {
                 const isActive = view === item.id;
                 return (
                   <button
                     key={item.id}
                     onClick={() => navigateTo(item.id)}
+                    aria-current={isActive ? 'page' : undefined}
                     className={cn(
-                      "w-full flex items-center justify-between px-4 py-3 rounded-full transition-all duration-200",
-                      isActive ? "bg-primary text-primary-foreground shadow-md shadow-primary/20" : "text-foreground/70 hover:bg-muted/50 hover:text-foreground"
+                      "w-full flex items-center justify-between px-4 py-2 rounded-full transition-all duration-200",
+                      isActive ? "bg-primary text-primary-foreground shadow-md shadow-primary/20" : "text-foreground/75 hover:bg-muted/60 hover:text-foreground"
                     )}
                   >
                     <div className="flex items-center gap-3">
@@ -233,7 +266,7 @@ export default function Console() {
                           animate={{ scale: 1 }} 
                           exit={{ scale: 0 }}
                           className={cn(
-                            "text-[10px] font-bold px-1.5 py-0.5 rounded-full min-w-[20px] text-center",
+                            "text-[11px] font-bold px-1.5 py-0.5 rounded-full min-w-[20px] text-center",
                             isActive ? "bg-white/20 text-white" : "bg-primary text-primary-foreground shadow-sm"
                           )}
                         >
@@ -245,14 +278,22 @@ export default function Console() {
                 );
               })}
             </div>
+            )}
           </div>
-        ))}
+          );
+        })}
       </div>
 
-      <div className="p-6 border-t border-border">
-        <button onClick={() => setCmdOpen(true)} className="w-full flex items-center justify-between text-xs text-muted-foreground hover:text-foreground bg-muted/30 hover:bg-muted/50 transition-colors p-3 rounded-full font-medium">
+      <div className="p-4 border-t border-border space-y-3">
+        <button onClick={() => setCmdOpen(true)} className="w-full flex items-center justify-between text-xs text-muted-foreground hover:text-foreground bg-muted/40 hover:bg-muted/70 transition-colors px-4 py-2.5 rounded-full font-medium">
           <span className="flex items-center gap-2"><Search className="w-4 h-4"/> {t('platform.console.search_console')}</span>
         </button>
+        <div className="flex items-center justify-between px-2 text-xs font-semibold text-muted-foreground">
+          <Link href="/platform" className="flex items-center gap-1.5 hover:text-foreground transition-colors"><ChevronLeft className="w-3.5 h-3.5" /> {t('platform.console.back_to_platform', 'All demos')}</Link>
+          <button onClick={() => setLang(lang === 'en' ? 'sr' : 'en')} className="flex items-center gap-1.5 hover:text-foreground transition-colors" title="English / Srpski">
+            <Languages className="w-3.5 h-3.5" /> {lang.toUpperCase()}
+          </button>
+        </div>
       </div>
     </>
   );
@@ -267,9 +308,8 @@ export default function Console() {
 
       {/* Mobile Header */}
       <div className="md:hidden fixed top-0 left-0 right-0 h-16 bg-background/80 backdrop-blur-xl border-b border-border z-50 flex items-center justify-between px-4">
-        <div className="font-bold tracking-widest text-sm uppercase font-sans">AmCham OS</div>
-        <button onClick={() => setMobileMenuOpen(true)} className="p-2 text-foreground/70">
-          <Menu className="w-6 h-6" />
+        <button onClick={() => setMobileMenuOpen(true)} className="flex items-center gap-2 font-bold tracking-widest text-sm uppercase font-sans" aria-label="Open menu">
+          <Menu className="w-5 h-5" /> {viewTitle}
         </button>
       </div>
 
@@ -297,9 +337,7 @@ export default function Console() {
       {/* Main Content Area */}
       <main className="flex-1 flex flex-col relative min-h-[100dvh] pt-16 md:pt-0 min-w-0 overflow-hidden">
         <header className="hidden md:flex h-20 border-b border-border items-center px-10 justify-between shrink-0 bg-transparent print:hidden">
-          <h1 className="text-2xl font-serif font-light text-foreground">
-            {navGroups.flatMap(g => g.items).find(i => i.id === view)?.label || view}
-          </h1>
+          <h1 className="text-2xl font-serif font-light text-foreground">{viewTitle}</h1>
           <div className="flex items-center gap-4 text-sm font-medium text-muted-foreground relative">
             <ThemeToggle />
             <button onClick={() => setShortcutsOpen(true)} className="w-10 h-10 rounded-full border border-border bg-background shadow-sm flex items-center justify-center text-muted-foreground hover:bg-muted transition-colors" title="Keyboard shortcuts (?)">
@@ -309,7 +347,7 @@ export default function Console() {
               <button onClick={(e) => { e.stopPropagation(); setNotifOpen(o => !o); }} className="w-10 h-10 rounded-full border border-border bg-background shadow-sm flex items-center justify-center text-muted-foreground hover:bg-muted transition-colors relative" title="Notifications">
                 <Bell className="w-4 h-4" />
                 {unreadCount > 0 && (
-                  <span className="absolute -top-1 -right-1 min-w-[18px] h-[18px] px-1 rounded-full bg-primary text-primary-foreground text-[10px] font-bold flex items-center justify-center shadow-sm">{unreadCount}</span>
+                  <span className="absolute -top-1 -right-1 min-w-[18px] h-[18px] px-1 rounded-full bg-primary text-primary-foreground text-[11px] font-bold flex items-center justify-center shadow-sm">{unreadCount}</span>
                 )}
               </button>
               <AnimatePresence>
@@ -325,7 +363,7 @@ export default function Console() {
                     >
                       <div className="p-4 border-b border-border flex items-center justify-between bg-muted/30">
                         <span className="text-xs font-bold uppercase tracking-widest text-foreground">Notifications</span>
-                        {unreadCount > 0 && <button onClick={markAllRead} className="text-[10px] font-bold text-primary hover:underline">Mark all read</button>}
+                        {unreadCount > 0 && <button onClick={markAllRead} className="text-[11px] font-bold text-primary hover:underline">Mark all read</button>}
                       </div>
                       <div className="max-h-80 overflow-y-auto">
                         {notifications.map(n => (
@@ -333,7 +371,7 @@ export default function Console() {
                             <div className={cn("w-1.5 h-1.5 rounded-full mt-1.5 shrink-0", n.read ? "bg-transparent" : "bg-primary")} />
                             <div className="flex-1">
                               <div className={cn("text-xs font-medium leading-relaxed", n.read ? "text-muted-foreground" : "text-foreground font-bold")}>{n.text}</div>
-                              <div className="text-[10px] text-muted-foreground mt-1">{n.time}</div>
+                              <div className="text-[11px] text-muted-foreground mt-1">{n.time}</div>
                             </div>
                           </button>
                         ))}
@@ -355,7 +393,7 @@ export default function Console() {
                 <div className="w-2 h-2 bg-primary rounded-full shadow-sm shadow-primary/50 animate-pulse"></div>
                 <div className="flex flex-col items-start leading-none mr-2">
                   <span className="text-foreground font-bold">{roleConfig.name}</span>
-                  <span className="text-[10px] uppercase tracking-widest">{roleConfig.title}</span>
+                  <span className="text-[11px] uppercase tracking-widest">{roleConfig.title}</span>
                 </div>
                 <div className="w-6 h-6 rounded-full bg-primary/10 text-primary flex items-center justify-center text-xs font-bold ml-1 shrink-0">{roleConfig.avatar}</div>
               </button>
@@ -373,7 +411,7 @@ export default function Console() {
           </div>
         </header>
         
-        <div className="flex-1 overflow-y-auto p-4 md:p-10 relative">
+        <div className="flex-1 overflow-y-auto p-4 md:p-10 pb-32 md:pb-32 relative">
           <div className="max-w-6xl mx-auto">
             <ConsoleStateProvider>
             <AnimatePresence mode="wait">
@@ -427,6 +465,7 @@ export default function Console() {
             </AnimatePresence>
             <CompassFab
               view={view}
+              dossierOpen={!!selectedCompanyId && view !== 'brief'}
               selectedCompanyId={selectedCompanyId}
               roleParam={roleParam}
               navigateTo={navigateTo}
@@ -508,7 +547,7 @@ export default function Console() {
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: 20, scale: 0.95 }}
             transition={{ type: "spring", stiffness: 400, damping: 30 }}
-            className="fixed bottom-6 right-6 md:right-10 bg-foreground text-background px-6 py-4 text-sm font-medium rounded-2xl shadow-xl z-[60] flex items-center gap-3"
+            className="fixed bottom-6 right-6 md:right-10 ink bg-foreground text-background px-6 py-4 text-sm font-medium rounded-2xl shadow-xl z-[60] flex items-center gap-3"
           >
             <div className="w-6 h-6 bg-background/20 rounded-full flex items-center justify-center">
               <Check className="w-4 h-4 text-background" />

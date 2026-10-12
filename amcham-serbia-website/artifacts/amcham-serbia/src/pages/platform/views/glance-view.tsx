@@ -5,6 +5,12 @@ import { cn } from '@/lib/utils';
 import { motion, AnimatePresence } from 'framer-motion';
 
 export default function GlanceView({ t, navigateTo, roleParam, member, billing, glanceData }: any) {
+  // Same score bands the staff console uses (80+ / 60-79 / under 60), phrased for the member.
+  const health = member.score >= 80
+    ? { label: 'Strong', color: 'text-green-600' }
+    : member.score >= 60
+      ? { label: member.scoreTrend < 0 ? 'Worth a look' : 'Steady', color: 'text-amber-600' }
+      : { label: 'Needs attention', color: 'text-destructive' };
   const { people, notifications } = usePortalState();
   const glance = glanceData;
   const tier = glance.tier;
@@ -20,10 +26,10 @@ export default function GlanceView({ t, navigateTo, roleParam, member, billing, 
   return (
     <div className="space-y-8 animate-in fade-in duration-500">
       {/* Hero Section */}
-      <div className="bg-foreground text-background p-8 md:p-12 rounded-[40px] shadow-xl flex flex-col md:flex-row justify-between items-start md:items-end gap-6 relative overflow-hidden">
+      <div className="ink bg-foreground text-background p-8 md:p-12 rounded-[40px] shadow-xl flex flex-col md:flex-row justify-between items-start md:items-end gap-6 relative overflow-hidden">
          <div className="absolute -right-20 -top-20 w-72 h-72 rounded-full bg-[#40D9F1]/10 pointer-events-none" />
          <div className="relative z-10">
-            <div className="text-[10px] uppercase font-bold text-[#40D9F1] tracking-widest mb-4">Membership Tier</div>
+            <div className="text-[11px] uppercase font-bold text-[#40D9F1] tracking-widest mb-4">Membership Tier</div>
             <div className="flex items-center gap-4 mb-3">
               <div className="text-4xl md:text-5xl font-serif font-light">{tier}</div>
               {member.scoreTrend > 0 ? (
@@ -54,10 +60,10 @@ export default function GlanceView({ t, navigateTo, roleParam, member, billing, 
           { label: 'Next Renewal', value: billing.renewalDate, icon: <Clock className="w-4 h-4" /> },
           { label: 'Seats Used', value: billing.seatsUsed, icon: <Users className="w-4 h-4" /> },
           { label: 'Team Size', value: people.length || 5, icon: <Users className="w-4 h-4" /> },
-          { label: 'Account Health', value: 'Excellent', icon: <ShieldCheck className="w-4 h-4" />, color: 'text-green-600' }
+          { label: 'Account Health', value: health.label, icon: <ShieldCheck className="w-4 h-4" />, color: health.color }
         ].map((kpi, i) => (
           <div key={i} className="bg-card p-5 rounded-[32px] border border-border flex flex-col gap-2">
-            <div className="text-[10px] uppercase font-bold text-muted-foreground tracking-widest flex items-center gap-2">
+            <div className="text-[11px] uppercase font-bold text-muted-foreground tracking-widest flex items-center gap-2">
               {kpi.icon} {kpi.label}
             </div>
             <div className={cn("text-lg font-bold tabular-nums", kpi.color || "text-foreground")}>{kpi.value}</div>
@@ -76,7 +82,7 @@ export default function GlanceView({ t, navigateTo, roleParam, member, billing, 
                 <div className="flex-1">
                   <div className="flex items-center gap-3 mb-2">
                     <Calendar className="w-5 h-5 text-primary" />
-                    <div className="text-[10px] uppercase font-bold text-muted-foreground tracking-widest">Event Seats</div>
+                    <div className="text-[11px] uppercase font-bold text-muted-foreground tracking-widest">Event Seats</div>
                   </div>
                   <div className="flex items-end gap-2 mb-3">
                     <div className="text-4xl font-serif font-light tabular-nums text-foreground">{eventSeats.used}</div>
@@ -120,7 +126,7 @@ export default function GlanceView({ t, navigateTo, roleParam, member, billing, 
                 <div className="flex-1">
                   <div className="flex items-center gap-3 mb-2">
                     <Users className="w-5 h-5 text-primary" />
-                    <div className="text-[10px] uppercase font-bold text-muted-foreground tracking-widest">Committee Seats</div>
+                    <div className="text-[11px] uppercase font-bold text-muted-foreground tracking-widest">Committee Seats</div>
                   </div>
                   <div className="flex items-end gap-2 mb-3">
                     <div className="text-4xl font-serif font-light tabular-nums text-foreground">{committeeSeats.used}</div>
@@ -166,21 +172,21 @@ export default function GlanceView({ t, navigateTo, roleParam, member, billing, 
                {billing.invoices.slice(0, 3).map((inv: any, i: number) => (
                  <div key={i} className="relative pl-6">
                    <div className={cn("absolute -left-[9px] top-1 w-4 h-4 rounded-full border-2 border-background", i === 0 ? "bg-primary" : "bg-muted")} />
-                   <div className="text-[10px] font-bold text-muted-foreground tracking-widest uppercase mb-1">{inv.date}</div>
+                   <div className="text-[11px] font-bold text-muted-foreground tracking-widest uppercase mb-1">{inv.date}</div>
                    <div className="text-sm font-medium text-foreground">{inv.amount} • {inv.status}</div>
                    <div className="text-xs text-muted-foreground mt-1 flex items-center gap-1"><FileText className="w-3 h-3"/> Invoice {inv.id}</div>
                  </div>
                ))}
                <div className="relative pl-6 pt-4">
                    <div className="absolute -left-[9px] top-5 w-4 h-4 rounded-full border-2 border-background bg-background border-dashed border-muted-foreground" />
-                   <div className="text-[10px] font-bold text-primary tracking-widest uppercase mb-1">Next Expected</div>
+                   <div className="text-[11px] font-bold text-primary tracking-widest uppercase mb-1">Next Expected</div>
                    <div className="text-sm font-medium text-foreground">Oct 15, 2027</div>
                </div>
              </div>
            </div>
 
            <div className="bg-primary/5 rounded-[32px] p-6 border border-primary/10">
-              <div className="text-[10px] font-bold uppercase text-primary tracking-widest mb-4">Recent Activity Logs</div>
+              <div className="text-[11px] font-bold uppercase text-primary tracking-widest mb-4">Recent Activity Logs</div>
               <div className="space-y-3">
                 {notifications.slice(0, 3).map((n: any) => (
                   <div key={n.id} className="flex gap-3 items-start">

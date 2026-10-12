@@ -32,7 +32,7 @@ export function CoverView({ showToast }: { showToast: (m:string) => void }) {
           <div className="flex items-center gap-8 relative z-10 mb-8 md:mb-0">
             <div className="w-24 h-24 rounded-full bg-background/20 flex items-center justify-center text-4xl font-bold shadow-inner border border-white/20 shrink-0">{activeCover.avatar}</div>
             <div>
-              <div className="text-[10px] uppercase font-bold tracking-widest mb-2 flex items-center gap-2 bg-background/20 inline-flex px-3 py-1 rounded-full text-background"><ShieldAlert className="w-3 h-3"/> Active Continuity Mode</div>
+              <div className="text-[11px] uppercase font-bold tracking-widest mb-2 flex items-center gap-2 bg-background/20 inline-flex px-3 py-1 rounded-full text-background"><ShieldAlert className="w-3 h-3"/> Active Continuity Mode</div>
               <h2 className="text-4xl md:text-5xl font-serif font-light tracking-tight">{t('platform.console.cover_covering_for', 'Covering for {name}').replace('{name}', activeCover.name)}</h2>
             </div>
           </div>
@@ -44,7 +44,7 @@ export function CoverView({ showToast }: { showToast: (m:string) => void }) {
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
            <div className="bg-card p-10 rounded-[32px] border border-border shadow-sm">
-             <div className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest mb-8 flex items-center gap-2"><UserSquare2 className="w-4 h-4"/> Delegation Scope</div>
+             <div className="text-[11px] font-bold text-muted-foreground uppercase tracking-widest mb-8 flex items-center gap-2"><UserSquare2 className="w-4 h-4"/> Delegation Scope</div>
              <div className="space-y-5 text-sm font-medium">
                 <div className="flex justify-between border-b border-border pb-4">
                    <span className="text-muted-foreground">Start Date</span>
@@ -67,7 +67,7 @@ export function CoverView({ showToast }: { showToast: (m:string) => void }) {
 
            <div className="bg-card p-10 rounded-[32px] border border-border shadow-sm relative overflow-hidden">
              <div className="absolute top-0 right-0 w-32 h-32 bg-accent/5 rounded-bl-full pointer-events-none"></div>
-             <div className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest mb-6">Handoff Notes</div>
+             <div className="text-[11px] font-bold text-muted-foreground uppercase tracking-widest mb-6">Handoff Notes</div>
              <p className="text-base font-medium text-foreground/80 leading-relaxed italic border-l-4 border-muted pl-4">
                "Please ensure you follow up with S-Leasing on Thursday about their Q4 sponsorship. I've already sent the initial email, they just need a nudge. Don't worry about the FMCG sector flags, the Director will handle those while I'm out."
              </p>
@@ -76,7 +76,7 @@ export function CoverView({ showToast }: { showToast: (m:string) => void }) {
 
         <div>
           <div className="flex items-center justify-between mb-6 ml-2">
-            <h3 className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest flex items-center gap-2"><ListChecks className="w-4 h-4"/> {t('platform.console.cover_checklist', 'Execution Checklist')}</h3>
+            <h3 className="text-[11px] font-bold text-muted-foreground uppercase tracking-widest flex items-center gap-2"><ListChecks className="w-4 h-4"/> {t('platform.console.cover_checklist', 'Execution Checklist')}</h3>
             <div className="text-xs font-bold text-muted-foreground">{checklist.filter(c => c.done).length} / {checklist.length} Completed</div>
           </div>
           
@@ -90,7 +90,7 @@ export function CoverView({ showToast }: { showToast: (m:string) => void }) {
                    <div>
                      <div className="flex items-center gap-3 mb-1">
                        <div className={cn("w-2 h-2 rounded-full", item.type === 'Urgent' ? 'bg-primary' : 'bg-emerald-500')}></div>
-                       <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">{item.type}</span>
+                       <span className="text-[11px] font-bold text-muted-foreground uppercase tracking-widest">{item.type}</span>
                      </div>
                      <div className={cn("text-lg font-medium transition-colors", item.done ? "text-muted-foreground line-through" : "text-foreground")}>{item.title}</div>
                    </div>
@@ -121,28 +121,28 @@ export function CoverView({ showToast }: { showToast: (m:string) => void }) {
         <div className="bg-card rounded-[32px] border border-border p-6 shadow-sm flex items-center gap-4">
            <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center text-primary shrink-0"><AlertTriangle className="w-5 h-5"/></div>
            <div>
-             <div className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest mb-1">Unassigned Flags</div>
+             <div className="text-[11px] font-bold text-muted-foreground uppercase tracking-widest mb-1">Unassigned Flags</div>
              <div className="text-3xl font-serif font-light tabular-nums">4</div>
            </div>
         </div>
         <div className="bg-card rounded-[32px] border border-border p-6 shadow-sm flex items-center gap-4">
            <div className="w-12 h-12 rounded-full bg-emerald-500/10 flex items-center justify-center text-emerald-600 shrink-0"><BellRing className="w-5 h-5"/></div>
            <div>
-             <div className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest mb-1">Overdue Outreach</div>
+             <div className="text-[11px] font-bold text-muted-foreground uppercase tracking-widest mb-1">Overdue Outreach</div>
              <div className="text-3xl font-serif font-light tabular-nums">12</div>
            </div>
         </div>
-        <div className="bg-foreground text-background rounded-[32px] border border-border p-6 shadow-lg flex items-center gap-4">
+        <div className="ink bg-foreground text-background rounded-[32px] border border-border p-6 shadow-lg flex items-center gap-4">
            <div className="w-12 h-12 rounded-full bg-background/20 flex items-center justify-center text-background shrink-0"><Target className="w-5 h-5"/></div>
            <div>
-             <div className="text-[10px] font-bold text-accent uppercase tracking-widest mb-1">Team SLA Health</div>
+             <div className="text-[11px] font-bold text-accent uppercase tracking-widest mb-1">Team SLA Health</div>
              <div className="text-3xl font-serif font-light tabular-nums">94<span className="text-xl text-accent">%</span></div>
            </div>
         </div>
       </div>
 
       <div className="pt-8 border-t border-border">
-        <h3 className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest mb-8 ml-2">{t('platform.console.cover_select', 'Available for Takeover')}</h3>
+        <h3 className="text-[11px] font-bold text-muted-foreground uppercase tracking-widest mb-8 ml-2">{t('platform.console.cover_select', 'Available for Takeover')}</h3>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
           {team.map((member:any) => (
             <div key={member.id} className="bg-card p-10 rounded-[40px] border border-border shadow-sm flex flex-col hover:shadow-md transition-all group hover:border-primary/30">
@@ -150,17 +150,17 @@ export function CoverView({ showToast }: { showToast: (m:string) => void }) {
                 <div className="w-20 h-20 rounded-full bg-muted flex items-center justify-center text-3xl font-bold shrink-0 text-foreground">{member.avatar}</div>
                 <div>
                   <h3 className="text-3xl font-serif font-light text-foreground mb-1">{member.name}</h3>
-                  <div className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest bg-muted/50 inline-block px-3 py-1 rounded-full">{member.role}</div>
+                  <div className="text-[11px] font-bold text-muted-foreground uppercase tracking-widest bg-muted/50 inline-block px-3 py-1 rounded-full">{member.role}</div>
                 </div>
               </div>
               
               <div className="grid grid-cols-2 gap-4 mb-8">
                 <div className="bg-muted/30 p-4 rounded-2xl">
-                  <div className="text-[10px] uppercase font-bold text-muted-foreground mb-1">Book Size</div>
+                  <div className="text-[11px] uppercase font-bold text-muted-foreground mb-1">Book Size</div>
                   <div className="text-2xl font-serif tabular-nums">{member.bookSize}</div>
                 </div>
                 <div className="bg-muted/30 p-4 rounded-2xl">
-                  <div className="text-[10px] uppercase font-bold text-muted-foreground mb-1">Flags/Risk</div>
+                  <div className="text-[11px] uppercase font-bold text-muted-foreground mb-1">Flags/Risk</div>
                   <div className="text-2xl font-serif tabular-nums text-primary">{member.atRisk}</div>
                 </div>
               </div>
