@@ -43,6 +43,7 @@ export function Footer() {
               <Link href="/about#press" className="hover:text-secondary-foreground transition-colors">{t('about.press')}</Link>
               <Link href="/platform" className="hover:text-primary text-primary font-bold transition-colors">{t('platform.nav')}</Link>
               <Link href="/blueprint" className="hover:text-accent text-accent transition-colors">{t('nav.blueprint')} →</Link>
+              <Link href="/proposal" className="hover:text-accent text-accent transition-colors">{t('footer.proposal', 'Proposal: website + private AI')} →</Link>
             </div>
           </div>
 

@@ -472,6 +472,7 @@ export default function Console() {
               showToast={showToast}
               open={compassOpen}
               setOpen={setCompassOpen}
+              suppressNudge={tourStep !== -1}
             />
             </ConsoleStateProvider>
           </div>

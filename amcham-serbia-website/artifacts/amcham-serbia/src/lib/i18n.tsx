@@ -129,6 +129,7 @@ en: {
       search: "Search...",
     },
     footer: {
+      proposal: "Proposal: website + private AI",
       address: "Smiljanićeva 24/I, 11111 Beograd",
       phone: "(+381 11) 3088 132",
       email: "info@amcham.rs",
@@ -1095,7 +1096,12 @@ nav_today: "Today",
           "effect": "Effect on your score",
           "privacy": "Your controls",
           "privacy_desc": "Toggling anything off reduces your visibility in the directory. It never affects your rights as a member.",
-          "never_see": "What we never see"
+          "never_see": "What we never see",
+          "ai_eyebrow": "AI and your data",
+          "ai_title": "How AI handles your data",
+          "ai_desc": "Every AI request passes a privacy router first. Anything that names a member stays on a model AmCham controls; cloud models only ever see anonymised or public content, and nothing is used to train anyone’s AI.",
+          "ai_more": "The full approach, including the roadmap and the questions a board will ask, is in the proposal.",
+          "ai_link": "Read the proposal"
         }
       },
     common: {
@@ -1238,6 +1244,7 @@ sr: {
       search: "Pretraga...",
     },
     footer: {
+      proposal: "Predlog: novi sajt i privatni AI",
       address: "Smiljanićeva 24/I, 11111 Beograd",
       phone: "(+381 11) 3088 132",
       email: "info@amcham.rs",
@@ -1582,6 +1589,12 @@ sr: {
     platform: {
 
         portal: {
+        "portal_ai_title": "AI i vaši podaci",
+        "portal_ai_point1": "Vaši podaci se obrađuju na privatnom AI modelu AmCham-a, a ne na javnom AI servisu.",
+        "portal_ai_point2": "Ništa o vašoj kompaniji se ne koristi za treniranje AI-ja.",
+        "portal_ai_point3": "Osoba iz AmCham-a odobrava sve što AI napiše pre nego što stigne do vas.",
+        "portal_ai_optin": "AI upoznavanja i pregled",
+        "portal_ai_optin_desc": "Predlog članova za upoznavanje i nedeljni pregled prilagođen vama.",
         "portal_engagement_trend": "Trend angažovanja",
         "portal_score_short": "Skor",
         "portal_flat": "stabilno",
@@ -2331,7 +2344,12 @@ nav_today: "Danas",
           "effect": "Uticaj na vaš rezultat",
           "privacy": "Vaše kontrole",
           "privacy_desc": "Isključivanje bilo čega smanjuje vašu vidljivost u direktorijumu. To nikada ne utiče na vaša prava kao člana.",
-          "never_see": "Šta nikada ne vidimo"
+          "never_see": "Šta nikada ne vidimo",
+          "ai_eyebrow": "AI i vaši podaci",
+          "ai_title": "Kako AI postupa sa vašim podacima",
+          "ai_desc": "Svaki AI zahtev prvo prolazi kroz filter privatnosti. Sve što imenuje člana ostaje na modelu pod kontrolom AmCham-a; modeli u oblaku vide samo anonimizovan ili javni sadržaj, i ništa se ne koristi za treniranje AI-ja.",
+          "ai_more": "Ceo pristup, uključujući plan razvoja i pitanja koja će upravni odbor postaviti, nalazi se u predlogu.",
+          "ai_link": "Pročitajte predlog"
         }
       },
     common: {

@@ -3,6 +3,7 @@ import { useI18n } from '@/lib/i18n';
 import { SEO } from '@/components/seo';
 import { Layers, ShieldCheck, Eye, EyeOff } from 'lucide-react';
 import { Link } from 'wouter';
+import { TierCards, RouterExample, DataClassTable } from '@/components/ai-privacy';
 
 export default function PlatformSeam() {
   const { t } = useI18n();
@@ -119,6 +120,20 @@ export default function PlatformSeam() {
                 ))}
               </div>
             </div>
+          </div>
+
+          {/* How AI handles your data */}
+          <div className="mt-20 pt-16 border-t border-border">
+            <span className="text-xs font-bold uppercase tracking-widest text-primary block mb-3">{t('platform.seam.ai_eyebrow', 'AI and your data')}</span>
+            <h2 className="text-3xl md:text-4xl font-serif font-bold text-foreground mb-4 text-balance">{t('platform.seam.ai_title', 'How AI handles your data')}</h2>
+            <p className="text-lg text-muted-foreground max-w-3xl mb-10">{t('platform.seam.ai_desc', 'Every AI request passes a privacy router first. Anything that names a member stays on a model AmCham controls; cloud models only ever see anonymised or public content, and nothing is used to train anyone’s AI.')}</p>
+            <TierCards className="mb-8" />
+            <div className="mb-8"><RouterExample /></div>
+            <DataClassTable />
+            <p className="mt-6 text-sm text-muted-foreground">
+              {t('platform.seam.ai_more', 'The full approach, including the roadmap and the questions a board will ask, is in the proposal.')}{' '}
+              <Link href="/proposal#how" className="font-bold text-primary hover:underline">{t('platform.seam.ai_link', 'Read the proposal')} →</Link>
+            </p>
           </div>
 
         </div>

@@ -76,7 +76,10 @@ export function runFixtureQuery(query: string, t: (path: string, fallback?: stri
   }
 
   const sectors = [...new Set(platformData.allMembers.map(c => c.sector))].sort((a, b) => b.length - a.length);
-  const matchedSector = sectors.find(s => hasWord(s.toLowerCase()));
+  // "IT" only counts as the sector when written in capitals (or as tech/
+  // software); otherwise every question containing the word "it" was being
+  // filtered down to IT companies.
+  const matchedSector = sectors.find(s => s === 'IT' ? /\bIT\b/.test(query) || /\b(tech|technology|software)\b/i.test(query) : hasWord(s.toLowerCase()));
   if (matchedSector) { 
     filtered = filtered.filter(c => c.sector === matchedSector); 
     applied.push({ id: `sector-${matchedSector}`, label: `Sector: ${matchedSector}`, type: 'sector' }); 
