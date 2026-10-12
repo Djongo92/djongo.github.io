@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { usePortalState } from '../portal-state';
-import { Settings, Shield, User, Globe, History, CheckCircle2, Eye, EyeOff, AlertTriangle } from 'lucide-react';
+import { Settings, Shield, User, Globe, History, CheckCircle2, Eye, EyeOff, AlertTriangle, Server, ShieldCheck } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { motion } from 'framer-motion';
 
@@ -8,6 +8,7 @@ export default function SeamView({ t, showToast }: any) {
   const { seamProfile, setSeamProfile } = usePortalState();
   const [localProfile, setLocalProfile] = useState(seamProfile);
   const [hasChanges, setHasChanges] = useState(false);
+  const [aiOptIn, setAiOptIn] = useState(true);
 
   const toggle = (key: keyof typeof localProfile) => {
     setLocalProfile((p: any) => ({ ...p, [key]: !p[key] }));
@@ -122,6 +123,28 @@ export default function SeamView({ t, showToast }: any) {
                  </div>
                ))}
              </div>
+          </div>
+
+          <div className="bg-card border border-border rounded-[32px] p-6 shadow-sm">
+             <div className="flex items-center gap-2 mb-4">
+               <Server className="w-5 h-5 text-emerald-600 dark:text-emerald-400" />
+               <h3 className="font-serif text-lg font-medium">{t('portal_ai_title', 'AI and your data')}</h3>
+             </div>
+             <ul className="space-y-3 text-sm mb-5">
+               {[
+                 t('portal_ai_point1', 'Your records are processed on AmCham’s private model, not a public AI service.'),
+                 t('portal_ai_point2', 'Nothing about your company is used to train AI.'),
+                 t('portal_ai_point3', 'A person at AmCham approves anything AI drafts before it reaches you.'),
+               ].map((p) => (
+                 <li key={p} className="flex gap-2.5 text-foreground"><ShieldCheck className="w-4 h-4 text-emerald-600 dark:text-emerald-400 shrink-0 mt-0.5" />{p}</li>
+               ))}
+             </ul>
+             <ToggleRow
+               title={t('portal_ai_optin', 'AI introductions and digest')}
+               desc={t('portal_ai_optin_desc', 'Suggest members to meet and tailor your weekly digest.')}
+               value={aiOptIn}
+               onToggle={() => { setAiOptIn((v: boolean) => !v); showToast?.(t('portal_prefs_saved', 'Preferences saved')); }}
+             />
           </div>
         </div>
 

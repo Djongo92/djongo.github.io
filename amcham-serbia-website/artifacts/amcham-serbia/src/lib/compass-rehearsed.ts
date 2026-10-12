@@ -11,6 +11,9 @@ interface Rehearsed<C> {
   question: string;
   aliases: string[];
   answer: (ctx: C) => string | null;
+  // Drafts triggered from Compass's Today briefing; kept out of the
+  // suggestion chips so they don't crowd the questions a presenter asks.
+  briefingOnly?: boolean;
 }
 
 const normalize = (s: string) =>
@@ -92,6 +95,57 @@ const CONSOLE_PROMPTS: Rehearsed<void>[] = [
   },
 ];
 
+// Drafts behind the Today briefing's actions. Same fixture data as the rest
+// of the console, so names, dates and owners line up with what's on screen.
+const BRIEFING_DRAFTS: Rehearsed<void>[] = [
+  {
+    question: "Draft an intro to SBB's new IT lead",
+    aliases: ['Draft an intro to SBB'],
+    briefingOnly: true,
+    answer: () => {
+      const c = company('sbb');
+      return [
+        `Subject: Welcome, from AmCham Serbia`,
+        ``,
+        `Dear colleague,`,
+        ``,
+        `Congratulations on joining ${c?.name ?? 'SBB'}. I look after your company's membership at AmCham Serbia, and I'd like to make sure the team keeps getting value from it through the change.`,
+        ``,
+        `Two things worth a look: the Digital Economy Committee meets next on 2 November, and the C-Level Breakfast on 22 October is a quick way to meet the other technology members.`,
+        ``,
+        `Could we find 20 minutes in the next two weeks?`,
+        ``,
+        `Best regards,`,
+        `${c?.manager ?? 'Nikola Krstić'}`,
+        `AmCham Serbia`,
+      ].join('\n');
+    },
+  },
+  {
+    question: 'Draft the Roundtable agenda note for Adriatica',
+    aliases: ['Send Adriatica the Roundtable agenda'],
+    briefingOnly: true,
+    answer: () => {
+      const ev = (platformData as any).portal.events.find((e: any) => e.id === 'e1');
+      const c = company('adr');
+      if (!ev || !c) return null;
+      return [
+        `Subject: ${ev.title}, ${ev.date}: agenda`,
+        ``,
+        `Dear Marko,`,
+        ``,
+        `As promised on our call, here is the agenda for the ${ev.title} at the ${ev.location}:`,
+        ...ev.agenda.map((a: any) => `${a.time}  ${a.desc}`),
+        ``,
+        `NIS a.d. will be in the room as well. If it suits you, I'll introduce you during the break, so the conversation about the new production line's energy supply can start in person.`,
+        ``,
+        `See you on the 14th,`,
+        `${c.manager}`,
+      ].join('\n');
+    },
+  },
+];
+
 const PORTAL_PROMPTS: Rehearsed<PortalCompassContext>[] = [
   {
     question: 'How can we get more out of our membership?',
@@ -126,10 +180,10 @@ const PORTAL_PROMPTS: Rehearsed<PortalCompassContext>[] = [
   },
 ];
 
-export const CONSOLE_SHOWCASE_PROMPTS = CONSOLE_PROMPTS.map((p) => p.question);
+export const CONSOLE_SHOWCASE_PROMPTS = CONSOLE_PROMPTS.filter((p) => !p.briefingOnly).map((p) => p.question);
 export const PORTAL_SHOWCASE_PROMPTS = PORTAL_PROMPTS.map((p) => p.question);
 
-export const findConsoleRehearsed = (query: string) => find(CONSOLE_PROMPTS, query, undefined);
+export const findConsoleRehearsed = (query: string) => find([...CONSOLE_PROMPTS, ...BRIEFING_DRAFTS], query, undefined);
 export const findPortalRehearsed = (query: string, ctx: PortalCompassContext) => find(PORTAL_PROMPTS, query, ctx);
 
 // Long enough to read as "thinking", short enough not to stall a live demo.
