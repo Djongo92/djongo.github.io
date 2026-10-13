@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { usePortalState } from '../portal-state';
+import { MonthlyEmailCard } from '../components/monthly-email';
 import { cn } from '@/lib/utils';
 import { ArrowRight, CheckCircle2, ChevronDown, ChevronUp, Clock, Activity, TrendingUp, TrendingDown, Users, Calendar } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -34,6 +35,7 @@ export default function HomeView({ t, navigateTo, roleConfig, showToast, valueRe
 
   return (
     <div className="space-y-8 animate-in fade-in duration-500">
+      <MonthlyEmailCard t={t} member={member} />
       <div className="bg-primary/5 border border-primary/10 rounded-[40px] p-8 md:p-12 shadow-sm flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
         <div>
            <div className="text-[11px] uppercase font-bold text-primary tracking-widest mb-2">{t('portal_since_visit', 'Since your last visit')}</div>

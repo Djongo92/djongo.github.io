@@ -3,12 +3,41 @@ import { Download, Activity, Target, Zap, Clock, ChevronDown, ChevronUp, CheckCi
 import { cn } from '@/lib/utils';
 import { motion, AnimatePresence } from 'framer-motion';
 import { platformData } from '@/data/platform';
+import { TierChip } from '@/components/ai-privacy';
+
+// Themes from the written answers, summarised on AmCham's private model.
+// Only the combined picture is shown; individual answers never leave AmCham.
+const THEMES: Record<string, { theme: string; share: number; gist: string }[]> = {
+  All: [
+    { theme: 'Hiring and keeping skilled staff', share: 41, gist: 'Engineers and skilled trades are the hardest roles to fill; wages are rising faster than productivity.' },
+    { theme: 'Slow permits and approvals', share: 33, gist: 'Building and environmental permits take months longer than the law says, which delays investment.' },
+    { theme: 'Unpredictable rules', share: 27, gist: 'Laws change with little warning or consultation, so companies hold back on long-term plans.' },
+    { theme: 'Energy prices and grid access', share: 19, gist: 'New production lines wait for grid connections, and energy contracts have become harder to plan.' },
+    { theme: 'E-invoicing and digital services', share: 14, gist: 'The new e-invoicing rules work, but small suppliers need more help to keep up.' },
+  ],
+  Manufacturing: [
+    { theme: 'Energy prices and grid access', share: 52, gist: 'Grid connection delays are holding back new lines, especially outside Belgrade.' },
+    { theme: 'Hiring and keeping skilled staff', share: 47, gist: 'Welders, technicians and engineers are in short supply.' },
+    { theme: 'Slow permits and approvals', share: 31, gist: 'Environmental permits are the slowest step.' },
+  ],
+  Pharma: [
+    { theme: 'Medicine pricing rules', share: 58, gist: 'The pricing rulebook has not kept up with costs, which affects which products stay on the market.' },
+    { theme: 'Slow registrations', share: 36, gist: 'Registering new medicines takes longer than in neighbouring countries.' },
+    { theme: 'Hiring and keeping skilled staff', share: 22, gist: 'Specialists leave for EU markets.' },
+  ],
+  IT: [
+    { theme: 'Hiring and keeping skilled staff', share: 61, gist: 'Senior developers are hard to find and keep.' },
+    { theme: 'E-invoicing and digital services', share: 29, gist: 'Rules for software exporters need clearer guidance.' },
+    { theme: 'Unpredictable rules', share: 24, gist: 'Tax treatment of remote work changes too often.' },
+  ],
+};
 
 const REAL = (platformData.portal as any).lapTime;
 const SECTOR = (platformData.portal as any).laptimeSectorBreakdown;
 
 export default function LapTimeView({ t, showToast, member }: any) {
-  const [tab, setTab] = useState<'overview'|'performance'|'priorities'>('overview');
+  const [tab, setTab] = useState<'overview'|'performance'|'priorities'|'themes'>(() => new URLSearchParams(window.location.search).get('tab') === 'themes' ? 'themes' : 'overview');
+  const [themeSector, setThemeSector] = useState<string>('All');
   const [period, setPeriod] = useState<'2025' | '2024'>('2025');
   const sectorRow = SECTOR?.[period]?.[member?.sector];
   const [briefingRequested, setBriefingRequested] = useState(false);
@@ -92,6 +121,7 @@ export default function LapTimeView({ t, showToast, member }: any) {
         <button onClick={() => setTab('overview')} className={cn("px-6 py-2.5 rounded-full text-xs font-bold transition-all whitespace-nowrap", tab === 'overview' ? "bg-background text-foreground shadow-sm" : "text-muted-foreground hover:text-foreground")}>Climate & Outlook</button>
         <button onClick={() => setTab('performance')} className={cn("px-6 py-2.5 rounded-full text-xs font-bold transition-all whitespace-nowrap", tab === 'performance' ? "bg-background text-foreground shadow-sm" : "text-muted-foreground hover:text-foreground")}>Business Performance</button>
         <button onClick={() => setTab('priorities')} className={cn("px-6 py-2.5 rounded-full text-xs font-bold transition-all whitespace-nowrap", tab === 'priorities' ? "bg-background text-foreground shadow-sm" : "text-muted-foreground hover:text-foreground")}>Reform Priorities</button>
+        <button onClick={() => setTab('themes')} className={cn("px-6 py-2.5 rounded-full text-xs font-bold transition-all whitespace-nowrap", tab === 'themes' ? "bg-background text-foreground shadow-sm" : "text-muted-foreground hover:text-foreground")}>{t('portal_survey_themes_tab', 'What members wrote')}</button>
       </div>
 
       {tab === 'overview' && (
@@ -255,6 +285,37 @@ export default function LapTimeView({ t, showToast, member }: any) {
                  <div className="w-2 h-2 rounded-full bg-primary shrink-0" />
                  Modernization of seasonal work rules
               </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {tab === 'themes' && (
+        <div className="space-y-6">
+          <div className="rounded-[32px] border border-border bg-card p-6 md:p-8">
+            <div className="flex flex-col md:flex-row md:items-start justify-between gap-4 mb-6">
+              <div className="max-w-2xl">
+                <h3 className="text-2xl font-serif text-foreground mb-2">{t('portal_survey_themes_title', 'What members wrote, in their own words')}</h3>
+                <p className="text-sm text-muted-foreground leading-relaxed">{t('portal_survey_themes_desc', '412 written answers, grouped into themes. Only the combined picture is shown: individual answers never leave AmCham.')}</p>
+              </div>
+              <TierChip tier="on-prem" className="self-start" />
+            </div>
+            <div className="flex flex-wrap gap-2 mb-6">
+              {Object.keys(THEMES).map(sec => (
+                <button key={sec} onClick={() => setThemeSector(sec)} className={cn("px-4 py-2 rounded-full text-xs font-bold border transition-colors", themeSector === sec ? "bg-foreground text-background border-foreground" : "border-border text-muted-foreground hover:text-foreground")}>{sec === 'All' ? t('portal_survey_themes_all', 'All sectors') : sec}</button>
+              ))}
+            </div>
+            <div className="space-y-5">
+              {THEMES[themeSector].map(th => (
+                <div key={th.theme}>
+                  <div className="flex justify-between items-baseline gap-4 mb-1.5">
+                    <span className="font-semibold text-foreground">{th.theme}</span>
+                    <span className="text-sm text-muted-foreground tabular-nums whitespace-nowrap">{th.share}% {t('portal_survey_themes_of', 'of answers')}</span>
+                  </div>
+                  <div className="h-2 rounded-full bg-muted overflow-hidden mb-2"><div className="h-full rounded-full bg-primary/70" style={{ width: `${th.share}%` }} /></div>
+                  <p className="text-sm text-muted-foreground leading-relaxed">{th.gist}</p>
+                </div>
+              ))}
             </div>
           </div>
         </div>

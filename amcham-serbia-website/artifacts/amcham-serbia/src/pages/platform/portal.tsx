@@ -12,6 +12,7 @@ import { PortalStateProvider, usePortalState } from './portal-state';
 import { ThemeToggle } from '@/components/ui/theme-toggle';
 import { TourOverlay } from './console/components/Overlays';
 import { PortalCompassFab } from './components/portal-compass-fab';
+import { useShowcaseFocus } from '@/components/showcase-tour';
 import { platformData, resolveViewAsMember, VIEW_AS_OPTIONS } from '@/data/platform';
 
 // Import Views
@@ -89,6 +90,16 @@ function PortalContent({ viewAs }: { viewAs: ReturnType<typeof resolveViewAsMemb
     },
   ];
   const navItems = navGroups.flatMap(g => g.items);
+  // Focus mode during a walkthrough: only the screens the track visits, the rest under "More".
+  const focusViews = useShowcaseFocus('portal');
+  const [moreOpen, setMoreOpen] = useState(false);
+  const moreTitle = t('portal_nav_more', 'More');
+  const shownGroups = focusViews
+    ? [
+        { title: t('portal_nav_in_walkthrough', 'In this walkthrough'), items: focusViews.map(id => navItems.find(i => i.id === id)).filter(Boolean) as typeof navItems },
+        { title: moreTitle, items: navItems.filter(i => !focusViews.includes(i.id)) },
+      ]
+    : navGroups;
   const viewTitle = navItems.find(i => i.id === view)?.label
     || ({ notifications: t('portal_notifications', 'Notifications'), people: t('portal_people', 'People'), billing: t('portal_billing', 'Billing') } as Record<string, string>)[view]
     || view;
@@ -140,10 +151,14 @@ function PortalContent({ viewAs }: { viewAs: ReturnType<typeof resolveViewAsMemb
         </Link>
       </div>
       <div className="flex-1 overflow-y-auto py-5 space-y-5 px-4 no-scrollbar">
-        {navGroups.map((group) => (
+        {shownGroups.map((group) => {
+          const folded = !!focusViews && group.title === moreTitle && !moreOpen && !group.items.some(i => i.id === view);
+          return (
           <div key={group.title}>
-            <div className="px-4 mb-1.5 text-[11px] font-bold text-muted-foreground uppercase tracking-widest">{group.title}</div>
-            <div className="space-y-0.5">
+            {focusViews && group.title === moreTitle
+              ? <button onClick={() => setMoreOpen(o => !o)} aria-expanded={!folded} className="w-full text-left px-4 mb-1.5 text-[11px] font-bold text-muted-foreground uppercase tracking-widest hover:text-foreground">{group.title} {folded ? '+' : '–'}</button>
+              : <div className="px-4 mb-1.5 text-[11px] font-bold text-muted-foreground uppercase tracking-widest">{group.title}</div>}
+            {!folded && <div className="space-y-0.5">
               {group.items.map(item => {
                 const isActive = view === item.id;
                 return (
@@ -161,9 +176,10 @@ function PortalContent({ viewAs }: { viewAs: ReturnType<typeof resolveViewAsMemb
                   </button>
                 );
               })}
-            </div>
+            </div>}
           </div>
-        ))}
+          );
+        })}
       </div>
       <div className="p-4 border-t border-border flex items-center justify-between px-6 text-xs font-semibold text-muted-foreground">
         <Link href="/platform" className="flex items-center gap-1.5 hover:text-foreground transition-colors"><ChevronLeft className="w-3.5 h-3.5" /> {t('platform.console.back_to_platform', 'All demos')}</Link>
