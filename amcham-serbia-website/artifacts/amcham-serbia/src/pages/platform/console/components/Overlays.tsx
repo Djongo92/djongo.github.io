@@ -2,23 +2,29 @@ import React, { useMemo, useState } from 'react';
 import { useI18n } from '@/lib/i18n';
 import { platformData } from '@/data/platform';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Search, Command, X, Book, ArrowRight, Compass, UserMinus, Keyboard } from 'lucide-react';
+import { Search, Command, X, Book, ArrowRight, Compass, UserMinus, Keyboard, Eye, EyeOff } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { runFixtureQuery } from '../views/ask';
 import { AI_NAME } from '@/components/ui/ai-badge';
 
-export function TourOverlay({ step, setStep, endTour, steps, labels, onBack, badge }: {
+export function TourOverlay({ step, setStep, endTour, steps, labels, onBack, badge, noteHidden, onToggleNote, align = 'center' }: {
   step: number, setStep: (s:number)=>void, endTour: ()=>void,
-  steps: { title: string, desc: string }[],
-  labels: { skip: string, next: string, done: string, back?: string },
+  steps: { title: string, desc: string, note?: string }[],
+  labels: { skip: string, next: string, done: string, back?: string, note?: string, hideNote?: string, showNote?: string },
   onBack?: () => void,
   badge?: { icon: React.ComponentType<{ className?: string }>, label: string },
+  // Presenter notes: a quiet "click this" line the presenter can hide per step.
+  noteHidden?: boolean,
+  onToggleNote?: () => void,
+  // 'left' keeps the card in the bottom-left corner so it covers less of the page being shown.
+  align?: 'center' | 'left',
 }) {
+  const note = steps[step]?.note;
   const total = steps.length;
 
   return (
-    <div className="fixed inset-0 z-[100] pointer-events-none flex items-end justify-center pb-10 px-4">
-      <motion.div initial={{ opacity: 0, y: 50, scale: 0.95 }} animate={{ opacity: 1, y: 0, scale: 1 }} exit={{ opacity: 0, y: 20, scale: 0.95 }} transition={{ type: "spring", stiffness: 400, damping: 30 }} className="w-full max-w-md ink bg-foreground text-background rounded-3xl p-8 shadow-2xl pointer-events-auto border border-foreground/10 relative overflow-hidden font-sans">
+    <div className={cn("fixed inset-0 z-[100] pointer-events-none flex items-end px-4", align === 'left' ? "justify-center sm:justify-start pb-4 sm:pb-6" : "justify-center pb-10")}>
+      <motion.div initial={{ opacity: 0, y: 50, scale: 0.95 }} animate={{ opacity: 1, y: 0, scale: 1 }} exit={{ opacity: 0, y: 20, scale: 0.95 }} transition={{ type: "spring", stiffness: 400, damping: 30 }} className={cn("w-full ink bg-foreground text-background rounded-3xl shadow-2xl pointer-events-auto border border-foreground/10 relative overflow-hidden font-sans", align === 'left' ? "max-w-sm p-6" : "max-w-md p-8")}>
         <svg className="absolute top-0 right-0 w-32 h-32 opacity-10 pointer-events-none" viewBox="0 0 100 100">
            <circle cx="80" cy="20" r="40" fill="currentColor" />
         </svg>
@@ -40,10 +46,26 @@ export function TourOverlay({ step, setStep, endTour, steps, labels, onBack, bad
             <button onClick={endTour} className="text-[11px] font-bold uppercase tracking-widest text-background/70 hover:text-background transition-colors">{labels.skip}</button>
           </div>
         </div>
-        <h3 className="text-3xl font-serif font-light mb-3">{steps[step].title}</h3>
-        <p className="text-sm font-medium text-background/80 mb-8 leading-relaxed">{steps[step].desc}</p>
+        <h3 className={cn("font-serif font-light mb-3", align === 'left' ? "text-2xl" : "text-3xl")}>{steps[step].title}</h3>
+        <p className={cn("text-sm font-medium text-background/80 leading-relaxed", note && !noteHidden ? "mb-4" : "mb-8")}>{steps[step].desc}</p>
+        {note && !noteHidden && (
+          <div className="mb-6 rounded-xl border border-background/15 bg-background/5 px-4 py-3 flex items-start gap-3">
+            <div className="flex-1 min-w-0">
+              <div className="text-[10px] font-bold uppercase tracking-widest text-accent mb-0.5">{labels.note || 'Presenter note'}</div>
+              <p className="text-xs text-background/80 leading-relaxed">{note}</p>
+            </div>
+            {onToggleNote && (
+              <button onClick={onToggleNote} aria-label={labels.hideNote || 'Hide note'} title={labels.hideNote || 'Hide note'} className="shrink-0 w-6 h-6 rounded-full text-background/50 hover:text-background hover:bg-background/10 flex items-center justify-center"><EyeOff className="w-3.5 h-3.5" /></button>
+            )}
+          </div>
+        )}
         <div className="flex justify-between items-center">
-          <div className="text-xs font-bold text-background/60">{step + 1} / {total}</div>
+          <div className="flex items-center gap-2">
+            <div className="text-xs font-bold text-background/60">{step + 1} / {total}</div>
+            {note && noteHidden && onToggleNote && (
+              <button onClick={onToggleNote} aria-label={labels.showNote || 'Show note'} title={labels.showNote || 'Show note'} className="w-6 h-6 rounded-full text-background/30 hover:text-background/80 flex items-center justify-center"><Eye className="w-3.5 h-3.5" /></button>
+            )}
+          </div>
           <button onClick={() => {
             if (step === total - 1) endTour();
             else setStep(step + 1);

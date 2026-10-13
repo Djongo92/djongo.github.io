@@ -130,3 +130,13 @@ export const FAQ = [
   { q: 'Can members opt out?', a: 'Yes. Member-facing AI features are opt-in, and every member can see what AI does with their data in Privacy & Sharing.' },
   { q: 'What if our staff already use ChatGPT?', a: 'They probably do, and that is the real privacy risk today: member details pasted into public tools with no record. A governed tool is the safer answer than a ban.' },
 ];
+
+// What changes for each team, in their words. The showcase tracks end on the
+// matching card (/proposal#teams-<id>).
+export const TEAMS = [
+  { id: 'leadership', name: 'Leadership and the board', points: ['The state of the membership on one page, any day.', 'The board report ready without a night of spreadsheets.', 'Renewals at risk spotted months ahead, with the reason.', 'Every AI action logged, and approved by a person.'] },
+  { id: 'membership', name: 'Membership team', points: ['A short list each morning of who to call and why.', 'Call notes turned into tasks and a follow-up email.', 'Introductions between members followed to the end.', 'Contact records that tidy themselves.'] },
+  { id: 'comms', name: 'Communications and events', points: ['Serbian and English drafts of everything you publish.', 'Social posts, recaps and press releases ready to approve.', 'A monthly email built for each member.', 'Event invitations, reminders and thank-yous handled.'] },
+  { id: 'policy', name: 'Policy and committees', points: ['An alert when a law that matters to members opens for comment.', 'Drafts checked against what AmCham has said before.', 'Survey results summarised by sector.', 'Committee comments drafted from meeting notes, for the chair to approve.'] },
+  { id: 'members', name: 'Members', points: ['A clear record of what membership did for them this year.', 'Introductions they can ask for and follow.', 'One useful email a month instead of many.', 'They see what AmCham holds about them, and decide how it is used.'] },
+];
