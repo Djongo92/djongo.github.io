@@ -3,7 +3,7 @@ import { createPortal } from 'react-dom';
 import { Link } from 'wouter';
 import { SEO } from '@/components/seo';
 import { ArrowRight, Presentation, X, ChevronDown, ChevronUp, Globe2, LayoutDashboard, ShieldCheck, Sparkles, Check } from 'lucide-react';
-import { PRINCIPLES, USE_CASES, PHASES, ASKS, COMMERCIALS, RISKS, FAQ } from '@/data/proposal';
+import { PRINCIPLES, USE_CASES, PHASES, ASKS, RISKS, FAQ } from '@/data/proposal';
 import { TierCards, RouterExample, DataClassTable, TierChip } from '@/components/ai-privacy';
 import { cn } from '@/lib/utils';
 
@@ -229,26 +229,7 @@ const SECTIONS: Section[] = [
     ),
   },
   {
-    id: 'commercials', nav: 'How we charge', band: 'muted',
-    render: () => (
-      <>
-        <Eyebrow>How we charge</Eyebrow>
-        <H2>Fixed prices per step, and no per-user fees.</H2>
-        <Lead>Figures follow the discovery fortnight, once the scope is known rather than guessed.</Lead>
-        <div className="grid gap-4 md:grid-cols-3">
-          {COMMERCIALS.map((c) => (
-            <div key={c.title} className="rounded-3xl border border-border bg-card p-6">
-              <h3 className="text-lg font-bold text-foreground">{c.title}</h3>
-              <div className="text-primary font-bold mb-3">{c.model}</div>
-              <p className="text-muted-foreground leading-relaxed">{c.note}</p>
-            </div>
-          ))}
-        </div>
-      </>
-    ),
-  },
-  {
-    id: 'risks', nav: 'Risks', band: 'plain',
+    id: 'risks', nav: 'Risks', band: 'muted',
     render: () => (
       <>
         <Eyebrow>Risks, stated plainly</Eyebrow>
@@ -265,7 +246,7 @@ const SECTIONS: Section[] = [
     ),
   },
   {
-    id: 'faq', nav: 'Questions', band: 'muted',
+    id: 'faq', nav: 'Questions', band: 'plain',
     render: () => <FaqBlock />,
   },
   {
@@ -273,12 +254,12 @@ const SECTIONS: Section[] = [
     render: () => (
       <>
         <Eyebrow onNavy>Next steps</Eyebrow>
-        <H2>Three steps to a fixed-price proposal.</H2>
+        <H2>Three steps to get started.</H2>
         <ol className="grid gap-4 md:grid-cols-3 mb-10">
           {[
             { title: 'A working session', body: '90 minutes with the team: walk through the demo, agree what matters most.' },
             { title: 'Discovery fortnight', body: 'How data is kept today, what to connect first, and a Serbian-quality test on your own documents.' },
-            { title: 'Fixed-price proposal', body: 'For the redesign and Phase 0, with Phase 1 scoped and priced as an option.' },
+            { title: 'A written proposal', body: 'For the redesign and Phase 0, with Phase 1 scoped as an option.' },
           ].map((s, i) => (
             <li key={s.title} className="rounded-3xl border border-secondary-foreground/15 bg-secondary-foreground/5 p-6">
               <div className="text-accent font-serif text-3xl mb-3">{i + 1}</div>

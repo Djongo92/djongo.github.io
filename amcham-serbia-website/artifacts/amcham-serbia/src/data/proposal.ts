@@ -115,12 +115,6 @@ export const ASKS = [
   { title: 'Board visibility', body: 'A short session with the board on the principles above before any member data is used.' },
 ];
 
-export const COMMERCIALS = [
-  { title: 'Website redesign', model: 'Fixed-price project', note: 'Scope as shown in the Blueprint; priced after the discovery fortnight.' },
-  { title: 'AI phases', model: 'Fixed price per phase', note: 'Each phase has its own scope and success measure. You decide whether to continue after each one.' },
-  { title: 'Private AI, managed', model: 'Flat monthly fee', note: 'Hosting, model updates, monitoring, support and the audit log. Not priced per user, so the whole team can use it.' },
-];
-
 export const RISKS = [
   { risk: 'Serbian quality', answer: 'Smaller private models are weaker in Serbian than in English. We test with your real documents during discovery and route only what passes to the private model.' },
   { risk: 'Data readiness', answer: 'AI is only as good as the records behind it. Discovery tells us what exists; the pilot starts with what is already clean.' },
