@@ -6,7 +6,7 @@ import { cn } from '@/lib/utils';
 import { Link } from 'wouter';
 import { 
   Building2, Users, BarChart, Store, Settings, Calendar, ArrowRight,
-  Bell, Search, Target, Zap, CreditCard, Activity, Menu, X, ChevronLeft, Languages
+  Bell, Search, Target, Zap, CreditCard, Activity, Menu, X, ChevronLeft, Languages, Eye, Handshake
 } from 'lucide-react';
 import { PortalStateProvider, usePortalState } from './portal-state';
 import { ThemeToggle } from '@/components/ui/theme-toggle';
@@ -28,6 +28,8 @@ import SeamView from './views/seam-view';
 import PeopleView from './views/people-view';
 import BillingView from './views/billing-view';
 import NotificationsView from './views/notifications-view';
+import SeenView from './views/seen-view';
+import IntrosView from './views/intros-view';
 
 function PortalContent({ viewAs }: { viewAs: ReturnType<typeof resolveViewAsMember> }) {
   const { t, lang, setLang } = useI18n();
@@ -66,6 +68,7 @@ function PortalContent({ viewAs }: { viewAs: ReturnType<typeof resolveViewAsMemb
       title: t('portal_nav_tools', 'Tools'),
       items: [
         { id: 'directory', icon: Search, label: t('portal_directory', 'Directory') },
+        { id: 'intros', icon: Handshake, label: t('portal_intros', 'Introductions') },
         { id: 'events', icon: Calendar, label: t('portal_events', 'Events') },
         { id: 'marketplace', icon: Store, label: t('portal_marketplace', 'Opportunities') },
         { id: 'committee', icon: Users, label: t('portal_committee', 'Committees') },
@@ -76,6 +79,7 @@ function PortalContent({ viewAs }: { viewAs: ReturnType<typeof resolveViewAsMemb
       title: t('portal_nav_account', 'Account'),
       items: [
         { id: 'onboarding', icon: Zap, label: t('portal_onboarding', 'Onboarding') },
+        { id: 'seen', icon: Eye, label: t('portal_seen', 'What AmCham sees') },
         { id: 'seam', icon: Settings, label: t('portal_seam', 'Privacy & Sharing') },
         ...(roleParam === 'admin' ? [
           { id: 'people', icon: Users, label: t('portal_people', 'People') },
@@ -281,6 +285,8 @@ function PortalContent({ viewAs }: { viewAs: ReturnType<typeof resolveViewAsMemb
                  {view === 'committee' && <CommitteeView t={t} showToast={showToast} />}
                  {view === 'onboarding' && <OnboardingView t={t} navigateTo={navigateTo} showToast={showToast} member={viewAs.member} />}
                  {view === 'seam' && <SeamView t={t} showToast={showToast} />}
+                 {view === 'seen' && <SeenView t={t} showToast={showToast} member={viewAs.member} />}
+                 {view === 'intros' && <IntrosView t={t} showToast={showToast} member={viewAs.member} navigateTo={navigateTo} />}
                  {view === 'people' && roleParam === 'admin' && <PeopleView t={t} showToast={showToast} />}
                  {view === 'billing' && roleParam === 'admin' && <BillingView t={t} showToast={showToast} />}
                  {view === 'notifications' && <NotificationsView t={t} showToast={showToast} navigateTo={navigateTo} />}
@@ -291,7 +297,7 @@ function PortalContent({ viewAs }: { viewAs: ReturnType<typeof resolveViewAsMemb
                      <button onClick={() => navigateTo('home')} className="px-6 py-3 bg-foreground text-background rounded-full font-bold text-sm">{t('portal_back_home', 'Back to Home')}</button>
                    </div>
                  )}
-                 {!['home','score','glance','directory','laptime','events','marketplace','committee','onboarding','seam','people','billing','notifications'].includes(view) && (
+                 {!['home','score','glance','directory','laptime','events','marketplace','committee','onboarding','seam','seen','intros','people','billing','notifications'].includes(view) && (
                    <div className="text-center py-20 border border-dashed border-border rounded-[40px]">
                      <h3 className="font-serif text-2xl font-light mb-3">Page Not Found</h3>
                      <p className="text-sm text-muted-foreground mb-8 max-w-md mx-auto">This section doesn't exist or may have been moved.</p>
