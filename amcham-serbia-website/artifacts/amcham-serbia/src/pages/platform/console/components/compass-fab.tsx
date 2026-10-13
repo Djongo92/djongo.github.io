@@ -7,7 +7,7 @@ import { useConsoleState } from '../console-state';
 import { answerCompassQuery, getProactiveNudge, getCompanyGroundingContext, CompassAnswer, CompassAction } from '../compass-engine';
 import { buildBriefing, BriefingAction } from '../compass-briefing';
 import { compassStore, useCompassStore } from '../compass-store';
-import { CATEGORY_LABEL, SignalCategory } from '../compass-signals';
+import { CATEGORY_LABEL, SignalCategory, TRIAGE_EMAILS } from '../compass-signals';
 import { AiSuggestionChip, AiThinking, TypewriterText } from '@/components/ui/ai-badge';
 import { CompanyMark } from '@/components/ui/company-mark';
 import { askCompassAI, buildCompassHistory, CompassAiError } from '@/lib/compass-ai';
@@ -436,6 +436,33 @@ export function CompassFab({ view, dossierOpen = false, selectedCompanyId, roleP
                     <p className="font-serif text-xl text-foreground">{greeting()}, {firstName}.</p>
                     <p className="text-xs text-muted-foreground">{new Date().toLocaleDateString('en-GB', { weekday: 'long', day: 'numeric', month: 'long' })} · prepared from this morning’s data</p>
                   </div>
+
+                  <section>
+                    <h3 className="text-[11px] font-bold uppercase tracking-wider text-muted-foreground mb-2">Since you left</h3>
+                    <div className="rounded-2xl border border-border bg-card divide-y divide-border text-sm">
+                      <div className="px-3 py-2.5 flex items-start gap-2.5">
+                        <Inbox className="w-4 h-4 text-muted-foreground mt-0.5 shrink-0" />
+                        <div className="min-w-0 flex-1">
+                          <div className="font-bold text-foreground">{TRIAGE_EMAILS.length} emails in info@, sorted</div>
+                          <div className="text-[11px] text-muted-foreground">
+                            {(() => {
+                              const by = (c: string) => TRIAGE_EMAILS.filter((m) => m.category === c).length;
+                              return `${by('Membership enquiry')} membership questions, replies drafted · ${by('Event')} event changes · ${by('Invoice')} invoice for finance · ${by('Press')} press request · ${by('Spam')} spam`;
+                            })()}
+                          </div>
+                        </div>
+                        {canShowDeepLinks && <button onClick={() => { navigateTo('compass', undefined, { signal: 'triage' }); setOpen(false); }} className="shrink-0 text-[11px] font-bold px-2.5 py-1.5 rounded-full bg-primary/10 text-primary hover:bg-primary/20">Review</button>}
+                      </div>
+                      <div className="px-3 py-2.5 flex items-start gap-2.5">
+                        <CalendarDays className="w-4 h-4 text-muted-foreground mt-0.5 shrink-0" />
+                        <div className="min-w-0 flex-1">
+                          <div className="font-bold text-foreground">11:00 · Adriatica Grupa, call with the CEO</div>
+                          <div className="text-[11px] text-muted-foreground">One-page brief ready · last call’s follow-up sent yesterday</div>
+                        </div>
+                        {canShowDeepLinks && <button onClick={() => { navigateTo('brief', 'adr'); setOpen(false); }} className="shrink-0 text-[11px] font-bold px-2.5 py-1.5 rounded-full bg-primary/10 text-primary hover:bg-primary/20">Brief</button>}
+                      </div>
+                    </div>
+                  </section>
 
                   <section>
                     <div className="flex items-baseline justify-between mb-2">

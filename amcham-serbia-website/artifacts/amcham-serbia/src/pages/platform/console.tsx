@@ -19,11 +19,12 @@ import {
   FlagsView, ApprovalsView, CoverView, DossierView,
   BriefView, MyTeamView, BoardSummaryView, DigestsView,
   SponsorshipView, CommitteesView, AnalyticsView, ReportsView,
-  NetworkView, IntegrationsView, CompassView, NewsroomView, EventOpsView, MeetingNotesView
+  NetworkView, IntegrationsView, CompassView, NewsroomView, EventOpsView, MeetingNotesView, PositionCheckView
 } from './console/views';
 import { useCompassStore } from './console/compass-store';
 import { CommandPalette, GlossaryDrawer, TourOverlay, ShortcutsOverlay } from './console/components/Overlays';
 import { CompassFab } from './console/components/compass-fab';
+import { useShowcaseFocus } from '@/components/showcase-tour';
 import { ConsoleStateProvider } from './console/console-state';
 import { ThemeToggle } from '@/components/ui/theme-toggle';
 
@@ -47,7 +48,10 @@ export default function Console() {
   const [tourStep, setTourStep] = useState(-1);
   const [notifOpen, setNotifOpen] = useState(false);
   const [shortcutsOpen, setShortcutsOpen] = useState(false);
-  const [compassOpen, setCompassOpen] = useState(false);
+  // ?brief=open starts with Compass's Today panel open, for the walkthrough's morning-brief step.
+  const [compassOpen, setCompassOpen] = useState(() => new URLSearchParams(window.location.search).get('brief') === 'open');
+  const briefParam = searchParams.get('brief');
+  useEffect(() => { if (briefParam === 'open') setCompassOpen(true); }, [briefParam]);
   const [notifications, setNotifications] = useState([
     { id: 'n1', text: 'Your Q3 Board Summary is ready to review', read: false, time: '2h ago' },
     { id: 'n2', text: '3 renewals move into the 90-day window this week', read: false, time: '5h ago' },
@@ -205,9 +209,22 @@ export default function Console() {
     brief: t('platform.console.brief_title'),
     'board-summary': t('platform.console.nav_board_summary'),
     'my-team': t('platform.console.nav_my_team'),
+    'position-check': 'Position check',
   };
   const viewTitle = navGroups.flatMap((g) => g.items).find((i) => i.id === view)?.label || extraTitles[view] || view;
   const [collapsedGroups, setCollapsedGroups] = useState<Record<string, boolean>>({});
+  const focusViews = useShowcaseFocus('console');
+  const moreTitle = t('platform.console.nav_more', 'More');
+  const shownGroups = focusViews
+    ? (() => {
+        const all = navGroups.flatMap((g) => g.items);
+        const inTour = focusViews.map((id) => all.find((i) => i.id === id)).filter(Boolean) as NavItem[];
+        return [
+          { title: t('platform.console.nav_in_walkthrough', 'In this walkthrough'), items: inTour },
+          { title: moreTitle, items: all.filter((i) => !focusViews.includes(i.id)) },
+        ];
+      })()
+    : navGroups;
 
   const navigateTo = (newView: string, companyId?: string, extraParams?: Record<string, string>) => {
     let url = `/platform/console?view=${newView}&role=${roleParam}`;
@@ -233,9 +250,10 @@ export default function Console() {
       </div>
 
       <div className="flex-1 overflow-y-auto py-4 space-y-4 no-scrollbar">
-        {navGroups.map((group) => {
+        {shownGroups.map((group) => {
           const hasActive = group.items.some((i) => i.id === view);
-          const collapsed = !!collapsedGroups[group.title] && !hasActive;
+          // In focus mode "More" starts folded; every other group starts open.
+          const collapsed = (focusViews && group.title === moreTitle ? collapsedGroups[group.title] !== false : !!collapsedGroups[group.title]) && !hasActive;
           return (
           <div key={group.title}>
             <button
@@ -461,7 +479,8 @@ export default function Console() {
                   {view === 'newsroom' && <NewsroomView showToast={showToast} />}
                   {view === 'events' && <EventOpsView showToast={showToast} navigateTo={navigateTo} />}
                   {view === 'notes' && <MeetingNotesView showToast={showToast} navigateTo={navigateTo} />}
-                  {!['compass','ritual','heatmap','accounts','retention','outreach','ask','matchmaking','sponsorship','committees','intelligence','flags','approvals','my-team','board-summary','cover','digests','analytics','reports','brief','network','integrations','newsroom','events','notes'].includes(view) && (
+                  {view === 'position-check' && <PositionCheckView showToast={showToast} />}
+                  {!['compass','ritual','heatmap','accounts','retention','outreach','ask','matchmaking','sponsorship','committees','intelligence','flags','approvals','my-team','board-summary','cover','digests','analytics','reports','brief','network','integrations','newsroom','events','notes','position-check'].includes(view) && (
                     <div className="max-w-xl mx-auto py-24 text-center">
                       <div className="w-14 h-14 rounded-full bg-muted mx-auto mb-6 flex items-center justify-center"><Eye className="w-6 h-6 text-muted-foreground" /></div>
                       <h2 className="text-3xl font-serif font-light mb-3">Page Not Found</h2>

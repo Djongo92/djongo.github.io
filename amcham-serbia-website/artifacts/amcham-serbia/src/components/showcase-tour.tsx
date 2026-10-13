@@ -18,6 +18,7 @@ interface StepDef { path: string; title: string; desc: string; note?: string }
 const STEPS: Record<string, StepDef> = {
   website: { path: '/', title: 'This is the new website', desc: 'The public site, rebuilt so visitors find what they came for in a few clicks: joining, events, members and research. It works on phones, in English and Serbian.', note: 'Scroll down once, slowly, then press Next.' },
   priorities: { path: '/platform/console?view=ritual&role=lead&tour=off', title: 'Where the team’s day starts', desc: 'Each morning the team gets a short list of what matters most, with the money at stake next to each item. Adriatica Grupa is at the top: their renewal is at risk.', note: 'Click the Adriatica Grupa row.' },
+  morning: { path: '/platform/console?view=ritual&brief=open&role=lead&tour=off', title: 'Your morning in one panel', desc: 'Before anyone opens their email, Compass has sorted the shared inbox, drafted the easy replies and prepared a one-page brief for today’s 11:00 call. The team reads it and approves what is ready.', note: 'Point at “Since you left” on the right.' },
   dossier: { path: '/platform/console?view=heatmap&company=adr&role=lead&tour=off', title: 'Why Adriatica is slipping', desc: 'Their engagement score fell 9 points since May. The breakdown shows why: fewer events, and nobody on a committee.', note: 'Point at Event Attendance.' },
   saveplan: { path: '/platform/console?view=retention&focus=adr&role=lead&tour=off', title: 'A plan to keep them', desc: 'The drop opened a save plan: meet their CEO, with a named owner and a deadline. Nobody has to remember to do it.', note: 'Point at the owner and the deadline on the first card.' },
   notes: { path: '/platform/console?view=notes&role=lead&tour=off', title: 'After the call', desc: 'Marija called Adriatica’s CEO. She pastes her rough notes, and Compass writes the summary, who promised what, and the follow-up email.', note: 'Click “Turn into actions” and wait two seconds.' },
@@ -31,9 +32,10 @@ const STEPS: Record<string, StepDef> = {
   events: { path: '/platform/console?view=events&role=lead&tour=off', title: 'An event, start to finish', desc: 'Invitations, confirmations, reminders and thank-you emails happen by themselves. The team picks the topic, approves the texts and runs the room.', note: 'Click “5. Follow-up”.' },
   board: { path: '/platform/console?view=board-summary&role=lead&tour=off', title: 'The board report, already done', desc: 'The quarter on one page: how healthy the membership is, and how much money is safe or at risk. No spreadsheets the night before.', note: 'Point at the 88% and read the line under it.' },
   privacy: { path: '/platform/seam?tour=off', title: 'What staff see, and what they don’t', desc: 'Members can see exactly what the portal records, what staff see and how it is used. Personal data stays on AmCham’s own server.' },
-  surveys: { path: '/platform/portal?view=laptime&role=member&member=hmo&tour=off', title: 'Surveys', desc: 'Members take AmCham’s surveys here and see the combined results by sector. Nobody’s individual answers are ever shown.' },
+  surveys: { path: '/platform/portal?view=laptime&tab=themes&role=member&member=hmo&tour=off', title: 'What members told us', desc: 'Hundreds of written survey answers, grouped into themes by sector, in hours instead of weeks. Only the combined picture is shown; nobody’s individual answers ever leave AmCham.', note: 'Scroll down a little, then click “Manufacturing” to see the themes change.' },
   member_value: { path: '/platform/portal?view=score&role=member&member=hmo&tour=off', title: 'The member’s side', desc: 'This is what Hemofarm sees: what their membership did for them this year, and a statement they can forward to their own boss.', note: 'Click “Generate Annual Value Statement”.' },
   member_intros: { path: '/platform/portal?view=intros&role=member&member=hmo&tour=off', title: 'Asking for an introduction', desc: 'Members ask to meet each other and follow each request step by step. PwC said yes, so Hemofarm just picks a time.', note: 'Click “Pick a time”.' },
+  member_email: { path: '/platform/portal?view=home&email=open&role=member&member=hmo&tour=off', title: 'One useful email a month', desc: 'Members don’t have to log in to get value. Once a month they get one email with what matters to them: their sector’s news, their committees, events and introductions.', note: 'Close the email, then point at the Home page behind it.' },
   member_seen: { path: '/platform/portal?view=seen&role=member&member=hmo&tour=off', title: 'Nothing hidden', desc: 'Members see the same engagement number staff see, the notes AmCham keeps, and switches to decide how their data is used.', note: 'Scroll down and flip one switch.' },
 };
 
@@ -47,23 +49,45 @@ const endStep = (team: string): StepDef => ({
 type TrackId = 'full' | 'leadership' | 'membership' | 'comms' | 'policy' | 'members';
 
 const TRACKS: { id: TrackId; icon: React.ElementType; name: string; desc: string; steps: string[] }[] = [
-  { id: 'full', icon: Layers, name: 'Everyone', desc: 'The whole story, start to finish.', steps: ['website', 'priorities', 'dossier', 'saveplan', 'notes', 'match', 'compass', 'newsroom', 'privacy', 'member_value', 'member_intros'] },
+  { id: 'full', icon: Layers, name: 'Everyone', desc: 'The whole story, start to finish.', steps: ['website', 'priorities', 'morning', 'dossier', 'saveplan', 'notes', 'match', 'compass', 'newsroom', 'privacy', 'member_value', 'member_intros'] },
   { id: 'leadership', icon: Building, name: 'Leadership and the board', desc: 'The big picture, the board report and how data is protected.', steps: ['website', 'priorities', 'compass', 'board', 'privacy'] },
-  { id: 'membership', icon: Users, name: 'Membership team', desc: 'Priorities, calls, save plans and introductions.', steps: ['priorities', 'dossier', 'saveplan', 'notes', 'match', 'cleanup'] },
+  { id: 'membership', icon: Users, name: 'Membership team', desc: 'Priorities, calls, save plans and introductions.', steps: ['priorities', 'morning', 'dossier', 'saveplan', 'notes', 'match', 'cleanup'] },
   { id: 'comms', icon: Newspaper, name: 'Communications and events', desc: 'Drafts to approve, the member email and events.', steps: ['website', 'newsroom', 'digest', 'events'] },
   { id: 'policy', icon: Landmark, name: 'Policy and committees', desc: 'Law alerts, committees, surveys and press releases.', steps: ['compass', 'committees', 'surveys', 'press'] },
-  { id: 'members', icon: Briefcase, name: 'Members', desc: 'What membership gives them, and what AmCham sees.', steps: ['website', 'member_value', 'member_intros', 'member_seen'] },
+  { id: 'members', icon: Briefcase, name: 'Members', desc: 'What membership gives them, and what AmCham sees.', steps: ['website', 'member_email', 'member_value', 'member_intros', 'member_seen'] },
 ];
 
 interface ShowcaseContextValue {
   active: boolean;
   start: () => void;
   startTrack: (id: TrackId) => void;
+  // Screens the running track visits, per app, so the sidebar can show just those.
+  focus: { console: string[]; portal: string[] } | null;
 }
 
-const ShowcaseContext = createContext<ShowcaseContextValue>({ active: false, start: () => {}, startTrack: () => {} });
+const ShowcaseContext = createContext<ShowcaseContextValue>({ active: false, start: () => {}, startTrack: () => {}, focus: null });
 
 export const useShowcase = () => useContext(ShowcaseContext);
+
+// Focus mode: while a walkthrough runs, the sidebar lists only the screens
+// that track visits; everything else folds under "More". Returns null when
+// no walkthrough is running.
+export function useShowcaseFocus(area: 'console' | 'portal'): string[] | null {
+  const { focus } = useShowcase();
+  if (!focus || focus[area].length === 0) return null;
+  return focus[area];
+}
+
+function viewsFor(stepIds: string[], area: 'console' | 'portal'): string[] {
+  const out: string[] = [];
+  for (const id of stepIds) {
+    const def = STEPS[id];
+    if (!def || !def.path.startsWith(`/platform/${area}?`)) continue;
+    const v = new URLSearchParams(def.path.split('?')[1]).get('view');
+    if (v && !out.includes(v)) out.push(v);
+  }
+  return out;
+}
 
 const NOTES_KEY = 'amcham-showcase-hidden-notes';
 function readHidden(): Record<string, boolean> {
@@ -124,7 +148,7 @@ export function ShowcaseProvider({ children }: { children: React.ReactNode }) {
   }, [active, stepIds.length, toggleNote]);
 
   return (
-    <ShowcaseContext.Provider value={{ active, start, startTrack }}>
+    <ShowcaseContext.Provider value={{ active, start, startTrack, focus: active ? { console: viewsFor(track.steps, 'console'), portal: viewsFor(track.steps, 'portal') } : null }}>
       {children}
       <AnimatePresence>
         {picker && <AudiencePicker onPick={startTrack} onClose={() => setPicker(false)} />}
