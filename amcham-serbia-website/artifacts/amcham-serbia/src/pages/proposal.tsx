@@ -3,7 +3,7 @@ import { createPortal } from 'react-dom';
 import { Link } from 'wouter';
 import { SEO } from '@/components/seo';
 import { ArrowRight, Presentation, X, ChevronDown, ChevronUp, Globe2, LayoutDashboard, ShieldCheck, Sparkles, Check } from 'lucide-react';
-import { PRINCIPLES, USE_CASES, PHASES, ASKS, RISKS, FAQ } from '@/data/proposal';
+import { PRINCIPLES, USE_CASES, PHASES, ASKS, RISKS, FAQ, TEAMS } from '@/data/proposal';
 import { TierCards, RouterExample, DataClassTable, TierChip } from '@/components/ai-privacy';
 import { cn } from '@/lib/utils';
 
@@ -188,6 +188,27 @@ const SECTIONS: Section[] = [
     ),
   },
   {
+    id: 'teams', nav: 'For each team', band: 'navy',
+    render: () => (
+      <>
+        <Eyebrow onNavy>What changes for each team</Eyebrow>
+        <H2>The same platform, a different win for everyone.</H2>
+        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+          {TEAMS.map((team) => (
+            <div key={team.id} id={`teams-${team.id}`} className="rounded-3xl border border-border bg-card p-6 flex flex-col gap-4 scroll-mt-32 transition-shadow data-[highlight=true]:ring-4 data-[highlight=true]:ring-accent data-[highlight=true]:shadow-xl">
+              <h3 className="text-lg font-bold text-foreground">{team.name}</h3>
+              <ul className="space-y-2.5">
+                {team.points.map((p) => (
+                  <li key={p} className="flex gap-2.5 text-muted-foreground leading-relaxed"><Check className="w-4 h-4 text-primary shrink-0 mt-1" />{p}</li>
+                ))}
+              </ul>
+            </div>
+          ))}
+        </div>
+      </>
+    ),
+  },
+  {
     id: 'roadmap', nav: 'Roadmap', band: 'muted',
     render: () => (
       <>
@@ -322,6 +343,13 @@ export default function Proposal() {
     const id = window.location.hash.slice(1);
     const idx = SECTIONS.findIndex((s) => s.id === id);
     if (idx > 0) setTimeout(() => sectionRefs.current[idx]?.scrollIntoView({ block: 'start' }), 350);
+    // A card inside a section, such as #teams-membership from a showcase track.
+    else if (id) setTimeout(() => {
+      const el = document.getElementById(id);
+      if (!el) return;
+      el.scrollIntoView({ block: 'start' });
+      el.dataset.highlight = 'true';
+    }, 350);
   }, []);
 
   // Track which section is in view, for the nav highlight and the slide counter.

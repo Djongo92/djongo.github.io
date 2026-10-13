@@ -6,7 +6,12 @@ import { cn, parseEuro, fmtEuro } from '@/lib/utils';
 import { motion, AnimatePresence } from 'framer-motion';
 
 export function RetentionView({ navigateTo }: any) {
-  const [items, setItems] = useState(platformData.console.retention);
+  // ?focus=<companyId> puts that company's case first, so a walkthrough lands on it.
+  const [items, setItems] = useState(() => {
+    const focus = new URLSearchParams(window.location.search).get('focus');
+    const all = platformData.console.retention;
+    return focus ? [...all.filter(i => i.companyId === focus), ...all.filter(i => i.companyId !== focus)] : all;
+  });
   const [savePlays, setSavePlays] = useState<any[]>((platformData.console as any).savePlays);
   const [expandedId, setExpandedId] = useState<string | null>(null);
 

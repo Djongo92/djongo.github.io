@@ -1,4 +1,5 @@
-import React, { useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
+import { useSearch } from 'wouter';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Languages, Share2, Newspaper, Megaphone, Mail, Check, Pencil, Send, Clock, Image as ImageIcon, CheckCircle2 } from 'lucide-react';
 import { useI18n } from '@/lib/i18n';
@@ -21,11 +22,18 @@ export function NewsroomView({ showToast }: { showToast: (m: string) => void }) 
     digest: k('kind_digest', 'Member digest'),
   };
 
-  const initialFocus = new URLSearchParams(window.location.search).get('item');
+  // ?item=<id> opens that draft; following it means a walkthrough can move
+  // between drafts without leaving the page.
+  const search = useSearch();
+  const initialFocus = new URLSearchParams(search).get('item');
   const [filter, setFilter] = useState<NewsKind | 'all'>('all');
   const [selectedId, setSelectedId] = useState<string>(initialFocus && NEWS_ITEMS.some(i => i.id === initialFocus) ? initialFocus : NEWS_ITEMS[0].id);
   const [approved, setApproved] = useState<Record<string, string>>({});
   const [editing, setEditing] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (initialFocus && NEWS_ITEMS.some(i => i.id === initialFocus)) { setSelectedId(initialFocus); setFilter('all'); }
+  }, [initialFocus]);
 
   const items = useMemo(() => NEWS_ITEMS.filter(i => filter === 'all' || i.kind === filter), [filter]);
   const selected = NEWS_ITEMS.find(i => i.id === selectedId) ?? NEWS_ITEMS[0];
