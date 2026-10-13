@@ -55,13 +55,13 @@ const ROUTE_EXAMPLE: { tier: TierId; payload: React.ReactNode; verdict: 'full' |
     tier: 'on-prem',
     verdict: 'full',
     note: 'Full record, because it never leaves AmCham.',
-    payload: <>Adriatica Grupa · Patron · <b>€18k</b> renewal · score 62 (−15 since March) · contact <b>Marija Jovanović</b></>,
+    payload: <>Adriatica Grupa · Patron · <b>€18k</b> renewal · score 62 (−9 since May) · contact <b>Marija Jovanović</b></>,
   },
   {
     tier: 'anonymised',
     verdict: 'redacted',
     note: 'Only if a stronger model is needed. Names restored on the way back.',
-    payload: <><b>[COMPANY_1]</b> · Patron · <b>[AMOUNT_1]</b> renewal · score 62 (−15 since March) · contact <b>[PERSON_1]</b></>,
+    payload: <><b>[COMPANY_1]</b> · Patron · <b>[AMOUNT_1]</b> renewal · score 62 (−9 since May) · contact <b>[PERSON_1]</b></>,
   },
   {
     tier: 'public',

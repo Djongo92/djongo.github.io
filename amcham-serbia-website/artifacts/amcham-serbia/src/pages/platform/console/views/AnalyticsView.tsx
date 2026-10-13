@@ -138,9 +138,9 @@ export function AnalyticsView({ navigateTo }: { navigateTo: (v: string, c?: stri
                   <div className="text-[11px] font-bold text-primary uppercase tracking-widest mb-2">Score over time · {trend[0].month} → {latest.month}</div>
                   <h3 className="text-2xl md:text-3xl font-serif text-foreground mb-2 text-balance">The average hides a split</h3>
                   <p className="text-sm text-muted-foreground leading-relaxed">
-                    The book average barely moved ({Math.round(split.book[0])} → {Math.round(latest.avgScore)}). Underneath it, the {split.engagedCount} engaged accounts gained {split.engagedDelta} points
+                    The membership average barely moved ({Math.round(split.book[0])} → {Math.round(latest.avgScore)}). Underneath it, the {split.engagedCount} engaged accounts gained {split.engagedDelta} points
                     while the {atRiskCompanies.length} at-risk accounts lost {Math.abs(split.atRiskDelta)}
-                    {split.atRiskStartedAhead ? <> — and in {trend[0].month} they were the strongest group in the book.</> : '.'}
+                    {split.atRiskStartedAhead ? <> — and in {trend[0].month} they were the strongest group in the membership.</> : '.'}
                   </p>
                 </div>
                 <div className="rounded-2xl bg-destructive/10 px-4 py-3 text-right">

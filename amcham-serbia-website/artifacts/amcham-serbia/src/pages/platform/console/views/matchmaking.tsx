@@ -9,7 +9,13 @@ import { Confetti } from '@/components/ui/confetti';
 
 export function MatchmakingView({ showToast }: { showToast: (m:string) => void }) {
   const { t } = useI18n();
-  const [pairs, setPairs] = useState(() => platformData.console.matchmaking.pairs.map((p: any) => ({ ...p, pairId: `${p.from}-${p.to}` })));
+  // ?focus=<companyId> floats that company's matches to the top, so a walkthrough lands on the right card.
+  const [pairs, setPairs] = useState(() => {
+    const all = platformData.console.matchmaking.pairs.map((p: any) => ({ ...p, pairId: `${p.from}-${p.to}` }));
+    const focus = new URLSearchParams(window.location.search).get('focus');
+    if (!focus) return all;
+    return [...all.filter((p: any) => p.from === focus || p.to === focus), ...all.filter((p: any) => p.from !== focus && p.to !== focus)];
+  });
   const [deals, setDeals] = useState<any[]>((platformData.console.matchmaking as any).deals);
   const [dealValue, setDealValue] = useState<Record<string, string>>({});
   const [expandedId, setExpandedId] = useState<string | null>(null);

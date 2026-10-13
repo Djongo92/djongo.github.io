@@ -159,8 +159,8 @@ export function ReportsView() {
           />
           <p className="mt-3 text-xs font-semibold text-muted-foreground print:text-gray-600">
             {dimension === 'all' || !effectiveValue
-              ? 'Engaged vs at-risk accounts, against the book average (dashed).'
-              : `${effectiveValue} against the book average (dashed).`}
+              ? 'Engaged vs at-risk accounts, against the membership average (dashed).'
+              : `${effectiveValue} against the membership average (dashed).`}
           </p>
         </div>
       )}

@@ -194,13 +194,13 @@ export function RetentionView({ navigateTo }: any) {
             </div>
 
             <div className="mt-8 bg-muted p-5 rounded-3xl border border-border/50 relative z-10 shadow-sm">
-              <div className="text-xs font-bold text-foreground mb-2 flex items-center gap-2"><Target className="w-4 h-4" /> Save-Play Result</div>
+              <div className="text-xs font-bold text-foreground mb-2 flex items-center gap-2"><Target className="w-4 h-4" /> Save Plan Result</div>
               <p className="text-sm text-muted-foreground leading-relaxed">{savedCount} of {savePlays.length} resolved cases saved this year, protecting {fmtEuro(savedValue)} in dues.</p>
             </div>
 
             {savePlays.length > 0 && (
               <div className="mt-8 relative z-10">
-                <div className="text-[11px] font-bold uppercase tracking-widest text-muted-foreground mb-4 flex items-center gap-2"><History className="w-4 h-4"/> Recent Save Plays</div>
+                <div className="text-[11px] font-bold uppercase tracking-widest text-muted-foreground mb-4 flex items-center gap-2"><History className="w-4 h-4"/> Recent Save Plans</div>
                 <div className="space-y-3">
                   {savePlays.slice(0, 4).map((p, i) => {
                     const company = platformData.allMembers.find(m => m.id === p.companyId);

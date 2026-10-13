@@ -87,7 +87,7 @@ export interface TriageEmail {
 export const TRIAGE_EMAILS: TriageEmail[] = [
   { id: 'm1', from: 'Lena Marić', org: 'Cascade Robotics', subject: 'Membership for a new US investor in Subotica?', received: '07:12', category: 'Membership enquiry', routeTo: 'Milica Kostić', confidence: 'High', reply: 'Dear Ms Marić,\n\nThank you for getting in touch, and congratulations on the Subotica announcement. Corporate membership is usually the right fit for a company at your stage; I have attached the overview and would be glad to walk you through it in a 20-minute call this week.\n\nBest regards,\nMilica Kostić' },
   { id: 'm2', from: 'Ivan Petrović', org: 'Hemofarm', subject: 'Two more seats for the Energy Roundtable', received: '07:40', category: 'Event', routeTo: 'Events team', confidence: 'High', reply: 'Dear Ivan,\n\nThe Roundtable has five seats left, so two more for Hemofarm is no problem. Please send the names and I will add them today.\n\nBest regards,\nAmCham Events' },
-  { id: 'm3', from: 'Ana Stojić', org: 'Business Info Group', subject: 'Interview request on the Lap Time results', received: '08:05', category: 'Press', routeTo: 'Ana Vulović', confidence: 'High', reply: 'Dear Ms Stojić,\n\nThank you for your interest in Lap Time. Ana Vulović, who leads our communications, can offer 20 minutes on Thursday or Friday. Which suits you?\n\nKind regards,\nAmCham Serbia' },
+  { id: 'm3', from: 'Ana Stojić', org: 'Business Info Group', subject: 'Interview request on the survey results', received: '08:05', category: 'Press', routeTo: 'Ana Vulović', confidence: 'High', reply: 'Dear Ms Stojić,\n\nThank you for your interest in Lap Time. Ana Vulović, who leads our communications, can offer 20 minutes on Thursday or Friday. Which suits you?\n\nKind regards,\nAmCham Serbia' },
   { id: 'm4', from: 'Accounts payable', org: 'Bambi', subject: 'Invoice INV-2026-0418: PO number missing', received: '08:21', category: 'Invoice', routeTo: 'Tina Kostić', confidence: 'High', reply: 'Dear colleagues,\n\nApologies for the missing PO number. We will reissue invoice INV-2026-0418 with your reference today.\n\nBest regards,\nAmCham Serbia, Finance' },
   { id: 'm5', from: 'Marko Ilić', org: 'Adriatica Grupa', subject: 'Re: ESG committee, joining the November session', received: '08:34', category: 'Committee', routeTo: 'Marija Jovanović', confidence: 'Medium', reply: 'Dear Marko,\n\nWonderful to hear. The ESG & Environment Committee meets on 24 October; I have added you to the invitation and will send the pre-read on Monday.\n\nBest regards,\nMarija Jovanović' },
   { id: 'm6', from: 'Nikola Đurić', org: 'Zapad IT Solutions', subject: 'Question about upgrading our membership', received: '08:50', category: 'Membership enquiry', routeTo: 'Milica Kostić', confidence: 'High' },
@@ -410,7 +410,7 @@ export function buildSignals(): CompassSignal[] {
     },
     {
       id: 'follow-up', kind: 'event-follow-up', kindLabel: 'event follow-ups', category: 'events',
-      title: '9 people from the Lap Time presentation haven’t heard from us',
+      title: '9 people from the survey presentation haven’t heard from us',
       summary: 'Of the 31 who attended on 10 September, 9 have had no follow-up. Compass has drafted a thank-you with the full results attached.',
       evidence: [
         { text: '31 attendees checked in on 10 September.', source: 'Event check-ins' },
@@ -419,13 +419,13 @@ export function buildSignals(): CompassSignal[] {
       why: 'Every attendee should hear from AmCham within two weeks of an event.',
       confidence: 'High', audience: 'team', tier: 'on-prem', priority: 48,
       action: {
-        kind: 'draft', label: 'Draft the thank-you', draftTitle: 'Thank you for joining the Lap Time presentation',
+        kind: 'draft', label: 'Draft the thank-you', draftTitle: 'Thank you for joining the survey presentation',
         draft: () => lines(
-          'Subject: Thank you for joining us for Lap Time 2026',
+          'Subject: Thank you for joining us for the 2026 survey results',
           '',
           'Dear colleague,',
           '',
-          'Thank you for joining the Lap Time presentation on 10 September. The full results, with the sector breakdowns we discussed, are attached.',
+          'Thank you for joining the survey results presentation on 10 September. The full results, with the sector breakdowns we discussed, are attached.',
           '',
           'If your sector’s results raise questions, our committees are where we turn them into proposals to government. I’d be glad to introduce you.',
           '',
@@ -539,13 +539,13 @@ export function buildSignals(): CompassSignal[] {
     },
     {
       id: 'anomaly', kind: 'anomaly', kindLabel: 'unusual changes', category: 'team',
-      title: `${slide.sector || 'One sector'} is sliding while the book holds steady`,
-      summary: `Average score in ${slide.sector} is down ${Math.abs(slide.delta).toFixed(1)} points over three months; the book as a whole moved ${slide.bookDelta >= 0 ? '+' : ''}${slide.bookDelta.toFixed(1)}.`,
+      title: `${slide.sector || 'One sector'} is sliding while the rest of the membership holds steady`,
+      summary: `Average score in ${slide.sector} is down ${Math.abs(slide.delta).toFixed(1)} points over three months; the membership as a whole moved ${slide.bookDelta >= 0 ? '+' : ''}${slide.bookDelta.toFixed(1)}.`,
       evidence: [
         { text: `${slide.n} ${slide.sector} members, average score now ${Math.round(slide.now)}.`, source: 'Engagement scores' },
         { text: 'Computed on totals only; no individual records leave the console.', source: 'Analytics' },
       ],
-      why: 'Compass flags any sector moving against the rest of the book by more than a point in a quarter.',
+      why: 'Compass flags any sector moving against the rest of the membership by more than a point in a quarter.',
       confidence: 'Medium', audience: 'team', tier: 'anonymised', priority: 44,
       action: { kind: 'navigate', label: 'Open analytics', view: 'analytics' },
     },
@@ -615,7 +615,7 @@ export function buildSignals(): CompassSignal[] {
       title: 'Jelena is out Thursday and Friday',
       summary: `${jelenaRenewals.length} of her accounts renew in the next three months (${jelenaRenewals.map((m) => m.name).join(', ')}). Worth a handover before she goes.`,
       evidence: [{ text: 'Out of office Thursday and Friday.', source: 'Team calendar' }],
-      why: 'Absences longer than a day with renewals in the book get a handover suggestion.',
+      why: 'Absences longer than a day with renewals coming up get a handover suggestion.',
       confidence: 'High', audience: 'team', tier: 'on-prem', due: 'Wed', priority: 66,
       action: { kind: 'navigate', label: 'Set up cover', view: 'cover' },
     },

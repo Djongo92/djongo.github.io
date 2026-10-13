@@ -282,7 +282,7 @@ export function AskView({ showToast }: { showToast: (m:string) => void }) {
 
       {!results && !loading && (
         <div className="flex gap-4 flex-wrap">
-          {["Manufacturing exporters in Kragujevac", "Patrons with renewal in 90 days", "IT companies with low engagement", "At-risk accounts", "Digital Economy committee members", "Legal sector companies in Belgrade", "Companies below the book average", "Startup tier companies", "Haven't talked to in 30 days", "Joined in the past 90 days", "Who left in the past 90 days"].map(q => (
+          {["Manufacturing exporters in Kragujevac", "Patrons with renewal in 90 days", "IT companies with low engagement", "At-risk accounts", "Digital Economy committee members", "Legal sector companies in Belgrade", "Companies below the membership average", "Startup tier companies", "Haven't talked to in 30 days", "Joined in the past 90 days", "Who left in the past 90 days"].map(q => (
             <button key={q} onClick={() => { setQuery(q); handleSearch(null as any, q); }} className="bg-background border border-border rounded-full px-5 py-3 text-sm font-bold text-foreground hover:border-primary hover:bg-primary/5 transition-colors shadow-sm flex items-center gap-2">
               <Search className="w-3 h-3 text-muted-foreground"/> {q}
             </button>

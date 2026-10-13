@@ -69,7 +69,7 @@ function PortalContent({ viewAs }: { viewAs: ReturnType<typeof resolveViewAsMemb
         { id: 'events', icon: Calendar, label: t('portal_events', 'Events') },
         { id: 'marketplace', icon: Store, label: t('portal_marketplace', 'Opportunities') },
         { id: 'committee', icon: Users, label: t('portal_committee', 'Committees') },
-        { id: 'laptime', icon: BarChart, label: t('portal_laptime', 'Lap Time') },
+        { id: 'laptime', icon: BarChart, label: t('portal_laptime', 'Surveys') },
       ]
     },
     {
