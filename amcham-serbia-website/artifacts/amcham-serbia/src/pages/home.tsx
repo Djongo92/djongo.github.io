@@ -2,7 +2,7 @@ import React, { useRef, useState, useEffect } from 'react';
 import { Link } from 'wouter';
 import { useI18n } from '@/lib/i18n';
 import { SEO } from '@/components/seo';
-import { ArrowRight, ChevronRight, Newspaper, ArrowUpRight, CheckCircle2, Compass } from 'lucide-react';
+import { ArrowRight, ChevronRight, Newspaper, ArrowUpRight, Compass } from 'lucide-react';
 import { mockEvents, mockNews } from '@/data/mock';
 import { useScroll, useTransform, useInView, motion, AnimatePresence } from 'framer-motion';
 import { useGuidedTour } from '@/components/guided-tour';
@@ -140,14 +140,14 @@ export default function Home() {
         <div className="container mx-auto px-4 md:px-8">
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
             <div className="lg:col-span-6 relative group">
-              <div className="aspect-[4/3] relative rounded-sm overflow-hidden shadow-xl">
+              <div className="aspect-[4/3] relative rounded-2xl overflow-hidden shadow-xl">
                 <ImageWithSkeleton
                   src={`${import.meta.env.BASE_URL}images/real/in-focus.jpeg`}
                   alt="In Focus"
                   className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
                 />
               </div>
-              <div className="absolute -bottom-6 -right-6 w-48 h-48 bg-background border border-border p-6 shadow-xl hidden md:flex flex-col justify-center rounded-sm">
+              <div className="absolute -bottom-6 -right-6 w-48 h-48 bg-background border border-border p-6 shadow-xl hidden md:flex flex-col justify-center rounded-2xl">
                 <span className="text-xs font-bold uppercase tracking-widest text-primary mb-2">{t('home.in_focus')}</span>
                 <span className="font-serif font-bold text-xl leading-tight">{t('home.in_focus_badge', 'Fourteenth Lap Time Survey Results')}</span>
               </div>
@@ -183,7 +183,7 @@ export default function Home() {
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             {latestNews.map((news, i) => (
               <Link key={news.id} href={`/news/${news.id}`} className="group flex flex-col h-full">
-                <div className="aspect-[3/2] relative overflow-hidden rounded-sm bg-background mb-4">
+                <div className="aspect-[3/2] relative overflow-hidden rounded-2xl bg-background mb-4">
                   <ImageWithSkeleton
                     src={`${import.meta.env.BASE_URL}${newsThumbnails[i % newsThumbnails.length]}`}
                     alt=""
@@ -219,7 +219,7 @@ export default function Home() {
             </Link>
           </div>
           
-          <div className="bg-background border border-border p-8 rounded-sm flex flex-col md:flex-row gap-8 items-center justify-between hover:border-primary/30 transition-colors group">
+          <div className="bg-background border border-border p-8 rounded-2xl flex flex-col md:flex-row gap-8 items-center justify-between hover:border-primary/30 transition-colors group">
             <div>
               <div className="flex items-center gap-3 mb-4">
                 <span className="bg-primary/10 text-primary font-bold px-3 py-1 rounded-sm text-xs uppercase tracking-widest">{t('home.next_event')}</span>
@@ -244,7 +244,7 @@ export default function Home() {
             <h2 className="text-3xl font-serif font-bold text-foreground">{t('home.members_news')}</h2>
           </div>
           
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center bg-background border border-border p-8 md:p-12 rounded-sm shadow-sm">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center bg-background border border-border p-8 md:p-12 rounded-2xl shadow-sm">
             <div className="order-2 lg:order-1">
               <span className="text-xs font-bold uppercase tracking-widest text-primary mb-4 block">Spotlight</span>
               <h3 className="text-2xl md:text-3xl font-serif font-bold mb-6 text-foreground leading-tight">
@@ -262,7 +262,7 @@ export default function Home() {
               </div>
             </div>
             <div className="order-1 lg:order-2">
-              <div className="aspect-[4/3] relative rounded-sm overflow-hidden shadow-md group">
+              <div className="aspect-[4/3] relative rounded-2xl overflow-hidden shadow-md group">
                 <ImageWithSkeleton
                   src={`${import.meta.env.BASE_URL}images/member-story-1.jpg`}
                   alt="Member Story"
@@ -319,7 +319,7 @@ export default function Home() {
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
             {team.slice(0, 4).map((member, i) => (
               <Link key={member.id} href="/about" className={`group block ${i % 2 === 1 ? 'md:translate-y-0 lg:translate-y-8' : ''}`}>
-                <div className="aspect-[3/4] overflow-hidden rounded-sm bg-muted mb-4 relative shadow-sm group-hover:shadow-md transition-all">
+                <div className="aspect-[3/4] overflow-hidden rounded-2xl bg-muted mb-4 relative shadow-sm group-hover:shadow-md transition-all">
                   <ImageWithSkeleton
                     src={`${import.meta.env.BASE_URL}images/team/${member.img}`}
                     alt={member.name}
@@ -358,66 +358,33 @@ export default function Home() {
         </div>
       </section>
 
-      {/* 11. Diagnostic Scorecard */}
-      <section className="py-24 bg-secondary text-secondary-foreground relative overflow-hidden">
-        <div className="absolute inset-0 bg-network-pattern opacity-10 pointer-events-none"></div>
-        <div className="container mx-auto px-4 md:px-8 relative z-10">
-          <div className="max-w-2xl mb-16">
-            <span className="text-xs font-bold uppercase tracking-widest text-accent mb-4 block">{t('home.scorecard.eyebrow')}</span>
-            <h2 className="text-3xl md:text-4xl font-serif font-bold mb-6">{t('home.scorecard.title')}</h2>
-            <p className="text-lg text-secondary-foreground/80 leading-relaxed">{t('home.scorecard.desc')}</p>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-12">
-            <div className="bg-secondary-foreground/5 border border-secondary-foreground/10 rounded-sm p-8">
-              <span className="text-xs font-bold uppercase tracking-widest text-secondary-foreground/70 mb-6 block">{t('home.scorecard.old_label')}</span>
-              <div className="flex gap-10">
-                <div>
-                  <div className="text-4xl font-serif font-bold text-secondary-foreground/80">8<span className="text-xl text-secondary-foreground/60">/12</span></div>
-                  <div className="text-xs font-bold uppercase tracking-widest text-secondary-foreground/60 mt-2">{t('home.scorecard.findability_label')}</div>
-                </div>
-                <div>
-                  <div className="text-4xl font-serif font-bold text-secondary-foreground/80">4<span className="text-xl text-secondary-foreground/60">/6</span></div>
-                  <div className="text-xs font-bold uppercase tracking-widest text-secondary-foreground/60 mt-2">{t('home.scorecard.visual_label')}</div>
-                </div>
+      {/* 11. Behind the redesign: a quiet note for reviewers, not visitors */}
+      <section className="py-10 bg-muted/40 border-t border-border">
+        <div className="container mx-auto px-4 md:px-8">
+          <div className="flex flex-col lg:flex-row lg:items-center gap-6 lg:gap-10">
+            <div className="flex-1 min-w-0">
+              <span className="text-xs font-bold uppercase tracking-widest text-primary mb-2 block">{t('home.behind.eyebrow')}</span>
+              <p className="text-foreground/80 leading-relaxed max-w-2xl">{t('home.behind.text')}</p>
+            </div>
+            <dl className="flex gap-8 shrink-0">
+              <div>
+                <dt className="text-[11px] font-bold uppercase tracking-widest text-muted-foreground">{t('home.behind.findability')}</dt>
+                <dd className="font-serif font-bold text-2xl text-foreground tabular-nums">8 <span className="text-muted-foreground text-base">→</span> 11<span className="text-sm text-muted-foreground">/12</span></dd>
               </div>
-            </div>
-            <div className="bg-primary/10 border border-primary/40 rounded-sm p-8 relative">
-              <span className="text-xs font-bold uppercase tracking-widest text-primary mb-6 block">{t('home.scorecard.new_label')}</span>
-              <div className="flex gap-10">
-                <div>
-                  <div className="text-4xl font-serif font-bold text-secondary-foreground">11<span className="text-xl text-secondary-foreground/70">/12</span></div>
-                  <div className="text-xs font-bold uppercase tracking-widest text-secondary-foreground/70 mt-2">{t('home.scorecard.findability_label')}</div>
-                </div>
-                <div>
-                  <div className="text-4xl font-serif font-bold text-secondary-foreground">5<span className="text-xl text-secondary-foreground/70">/6</span></div>
-                  <div className="text-xs font-bold uppercase tracking-widest text-secondary-foreground/70 mt-2">{t('home.scorecard.visual_label')}</div>
-                </div>
+              <div>
+                <dt className="text-[11px] font-bold uppercase tracking-widest text-muted-foreground">{t('home.behind.visual')}</dt>
+                <dd className="font-serif font-bold text-2xl text-foreground tabular-nums">4 <span className="text-muted-foreground text-base">→</span> 5<span className="text-sm text-muted-foreground">/6</span></dd>
               </div>
+            </dl>
+            <div className="flex flex-wrap gap-3 shrink-0">
+              <Link href="/blueprint/diagnostic" className="inline-flex items-center gap-2 bg-foreground text-background px-5 py-2.5 rounded-full text-sm font-semibold hover:opacity-90 transition-opacity">
+                {t('home.behind.diagnostic')} <ArrowRight className="w-4 h-4" />
+              </Link>
+              <Link href="/blueprint" className="inline-flex items-center gap-2 border border-border px-5 py-2.5 rounded-full text-sm font-semibold text-foreground hover:bg-background transition-colors">
+                {t('home.behind.blueprint')}
+              </Link>
             </div>
           </div>
-
-          <div className="bg-secondary-foreground/5 border border-secondary-foreground/10 rounded-sm p-8 mb-10">
-            <span className="text-xs font-bold uppercase tracking-widest text-secondary-foreground/70 mb-5 block">{t('home.scorecard.journeys_label')}</span>
-            <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
-              {[
-                t('home.scorecard.journey_1'),
-                t('home.scorecard.journey_2'),
-                t('home.scorecard.journey_3'),
-                t('home.scorecard.journey_4'),
-                t('home.scorecard.journey_5'),
-              ].map((journey, i) => (
-                <div key={i} className="flex items-center gap-2 text-sm font-medium text-secondary-foreground/80">
-                  <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0" />
-                  {journey}
-                </div>
-              ))}
-            </div>
-          </div>
-
-          <Link href="/blueprint/diagnostic" className="inline-flex items-center gap-2 text-accent font-bold hover:underline">
-            {t('home.scorecard.cta')} <ArrowRight className="w-4 h-4" />
-          </Link>
         </div>
       </section>
 

@@ -41,7 +41,7 @@ export default function About() {
             <div className="lg:col-span-8 space-y-16">
               
               {/* Mission */}
-              <div className="bg-card border border-border p-8 md:p-12 shadow-xl rounded-sm">
+              <div className="bg-card border border-border p-8 md:p-12 shadow-xl rounded-2xl">
                 <div className="flex items-center gap-4 mb-8 pb-4 border-b border-border">
                   <div className="w-12 h-12 bg-primary/10 rounded-full flex items-center justify-center">
                     <Globe className="w-6 h-6 text-primary" />
@@ -59,7 +59,7 @@ export default function About() {
                     {t('about.mission_p3')}
                   </p>
                 </div>
-                <Link href="/impact" className="mt-8 flex items-center justify-between gap-4 bg-background border border-border hover:border-primary/50 rounded-sm p-6 group transition-colors">
+                <Link href="/impact" className="mt-8 flex items-center justify-between gap-4 bg-background border border-border hover:border-primary/50 rounded-2xl p-6 group transition-colors">
                   <div className="flex items-center gap-4">
                     <div className="w-10 h-10 bg-primary/10 rounded-full flex items-center justify-center shrink-0">
                       <BarChart3 className="w-5 h-5 text-primary" />
@@ -84,7 +84,7 @@ export default function About() {
                 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                   {team.map((member) => (
-                    <div key={member.id} className="bg-card border border-border p-6 rounded-sm flex flex-col gap-4 hover:shadow-md transition-shadow group">
+                    <div key={member.id} className="bg-card border border-border p-6 rounded-2xl flex flex-col gap-4 hover:shadow-md transition-shadow group">
                       <div className="flex items-center gap-4">
                         <div className="w-16 h-16 shrink-0 relative rounded-full overflow-hidden bg-background ring-1 ring-border">
                           <ImageWithSkeleton
@@ -116,22 +116,22 @@ export default function About() {
                 </div>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
                   {/* Board Members */}
-                  <div className="bg-card border border-border p-8 rounded-sm hover:shadow-md transition-shadow">
+                  <div className="bg-card border border-border p-8 rounded-2xl hover:shadow-md transition-shadow">
                     <h3 className="font-bold text-xl mb-1">Stefan Lazarević</h3>
                     <p className="text-primary text-xs font-bold uppercase tracking-widest mb-4">President</p>
                     <p className="text-muted-foreground text-sm font-medium">Vice President, NCR Atleos</p>
                   </div>
-                  <div className="bg-card border border-border p-8 rounded-sm hover:shadow-md transition-shadow">
+                  <div className="bg-card border border-border p-8 rounded-2xl hover:shadow-md transition-shadow">
                     <h3 className="font-bold text-xl mb-1">Ronald Seeliger</h3>
                     <p className="text-primary text-xs font-bold uppercase tracking-widest mb-4">First Vice President</p>
                     <p className="text-muted-foreground text-sm font-medium">CEO, Hemofarm</p>
                   </div>
-                  <div className="bg-card border border-border p-8 rounded-sm hover:shadow-md transition-shadow">
+                  <div className="bg-card border border-border p-8 rounded-2xl hover:shadow-md transition-shadow">
                     <h3 className="font-bold text-xl mb-1">Ksenija Karić</h3>
                     <p className="text-primary text-xs font-bold uppercase tracking-widest mb-4">Second Vice President</p>
                     <p className="text-muted-foreground text-sm font-medium">Country General Manager, Schneider Electric</p>
                   </div>
-                  <div className="bg-card border border-border p-8 rounded-sm hover:shadow-md transition-shadow">
+                  <div className="bg-card border border-border p-8 rounded-2xl hover:shadow-md transition-shadow">
                     <h3 className="font-bold text-xl mb-1">Bojan Vračević</h3>
                     <p className="text-primary text-xs font-bold uppercase tracking-widest mb-4">Secretary Treasurer</p>
                     <p className="text-muted-foreground text-sm font-medium">CEO, S-Leasing</p>
@@ -142,7 +142,7 @@ export default function About() {
 
             {/* Sidebar Contact */}
             <div className="lg:col-span-4">
-              <div className="bg-secondary text-secondary-foreground p-8 md:p-10 rounded-sm sticky top-24 z-10 shadow-2xl">
+              <div className="bg-secondary text-secondary-foreground p-8 md:p-10 rounded-2xl sticky top-24 z-10 shadow-2xl">
                 <div className="flex items-center gap-3 mb-8 pb-4 border-b border-secondary-foreground/10">
                   <Building className="w-6 h-6 text-secondary-foreground" />
                   <h3 className="text-2xl font-serif font-bold text-secondary-foreground">{t('about.contact')}</h3>
@@ -182,7 +182,7 @@ export default function About() {
               </div>
 
               {/* Press & Media */}
-              <div id="press" className="bg-card border border-border p-8 rounded-sm mt-8 shadow-md scroll-mt-24">
+              <div id="press" className="bg-card border border-border p-8 rounded-2xl mt-8 shadow-md scroll-mt-24">
                 <div className="flex items-center gap-3 mb-6 pb-4 border-b border-border">
                   <Newspaper className="w-5 h-5 text-primary" />
                   <h3 className="text-xl font-serif font-bold">{t('about.press')}</h3>

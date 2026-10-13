@@ -72,7 +72,7 @@ export default function Membership() {
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-12">
             
             {/* Left Col: Info */}
-            <div className="lg:col-span-7 bg-background p-8 border border-border shadow-xl rounded-sm">
+            <div className="lg:col-span-7 bg-background p-8 border border-border shadow-xl rounded-2xl">
               <h2 className="text-2xl font-serif font-bold mb-6">{t('membership.why_join')}</h2>
               <ul className="flex flex-col gap-4 mb-12">
                 {Array.isArray(benefits) && benefits.map((benefit, i) => (
@@ -88,7 +88,7 @@ export default function Membership() {
                   <h2 className="text-2xl font-serif font-bold mb-6">{t('membership.testimonials_title')}</h2>
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                     {testimonials.map((item, i) => (
-                      <div key={i} className="border border-border bg-card p-5 rounded-sm flex flex-col gap-3">
+                      <div key={i} className="border border-border bg-card p-5 rounded-2xl flex flex-col gap-3">
                         <Quote className="w-5 h-5 text-primary/40 shrink-0" />
                         <p className="text-sm text-foreground leading-relaxed italic flex-1">"{item.quote}"</p>
                         <div className="pt-3 border-t border-border/60">
@@ -109,7 +109,7 @@ export default function Membership() {
                   { id: 'business', name: t('membership.categories.business.name'), desc: t('membership.categories.business.desc'), feeFrom: t('membership.categories.business.fee_from') },
                   { id: 'nonprofit', name: t('membership.categories.nonprofit.name'), desc: t('membership.categories.nonprofit.desc'), feeFrom: t('membership.categories.nonprofit.fee_from') }
                 ].map((cat, i) => (
-                  <div key={i} className="border border-border p-6 rounded-sm hover:border-primary/30 transition-colors bg-card">
+                  <div key={i} className="border border-border p-6 rounded-2xl hover:border-primary/30 transition-colors bg-card">
                     <div className="flex items-start justify-between gap-4 mb-2">
                       <h3 className="font-bold text-lg text-primary">{cat.name}</h3>
                       <span className="text-sm font-bold text-foreground whitespace-nowrap shrink-0">{cat.feeFrom}</span>
@@ -123,12 +123,12 @@ export default function Membership() {
 
             {/* Right Col: Form */}
             <div className="lg:col-span-5 relative z-20">
-              <div className="bg-card border-2 border-border p-8 sticky top-24 rounded-sm shadow-xl">
+              <div className="bg-card border-2 border-border p-8 sticky top-24 rounded-2xl shadow-xl">
                 <h3 className="text-2xl font-serif font-bold mb-2">{t('membership.form.title')}</h3>
                 <p className="text-sm text-muted-foreground mb-8">{t('membership.form.subtitle')}</p>
                 
                 {submitStatus === 'success' ? (
-                  <div className="bg-primary/5 border border-primary/20 p-8 text-center rounded-sm">
+                  <div className="bg-primary/5 border border-primary/20 p-8 text-center rounded-2xl">
                     <CheckCircle2 className="w-12 h-12 text-primary mx-auto mb-4" />
                     <h4 className="font-bold text-lg mb-2">{t('membership.form.success_title')}</h4>
                     <p className="text-sm text-muted-foreground mb-4">{t('membership.form.success_desc')}</p>

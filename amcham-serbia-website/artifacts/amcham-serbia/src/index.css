@@ -46,10 +46,10 @@
   --font-serif: var(--app-font-serif);
   --font-mono: var(--app-font-mono);
 
-  --radius-sm: calc(var(--radius) - 4px);
-  --radius-md: calc(var(--radius) - 2px);
+  --radius-sm: calc(var(--radius) - 0.25rem);
+  --radius-md: calc(var(--radius) - 0.125rem);
   --radius-lg: var(--radius);
-  --radius-xl: calc(var(--radius) + 4px);
+  --radius-xl: calc(var(--radius) + 0.25rem);
 }
 
 /* LIGHT MODE */
@@ -111,7 +111,7 @@
   --app-font-serif: 'Playfair Display', serif;
   --app-font-mono: Menlo, monospace;
   
-  --radius: 0.25rem; /* Lightly rounded, mostly square */
+  --radius: 0.75rem; /* Soft corners: sm 8px, md 10px, lg 12px, xl 16px */
   
   --shadow-2xs: 0px 2px 0px 0px rgba(11, 18, 33, 0.05);
   --shadow-xs: 0px 2px 0px 0px rgba(11, 18, 33, 0.05);

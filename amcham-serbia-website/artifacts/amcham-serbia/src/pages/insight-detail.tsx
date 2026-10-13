@@ -58,7 +58,7 @@ export default function InsightDetail() {
           
           <div className="lg:col-span-8 space-y-8">
             {/* Key Findings */}
-            <div className="bg-card border border-border p-8 md:p-12 shadow-xl rounded-sm">
+            <div className="bg-card border border-border p-8 md:p-12 shadow-xl rounded-2xl">
               <h2 className="text-2xl font-serif font-bold mb-8">{t('insights.detail.key_findings')}</h2>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-8">
                 {insight.keyFindings.map((finding, i) => (
@@ -71,7 +71,7 @@ export default function InsightDetail() {
             </div>
 
             {/* Methodology */}
-            <div className="bg-card border border-border p-8 rounded-sm shadow-sm">
+            <div className="bg-card border border-border p-8 rounded-2xl shadow-sm">
               <h3 className="text-lg font-serif font-bold mb-3 flex items-center gap-2">
                  {t('insights.detail.methodology')}
               </h3>
@@ -83,7 +83,7 @@ export default function InsightDetail() {
 
           {/* Sidebar */}
           <div className="lg:col-span-4">
-            <div className="bg-card border border-border p-8 rounded-sm sticky top-24 shadow-sm">
+            <div className="bg-card border border-border p-8 rounded-2xl sticky top-24 shadow-sm">
               <h3 className="font-bold text-lg mb-6 border-b border-border pb-4">{t('insights.detail.download_report')}</h3>
               
               <button className="w-full bg-primary text-primary-foreground py-4 rounded-sm font-bold flex justify-center items-center gap-2 hover:bg-primary/90 transition-colors shadow-lg shadow-primary/20 mb-4">

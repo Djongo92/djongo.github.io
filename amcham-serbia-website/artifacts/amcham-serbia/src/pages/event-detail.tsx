@@ -61,7 +61,7 @@ export default function EventDetail() {
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
           
           {/* Main Content */}
-          <div className="lg:col-span-8 bg-card border border-border p-8 md:p-12 shadow-xl rounded-sm">
+          <div className="lg:col-span-8 bg-card border border-border p-8 md:p-12 shadow-xl rounded-2xl">
             <h2 className="text-2xl font-serif font-bold mb-6 border-b border-border pb-4">{t('events.detail.agenda')}</h2>
             <div className="space-y-6 mb-12">
               {event.agenda.map((item, i) => (
@@ -94,7 +94,7 @@ export default function EventDetail() {
 
           {/* Sidebar CTA */}
           <div className="lg:col-span-4 space-y-6">
-            <div className="bg-card border border-border p-8 shadow-sm rounded-sm sticky top-24">
+            <div className="bg-card border border-border p-8 shadow-sm rounded-2xl sticky top-24">
               <div className="mb-6 pb-6 border-b border-border space-y-4">
                 <div>
                   <span className="block text-xs font-bold text-muted-foreground uppercase tracking-wider mb-1">{t('events.detail.audience')}</span>
@@ -133,7 +133,7 @@ export default function EventDetail() {
             </div>
             
             {isPast && (
-              <div className="bg-primary/5 border border-primary/20 p-6 rounded-sm">
+              <div className="bg-primary/5 border border-primary/20 p-6 rounded-2xl">
                 <h3 className="font-bold mb-2">{t('events.detail.materials')}</h3>
                 <p className="text-sm text-muted-foreground mb-4">{t('events.detail.materials_desc')}</p>
                 <button className="flex items-center gap-2 text-sm font-bold text-primary hover:underline">
