@@ -21,3 +21,6 @@ export { ReportsView } from './ReportsView';
 export { NetworkView } from './NetworkView';
 export { IntegrationsView } from './IntegrationsView';
 export { CompassView } from './CompassView';
+export { NewsroomView } from './newsroom';
+export { EventOpsView } from './event-ops';
+export { MeetingNotesView } from './meeting-notes';

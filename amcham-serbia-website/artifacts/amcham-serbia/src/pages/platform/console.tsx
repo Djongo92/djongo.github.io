@@ -9,7 +9,7 @@ import {
   CheckSquare, Inbox, Repeat, ArrowRight,
   Search, X, Check, Eye, Download, ChevronLeft,
   Command, Menu, Phone, Activity, Globe, Mail, Plus, Book, Award, Landmark,
-  BarChart3, FileBarChart2, Bell, Keyboard, Network, Radar, UserCog, ChevronDown, Languages, Compass
+  BarChart3, FileBarChart2, Bell, Keyboard, Network, Radar, UserCog, ChevronDown, Languages, Compass, Newspaper, CalendarDays, NotebookPen
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Link } from 'wouter';
@@ -19,7 +19,7 @@ import {
   FlagsView, ApprovalsView, CoverView, DossierView,
   BriefView, MyTeamView, BoardSummaryView, DigestsView,
   SponsorshipView, CommitteesView, AnalyticsView, ReportsView,
-  NetworkView, IntegrationsView, CompassView
+  NetworkView, IntegrationsView, CompassView, NewsroomView, EventOpsView, MeetingNotesView
 } from './console/views';
 import { useCompassStore } from './console/compass-store';
 import { CommandPalette, GlossaryDrawer, TourOverlay, ShortcutsOverlay } from './console/components/Overlays';
@@ -162,6 +162,7 @@ export default function Console() {
         items: [
           item('heatmap', BarChart, t('platform.console.heatmap')),
           item('accounts', Users, t('platform.console.accounts')),
+          item('notes', NotebookPen, t('platform.console.nav_notes', 'Meeting notes')),
           item('ask', Search, t('platform.console.ask')),
           item('retention', AlertTriangle, t('platform.console.retention')),
           item('analytics', BarChart3, t('platform.console.nav_analytics', 'Analytics')),
@@ -171,6 +172,8 @@ export default function Console() {
       {
         title: t('platform.console.nav_operations'),
         items: [
+          item('events', CalendarDays, t('platform.console.nav_events', 'Events')),
+          item('newsroom', Newspaper, t('platform.console.nav_newsroom', 'Newsroom')),
           item('outreach', MessageSquare, t('platform.console.outreach')),
           item('matchmaking', Handshake, t('platform.console.matchmaking')),
           item('sponsorship', Award, t('platform.console.nav_sponsorship', 'Sponsorship')),
@@ -190,7 +193,6 @@ export default function Console() {
         title: t('platform.console.nav_reports'),
         items: [
           item('reports', FileBarChart2, t('platform.console.nav_reports_generator', 'Reports')),
-          item('digests', Mail, t('platform.console.nav_digests')),
           item('cover', Repeat, t('platform.console.cover')),
         ],
       },
@@ -456,7 +458,10 @@ export default function Console() {
                   {view === 'brief' && <BriefView companyId={selectedCompanyId} navigateTo={navigateTo} showToast={showToast} />}
                   {view === 'network' && <NetworkView navigateTo={navigateTo} />}
                   {view === 'integrations' && <IntegrationsView showToast={showToast} />}
-                  {!['compass','ritual','heatmap','accounts','retention','outreach','ask','matchmaking','sponsorship','committees','intelligence','flags','approvals','my-team','board-summary','cover','digests','analytics','reports','brief','network','integrations'].includes(view) && (
+                  {view === 'newsroom' && <NewsroomView showToast={showToast} />}
+                  {view === 'events' && <EventOpsView showToast={showToast} navigateTo={navigateTo} />}
+                  {view === 'notes' && <MeetingNotesView showToast={showToast} navigateTo={navigateTo} />}
+                  {!['compass','ritual','heatmap','accounts','retention','outreach','ask','matchmaking','sponsorship','committees','intelligence','flags','approvals','my-team','board-summary','cover','digests','analytics','reports','brief','network','integrations','newsroom','events','notes'].includes(view) && (
                     <div className="max-w-xl mx-auto py-24 text-center">
                       <div className="w-14 h-14 rounded-full bg-muted mx-auto mb-6 flex items-center justify-center"><Eye className="w-6 h-6 text-muted-foreground" /></div>
                       <h2 className="text-3xl font-serif font-light mb-3">Page Not Found</h2>
