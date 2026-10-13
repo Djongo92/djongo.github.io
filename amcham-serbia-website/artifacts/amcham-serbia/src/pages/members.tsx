@@ -84,7 +84,7 @@ export default function Members() {
             <select 
               value={categoryFilter}
               onChange={(e) => updateFilters({ category: e.target.value })}
-              className="border border-border p-3 rounded-sm bg-background focus:outline-none focus:border-primary flex-1 md:w-48 text-sm"
+              className="border border-border p-3 rounded-2xl bg-background focus:outline-none focus:border-primary flex-1 md:w-48 text-sm"
             >
               <option value="all">{t('members.all_cats')}</option>
               {categories.map(c => <option key={c} value={c}>{c}</option>)}
@@ -93,7 +93,7 @@ export default function Members() {
             <select 
               value={sectorFilter}
               onChange={(e) => updateFilters({ sector: e.target.value })}
-              className="border border-border p-3 rounded-sm bg-background focus:outline-none focus:border-primary flex-1 md:w-48 text-sm"
+              className="border border-border p-3 rounded-2xl bg-background focus:outline-none focus:border-primary flex-1 md:w-48 text-sm"
             >
               <option value="all">{t('members.all_sectors')}</option>
               {sectors.map(s => <option key={s} value={s}>{s}</option>)}
@@ -130,7 +130,7 @@ export default function Members() {
                 const summary = lang === 'sr' ? member.summarySr : member.summary;
                 const sector = lang === 'sr' ? member.sectorSr : member.sector;
                 return (
-                  <div key={member.id} className="bg-card border border-border rounded-sm p-6 hover:shadow-lg hover:border-primary/50 transition-all group flex flex-col relative">
+                  <div key={member.id} className="bg-card border border-border rounded-2xl p-6 hover:shadow-lg hover:border-primary/50 transition-all group flex flex-col relative">
                     
                     <div className="flex justify-between items-start mb-4">
                       <CompanyMark name={member.name} sector={member.sector} size="lg" className="w-16 h-16 rounded-sm text-xl" />

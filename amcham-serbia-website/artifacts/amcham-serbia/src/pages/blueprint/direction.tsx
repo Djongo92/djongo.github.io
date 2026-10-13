@@ -14,7 +14,7 @@ export default function BlueprintDirection() {
         <div className="mb-16">
           <h2 className="text-3xl font-serif font-bold mb-8">The Creative Direction</h2>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            <div className="bg-secondary text-secondary-foreground border-2 border-primary p-8 rounded-sm shadow-xl relative overflow-hidden">
+            <div className="bg-secondary text-secondary-foreground border-2 border-primary p-8 rounded-2xl shadow-xl relative overflow-hidden">
               <div className="absolute top-0 right-0 bg-primary text-primary-foreground text-xs font-bold px-3 py-1 rounded-bl-sm">Chosen Lead</div>
               <BookOpen className="w-8 h-8 text-primary mb-6" />
               <h3 className="text-xl font-bold mb-3">Editorial authority</h3>
@@ -25,7 +25,7 @@ export default function BlueprintDirection() {
               </div>
             </div>
 
-            <div className="bg-card border border-border p-8 rounded-sm shadow-sm flex flex-col">
+            <div className="bg-card border border-border p-8 rounded-2xl shadow-sm flex flex-col">
               <Users className="w-8 h-8 text-muted-foreground mb-6" />
               <h3 className="text-xl font-bold mb-3">People & connections</h3>
               <p className="text-sm text-muted-foreground mb-6">Member stories with a specific challenge, participation and result; consented portraits; conversational headlines.</p>
@@ -35,7 +35,7 @@ export default function BlueprintDirection() {
               </div>
             </div>
 
-            <div className="bg-card border border-border p-8 rounded-sm shadow-sm flex flex-col">
+            <div className="bg-card border border-border p-8 rounded-2xl shadow-sm flex flex-col">
               <Activity className="w-8 h-8 text-muted-foreground mb-6" />
               <h3 className="text-xl font-bold mb-3">Evidence & signal</h3>
               <p className="text-sm text-muted-foreground mb-6">Question-led explainers; labelled charts with source, unit, period; topic/year filters.</p>
@@ -57,7 +57,7 @@ export default function BlueprintDirection() {
               <Settings2 className="w-6 h-6 text-primary" />
               <h3 className="text-2xl font-serif font-bold">Design principles</h3>
             </div>
-            <ol className="space-y-4 list-decimal list-inside text-foreground bg-card border border-border p-8 rounded-sm shadow-sm marker:text-primary marker:font-bold">
+            <ol className="space-y-4 list-decimal list-inside text-foreground bg-card border border-border p-8 rounded-2xl shadow-sm marker:text-primary marker:font-bold">
               <li className="pl-2 pb-2 border-b border-border/50">One primary action per page section.</li>
               <li className="pl-2 pb-2 border-b border-border/50">Useful content before decoration.</li>
               <li className="pl-2 pb-2 border-b border-border/50">Dates and conditions wherever they affect a decision.</li>
@@ -71,7 +71,7 @@ export default function BlueprintDirection() {
           <div className="space-y-8">
             <div>
               <h3 className="text-2xl font-serif font-bold mb-6">Information architecture</h3>
-              <div className="bg-card border border-border p-6 rounded-sm shadow-sm text-sm">
+              <div className="bg-card border border-border p-6 rounded-2xl shadow-sm text-sm">
                 <ul className="space-y-4 text-muted-foreground">
                   <li><strong className="text-foreground">Primary:</strong> Membership · Events · Advocacy · Insights · About</li>
                   <li><strong className="text-foreground">Global utilities:</strong> visible Search, EN/SR switch, Join action</li>
@@ -81,12 +81,12 @@ export default function BlueprintDirection() {
             </div>
             
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-              <div className="bg-background border border-border p-6 rounded-sm">
+              <div className="bg-background border border-border p-6 rounded-2xl">
                 <ShieldCheck className="w-6 h-6 text-primary mb-4" />
                 <h4 className="font-bold mb-2">Accessibility Target</h4>
                 <p className="text-sm text-muted-foreground">WCAG 2.2 AA for the agreed scope, verified by manual + automated audit (keyboard, focus, zoom, reflow, screen reader).</p>
               </div>
-              <div className="bg-background border border-border p-6 rounded-sm">
+              <div className="bg-background border border-border p-6 rounded-2xl">
                 <Maximize className="w-6 h-6 text-primary mb-4" />
                 <h4 className="font-bold mb-2">Responsive & Motion</h4>
                 <p className="text-sm text-muted-foreground">Build from 320px minimum. Transitions ~150–250ms. Respect prefers-reduced-motion. No zero-to-total counters.</p>
@@ -99,7 +99,7 @@ export default function BlueprintDirection() {
         <div className="mb-16">
           <h2 className="text-3xl font-serif font-bold mb-8">Living Design Tokens</h2>
           
-          <div className="bg-card border border-border p-8 md:p-12 shadow-sm rounded-sm">
+          <div className="bg-card border border-border p-8 md:p-12 shadow-sm rounded-2xl">
 
             <h3 className="text-lg font-bold mb-6 border-b border-border pb-2">1. Color Palette</h3>
             <div className="grid grid-cols-2 md:grid-cols-5 gap-4 mb-12">
@@ -192,7 +192,7 @@ export default function BlueprintDirection() {
                 <input 
                   type="text" 
                   placeholder="Focus state..." 
-                  className="w-48 border border-border p-3 rounded-sm bg-background focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-all text-sm"
+                  className="w-48 border border-border p-3 rounded-2xl bg-background focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-all text-sm"
                   readOnly
                 />
               </div>

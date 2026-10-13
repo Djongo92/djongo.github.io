@@ -62,7 +62,7 @@ export default function BlueprintDiagnostic() {
         </div>
 
         {/* Evidence */}
-        <div className="bg-secondary text-secondary-foreground p-8 md:p-12 rounded-sm shadow-xl relative overflow-hidden mb-16">
+        <div className="bg-secondary text-secondary-foreground p-8 md:p-12 rounded-2xl shadow-xl relative overflow-hidden mb-16">
           <div className="absolute top-0 right-0 w-64 h-64 bg-primary/10 rounded-full blur-3xl -z-0 pointer-events-none"></div>
           
           <div className="flex items-center gap-3 mb-8 relative z-10">
@@ -80,7 +80,7 @@ export default function BlueprintDiagnostic() {
               </p>
             </div>
 
-            <div className="bg-secondary-foreground/10 border border-secondary-foreground/20 p-6 rounded-sm">
+            <div className="bg-secondary-foreground/10 border border-secondary-foreground/20 p-6 rounded-2xl">
               <h4 className="font-bold text-accent mb-4 uppercase tracking-widest text-sm">Five Test Journeys</h4>
               <p className="text-secondary-foreground/80 mb-4 text-sm">Everything in the redesign is judged against these five:</p>
               <ol className="space-y-2 list-decimal list-inside text-secondary-foreground/90 font-medium">

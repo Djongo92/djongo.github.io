@@ -62,7 +62,7 @@ export default function Insights() {
             <select 
               value={typeFilter}
               onChange={(e) => updateFilters({ topic: e.target.value })}
-              className="border border-border p-2 rounded-sm bg-background focus:outline-none focus:border-primary text-sm flex-1 md:w-48"
+              className="border border-border p-2 rounded-2xl bg-background focus:outline-none focus:border-primary text-sm flex-1 md:w-48"
             >
               <option value="all">{t('insights.all_formats')}</option>
               {types.map(t => <option key={t} value={t}>{t}</option>)}

@@ -121,7 +121,7 @@ export default function Events() {
                 
                 return (
                   <Link key={event.id} href={`/events/${event.id}`}>
-                    <div className="group bg-card border border-border hover:border-primary/50 p-6 md:p-8 rounded-sm shadow-sm hover:shadow-md transition-all flex flex-col md:flex-row gap-6 md:gap-12 items-start md:items-center relative overflow-hidden">
+                    <div className="group bg-card border border-border hover:border-primary/50 p-6 md:p-8 rounded-2xl shadow-sm hover:shadow-md transition-all flex flex-col md:flex-row gap-6 md:gap-12 items-start md:items-center relative overflow-hidden">
                       <div className="absolute top-0 left-0 w-1 h-full bg-transparent group-hover:bg-primary transition-colors"></div>
                       
                       {/* Date Box */}

@@ -195,21 +195,13 @@ en: {
       member_spotlight: "Member Spotlight",
       spotlight_title: "Shaping the Future of Manufacturing in Serbia",
       spotlight_quote: "\"Being part of AmCham has provided us with an unparalleled platform to advocate for a predictable business environment. It's not just about networking; it's about shaping policy together.\"",
-      scorecard: {
-        eyebrow: "The Diagnostic, Scored",
-        title: "We measured the old site. Then we rebuilt against the gaps.",
-        desc: "Before redesigning anything, we benchmarked amcham.rs against 47 peer AmCham sites across Europe on the same rubric. Here's the baseline, and where this redesign lands against it.",
-        old_label: "Original site — external benchmark",
-        new_label: "This redesign — self-assessed, same rubric",
-        findability_label: "Findability",
-        visual_label: "Visual First Impression",
-        journeys_label: "Judged against five test journeys",
-        journey_1: "Join AmCham",
-        journey_2: "Attend an event",
-        journey_3: "Find a member",
-        journey_4: "Find research",
-        journey_5: "Reach a committee",
-        cta: "Read the full diagnostic"
+      behind: {
+        eyebrow: "Behind this redesign",
+        text: "We benchmarked the old amcham.rs against 47 peer AmCham sites, then rebuilt it around five member journeys: join, attend, find a member, find research, reach a committee.",
+        findability: "Findability",
+        visual: "First impression",
+        diagnostic: "Read the diagnostic",
+        blueprint: "Delivery blueprint"
       },
       stats: {
         members: "Member Companies",
@@ -1339,21 +1331,13 @@ sr: {
       member_spotlight: "U fokusu",
       spotlight_title: "Oblikovanje budućnosti proizvodnje u Srbiji",
       spotlight_quote: "\"Biti deo AmCham-a pružilo nam je neuporedivu platformu za zalaganje za predvidljivo poslovno okruženje. Ne radi se samo o umrežavanju; radi se o zajedničkom kreiranju politika.\"",
-      scorecard: {
-        eyebrow: "Dijagnostika, ocenjena",
-        title: "Izmerili smo stari sajt. Zatim smo ga obnovili tamo gde je zaostajao.",
-        desc: "Pre nego što smo bilo šta redizajnirali, uporedili smo amcham.rs sa 47 partnerskih AmCham sajtova širom Evrope po istoj metodologiji. Evo osnove, i gde se ovaj redizajn nalazi u odnosu na nju.",
-        old_label: "Originalni sajt — eksterno poređenje",
-        new_label: "Ovaj redizajn — samoprocena, ista metodologija",
-        findability_label: "Pronalažljivost",
-        visual_label: "Prvi vizuelni utisak",
-        journeys_label: "Ocenjeno prema pet test-scenarija",
-        journey_1: "Učlanjenje u AmCham",
-        journey_2: "Prijava za događaj",
-        journey_3: "Pronalaženje člana",
-        journey_4: "Pronalaženje istraživanja",
-        journey_5: "Kontakt sa odborom",
-        cta: "Pročitajte celu dijagnostiku"
+      behind: {
+        eyebrow: "Iza ovog redizajna",
+        text: "Uporedili smo stari amcham.rs sa 47 partnerskih AmCham sajtova, a zatim ga obnovili oko pet ključnih koraka za članove: učlanjenje, događaji, pronalaženje člana, istraživanja i kontakt sa odborom.",
+        findability: "Pronalažljivost",
+        visual: "Prvi utisak",
+        diagnostic: "Pročitajte dijagnostiku",
+        blueprint: "Nacrt isporuke"
       },
       stats: {
         members: "Kompanija članica",

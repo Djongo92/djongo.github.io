@@ -34,7 +34,7 @@ export default function MemberDetail() {
           <ArrowLeft className="w-4 h-4" /> {t('members.detail.back')}
         </Link>
         
-        <div className="bg-card border border-border rounded-sm shadow-xl p-8 md:p-12 mb-8 relative z-10 flex flex-col md:flex-row gap-8 items-start">
+        <div className="bg-card border border-border rounded-2xl shadow-xl p-8 md:p-12 mb-8 relative z-10 flex flex-col md:flex-row gap-8 items-start">
 
           <div className="w-32 h-32 md:w-48 md:h-48 bg-card border border-border shadow-sm flex items-center justify-center shrink-0">
             <CompanyMark name={member.name} sector={member.sector} className="w-full h-full rounded-none ring-0 text-5xl md:text-7xl font-serif" />
@@ -65,7 +65,7 @@ export default function MemberDetail() {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           
           <div className="lg:col-span-2 space-y-8">
-            <div className="bg-card border border-border p-8 rounded-sm shadow-sm">
+            <div className="bg-card border border-border p-8 rounded-2xl shadow-sm">
               <h2 className="text-2xl font-serif font-bold mb-4 flex items-center gap-2">
                 <Info className="w-5 h-5 text-primary" /> {t('members.detail.about')}
               </h2>
@@ -76,7 +76,7 @@ export default function MemberDetail() {
           </div>
           
           <div className="lg:col-span-1 space-y-6">
-            <div className="bg-card border border-border p-6 rounded-sm shadow-sm sticky top-24">
+            <div className="bg-card border border-border p-6 rounded-2xl shadow-sm sticky top-24">
               <h3 className="font-bold text-sm uppercase tracking-widest text-muted-foreground mb-4">{t('members.detail.details')}</h3>
               <div className="space-y-4 text-sm">
                 <div className="flex justify-between items-center py-2 border-b border-border/50">
