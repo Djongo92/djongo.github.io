@@ -4,6 +4,7 @@ import { platformData } from '@/data/platform';
 import { Check, X, FileDiff, ArrowRight, ChevronDown, ChevronUp, Clock, ShieldCheck, AlertCircle } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { motion, AnimatePresence } from 'framer-motion';
+import { CleanupPanel } from '../components/cleanup-panel';
 
 type ApprovalStatus = 'pending' | 'approved' | 'rejected' | 'changes';
 
@@ -56,6 +57,8 @@ export function ApprovalsView({ showToast, updateBadge }: any) {
            <div className="w-12 h-12 rounded-full bg-accent/20 flex items-center justify-center text-accent"><Check className="w-5 h-5"/></div>
         </div>
       </div>
+
+      <CleanupPanel showToast={showToast} />
 
       <div className="space-y-6 mt-12">
         <h3 className="text-[11px] font-bold text-muted-foreground uppercase tracking-widest border-b border-border pb-2">Action Required ({pendingApprovals.length})</h3>
