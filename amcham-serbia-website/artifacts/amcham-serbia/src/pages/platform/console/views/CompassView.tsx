@@ -353,7 +353,7 @@ export function CompassView({ navigateTo, showToast }: { navigateTo: (v: string,
           <span className="w-12 h-12 rounded-2xl bg-primary text-primary-foreground flex items-center justify-center shadow-lg shadow-primary/20 shrink-0"><Compass className="w-6 h-6" /></span>
           <div>
             <h2 className="text-4xl font-serif tracking-tight text-foreground mb-1">Compass</h2>
-            <p className="text-muted-foreground max-w-2xl">{t('compass_hub.subtitle', 'What Compass has noticed across the book, ranked by what’s at stake. It drafts and suggests; nothing goes out without you.')}</p>
+            <p className="text-muted-foreground max-w-2xl">{t('compass_hub.subtitle', 'What Compass has noticed across the membership, ranked by what’s at stake. It drafts and suggests; nothing goes out without you.')}</p>
           </div>
         </div>
         <div className="flex rounded-full bg-muted p-1 border border-border self-start lg:self-auto" role="tablist">

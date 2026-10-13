@@ -118,7 +118,7 @@ const SECTIONS: Section[] = [
           </div>
           <div className="rounded-3xl border border-border bg-card p-7">
             <h3 className="text-xl font-serif font-bold mb-3 text-foreground">Member portal</h3>
-            <p className="text-muted-foreground mb-5">What membership delivered this year, introductions to other members, events, committees and the Lap Time survey.</p>
+            <p className="text-muted-foreground mb-5">What membership delivered this year, introductions to other members, events, committees and AmCham’s surveys.</p>
             <Link href="/platform/portal" className="text-primary font-bold inline-flex items-center gap-1.5">Open the portal <ArrowRight className="w-4 h-4" /></Link>
           </div>
         </div>

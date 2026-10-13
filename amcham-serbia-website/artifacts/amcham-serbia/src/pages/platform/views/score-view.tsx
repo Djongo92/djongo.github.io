@@ -6,7 +6,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { platformData, committeeRosters } from '@/data/platform';
 
 // Badges are computed straight off real fixture fields (tenure, book-wide
-// score rank, committee rosters) rather than being hand-assigned per member,
+// score level, committee rosters) rather than being hand-assigned per member,
 // so they stay honest if the underlying data changes.
 function computeBadges(member: any): { icon: any; label: string }[] {
   if (!member?.id) return [];
@@ -15,12 +15,8 @@ function computeBadges(member: any): { icon: any; label: string }[] {
   const tenure = new Date().getFullYear() - (member.since || new Date().getFullYear());
   if (tenure >= 1) badges.push({ icon: Star, label: `${tenure}-Year Member` });
 
-  const allScores = platformData.allMembers.map(c => c.score).sort((a, b) => b - a);
-  const rank = allScores.indexOf(member.score);
-  if (rank !== -1) {
-    const topPercent = Math.max(1, Math.round(((rank + 1) / allScores.length) * 100));
-    if (topPercent <= 25) badges.push({ icon: TrendingUp, label: `Top ${topPercent}% Engagement` });
-  }
+  // An absolute threshold, never a ranking: members are not compared against each other.
+  if ((member.score ?? 0) >= 80) badges.push({ icon: TrendingUp, label: 'Highly Engaged' });
 
   const seats = committeeRosters.filter(c => c.chairCompanyId === member.id || c.memberCompanyIds.includes(member.id));
   const isChair = seats.some(c => c.chairCompanyId === member.id);

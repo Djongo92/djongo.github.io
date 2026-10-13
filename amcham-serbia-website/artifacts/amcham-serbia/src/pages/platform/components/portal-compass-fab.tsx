@@ -29,7 +29,7 @@ const VIEW_LABELS: Record<string, string> = {
   score: 'Membership Value (score breakdown)',
   glance: 'At a Glance',
   directory: 'the Member Directory',
-  laptime: 'Lap Time',
+  laptime: 'Surveys',
   events: 'Events',
   marketplace: 'the Opportunities marketplace',
   committee: 'Committees',

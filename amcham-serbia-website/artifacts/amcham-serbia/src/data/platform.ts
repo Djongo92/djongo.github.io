@@ -78,7 +78,7 @@ export const platformData = {
     ritual: {
       streak: 4,
       items: [
-        { id: "rit-1", companyId: "adr", tag: "RENEWAL RISK", text: "Score down 15 points since March. No C-suite event attendance this year.", action: "Needs call", urgency: "High", expectedValue: "€18k", confidence: "95%", source: "Platform Analytics", owner: "Marija J.", dueDate: "Today", channel: "Phone" },
+        { id: "rit-1", companyId: "adr", tag: "RENEWAL RISK", text: "Score down 9 points since May. No C-suite event attendance this year.", action: "Needs call", urgency: "High", expectedValue: "€18k", confidence: "95%", source: "Platform Analytics", owner: "Marija J.", dueDate: "Today", channel: "Phone" },
         { id: "rit-2", companyId: "stada", tag: "OPPORTUNITY", text: "Growing team in Vršac. Might be interested in Tech Committee.", action: "Suggest Intro", urgency: "Medium", expectedValue: "€2.5k upgrade", confidence: "70%", source: "LinkedIn Alert", owner: "Nikola K.", dueDate: "This Week", channel: "Email" },
         { id: "rit-3", companyId: "sbb", tag: "CHURN WARNING", text: "Score at 55. Primary contact left company.", action: "Find new contact", urgency: "Critical", expectedValue: "€5k", confidence: "99%", source: "Bouncer / Email Bounce", owner: "Nikola K.", dueDate: "Tomorrow", channel: "LinkedIn" },
         { id: "rit-4", companyId: "tmm", tag: "CHURN WARNING", text: "Score down to 58 amid a permitting dispute. No attendance since the Q2 safety incident.", action: "Reconnect once new site manager is named", urgency: "High", expectedValue: "€5k", confidence: "88%", source: "Platform Analytics", owner: "Nikola K.", dueDate: "This Week", channel: "Phone" },
@@ -104,7 +104,7 @@ export const platformData = {
       { id: "sp6", companyId: "ibm", owner: "Marko Ristić", intervention: "Offered a Corporate-to-Business step-down to retain partial engagement", outcome: "lost", value: "€5k", resolvedDate: "Jun 2026", note: "Declined; cited an internal budget freeze." },
       { id: "sp7", companyId: "dcb", owner: "Ana Savić", intervention: "Assigned a dedicated trade-finance contact after early-2025 engagement softened", outcome: "saved", value: "€18k", resolvedDate: "Mar 2025", note: "Engagement and event attendance recovered within the quarter." }
     ],
-    // Members who canceled outright rather than being retained or lost mid-save-play.
+    // Members who canceled outright rather than being retained or lost mid-save plan.
     // Kept separate from `companies` (all current members, at varying risk) rather
     // than folded in with a fake "churned" lifecycle value, since a departed member
     // has no live score/history to keep tracking. Fictional, not modeled on real firms.
@@ -141,7 +141,7 @@ export const platformData = {
         risks: [
           { title: "Post-Holiday Engagement Dip", action: "Front-loaded Q1 event calendar to re-engage." }
         ],
-        methodology: "Aggregated across the 40 member companies in the book.",
+        methodology: "Aggregated across the 40 member companies.",
         provenance: "AmCham OS Intelligence Engine v4",
         riskRegister: [{ risk: "Slow Q1 renewal pipeline", severity: "Medium" }],
         owners: ["Ana Savić"]
@@ -156,7 +156,7 @@ export const platformData = {
         risks: [
           { title: "IT Sector Renewal Softness", action: "Scheduled one-on-one check-ins with IT-tier accounts." }
         ],
-        methodology: "Aggregated across the 40 member companies in the book.",
+        methodology: "Aggregated across the 40 member companies.",
         provenance: "AmCham OS Intelligence Engine v4",
         riskRegister: [{ risk: "IT sector budget freezes", severity: "Medium" }],
         owners: ["Ana Savić"]
@@ -171,7 +171,7 @@ export const platformData = {
         risks: [
           { title: "Energy Sector Regulatory Uncertainty", action: "Briefed energy-tier members on pending reforms." }
         ],
-        methodology: "Aggregated across the 40 member companies in the book.",
+        methodology: "Aggregated across the 40 member companies.",
         provenance: "AmCham OS Intelligence Engine v4",
         riskRegister: [{ risk: "Energy sector policy volatility", severity: "High" }],
         owners: ["Ana Savić", "Stefan Mitić"]
@@ -186,7 +186,7 @@ export const platformData = {
         risks: [
           { title: "Consulting Sector Engagement Drop", action: "Piloted a consulting-only roundtable format." }
         ],
-        methodology: "Aggregated across the 40 member companies in the book.",
+        methodology: "Aggregated across the 40 member companies.",
         provenance: "AmCham OS Intelligence Engine v4",
         riskRegister: [{ risk: "Consulting sector demand slowdown", severity: "Medium" }],
         owners: ["Ana Savić"]
@@ -196,12 +196,12 @@ export const platformData = {
         retention: { protected: "€255k", atRisk: "€73k" },
         kpis: { events: 1180, intros: 39, marketplace: 148, committee: 81 },
         wins: [
-          { title: "Manufacturing Cohort Save-Play Wins", action: "Recovered two at-risk manufacturing accounts." }
+          { title: "Manufacturing Cohort Save Plan Wins", action: "Recovered two at-risk manufacturing accounts." }
         ],
         risks: [
           { title: "SBB Contact Attrition Emerging", action: "Flagged for early Retention Control intervention." }
         ],
-        methodology: "Aggregated across the 40 member companies in the book.",
+        methodology: "Aggregated across the 40 member companies.",
         provenance: "AmCham OS Intelligence Engine v4",
         riskRegister: [{ risk: "Key-account contact turnover", severity: "Medium" }],
         owners: ["Ana Savić", "Stefan Mitić"]
@@ -218,7 +218,7 @@ export const platformData = {
           { title: "FMCG Sector Engagement Drop", action: "Hosting targeted roundtable next month." },
           { title: "SBB Attrition Risk", action: "Brokering new C-level connections." }
         ],
-        methodology: "Aggregated across the 40 member companies in the book.",
+        methodology: "Aggregated across the 40 member companies.",
         provenance: "AmCham OS Intelligence Engine v4",
         riskRegister: [{ risk: "Regulatory instability", severity: "High" }, { risk: "FDI drop", severity: "Medium" }],
         owners: ["Ana Savić", "Stefan Mitić"]
@@ -234,7 +234,7 @@ export const platformData = {
         risks: [
           { title: "Finance Renewals Sluggish", action: "Direct outreach from Exec Director." }
         ],
-        methodology: "Aggregated across the 40 member companies in the book.",
+        methodology: "Aggregated across the 40 member companies.",
         provenance: "AmCham OS Intelligence Engine v4",
         riskRegister: [{ risk: "Election year pausing investments", severity: "High" }],
         owners: ["Ana Savić"]
@@ -280,7 +280,7 @@ export const platformData = {
       { id: "sp4", companyId: "dlz", initiative: "Retail & Consumer Forum", stage: "proposed", value: "€6k", owner: "Ana Savić", notes: "Proposal sent; awaiting marketing budget approval." },
       { id: "sp5", companyId: "ncr", initiative: "Digital Banking Roundtable", stage: "proposed", value: "€5k", owner: "Marko Ristić", notes: "Follow-up call scheduled for next week." },
       { id: "sp6", companyId: "mcb", initiative: "AmCham Annual Gala", stage: "prospecting", value: "€15k", owner: "Ana Savić", notes: "Warm relationship from a board seat; not yet approached formally." },
-      { id: "sp7", companyId: "ccbc", initiative: "Sustainability Summit", stage: "prospecting", value: "€7k", owner: "Stefan Mitić", notes: "Identified via Lap Time's ESG interest signal." },
+      { id: "sp7", companyId: "ccbc", initiative: "Sustainability Summit", stage: "prospecting", value: "€7k", owner: "Stefan Mitić", notes: "Identified via the business climate survey's ESG interest signal." },
       { id: "sp8", companyId: "kpmg", initiative: "Tax Policy Briefing Series", stage: "declined", value: "€4k", owner: "Marko Ristić", notes: "Budget frozen this cycle; revisit in Q1." },
       { id: "sp9", companyId: "nph", initiative: "Health & Life Sciences Committee Briefing", stage: "proposed", value: "€5k", owner: "Nikola Krstić", notes: "Approached after their generics-distribution approval; awaiting confirmation." }
     ],
@@ -306,7 +306,7 @@ export const platformData = {
     matchmaking: {
       pairs: [
         { from: "sls", to: "nkt", rationale: "Nelt is expanding fleet; S-Leasing offers commercial vehicle financing.", overlapEvidence: "Both active in Transport sub-committee", conflicts: "None", fromApproved: true, toApproved: false, expiry: "2 days", outcomeState: "pending" },
-        { from: "stada", to: "ncr", rationale: "Both expanding R&D operations in Serbia.", overlapEvidence: "Both indicated 'Tech Talent' as priority in Lap Time 2025", conflicts: "Competing for same talent pool", fromApproved: true, toApproved: true, expiry: "5 days", outcomeState: "scheduled" },
+        { from: "stada", to: "ncr", rationale: "Both expanding R&D operations in Serbia.", overlapEvidence: "Both indicated 'Tech Talent' as a priority in the 2025 business climate survey", conflicts: "Competing for same talent pool", fromApproved: true, toApproved: true, expiry: "5 days", outcomeState: "scheduled" },
         { from: "kar", to: "ibm", rationale: "Both serve multinational clients navigating IT compliance and data protection law.", overlapEvidence: "Both flagged 'regulatory compliance' as a top priority in recent staff notes", conflicts: "None", fromApproved: true, toApproved: false, expiry: "4 days", outcomeState: "pending" },
         { from: "hmo", to: "pwc", rationale: "Hemofarm is exploring ESG audit partners; PwC offers dedicated ESG advisory.", overlapEvidence: "Both attended the Q3 ESG roundtable", conflicts: "None", fromApproved: true, toApproved: true, expiry: "3 days", outcomeState: "scheduled" },
         { from: "mtk", to: "mcb", rationale: "Metalac is evaluating equipment financing for a manufacturing line upgrade.", overlapEvidence: "UniCredit's corporate desk flagged manufacturing equipment financing as a growth area", conflicts: "None", fromApproved: true, toApproved: false, expiry: "6 days", outcomeState: "pending" },
@@ -342,7 +342,7 @@ export const platformData = {
           { text: "Tier: Patron since 2004", type: "system" }
         ],
         agenda: ["09:00 - Arrival", "09:10 - Operations Update", "09:30 - Advocacy Alignment"],
-        citations: ["LapTime 2025: Manufacturing Priority", "Q2 ESG Report"],
+        citations: ["Business climate survey 2025: Manufacturing priority", "Q2 ESG Report"],
         contradictions: ["They complained about lack of ESG events, but didn't attend the last two."],
         attendeeContext: "CEO prefers direct data over fluff.",
         notesCommitments: [],
@@ -404,7 +404,7 @@ export const platformData = {
           { text: "Patron since 2002", type: "system" }
         ],
         agenda: ["09:00 - Arrival", "09:10 - Year in Review", "09:30 - Board Nomination Discussion"],
-        citations: ["LapTime 2025: Pharma sector leadership", "Q3 2026 Portfolio Rollup"],
+        citations: ["Business climate survey 2025: Pharma sector leadership", "Q3 2026 Portfolio Rollup"],
         contradictions: [],
         attendeeContext: "Values direct, data-backed conversations; proud of their ESG record.",
         notesCommitments: [],
@@ -458,7 +458,7 @@ export const platformData = {
         desiredOutcome: "Renew their sponsorship commitment for next year's calendar.",
         talkingPoints: ["Open with their own news: Continued hiring surge at the Belgrade hub.", "They're sitting on the Digital Economy committee — ask what's working and what isn't.", "This is one of the strongest accounts in IT — worth a direct ask, not just a check-in."],
         ask: "Confirm sponsorship renewal for the next cycle.",
-        rationale: "Score 91 (+5 trend) — one of the stronger accounts in the book.",
+        rationale: "Score 91 (+5 trend) — one of the stronger accounts in the membership.",
         signals: [{ text: "Continued hiring surge at the Belgrade hub", type: "web" }, { text: "Consistent attendance across IT and Trade committees", type: "engagement" }, { text: "Score 91, +5 trend", type: "system" }],
         agenda: ["Arrival", "Check-in", "Growth conversation"],
         citations: [],
@@ -471,7 +471,7 @@ export const platformData = {
         desiredOutcome: "Renew their sponsorship commitment for next year's calendar.",
         talkingPoints: ["Open with their own news: Stable market leadership, no negative press.", "They're chairing the Trade & Customs committee — ask what's working and what isn't.", "This is one of the strongest accounts in FMCG — worth a direct ask, not just a check-in."],
         ask: "Confirm sponsorship renewal for the next cycle.",
-        rationale: "Score 94 (+1 trend) — one of the stronger accounts in the book.",
+        rationale: "Score 94 (+1 trend) — one of the stronger accounts in the membership.",
         signals: [{ text: "Stable market leadership, no negative press", type: "web" }, { text: "Near-perfect attendance across major events", type: "engagement" }, { text: "Score 94, +1 trend", type: "system" }],
         agenda: ["Arrival", "Check-in", "Growth conversation"],
         citations: [],
@@ -484,7 +484,7 @@ export const platformData = {
         desiredOutcome: "Renew their sponsorship commitment for next year's calendar.",
         talkingPoints: ["Open with their own news: Expanding bottling capacity signalled in press.", "They're sitting on the ESG & Environment committee — ask what's working and what isn't.", "This is one of the strongest accounts in FMCG — worth a direct ask, not just a check-in."],
         ask: "Confirm sponsorship renewal for the next cycle.",
-        rationale: "Score 85 (+4 trend) — one of the stronger accounts in the book.",
+        rationale: "Score 85 (+4 trend) — one of the stronger accounts in the membership.",
         signals: [{ text: "Expanding bottling capacity signalled in press", type: "web" }, { text: "Strong attendance, slight dip in Q3 regional events", type: "engagement" }, { text: "Score 85, +4 trend", type: "system" }],
         agenda: ["Arrival", "Check-in", "Growth conversation"],
         citations: [],
@@ -510,7 +510,7 @@ export const platformData = {
         desiredOutcome: "Renew their sponsorship commitment for next year's calendar.",
         talkingPoints: ["Open with their own news: Rapid store network expansion covered in press.", "They're sitting on the Labor & HR committee — ask what's working and what isn't.", "This is one of the strongest accounts in Retail — worth a direct ask, not just a check-in."],
         ask: "Confirm sponsorship renewal for the next cycle.",
-        rationale: "Score 92 (+8 trend) — one of the stronger accounts in the book.",
+        rationale: "Score 92 (+8 trend) — one of the stronger accounts in the membership.",
         signals: [{ text: "Rapid store network expansion covered in press", type: "web" }, { text: "Attendance up sharply across all event types", type: "engagement" }, { text: "Score 92, +8 trend", type: "system" }],
         agenda: ["Arrival", "Check-in", "Growth conversation"],
         citations: [],
@@ -523,7 +523,7 @@ export const platformData = {
         desiredOutcome: "Renew their sponsorship commitment for next year's calendar.",
         talkingPoints: ["Open with their own news: Stable hiring, no major signals.", "They're chairing the Digital Economy committee — ask what's working and what isn't.", "This is one of the strongest accounts in IT — worth a direct ask, not just a check-in."],
         ask: "Confirm sponsorship renewal for the next cycle.",
-        rationale: "Score 89 (-2 trend) — one of the stronger accounts in the book.",
+        rationale: "Score 89 (-2 trend) — one of the stronger accounts in the membership.",
         signals: [{ text: "Stable hiring, no major signals", type: "web" }, { text: "Slight attendance dip from senior team travel", type: "engagement" }, { text: "Score 89, -2 trend", type: "system" }],
         agenda: ["Arrival", "Check-in", "Growth conversation"],
         citations: [],
@@ -562,7 +562,7 @@ export const platformData = {
         desiredOutcome: "Renew their sponsorship commitment for next year's calendar.",
         talkingPoints: ["Open with their own news: Expanding corporate lending signalled in press.", "They're chairing the Tax & Finance committee — ask what's working and what isn't.", "This is one of the strongest accounts in Finance — worth a direct ask, not just a check-in."],
         ask: "Confirm sponsorship renewal for the next cycle.",
-        rationale: "Score 81 (+6 trend) — one of the stronger accounts in the book.",
+        rationale: "Score 81 (+6 trend) — one of the stronger accounts in the membership.",
         signals: [{ text: "Expanding corporate lending signalled in press", type: "web" }, { text: "Attendance climbing steadily this year", type: "engagement" }, { text: "Score 81, +6 trend", type: "system" }],
         agenda: ["Arrival", "Check-in", "Growth conversation"],
         citations: [],
@@ -614,7 +614,7 @@ export const platformData = {
         desiredOutcome: "Explore a deeper commitment — committee leadership or sponsorship — while engagement is at its peak.",
         talkingPoints: ["Open with their own news: 5G rollout coverage driving visibility.", "They're sitting on the Digital Economy committee — ask what's working and what isn't.", "This is one of the strongest accounts in IT — worth a direct ask, not just a check-in."],
         ask: "Propose a committee leadership role or sponsorship slot.",
-        rationale: "Score 86 (+7 trend) — one of the stronger accounts in the book.",
+        rationale: "Score 86 (+7 trend) — one of the stronger accounts in the membership.",
         signals: [{ text: "5G rollout coverage driving visibility", type: "web" }, { text: "Attendance rising sharply this year", type: "engagement" }, { text: "Score 86, +7 trend", type: "system" }],
         agenda: ["Arrival", "Check-in", "Growth conversation"],
         citations: [],
@@ -679,7 +679,7 @@ export const platformData = {
         desiredOutcome: "Explore a deeper commitment — committee leadership or sponsorship — while engagement is at its peak.",
         talkingPoints: ["Open with their own news: Expanded working-capital lending line for SME exporters.", "Ask whether a committee seat would be worth their time this year.", "This is one of the strongest accounts in Banking — worth a direct ask, not just a check-in."],
         ask: "Propose a committee leadership role or sponsorship slot.",
-        rationale: "Score 86 (+2 trend) — one of the stronger accounts in the book.",
+        rationale: "Score 86 (+2 trend) — one of the stronger accounts in the membership.",
         signals: [{ text: "Expanded working-capital lending line for SME exporters", type: "web" }, { text: "Sent senior trade-finance staff to every Q3 event", type: "engagement" }, { text: "Score 86, +2 trend", type: "system" }],
         agenda: ["Arrival", "Check-in", "Growth conversation"],
         citations: [],
@@ -744,7 +744,7 @@ export const platformData = {
         desiredOutcome: "Explore a deeper commitment — committee leadership or sponsorship — while engagement is at its peak.",
         talkingPoints: ["Open with their own news: Opened a second delivery office to handle Western-Europe demand.", "Ask whether a committee seat would be worth their time this year.", "This is one of the strongest accounts in IT — worth a direct ask, not just a check-in."],
         ask: "Propose a committee leadership role or sponsorship slot.",
-        rationale: "Score 83 (+2 trend) — one of the stronger accounts in the book.",
+        rationale: "Score 83 (+2 trend) — one of the stronger accounts in the membership.",
         signals: [{ text: "Opened a second delivery office to handle Western-Europe demand", type: "web" }, { text: "Sent a delegation to the nearshoring & talent panel", type: "engagement" }, { text: "Score 83, +2 trend", type: "system" }],
         agenda: ["Arrival", "Check-in", "Growth conversation"],
         citations: [],
@@ -861,7 +861,7 @@ export const platformData = {
         desiredOutcome: "Renew their sponsorship commitment for next year's calendar.",
         talkingPoints: ["Open with their own news: Received approval to distribute two additional generics regionally.", "Thank them for last year's sponsorship and gauge appetite for the next cycle.", "This is one of the strongest accounts in Pharma — worth a direct ask, not just a check-in."],
         ask: "Confirm sponsorship renewal for the next cycle.",
-        rationale: "Score 81 (+0 trend) — one of the stronger accounts in the book.",
+        rationale: "Score 81 (+0 trend) — one of the stronger accounts in the membership.",
         signals: [{ text: "Received approval to distribute two additional generics regionally", type: "web" }, { text: "Sent regulatory-affairs staff to every Pharma & Health session", type: "engagement" }, { text: "Score 81, 0 trend", type: "system" }],
         agenda: ["Arrival", "Check-in", "Growth conversation"],
         citations: [],
@@ -1581,7 +1581,7 @@ export const platformData = {
     },
     lapTime: {
       reportYear: 2025,
-      reportName: "Thirteenth Lap Time",
+      reportName: "Business climate survey 2025",
       methodology: {
         partner: "Ipsos Strategic Marketing",
         period: "August–September 2025",

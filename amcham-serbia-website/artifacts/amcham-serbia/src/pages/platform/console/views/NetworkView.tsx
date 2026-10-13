@@ -102,7 +102,7 @@ export function NetworkView({ navigateTo }: { navigateTo: (v: string, c?: string
       <div className="mb-8 flex flex-col md:flex-row justify-between items-start md:items-end gap-6 border-b border-border pb-6">
         <div>
           <h2 className="text-4xl font-serif font-light tracking-tight text-foreground mb-2 flex items-center gap-3"><Network className="w-8 h-8 text-primary" /> Network</h2>
-          <p className="text-sm font-medium text-muted-foreground max-w-2xl">How the book connects — matchmaking introductions and shared committee seats across all {members.length} members.</p>
+          <p className="text-sm font-medium text-muted-foreground max-w-2xl">How members connect — matchmaking introductions and shared committee seats across all {members.length} members.</p>
         </div>
         <div className="flex items-center gap-2 bg-muted p-1 rounded-2xl border border-border/50 shadow-inner">
           {([

@@ -134,7 +134,7 @@ export function answerCompassQuery(
 ): CompassAnswer {
   const trimmed = query.trim();
   if (!trimmed) {
-    return { text: 'Ask about a segment of the book ("manufacturing exporters", "at-risk accounts"), or open a dossier and ask "brief me on this".' };
+    return { text: 'Ask about a group of members ("manufacturing exporters", "at-risk accounts"), or open a dossier and ask "brief me on this".' };
   }
 
   // 1. Book-wide filter — the exact same engine Ask and Cmd+K already call.

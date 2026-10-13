@@ -17,7 +17,7 @@ function buildEvents(): string[] {
     `${a} logged into the member portal`,
     `${b}'s engagement score moved to 88 (+2)`,
     `New committee seat opened on Digital Economy`,
-    `${c} registered for the LapTime Roundtable`,
+    `${c} registered for the survey results roundtable`,
     `${d} joined the Tech Committee`,
     `A new matchmaking overlap was flagged between ${e} and ${f}`,
     `Quarterly benchmark refresh completed for 40 members`,

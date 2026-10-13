@@ -18,7 +18,7 @@ export default function PlatformSeam() {
     { portal: "Event registration & attendance", staff: "Relationship timeline entry", effect: "Used for relevant follow-up" },
     { portal: "Committee application", staff: "Matchmaking & policy lists", effect: "Used to route opportunities" },
     { portal: "Profile completion", staff: "Public directory visibility", effect: "Shown only if published" },
-    { portal: "Survey response (Lap Time)", staff: "Aggregated needs analysis", effect: "Combined with member responses" },
+    { portal: "Survey answers", staff: "Combined results only", effect: "Never shown answer by answer" },
     { portal: "Portal messages and requests", staff: "Service workflow context", effect: "Visible to assigned staff" }
   ];
 
@@ -56,7 +56,7 @@ export default function PlatformSeam() {
                   <tr className="bg-background border-b border-border text-xs uppercase tracking-widest text-muted-foreground">
                     <th className="p-4 md:p-6 font-bold">{t('platform.seam.portal_records')}</th>
                     <th className="p-4 md:p-6 font-bold border-l border-border">{t('platform.seam.staff_see')}</th>
-                    <th className="p-4 md:p-6 font-bold border-l border-border text-primary">{t('platform.seam.effect')}</th>
+                    <th className="p-4 md:p-6 font-bold border-l border-border">{t('platform.seam.effect')}</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-border text-sm">
@@ -64,7 +64,7 @@ export default function PlatformSeam() {
                     <tr key={i} className="hover:bg-background/50 transition-colors">
                       <td className="p-4 md:p-6 font-medium text-foreground">{row.portal}</td>
                       <td className="p-4 md:p-6 text-muted-foreground border-l border-border">{row.staff}</td>
-                      <td className="p-4 md:p-6 font-mono font-medium text-primary border-l border-border">{row.effect}</td>
+                      <td className="p-4 md:p-6 text-foreground border-l border-border">{row.effect}</td>
                     </tr>
                   ))}
                 </tbody>

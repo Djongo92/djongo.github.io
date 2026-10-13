@@ -507,7 +507,7 @@ export function CompassFab({ view, dossierOpen = false, selectedCompanyId, roleP
                   {!hasUserMessage && (
                     <div className="space-y-3">
                       <p className="text-xs text-muted-foreground leading-relaxed">
-                        Ask about the book in your own words, or ask me to draft something.
+                        Ask about your members in your own words, or ask me to draft something.
                       </p>
                       <div className="flex flex-col gap-1.5">
                         {suggestions.map((s) => (

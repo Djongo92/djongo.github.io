@@ -27,7 +27,7 @@ export default function LapTimeView({ t, showToast, member }: any) {
     setTimeout(() => {
       setDownloading(false);
       setDownloaded(true);
-      showToast(`Lap Time ${period} PDF downloaded.`);
+      showToast(t('portal_survey_downloaded', 'Survey report downloaded.'));
     }, 1500);
   };
 
@@ -36,16 +36,34 @@ export default function LapTimeView({ t, showToast, member }: any) {
     showToast('Briefing request submitted. Staff will contact you shortly.');
   };
 
+  const shelf = [
+    { id: 'climate', title: t('portal_survey_climate', 'Business climate survey'), status: t('portal_survey_results', 'Results out'), tone: 'done' },
+    { id: 'satisfaction', title: t('portal_survey_satisfaction', 'Member satisfaction survey 2026'), status: t('portal_survey_open', 'Open until 31 Oct · 4 minutes'), tone: 'open' },
+    { id: 'digital', title: t('portal_survey_digital', 'Digital readiness pulse'), status: t('portal_survey_soon', 'Results in December'), tone: 'soon' },
+  ];
+
   return (
     <div className="space-y-8 pb-20 animate-in fade-in duration-500">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        {shelf.map(s => (
+          <div key={s.id} className={cn("rounded-2xl border p-5 flex flex-col gap-3", s.id === 'climate' ? "border-foreground/30 bg-card shadow-sm" : "border-border bg-card/60")}>
+            <div className="text-sm font-semibold text-foreground">{s.title}</div>
+            <div className={cn("text-xs font-medium", s.tone === 'open' ? "text-emerald-600 dark:text-emerald-400" : "text-muted-foreground")}>{s.status}</div>
+            {s.tone === 'open' && (
+              <button onClick={() => showToast(t('portal_survey_take_toast', 'In the live platform this opens the survey.'))} className="mt-auto self-start px-4 py-2 rounded-full bg-foreground text-background text-xs font-bold hover:opacity-90">{t('portal_survey_take', 'Take the survey')}</button>
+            )}
+            {s.id === 'climate' && <span className="mt-auto text-[11px] font-bold uppercase tracking-widest text-muted-foreground">{t('portal_survey_viewing', 'Showing below')}</span>}
+          </div>
+        ))}
+      </div>
       <div className="ink bg-foreground text-background rounded-[40px] p-8 md:p-12 shadow-xl relative overflow-hidden flex flex-col md:flex-row justify-between items-start md:items-end gap-8">
         <div className="absolute -right-20 -top-20 w-72 h-72 rounded-full bg-[#40D9F1]/10 pointer-events-none" />
         <div className="relative z-10 max-w-2xl">
           <div className="text-[11px] uppercase font-bold text-[#40D9F1] tracking-widest mb-4 flex items-center gap-2">
-             <Activity className="w-3 h-3" /> Research & Intelligence
+             <Activity className="w-3 h-3" /> {t('portal_surveys', 'Surveys')}
           </div>
           <div className="flex items-center gap-4 mb-4">
-             <h2 className="text-4xl md:text-6xl font-serif font-light">Lap Time</h2>
+             <h2 className="text-3xl md:text-5xl font-serif font-light">{t('portal_laptime_title', 'Business climate survey')}</h2>
              <div className="bg-background/20 p-1 rounded-full flex gap-1">
                <button onClick={() => setPeriod('2025')} className={cn("px-4 py-1.5 rounded-full text-xs font-bold transition-colors", period === '2025' ? "bg-background text-foreground shadow-sm" : "text-background/80 hover:text-background")}>2025</button>
                <button onClick={() => setPeriod('2024')} className={cn("px-4 py-1.5 rounded-full text-xs font-bold transition-colors", period === '2024' ? "bg-background text-foreground shadow-sm" : "text-background/80 hover:text-background")}>2024</button>

@@ -97,15 +97,16 @@ export function BoardSummaryView() {
                <div className="text-[11px] uppercase font-bold text-muted-foreground tracking-widest print:text-black">{t('platform.console.health_trend', 'Member Health Trend')}</div>
                <div className="flex items-center gap-1 text-xs font-bold text-green-500 bg-green-500/10 px-3 py-1 rounded-full"><TrendingUp className="w-3 h-3"/> {data.healthTrend.delta} pts</div>
              </div>
-             <div className="text-7xl md:text-9xl font-serif font-light tabular-nums tracking-tight mb-10 text-foreground print:text-black">
+             <div className="text-7xl md:text-9xl font-serif font-light tabular-nums tracking-tight text-foreground print:text-black">
                {data.healthTrend.scoreBands.high + data.healthTrend.scoreBands.mid}<span className="text-4xl md:text-6xl text-muted-foreground">%</span>
              </div>
+             <p className="text-sm text-muted-foreground mt-2 mb-10 print:text-black">{t('platform.console.health_share', 'of members are in good or fair health')}</p>
              
              <div className="space-y-2">
                <div className="flex justify-between text-[11px] font-bold uppercase tracking-widest text-muted-foreground">
-                 <span>High ({data.healthTrend.scoreBands.high}%)</span>
-                 <span>Mid ({data.healthTrend.scoreBands.mid}%)</span>
-                 <span>Low ({data.healthTrend.scoreBands.low}%)</span>
+                 <span>{t('platform.console.band_good', 'Good')} ({data.healthTrend.scoreBands.high}%)</span>
+                 <span>{t('platform.console.band_fair', 'Fair')} ({data.healthTrend.scoreBands.mid}%)</span>
+                 <span>{t('platform.console.band_risk', 'At risk')} ({data.healthTrend.scoreBands.low}%)</span>
                </div>
                <div className="flex gap-1 h-4 rounded-full overflow-hidden w-full print:border print:border-black">
                   <div style={{ width: `${data.healthTrend.scoreBands.high}%` }} className="h-full bg-emerald-500 print:bg-gray-300"></div>
