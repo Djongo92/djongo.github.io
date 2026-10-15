@@ -61,7 +61,7 @@
     {
       "domain": "bdkadvokati.com",
       "displayName": "BDK Advokati",
-      "peerGroup": "local",
+      "peerGroup": "regional",
       "firmSize": "mid_11_50",
       "source": "census-match"
     },
@@ -103,7 +103,7 @@
     {
       "domain": "cwbip.com",
       "displayName": "CWB",
-      "peerGroup": "local",
+      "peerGroup": "international",
       "firmSize": "boutique_2_10",
       "source": "census-match"
     },
@@ -208,7 +208,7 @@
     {
       "domain": "jpm.law",
       "displayName": "JPM & Partners",
-      "peerGroup": "local",
+      "peerGroup": "regional",
       "firmSize": "mid_11_50",
       "source": "census-match"
     },

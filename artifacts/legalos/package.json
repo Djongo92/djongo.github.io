@@ -16,6 +16,7 @@
     "census:run": "tsx scripts/census/run-census-audits.mjs",
     "census:remeasure-missing": "tsx scripts/census/run-census-remeasure-missing.mjs",
     "census:snapshot": "node scripts/census/export-leaderboard-snapshot.mjs",
+    "census:recompute-v3": "tsx scripts/census/recompute-v3.mjs",
     "smoke:auth": "node tests/auth-smoke.mjs",
     "smoke:seed-audit": "node tests/seed-smoke-audit.mjs",
     "smoke:battleplan": "node tests/battleplan-smoke.mjs",
