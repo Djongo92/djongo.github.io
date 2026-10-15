@@ -1,8 +1,10 @@
-// Pure Performance category math (20 pts): no Deno globals, no network, no
-// cache — kept separate from performanceScore.ts so it's importable from a
-// plain Vitest/Node test without transitively pulling in cache.ts's
-// top-level Deno.env.get() calls.
-// 10×(desktop+mobile perf avg)/100 + 5×(access avg)/100 + 5×(seo avg)/100.
+// Pure Website Experience category math (50 pts — weights in methodology.ts):
+// no Deno globals, no network, no cache — kept separate from
+// performanceScore.ts so it's importable from a plain Vitest/Node test
+// without transitively pulling in cache.ts's top-level Deno.env.get() calls.
+// Each PageSpeed category (desktop+mobile averaged, 0–100) is a 0–1 signal.
+import { PERFORMANCE_WEIGHTS as W, round2 } from "./methodology.ts";
+
 export interface LighthouseCategories {
   performance: number;
   accessibility: number;
@@ -21,7 +23,7 @@ export function calculatePerformanceScore(desktop: LighthouseCategories, mobile:
   const accessAvg = (desktop.accessibility + mobile.accessibility) / 2;
   const seoAvg = (desktop.seo + mobile.seo) / 2;
 
-  const score = Math.round((10 * (perfAvg / 100) + 5 * (accessAvg / 100) + 5 * (seoAvg / 100)) * 100) / 100;
+  const score = round2(W.speed * (perfAvg / 100) + W.accessibility * (accessAvg / 100) + W.technicalSeo * (seoAvg / 100));
 
   return { score, perfAvg, accessAvg, seoAvg };
 }

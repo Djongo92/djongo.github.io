@@ -9,7 +9,7 @@ export const websiteOwnership: Chapter = {
   subtitle: "Why in-house management is a strategic imperative",
   hook: "Stop outsourcing your most important digital asset",
   categories: ["performance"],
-  proofMetric: "Performance category score at the next audit — plus update latency: the time from 'this change is approved' to 'it's live,' which should fall from days to minutes.",
+  proofMetric: "Website Experience category score at the next audit — plus update latency: the time from 'this change is approved' to 'it's live,' which should fall from days to minutes.",
   actionItems: [
     { text: "Run the agency dependency audit (Materials below): list every change you cannot make without your vendor, and what each costs in days", priority: "quick-win" },
     { text: "Train the marketing team to CMS independence for the ten most common updates (news, profiles, articles, practice pages)", priority: "strategic" },

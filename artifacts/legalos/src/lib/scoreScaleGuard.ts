@@ -1,7 +1,7 @@
 /**
- * Static guard against the internal 0–200 score scale leaking into user-facing
- * copy. Internal scoring stays on the 200-point rules, but every rendered
- * total must go through toScale500/measuredScoreLabel/scale500Suffix
+ * Static guard against the retired 0–200 score scale (methodology v1–v2)
+ * leaking into user-facing copy. Scores are native on 500 since v3, and
+ * every rendered total goes through measuredScoreLabel/scale500Suffix
  * (see measuredScore.ts). Two review rounds kept catching surfaces that
  * hardcoded a "/ 200"-style denominator next to a raw total_score (Command
  * Center partial note, What-If comparison, Before/After, mobile battle-plan

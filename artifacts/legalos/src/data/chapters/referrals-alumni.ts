@@ -10,7 +10,7 @@ export const referralsAlumni: Chapter = {
   subtitle: "The channel everyone names, almost nobody runs",
   hook: "Your best source of work is a system, not a hope",
   categories: ["reputation", "social"],
-  proofMetric: "Reputation and Social category scores at the next audit — plus referral attribution: the share of new matters traceable to a named referrer or alumnus, logged at intake. Baseline it this quarter; grow it every quarter after.",
+  proofMetric: "Recognition and Social Presence category scores at the next audit — plus referral attribution: the share of new matters traceable to a named referrer or alumnus, logged at intake. Baseline it this quarter; grow it every quarter after.",
   actionItems: [
     { text: "Add 'how did you hear about us?' to every intake conversation and log the answer by name — you cannot grow a channel you don't measure", priority: "quick-win" },
     { text: "List your top 20 referrers and 20 most-placed alumni; schedule a substantive touch with five of each this quarter (script in Materials)", priority: "strategic" },

@@ -1,21 +1,19 @@
-// Thought Leadership category (45 pts): 25×posts/peer-max + 5×byline% +
-// 15×news/peer-max, over the market's contentWindowDays.
+// Thought Leadership category (150 pts — signals and weights in
+// thoughtLeadershipFormula.ts / methodology.ts), over the market's
+// contentWindowDays.
 //
-// "posts" = everything the firm published on its own site (blog posts AND
-// newsroom announcements — the axis is decided by SOURCE, not by the
-// classifier's topic label), scraped from the homepage plus common listing
-// paths and LLM-classified — legitimate to self-source since it's measuring
-// the firm's own output. Byline% is measured over those own-content items —
-// a press mention about the firm doesn't carry an authorship byline the way
-// a blog post does.
+// Own output = everything the firm published on its own site, scraped from
+// the homepage plus common listing paths and LLM-classified — legitimate to
+// self-source since it's measuring the firm's own output. The classifier's
+// label splits it into analysis pieces ("blog" → articles) and
+// announcements ("news" → ownNews); both count, analysis counts most.
+// Byline% is measured over own items — a press mention about the firm
+// doesn't carry an authorship byline the way an article does.
 //
-// "news" used to ALSO come from that same self-scraped page (an LLM
-// tagging items as type "news"), which meant a firm could inflate its own
-// "press coverage" score just by writing about itself — no independent
-// check. It now comes from findPressMentions(), a real query against
-// Google News' public RSS search with the firm's own domain explicitly
-// excluded from the results — a source the firm doesn't control. See
-// pressMentionsFormula.ts for the exclusion logic.
+// Independent press comes from findPressMentions(), a real query against
+// Google News' public RSS search (plus regional trade outlets) with the
+// firm's own domain explicitly excluded from the results — a source the
+// firm doesn't control. See pressMentionsFormula.ts for the exclusion logic.
 //
 // The peer comparison here is the live 90th percentile among OTHER
 // published audits sharing market+peer_group (raw_metrics.thoughtLeadership),
@@ -61,7 +59,8 @@ export interface ThoughtLeadershipResult {
   score: number;
   raw: {
     postsCount: number; newsCount: number; bylinePct: number; items: ContentItem[]; pressMentions: PressMention[];
-    postsStats?: PeerStats; newsStats?: PeerStats;
+    articlesCount?: number; ownNewsCount?: number; activeMonths?: number; windowMonths?: number; measuredAt?: string;
+    articlesStats?: PeerStats; ownNewsStats?: PeerStats; newsStats?: PeerStats;
   };
   provenance: "ai_classified" | "missing";
 }
@@ -253,7 +252,7 @@ export async function computeThoughtLeadershipScore(
   }
 
   const inWindow = filterToWindow(items, windowDays);
-  const { postsCount, bylinePct } = aggregateContentItems(inWindow);
+  const { postsCount, articlesCount, ownNewsCount, bylinePct, activeMonths, windowMonths } = aggregateContentItems(inWindow, windowDays);
 
   // Real, external check — not the self-scraped "type: news" items above.
   // Falls back to the page title (best-effort) if no firm name was given;
@@ -265,12 +264,19 @@ export async function computeThoughtLeadershipScore(
   });
   const newsCount = pressMentions.length;
 
-  const [postsStats, newsStats] = await Promise.all([
-    peerStatsFor(serviceClient, market, peerGroup, "thoughtLeadership", "postsCount", postsCount, auditedDomain, firmSize),
+  const [articlesStats, ownNewsStats, newsStats] = await Promise.all([
+    peerStatsFor(serviceClient, market, peerGroup, "thoughtLeadership", "articlesCount", articlesCount, auditedDomain, firmSize),
+    peerStatsFor(serviceClient, market, peerGroup, "thoughtLeadership", "ownNewsCount", ownNewsCount, auditedDomain, firmSize),
     peerStatsFor(serviceClient, market, peerGroup, "thoughtLeadership", "newsCount", newsCount, auditedDomain, firmSize),
   ]);
 
-  const score = calculateThoughtLeadershipScore(p90Ratio(postsStats), bylinePct, p90Ratio(newsStats));
+  const score = calculateThoughtLeadershipScore({
+    articlesRatio: p90Ratio(articlesStats),
+    bylinePct,
+    ownNewsRatio: p90Ratio(ownNewsStats),
+    consistency: activeMonths / windowMonths,
+    pressRatio: p90Ratio(newsStats),
+  });
 
   return {
     score,
@@ -278,7 +284,11 @@ export async function computeThoughtLeadershipScore(
     // reasoning as socialScore.ts — so a client can re-derive this formula's
     // output for a hypothetical input without a live peerStatsFor query it
     // can't run, and so the number is auditable, not just asserted.
-    raw: { postsCount, newsCount, bylinePct, items: inWindow, pressMentions, postsStats, newsStats },
+    raw: {
+      postsCount, articlesCount, ownNewsCount, newsCount, bylinePct, activeMonths, windowMonths,
+      measuredAt: new Date().toISOString(),
+      items: inWindow, pressMentions, articlesStats, ownNewsStats, newsStats,
+    },
     provenance: "ai_classified",
   };
 }

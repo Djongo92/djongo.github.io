@@ -76,6 +76,8 @@ export interface AuditHistoryEntry {
    *  evidence line so an unmeasured category never shows a fabricated raw
    *  value (same gate as the web score-history chart). */
   provenance: Partial<Provenance> | null;
+  /** Methodology that scored this snapshot — pre-v3 totals were out of 200. */
+  methodologyVersion?: number | null;
   /** 0–1 confidence for this snapshot; < 1 flags thin-sampled peer metrics
    *  (the web chart's "Some points thin-sampled" treatment). */
   confidenceScore: number | null;
@@ -98,40 +100,39 @@ export const DEMO_FIRM: Firm = {
   rank: 7,
   name: 'Petrović & Partners',
   domain: 'petrovic-partners.rs',
-  score: 115,
+  score: 295,
   percentile: 15,
   isYou: true,
-  // 115 measured points ÷ 200 measured max, including SEO & Authority.
-  // Math.round(115/200 * 100) = 57 (IEEE 754: 0.575 rounds down to 57).
-  visibilityPercent: 57,
+  // 295 measured points ÷ 500 measured max, including Search Authority.
+  visibilityPercent: 59,
   hasFullAudit: true,
-  performance: 12,
-  social: 14,
-  seoAuthority: 30,
-  thoughtLeadership: 27,
-  reputation: 32,
+  performance: 30,
+  social: 52,
+  seoAuthority: 50,
+  thoughtLeadership: 90,
+  reputation: 73,
   // The representative SEO ranking is now available, so it contributes to
   // both the full score and its honest measured denominator.
   provenance: FULL_PROVENANCE,
 };
 
-// Every demo-roster row is fully measured, so visibilityPercent = score ÷ 200.
+// Every demo-roster row is fully measured, so visibilityPercent = score ÷ 500.
 export const LEADERBOARD: Firm[] = [
-  { id: '1',  rank: 1,  name: 'Joksović & Associates',  domain: 'joksovic-law.rs',    score: 167, percentile: 2,  visibilityPercent: 84, hasFullAudit: true, performance: 18, social: 19, seoAuthority: 45, thoughtLeadership: 40, reputation: 45, provenance: FULL_PROVENANCE },
-  { id: '2',  rank: 2,  name: 'Živković Partnership',   domain: 'zivkovic-law.rs',    score: 158, percentile: 5,  visibilityPercent: 79, hasFullAudit: true, performance: 17, social: 17, seoAuthority: 42, thoughtLeadership: 38, reputation: 44, provenance: FULL_PROVENANCE },
-  { id: '3',  rank: 3,  name: 'Marković Legal Group',   domain: 'markovic-legal.rs',  score: 151, percentile: 7,  visibilityPercent: 76, hasFullAudit: true, performance: 16, social: 16, seoAuthority: 40, thoughtLeadership: 37, reputation: 42, provenance: FULL_PROVENANCE },
-  { id: '4',  rank: 4,  name: 'Nikolić & Savić',        domain: 'nikolic-savic.rs',   score: 143, percentile: 9,  visibilityPercent: 72, hasFullAudit: true, performance: 15, social: 15, seoAuthority: 38, thoughtLeadership: 35, reputation: 40, provenance: FULL_PROVENANCE },
-  { id: '5',  rank: 5,  name: 'Đorđević Law Group',     domain: 'djordjevic-law.rs',  score: 137, percentile: 11, visibilityPercent: 69, hasFullAudit: true, performance: 15, social: 14, seoAuthority: 37, thoughtLeadership: 33, reputation: 38, provenance: FULL_PROVENANCE },
-  { id: '6',  rank: 6,  name: 'Stefanović Partners',    domain: 'stefanovic.rs',      score: 127, percentile: 14, visibilityPercent: 64, hasFullAudit: true, performance: 14, social: 14, seoAuthority: 34, thoughtLeadership: 31, reputation: 34, provenance: FULL_PROVENANCE },
+  { id: '1',  rank: 1,  name: 'Joksović & Associates',  domain: 'joksovic-law.rs',    score: 426, percentile: 2,  visibilityPercent: 85, hasFullAudit: true, performance: 45, social: 71, seoAuthority: 75, thoughtLeadership: 133, reputation: 102, provenance: FULL_PROVENANCE },
+  { id: '2',  rank: 2,  name: 'Živković Partnership',   domain: 'zivkovic-law.rs',    score: 403, percentile: 5,  visibilityPercent: 81, hasFullAudit: true, performance: 42, social: 64, seoAuthority: 70, thoughtLeadership: 127, reputation: 100, provenance: FULL_PROVENANCE },
+  { id: '3',  rank: 3,  name: 'Marković Legal Group',   domain: 'markovic-legal.rs',  score: 385, percentile: 7,  visibilityPercent: 77, hasFullAudit: true, performance: 40, social: 60, seoAuthority: 67, thoughtLeadership: 123, reputation: 95, provenance: FULL_PROVENANCE },
+  { id: '4',  rank: 4,  name: 'Nikolić & Savić',        domain: 'nikolic-savic.rs',   score: 365, percentile: 9,  visibilityPercent: 73, hasFullAudit: true, performance: 38, social: 56, seoAuthority: 63, thoughtLeadership: 117, reputation: 91, provenance: FULL_PROVENANCE },
+  { id: '5',  rank: 5,  name: 'Đorđević Law Group',     domain: 'djordjevic-law.rs',  score: 348, percentile: 11, visibilityPercent: 70, hasFullAudit: true, performance: 38, social: 52, seoAuthority: 62, thoughtLeadership: 110, reputation: 86, provenance: FULL_PROVENANCE },
+  { id: '6',  rank: 6,  name: 'Stefanović Partners',    domain: 'stefanovic.rs',      score: 324, percentile: 14, visibilityPercent: 65, hasFullAudit: true, performance: 35, social: 52, seoAuthority: 57, thoughtLeadership: 103, reputation: 77, provenance: FULL_PROVENANCE },
   { ...DEMO_FIRM },
-  { id: '8',  rank: 8,  name: 'Simić Legal',            domain: 'simic-legal.rs',     score: 108, percentile: 18, visibilityPercent: 54, hasFullAudit: true, performance: 12, social: 13, seoAuthority: 27, thoughtLeadership: 26, reputation: 30, provenance: FULL_PROVENANCE },
-  { id: '9',  rank: 9,  name: 'Popović Law Office',     domain: 'popovic-law.rs',     score: 102, percentile: 20, visibilityPercent: 51, hasFullAudit: true, performance: 11, social: 13, seoAuthority: 25, thoughtLeadership: 24, reputation: 29, provenance: FULL_PROVENANCE },
-  { id: '10', rank: 10, name: 'Ivanović & Co',          domain: 'ivanovic.rs',        score: 97,  percentile: 23, visibilityPercent: 49, hasFullAudit: true, performance: 10, social: 12, seoAuthority: 24, thoughtLeadership: 23, reputation: 28, provenance: FULL_PROVENANCE },
-  { id: '11', rank: 11, name: 'Milošević Attorneys',    domain: 'milosevic-law.rs',   score: 91,  percentile: 25, visibilityPercent: 46, hasFullAudit: true, performance: 10, social: 11, seoAuthority: 22, thoughtLeadership: 22, reputation: 26, provenance: FULL_PROVENANCE },
-  { id: '12', rank: 12, name: 'Vasić Law Firm',         domain: 'vasic-law.rs',       score: 87,  percentile: 27, visibilityPercent: 44, hasFullAudit: true, performance:  9, social: 11, seoAuthority: 21, thoughtLeadership: 20, reputation: 26, provenance: FULL_PROVENANCE },
-  { id: '13', rank: 13, name: 'Lukić & Partners',       domain: 'lukic-law.rs',       score: 81,  percentile: 30, visibilityPercent: 41, hasFullAudit: true, performance:  9, social: 10, seoAuthority: 19, thoughtLeadership: 19, reputation: 24, provenance: FULL_PROVENANCE },
-  { id: '14', rank: 14, name: 'Đukić Legal',            domain: 'djukic-legal.rs',    score: 76,  percentile: 32, visibilityPercent: 38, hasFullAudit: true, performance:  8, social: 10, seoAuthority: 18, thoughtLeadership: 17, reputation: 23, provenance: FULL_PROVENANCE },
-  { id: '15', rank: 15, name: 'Pavlović Office',        domain: 'pavlovic-law.rs',    score: 71,  percentile: 34, visibilityPercent: 36, hasFullAudit: true, performance:  8, social:  9, seoAuthority: 17, thoughtLeadership: 16, reputation: 21, provenance: FULL_PROVENANCE },
+  { id: '8',  rank: 8,  name: 'Simić Legal',            domain: 'simic-legal.rs',     score: 279, percentile: 18, visibilityPercent: 56, hasFullAudit: true, performance: 30, social: 49, seoAuthority: 45, thoughtLeadership: 87, reputation: 68, provenance: FULL_PROVENANCE },
+  { id: '9',  rank: 9,  name: 'Popović Law Office',     domain: 'popovic-law.rs',     score: 265, percentile: 20, visibilityPercent: 53, hasFullAudit: true, performance: 28, social: 49, seoAuthority: 42, thoughtLeadership: 80, reputation: 66, provenance: FULL_PROVENANCE },
+  { id: '10', rank: 10, name: 'Ivanović & Co',          domain: 'ivanovic.rs',        score: 251,  percentile: 23, visibilityPercent: 50, hasFullAudit: true, performance: 25, social: 45, seoAuthority: 40, thoughtLeadership: 77, reputation: 64, provenance: FULL_PROVENANCE },
+  { id: '11', rank: 11, name: 'Milošević Attorneys',    domain: 'milosevic-law.rs',   score: 235,  percentile: 25, visibilityPercent: 47, hasFullAudit: true, performance: 25, social: 41, seoAuthority: 37, thoughtLeadership: 73, reputation: 59, provenance: FULL_PROVENANCE },
+  { id: '12', rank: 12, name: 'Vasić Law Firm',         domain: 'vasic-law.rs',       score: 224,  percentile: 27, visibilityPercent: 45, hasFullAudit: true, performance:  22, social: 41, seoAuthority: 35, thoughtLeadership: 67, reputation: 59, provenance: FULL_PROVENANCE },
+  { id: '13', rank: 13, name: 'Lukić & Partners',       domain: 'lukic-law.rs',       score: 210,  percentile: 30, visibilityPercent: 42, hasFullAudit: true, performance:  22, social: 38, seoAuthority: 32, thoughtLeadership: 63, reputation: 55, provenance: FULL_PROVENANCE },
+  { id: '14', rank: 14, name: 'Đukić Legal',            domain: 'djukic-legal.rs',    score: 197,  percentile: 32, visibilityPercent: 39, hasFullAudit: true, performance:  20, social: 38, seoAuthority: 30, thoughtLeadership: 57, reputation: 52, provenance: FULL_PROVENANCE },
+  { id: '15', rank: 15, name: 'Pavlović Office',        domain: 'pavlovic-law.rs',    score: 183,  percentile: 34, visibilityPercent: 37, hasFullAudit: true, performance:  20, social:  34, seoAuthority: 28, thoughtLeadership: 53, reputation: 48, provenance: FULL_PROVENANCE },
 ];
 
 // ─── Data seams ───────────────────────────────────────────────────────────────

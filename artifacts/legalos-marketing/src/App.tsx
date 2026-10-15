@@ -69,36 +69,43 @@ const PEER_FIRMS: (BenchmarkLeader & { highlight?: boolean })[] = [
 const REAL_PEER_SCORES = PEER_FIRMS.filter(f => !f.highlight).map(f => f.score);
 const MARKET_LEADER_SCORE = REAL_PEER_SCORES.length ? Math.max(...REAL_PEER_SCORES) : 0;
 
-// Must mirror the canonical five in the app's visibilityCategories.ts —
-// Performance, Social Media, SEO & Authority, Thought Leadership, Reputation.
+// Must mirror the canonical five in the app's visibilityCategories.ts and the
+// point weights in legalos/supabase/functions/_shared/methodology.ts —
+// Website Experience 50, Social Presence 75, Search Authority 100,
+// Thought Leadership 150, Recognition 125 (500 total).
 const SCORE_CATEGORIES = [
   {
     icon: <Gauge className="w-6 h-6" />,
-    title: "Performance",
+    title: "Website Experience",
+    points: 50,
     desc: "How fast, accessible, and technically sound your website is on desktop and mobile — graded by Google's own measurement tools.",
     sources: ["Google PageSpeed Insights", "Lighthouse accessibility audit", "Mobile Core Web Vitals"],
   },
   {
     icon: <Users className="w-6 h-6" />,
-    title: "Social Media",
-    desc: "Your firm's LinkedIn following, posting cadence, and engagement — measured against the current best in your market, not a global average.",
+    title: "Social Presence",
+    points: 75,
+    desc: "Your firm's LinkedIn following, posting cadence, and engagement — measured against similar firms in your market, not a global average.",
     sources: ["LinkedIn firm page", "Followers, posts & engagement", "Market-normalized"],
   },
   {
     icon: <Search className="w-6 h-6" />,
-    title: "SEO & Authority",
+    title: "Search Authority",
+    points: 100,
     desc: "Domain authority, referring domains, backlinks, and organic search footprint — whether clients find you when they search for a lawyer in your practice area.",
     sources: ["DataForSEO backlink & search data", "Referring domains", "Organic traffic & keywords"],
   },
   {
     icon: <Newspaper className="w-6 h-6" />,
     title: "Thought Leadership",
-    desc: "How often your firm publishes original analysis, whether it is attributed to a named partner, and how often the market writes about you.",
-    sources: ["Google News (independently verified)", "Byline attribution", "Content volume vs. the market"],
+    points: 150,
+    desc: "The most heavily weighted category. How much original analysis your firm publishes on its own website, whether named lawyers sign it, how steadily you publish month to month — and, weighted less, how often independent outlets cover you.",
+    sources: ["Articles on your own site", "Named bylines & publishing consistency", "Independent press (Google News)"],
   },
   {
     icon: <Award className="w-6 h-6" />,
-    title: "Reputation",
+    title: "Recognition",
+    points: 125,
     desc: "Your standing in Chambers, Legal 500, and IFLR1000, plus your Google Business Profile — the credibility the market already assigns you.",
     sources: ["Chambers & Partners", "Legal 500 & IFLR1000", "Google Business Profile"],
   },
@@ -418,7 +425,10 @@ export default function App() {
                     className="p-8 border border-white/5 bg-card/10 rounded-2xl hover:bg-white/[0.02] hover:border-primary/20 focus-visible:border-primary/40 focus-visible:outline-none transition-all group h-full relative overflow-hidden"
                   >
                     <div className="text-primary mb-6 group-hover:scale-110 transition-transform origin-left">{cat.icon}</div>
-                    <h4 className="text-xl font-serif text-white mb-3">{cat.title}</h4>
+                    <h4 className="text-xl font-serif text-white mb-3 flex items-baseline justify-between gap-3">
+                      <span>{cat.title}</span>
+                      <span className="text-xs font-sans text-primary/80 tabular-nums shrink-0">{cat.points} pts</span>
+                    </h4>
                     <p className="text-muted-foreground text-sm leading-relaxed lg:group-hover:opacity-0 lg:group-focus-within:opacity-0 transition-opacity duration-300">{cat.desc}</p>
                     {/* data sources — always visible on touch/small screens, revealed on hover/focus on desktop */}
                     <div className="mt-6 lg:mt-0 lg:absolute lg:inset-x-8 lg:bottom-8 lg:top-[7.5rem] lg:opacity-0 lg:group-hover:opacity-100 lg:group-focus-within:opacity-100 transition-opacity duration-300">

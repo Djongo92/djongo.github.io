@@ -39,7 +39,7 @@ Deno.serve(withCronAlert("weekly-score-digest", async (req) => {
   const since = new Date(now.getTime() - HISTORY_WINDOW_DAYS * 864e5).toISOString();
   const { data: rows, error } = await serviceClient
     .from("market_visibility_audit_history")
-    .select("client_id,audited_domain,market,total_score,performance_score,social_score,seo_authority_score,thought_leadership_score,reputation_score,recorded_at")
+    .select("client_id,audited_domain,market,total_score,performance_score,social_score,seo_authority_score,thought_leadership_score,reputation_score,recorded_at,methodology_version")
     .gte("recorded_at", since)
     .order("recorded_at", { ascending: true });
   if (error) {

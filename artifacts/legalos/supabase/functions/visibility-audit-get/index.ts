@@ -92,7 +92,7 @@ Deno.serve(async (req) => {
     // per-snapshot confidence alongside the normalized score.
     const { data: history, error: historyError } = await serviceClient
       .from("market_visibility_audit_history")
-      .select("audited_domain, market, peer_group, total_score, performance_score, social_score, seo_authority_score, thought_leadership_score, reputation_score, recorded_at, raw_metrics, provenance, confidence_score, sample_size")
+      .select("audited_domain, market, peer_group, total_score, performance_score, social_score, seo_authority_score, thought_leadership_score, reputation_score, recorded_at, raw_metrics, provenance, confidence_score, sample_size, methodology_version")
       .eq("client_id", clientId)
       .order("recorded_at", { ascending: true });
 

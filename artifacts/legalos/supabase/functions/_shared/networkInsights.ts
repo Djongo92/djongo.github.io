@@ -7,6 +7,7 @@
 // builders are separated from the queries for vitest coverage.
 
 // deno-lint-ignore no-explicit-any
+import { CATEGORY_MAX, TOTAL_MAX, carryForwardCategoryScore, round2, totalMaxForVersion } from "./methodology.ts";
 type SupabaseClient = any;
 
 /** No statistic is ever shown when fewer than this many distinct firms contribute. */
@@ -58,8 +59,8 @@ export function nextCronBatch(
 
 export interface CohortAuditPoint {
   totalScore: number;
-  socialScore: number;   // /20
-  thoughtScore: number;  // /45
+  socialScore: number;   // current-methodology points (see toCohortPoint)
+  thoughtScore: number;
   createdAt: string;
 }
 
@@ -130,11 +131,11 @@ export function buildNetworkInsights(cohort: CohortFirm[], ownClientId: string):
     const ownLatest = own.audits[own.audits.length - 1];
     const peerSocial = avg(peers.map((f) => f.audits[f.audits.length - 1].socialScore));
     const peerThought = avg(peers.map((f) => f.audits[f.audits.length - 1].thoughtScore));
-    const socialGap = peerSocial - ownLatest.socialScore;   // /20 scale
-    const thoughtGap = peerThought - ownLatest.thoughtScore; // /45 scale
+    const socialGap = peerSocial - ownLatest.socialScore;
+    const thoughtGap = peerThought - ownLatest.thoughtScore;
     // Normalize to % of category max so gaps are comparable across scales.
-    const socialPct = socialGap / 20;
-    const thoughtPct = thoughtGap / 45;
+    const socialPct = socialGap / CATEGORY_MAX.social;
+    const thoughtPct = thoughtGap / CATEGORY_MAX.thoughtLeadership;
     if (Math.max(socialPct, thoughtPct) > 0.05) {
       const isSocial = socialPct >= thoughtPct;
       insights.push({
@@ -146,8 +147,8 @@ export function buildNetworkInsights(cohort: CohortFirm[], ownClientId: string):
           ? `${Math.round(peerSocial)} vs your ${Math.round(ownLatest.socialScore)}`
           : `${Math.round(peerThought)} vs your ${Math.round(ownLatest.thoughtScore)}`,
         detail: isSocial
-          ? `Peer firms average ${Math.round(peerSocial)}/20 on Social — the biggest relative gap in your scorecard. Closing it is the fastest route up the leaderboard.`
-          : `Peer firms average ${Math.round(peerThought)}/45 on Thought Leadership — the biggest relative gap in your scorecard. Publishing consistently is how peers close it.`,
+          ? `Peer firms average ${Math.round(peerSocial)}/${CATEGORY_MAX.social} on Social presence — the biggest relative gap in your scorecard. Closing it is the fastest route up the leaderboard.`
+          : `Peer firms average ${Math.round(peerThought)}/${CATEGORY_MAX.thoughtLeadership} on Thought Leadership — the biggest relative gap in your scorecard. Publishing consistently is how peers close it.`,
         sampleSize: peers.length,
         confidence: confidenceFor(peers.length),
       });
@@ -183,23 +184,31 @@ export function buildNetworkInsights(cohort: CohortFirm[], ownClientId: string):
 // is used ONLY for peer-scope dimensions (firm_size lives there, not in
 // history).
 
+/** A history row on the current methodology's scale — older readings are
+ *  converted share-for-share so a cohort never mixes two point scales. */
+function toCohortPoint(r: Record<string, unknown>): CohortAuditPoint {
+  const v = r.methodology_version == null ? null : Number(r.methodology_version);
+  const total = Number(r.total_score) || 0;
+  return {
+    totalScore: round2((total * TOTAL_MAX) / totalMaxForVersion(v)),
+    socialScore: carryForwardCategoryScore(Number(r.social_score) || 0, "social", v),
+    thoughtScore: carryForwardCategoryScore(Number(r.thought_leadership_score) || 0, "thoughtLeadership", v),
+    createdAt: String(r.recorded_at),
+  };
+}
+
 /** The firm's own audit history, ascending by recorded_at. */
 export async function getOwnAudits(serviceClient: SupabaseClient, firmId: string): Promise<CohortAuditPoint[]> {
   const { data, error } = await serviceClient
     .from("market_visibility_audit_history")
-    .select("total_score, social_score, thought_leadership_score, recorded_at")
+    .select("total_score, social_score, thought_leadership_score, recorded_at, methodology_version")
     .eq("client_id", firmId)
     .order("recorded_at", { ascending: true });
   if (error) {
     console.error("network-insights own audits error:", error.message);
     return [];
   }
-  return (data ?? []).map((r: Record<string, unknown>) => ({
-    totalScore: Number(r.total_score) || 0,
-    socialScore: Number(r.social_score) || 0,
-    thoughtScore: Number(r.thought_leadership_score) || 0,
-    createdAt: String(r.recorded_at),
-  }));
+  return (data ?? []).map((r: Record<string, unknown>) => toCohortPoint(r));
 }
 
 export interface PeerScope {
@@ -263,7 +272,7 @@ export async function getCohort(
 
   const { data, error } = await serviceClient
     .from("market_visibility_audit_history")
-    .select("client_id, total_score, social_score, thought_leadership_score, recorded_at")
+    .select("client_id, total_score, social_score, thought_leadership_score, recorded_at, methodology_version")
     .in("client_id", [...ids])
     .order("recorded_at", { ascending: true })
     .limit(5000);
@@ -276,12 +285,7 @@ export async function getCohort(
   for (const r of (data ?? []) as Record<string, unknown>[]) {
     const id = String(r.client_id);
     if (!byFirm.has(id)) byFirm.set(id, { clientId: id, audits: [], runCount90d: 0 });
-    byFirm.get(id)!.audits.push({
-      totalScore: Number(r.total_score) || 0,
-      socialScore: Number(r.social_score) || 0,
-      thoughtScore: Number(r.thought_leadership_score) || 0,
-      createdAt: String(r.recorded_at),
-    });
+    byFirm.get(id)!.audits.push(toCohortPoint(r));
   }
 
   // 90-day workshop run counts per firm (from synced run history).

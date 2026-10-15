@@ -2,6 +2,7 @@ import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Loader2, ArrowRight, Trophy, Sparkles } from "lucide-react";
 import { DEMO_AUDIT, DEMO_DISPLAY_NAME, DEMO_DOMAIN } from "@/data/demoData";
+import { CATEGORY_MAX } from "../../supabase/functions/_shared/methodology";
 
 interface DemoScoreTeaserProps {
   /** Flips the app into real demo mode (enableDemoMode + reload) — the same
@@ -11,12 +12,12 @@ interface DemoScoreTeaserProps {
   onBack: () => void;
 }
 
-const PERFORMANCE_MAX = 20;
-const REPUTATION_MAX = 55; // Petrović & Partners is directory-matched in the demo data.
+const PERFORMANCE_MAX = CATEGORY_MAX.performance;
+const REPUTATION_MAX = CATEGORY_MAX.reputation; // Petrović & Partners is directory-matched in the demo data.
 
 /**
  * A canned stand-in for LiveScoreTeaser, built so the same "type a domain →
- * watch two categories compute → unlock the full 200-point score" arc is
+ * watch two categories compute → unlock the full 500-point score" arc is
  * walkable entirely offline, using the sample firm's real (if fictional)
  * audit numbers instead of a live network call. Exists because the real
  * journey's unlock step is a real Supabase Auth signup, which depends on
@@ -113,12 +114,12 @@ const DemoScoreTeaser = ({ onUnlock, onBack }: DemoScoreTeaserProps) => {
 
             <div className="space-y-2 text-sm font-body">
               <div className="flex items-center justify-between">
-                <span className="text-foreground">Performance (PageSpeed)</span>
-                <span className="text-muted-foreground">{DEMO_AUDIT.performance_score} / {PERFORMANCE_MAX}</span>
+                <span className="text-foreground">Website Experience (PageSpeed)</span>
+                <span className="text-muted-foreground">{Math.round(DEMO_AUDIT.performance_score)} / {PERFORMANCE_MAX}</span>
               </div>
               <div className="flex items-center justify-between">
-                <span className="text-foreground">Reputation</span>
-                <span className="text-muted-foreground">{DEMO_AUDIT.reputation_score} / {REPUTATION_MAX}</span>
+                <span className="text-foreground">Recognition</span>
+                <span className="text-muted-foreground">{Math.round(DEMO_AUDIT.reputation_score)} / {REPUTATION_MAX}</span>
               </div>
               <p className="text-[11px] text-muted-foreground font-body">
                 Matched to "{DEMO_DISPLAY_NAME}" in the directory.
@@ -138,7 +139,7 @@ const DemoScoreTeaser = ({ onUnlock, onBack }: DemoScoreTeaserProps) => {
 
             <div className="mt-5 pt-5 border-t border-border/40 text-center space-y-3">
               <p className="text-xs text-muted-foreground font-body">
-                This is 2 of 5 categories. The full score adds Social Media, SEO &amp; Authority, and Thought Leadership —
+                This is 2 of 5 categories. The full score adds Social Presence, Search Authority, and Thought Leadership —
                 already computed for this sample firm.
               </p>
               <button

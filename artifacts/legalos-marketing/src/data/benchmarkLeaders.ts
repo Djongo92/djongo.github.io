@@ -6,7 +6,7 @@
 export interface BenchmarkLeader {
   rank: number;
   name: string;
-  /** Public 0–500 display scale (raw census total_score × 2.5, rounded). */
+  /** Public 0–500 display scale (rounded). */
   score: number;
   delta: string;
   category: string;

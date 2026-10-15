@@ -3,50 +3,49 @@ import { findWeakestCategoryTool } from "./categoryToolMap";
 
 describe("findWeakestCategoryTool", () => {
   it("picks the category with the most absolute points recoverable, not the lowest percentage (defect 1.1)", () => {
-    // Exact scores from the reported defect: Social 9.5/20 (47.5%, 10.5 pts
-    // recoverable) vs Thought Leadership 22/45 (48.9%, 23 pts recoverable).
-    // Social's percentage looks worse, but Thought Leadership has more than
-    // double the real points on the table — it must win.
+    // Social 30/75 (40%, 45 pts recoverable) vs Thought Leadership 70/150
+    // (46.7%, 80 pts recoverable). Social's percentage looks worse, but
+    // Thought Leadership has far more real points on the table — it must win.
     const categories = {
-      performance: { score: 14.8, provenance: "api" },
-      social: { score: 9.5, provenance: "self_reported" },
+      performance: { score: 38, provenance: "api" },
+      social: { score: 30, provenance: "self_reported" },
       seoAuthority: { score: 0, provenance: "missing" },
-      thoughtLeadership: { score: 22, provenance: "ai_classified" },
-      reputation: { score: 34, provenance: "api" },
+      thoughtLeadership: { score: 70, provenance: "ai_classified" },
+      reputation: { score: 85, provenance: "api" },
     };
 
     const result = findWeakestCategoryTool(categories);
     expect(result).not.toBeNull();
     expect(result!.categoryKey).toBe("thoughtLeadership");
-    expect(result!.pointsRecoverable).toBeCloseTo(23);
+    expect(result!.pointsRecoverable).toBeCloseTo(80);
   });
 
   it("returns exactly one result even when multiple categories are below the weak threshold", () => {
     const categories = {
-      social: { score: 9.5, provenance: "self_reported" },
-      thoughtLeadership: { score: 22, provenance: "ai_classified" },
-      reputation: { score: 10, provenance: "api" },
+      social: { score: 30, provenance: "self_reported" },
+      thoughtLeadership: { score: 70, provenance: "ai_classified" },
+      reputation: { score: 20, provenance: "api" },
     };
     const result = findWeakestCategoryTool(categories);
     expect(result).not.toBeNull();
-    // Only one winner: reputation has the most points recoverable (55-10=45).
+    // Only one winner: reputation has the most points recoverable (125-20=105).
     expect(result!.categoryKey).toBe("reputation");
   });
 
   it("ignores categories with missing provenance", () => {
     const categories = {
       seoAuthority: { score: 0, provenance: "missing" },
-      reputation: { score: 34, provenance: "api" },
+      reputation: { score: 80, provenance: "api" },
     };
     const result = findWeakestCategoryTool(categories);
-    // reputation is at 34/55 = 61.8%, above the weak threshold, so nothing qualifies.
+    // reputation is at 80/125 = 64%, above the weak threshold, so nothing qualifies.
     expect(result).toBeNull();
   });
 
   it("returns null when nothing is below the weak threshold", () => {
     const categories = {
-      performance: { score: 19, provenance: "api" },
-      reputation: { score: 50, provenance: "api" },
+      performance: { score: 45, provenance: "api" },
+      reputation: { score: 110, provenance: "api" },
     };
     expect(findWeakestCategoryTool(categories)).toBeNull();
   });

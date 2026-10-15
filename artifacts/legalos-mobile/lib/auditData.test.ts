@@ -31,12 +31,12 @@ function auditRow(overrides: Partial<AuditRow> = {}): AuditRow {
     id: "audit-1",
     firm_name: "Test Firm",
     firm_domain: "testfirm.rs",
-    total_score: 100,
-    performance_score: 10,
-    social_score: 10,
-    seo_authority_score: 30,
-    thought_leadership_score: 25,
-    reputation_score: 25,
+    total_score: 250,
+    performance_score: 25,
+    social_score: 40,
+    seo_authority_score: 50,
+    thought_leadership_score: 75,
+    reputation_score: 60,
     percentile: 20,
     market: "serbia",
     provenance: FULL_PROV,
@@ -122,15 +122,15 @@ describe("loadSignedInData success mapping", () => {
     expect(result.firm.name).toBe("Test Firm");
     expect(result.firm.domain).toBe("testfirm.rs");
     expect(result.firm.isYou).toBe(true);
-    expect(result.firm.score).toBe(100);
-    expect(result.firm.seoAuthority).toBe(30);
-    // Fully measured: 100 ÷ 200 = 50.
+    expect(result.firm.score).toBe(250);
+    expect(result.firm.seoAuthority).toBe(50);
+    // Fully measured: 250 ÷ 500 = 50.
     expect(result.firm.visibilityPercent).toBe(50);
     expect(result.firm.provenance).toEqual(FULL_PROV);
   });
 
   it("missing provenance shrinks the denominator — never an earned zero", async () => {
-    // seoAuthority missing: measured = 100-30 = 70 of 200-60 = 140 → 50%.
+    // seoAuthority missing: measured = 250-50 = 200 of 500-100 = 400 → 50%.
     const result = await loadSignedInData("user-1", "token", sources({
       callAuditGet: async () => ({
         audits: [auditRow({ provenance: { ...FULL_PROV, seoAuthority: "missing" } })],
@@ -197,6 +197,7 @@ describe("loadSignedInData success mapping", () => {
       provenance: FULL_PROV,
       confidenceScore: 0.8,
       sampleSize: 12,
+      methodologyVersion: null,
     });
   });
 });
@@ -242,7 +243,7 @@ describe("Score tab SEO & Authority category row", () => {
     expect(seoCat!.provenance).toBe("api");
     // Score must carry the raw value from the audit row.
     expect(seoCat!.score).toBe(30);
-    expect(seoCat!.label).toBe("SEO & Authority");
+    expect(seoCat!.label).toBe("Search Authority");
   });
 
   it("all categories measured → isPartial is false and partialNote is absent", async () => {
@@ -300,7 +301,7 @@ describe("Score tab SEO & Authority category row", () => {
     const note = scoreTabPartialNote(categories);
 
     expect(note).not.toBeNull();
-    expect(note).toContain("SEO & Authority");
+    expect(note).toContain("Search Authority");
 
     const seoCat = categories.find((c) => c.key === "seoAuthority");
     expect(seoCat!.provenance).toBe("missing");

@@ -10,7 +10,7 @@ export const reputationReviews: Chapter = {
   subtitle: "The proof layer: Google, reviews, and rankings",
   hook: "Your reputation already has a score — the only question is whether you manage it",
   categories: ["reputation"],
-  proofMetric: "Reputation category score at the next audit — plus review count and average rating on Google (baseline today, target +1 review per matter closed), and at least one directory submission per cycle.",
+  proofMetric: "Recognition category score at the next audit — plus review count and average rating on Google (baseline today, target +1 review per matter closed), and at least one directory submission per cycle.",
   actionItems: [
     { text: "Claim and fully complete your Google Business Profile today — categories, services, photos, Q&A — and respond to every existing review", priority: "quick-win" },
     { text: "Adopt the review-ask script (Materials below) as a standing step in every matter-closing process", priority: "strategic" },

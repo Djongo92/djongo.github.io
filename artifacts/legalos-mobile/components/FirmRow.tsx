@@ -20,7 +20,7 @@ export function FirmRow({ firm }: FirmRowProps) {
   const isYou = !!firm.isYou;
   const measured = computeMeasuredTotals(getCategories(firm));
   // Directory-standing rows (no full audit) score on the directory index's
-  // own 45-point scale — label them instead of implying a 200-point audit.
+  // own 100-point ceiling — label them instead of implying a full audit.
   const isDirectoryOnly = !firm.hasFullAudit;
 
   // Trust flags for full-audit rows only — directory-only rows carry no audit
@@ -102,7 +102,7 @@ export function FirmRow({ firm }: FirmRowProps) {
 
       {/* Score — rescaled to the public 500-point scale: full-audit rows
           against their measured denominator, directory-only rows against
-          the directory index's 45-point ceiling. */}
+          the directory index's 100-point ceiling. */}
       <View style={styles.scoreBox}>
         <Text
           style={[
@@ -113,7 +113,7 @@ export function FirmRow({ firm }: FirmRowProps) {
             },
           ]}
         >
-          {toScale500(firm.score, isDirectoryOnly ? 45 : measured.measuredMax || 200)}
+          {toScale500(firm.score, isDirectoryOnly ? 100 : measured.measuredMax || 500)}
         </Text>
         <Text style={[styles.max, { color: colors.mutedForeground, fontFamily: 'Inter_400Regular' }]}>
           {isDirectoryOnly ? '/500' : `/500${measured.isPartial ? '*' : ''}`}

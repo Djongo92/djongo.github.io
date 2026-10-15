@@ -18,6 +18,7 @@
 type SupabaseClient = any;
 
 import { synthesisNoteLine, SYNTHESIS_NOTES_IN_CONTEXT, type SynthesisNote } from "./postRunSynthesis.ts";
+import { TOTAL_MAX, categoryMaxForVersion, totalMaxForVersion } from "./methodology.ts";
 
 interface AuditRow {
   total_score: number | null;
@@ -31,7 +32,12 @@ interface AuditRow {
   confidence_score: number | null;
   sample_size: number | null;
   created_at: string;
+  methodology_version: number | null;
 }
+
+/** A stored total on the 500-point scale, whichever methodology produced it. */
+const to500 = (total: number, version: number | null): number =>
+  Math.round((total * TOTAL_MAX) / totalMaxForVersion(version));
 
 interface WorkshopRun {
   toolId: string;
@@ -72,23 +78,23 @@ function formatDate(iso: string): string {
   return new Date(iso).toLocaleDateString("en-US", { month: "short", year: "numeric" });
 }
 
-// Category maxes (20/20/60/45/55) let history render as percentages of
-// category potential — the public convention, matching the dashboard.
-const CATEGORY_MAXES = { performance: 20, social: 20, seo: 60, thought: 45, reputation: 55 } as const;
-
+// History renders as percentages of category potential — the public
+// convention, matching the dashboard. Maxima follow the methodology version
+// that produced each row, so older readings stay comparable.
 function auditLine(a: AuditRow): string {
-  const pct = (v: number, max: number) => `${Math.round((v / max) * 100)}%`;
+  const max = categoryMaxForVersion(a.methodology_version);
+  const pct = (v: number, m: number) => `${Math.round((v / m) * 100)}%`;
   const scores = [
-    a.performance_score != null && `Perf ${pct(a.performance_score, CATEGORY_MAXES.performance)}`,
-    a.social_score != null && `Social ${pct(a.social_score, CATEGORY_MAXES.social)}`,
-    a.seo_authority_score != null && `SEO ${pct(a.seo_authority_score, CATEGORY_MAXES.seo)}`,
-    a.thought_leadership_score != null && `Thought ${pct(a.thought_leadership_score, CATEGORY_MAXES.thought)}`,
-    a.reputation_score != null && `Reputation ${pct(a.reputation_score, CATEGORY_MAXES.reputation)}`,
+    a.performance_score != null && `Website ${pct(a.performance_score, max.performance)}`,
+    a.social_score != null && `Social ${pct(a.social_score, max.social)}`,
+    a.seo_authority_score != null && `Search ${pct(a.seo_authority_score, max.seoAuthority)}`,
+    a.thought_leadership_score != null && `Thought ${pct(a.thought_leadership_score, max.thoughtLeadership)}`,
+    a.reputation_score != null && `Recognition ${pct(a.reputation_score, max.reputation)}`,
   ].filter(Boolean).join(", ");
   const confidence = a.confidence_score != null
     ? ` (confidence: ${a.confidence_score >= 0.7 ? "high" : a.confidence_score >= 0.4 ? "medium" : "low"})`
     : "";
-  return `- ${formatDate(a.created_at)}: total ${a.total_score != null ? Math.round(a.total_score * 2.5) : "?"}/500 — ${scores}${confidence}`;
+  return `- ${formatDate(a.created_at)}: total ${a.total_score != null ? to500(a.total_score, a.methodology_version) : "?"}/${TOTAL_MAX} — ${scores}${confidence}`;
 }
 
 function trendLine(audits: AuditRow[]): string {
@@ -96,10 +102,10 @@ function trendLine(audits: AuditRow[]): string {
   const [latest, ...rest] = audits;
   const oldest = rest[rest.length - 1];
   if (latest.total_score == null || oldest.total_score == null) return "";
-  // Points on the public 500 scale (internal raw × 2.5) — the models quoting
-  // this block must never say a number the dashboard wouldn't.
-  const latest500 = Math.round(latest.total_score * 2.5);
-  const oldest500 = Math.round(oldest.total_score * 2.5);
+  // Points on the public 500 scale — the models quoting this block must
+  // never say a number the dashboard wouldn't.
+  const latest500 = to500(latest.total_score, latest.methodology_version);
+  const oldest500 = to500(oldest.total_score, oldest.methodology_version);
   const delta = latest500 - oldest500;
   if (Math.abs(delta) < 5) return `- Trend: stable across ${audits.length} audits`;
   const dir = delta > 0 ? "up" : "down";
@@ -140,7 +146,7 @@ export async function buildFirmContext(
         .maybeSingle(),
       serviceClient
         .from("market_visibility_audits")
-        .select("total_score,performance_score,social_score,seo_authority_score,thought_leadership_score,reputation_score,market,peer_group,confidence_score,sample_size,created_at")
+        .select("total_score,performance_score,social_score,seo_authority_score,thought_leadership_score,reputation_score,market,peer_group,confidence_score,sample_size,created_at,methodology_version")
         .eq("client_id", firmId)
         .order("created_at", { ascending: false })
         .limit(4),

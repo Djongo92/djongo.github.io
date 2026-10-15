@@ -25,7 +25,7 @@ describe("recomputeFromRawMetrics", () => {
         mobile: { performance: 100, accessibility: 100, seo: 100 },
       },
     };
-    expect(recomputeFromRawMetrics("serbia", raw).performance_score).toBe(20);
+    expect(recomputeFromRawMetrics("serbia", raw).performance_score).toBe(50);
   });
 
   it("recomputes social from stored PeerStats — a corrected followers value changes the ratio", () => {
@@ -46,16 +46,33 @@ describe("recomputeFromRawMetrics", () => {
     expect(after).toBeGreaterThan(before);
   });
 
-  it("recomputes thought leadership from stored PeerStats and bylinePct fraction", () => {
+  it("recomputes thought leadership from stored PeerStats, byline share and publishing months", () => {
     const raw = {
       thoughtLeadership: {
-        postsStats: stats(10, 20),
+        articlesStats: stats(10, 20),
+        ownNewsStats: stats(1, 2),
         newsStats: stats(2, 4),
         bylinePct: 0.5,
+        activeMonths: 2,
+        windowMonths: 3,
       },
     };
-    // 25*(10/20) + 5*0.5 + 15*(2/4) = 12.5 + 2.5 + 7.5 = 22.5
-    expect(recomputeFromRawMetrics("serbia", raw).thought_leadership_score).toBeCloseTo(22.5, 5);
+    // 60*(10/20) + 20*0.5 + 20*(1/2) + 20*(2/3) + 30*(2/4) = 30 + 10 + 10 + 13.33 + 15
+    expect(recomputeFromRawMetrics("serbia", raw).thought_leadership_score).toBeCloseTo(78.33, 2);
+  });
+
+  it("reads a pre-v3 blended own-output comparison as articles, never inventing an own-news split", () => {
+    const raw = { thoughtLeadership: { postsStats: stats(10, 20), newsStats: stats(2, 4), bylinePct: 0.5, activeMonths: 0, windowMonths: 3 } };
+    // 60*0.5 + 20*0.5 + 0 + 0 + 30*0.5 = 55
+    expect(recomputeFromRawMetrics("serbia", raw).thought_leadership_score).toBeCloseTo(55, 5);
+  });
+
+  it("recomputes search authority from stored per-metric stats, and keeps a carried-forward score otherwise", () => {
+    const measured = { seoAuthority: { domainAuthority: stats(10, 20), referringDomains: stats(40, 20) } };
+    // average of 0.5 and 1 → 75 of 100
+    expect(recomputeFromRawMetrics("serbia", measured).seo_authority_score).toBe(75);
+    const carried = { seoAuthority: { provider: "dataforseo", fallback: "historical" } };
+    expect(recomputeFromRawMetrics("serbia", carried, { seoAuthority: 42 }).seo_authority_score).toBe(42);
   });
 
   it("recomputes reputation gbp + directory points without a peer requery", () => {
@@ -66,15 +83,15 @@ describe("recomputeFromRawMetrics", () => {
       },
     };
     const result = recomputeFromRawMetrics("serbia", raw);
-    // gbp 10 + chambers countScore (min(10, 10*2/7)) + qualityScore (5 * 3/4), rounded to 2 decimals
-    const expectedCount = Math.min(10, 10 * (2 / 7));
-    const expected = Math.round((10 + expectedCount + 5 * 0.75) * 100) / 100;
+    // gbp 25 + chambers breadth (25 * 2/7) + depth (15 * 3/4), rounded to 2 decimals
+    const expectedCount = 25 * (2 / 7);
+    const expected = Math.round((25 + expectedCount + 15 * 0.75) * 100) / 100;
     expect(result.reputation_score).toBe(expected);
   });
 
   it("never fabricates a score for an unknown market", () => {
     const raw = { reputation: { gbpListed: true } };
-    expect(recomputeFromRawMetrics("nowhere", raw).reputation_score).toBe(10);
+    expect(recomputeFromRawMetrics("nowhere", raw).reputation_score).toBe(25);
   });
 
   it("uses persisted gbpScore (API-sourced) instead of re-deriving from gbpListed boolean", () => {
@@ -89,24 +106,22 @@ describe("recomputeFromRawMetrics", () => {
       },
     };
     const result = recomputeFromRawMetrics("serbia", raw);
-    const expectedCount = Math.min(10, 10 * (2 / 7));
-    const expected = Math.round((7 + expectedCount + 5 * 0.75) * 100) / 100;
+    const expectedCount = 25 * (2 / 7);
+    const expected = Math.round((17.5 + expectedCount + 15 * 0.75) * 100) / 100;
     expect(result.reputation_score).toBe(expected);
-    // Must NOT equal the boolean-derived 10-pt score
-    const booleanDerived = Math.round((10 + expectedCount + 5 * 0.75) * 100) / 100;
+    // Must NOT equal the boolean-derived full GBP share
+    const booleanDerived = Math.round((25 + expectedCount + 15 * 0.75) * 100) / 100;
     expect(result.reputation_score).not.toBe(booleanDerived);
   });
 
   it("falls back to the gbpListed boolean for legacy audits without a numeric gbpScore", () => {
     const raw = { reputation: { gbpListed: true } };
-    expect(recomputeFromRawMetrics("nowhere", raw).reputation_score).toBe(10);
+    expect(recomputeFromRawMetrics("nowhere", raw).reputation_score).toBe(25);
     const rawFalse = { reputation: { gbpListed: false } };
     expect(recomputeFromRawMetrics("nowhere", rawFalse).reputation_score).toBe(0);
   });
 
-  it("IFLR1000 at full breadth and 90th-percentile quality contributes up to 15 pts", () => {
-    // Confirm the scoring ceiling is 15 (10 breadth + 5 quality), not 10,
-    // which is the figure the UI should display as the /max label.
+  it("IFLR1000 at full breadth and 90th-percentile quality contributes its full 20 pts", () => {
     const serbia = DMV_MARKETS["serbia"];
     const iflrN = serbia.iflr1000.n;
     // count = n (full breadth), qualityStats at p90 (ratio = 1)
@@ -117,8 +132,8 @@ describe("recomputeFromRawMetrics", () => {
       },
     };
     const result = recomputeFromRawMetrics("serbia", rawFull);
-    // countScore = 10, qualityScore = 5*1 = 5 → total IFLR contribution = 15
-    expect(result.reputation_score).toBe(15);
+    // breadth 12 + depth 8 = 20
+    expect(result.reputation_score).toBe(20);
   });
 });
 

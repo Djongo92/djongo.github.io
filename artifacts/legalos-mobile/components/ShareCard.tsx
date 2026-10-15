@@ -21,22 +21,22 @@ import { useColors } from '@/hooks/useColors';
 import { getCategories, type Firm } from '@/context/DataContext';
 import { computeMeasuredTotals, measuredScoreLabel, toScale500 } from '@/lib/measuredScore';
 
-// Tier thresholds are on the full 200-point scale — a firm with an
+// Tier thresholds are on the full 500-point scale — a firm with an
 // unmeasured category is compared on its measured-equivalent score, not
 // its raw total, so an excluded category never quietly demotes its tier.
 function tierLabel(score: number): string {
-  if (score >= 160) return 'ELITE';
-  if (score >= 140) return 'ADVANCED';
-  if (score >= 120) return 'GROWING';
-  if (score >= 100) return 'EMERGING';
+  if (score >= 400) return 'ELITE';
+  if (score >= 350) return 'ADVANCED';
+  if (score >= 300) return 'GROWING';
+  if (score >= 250) return 'EMERGING';
   return 'DEVELOPING';
 }
 
 function tierDescription(score: number): string {
-  if (score >= 160) return 'Top 5% of the Serbia market';
-  if (score >= 140) return 'Top 15% of the Serbia market';
-  if (score >= 120) return 'Top 30% of the Serbia market';
-  if (score >= 100) return 'Top 50% of the Serbia market';
+  if (score >= 400) return 'Top 5% of the Serbia market';
+  if (score >= 350) return 'Top 15% of the Serbia market';
+  if (score >= 300) return 'Top 30% of the Serbia market';
+  if (score >= 250) return 'Top 50% of the Serbia market';
   return 'Bottom 50% of the Serbia market';
 }
 
@@ -52,7 +52,7 @@ export function ShareCard({ firm, visible, onClose }: ShareCardProps) {
   const measured = computeMeasuredTotals(categories);
   const totalCount = categories.length;
   const measuredCount = totalCount - measured.excludedLabels.length;
-  const tierEquivalentScore = (firm.score / measured.measuredMax) * 200;
+  const tierEquivalentScore = (firm.score / measured.measuredMax) * 500;
   const tier = tierLabel(tierEquivalentScore);
   const scoreLine = measuredScoreLabel(firm.score, measured);
 
@@ -111,7 +111,7 @@ export function ShareCard({ firm, visible, onClose }: ShareCardProps) {
 
             {/* Score display */}
             <View style={styles.scoreBlock}>
-              <Text style={[styles.scoreNum, { color: colors.primary }]}>{toScale500(firm.score, measured.measuredMax || 200)}</Text>
+              <Text style={[styles.scoreNum, { color: colors.primary }]}>{toScale500(firm.score, measured.measuredMax || 500)}</Text>
               <Text style={[styles.scoreMax, { color: colors.mutedForeground }]}>
                 /500{measured.isPartial ? '*' : ''}
               </Text>

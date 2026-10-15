@@ -194,7 +194,7 @@ export const chapters: Chapter[] = [
       {
         heading: 'Proof it worked',
         paragraphs: [
-          'SEO Authority category score at the next audit — and the count of near-miss queries (positions 7–20) your firm has published targeted articles for this quarter.',
+          'Search Authority category score at the next audit — and the count of near-miss queries (positions 7–20) your firm has published targeted articles for this quarter.',
         ],
       },
     ],
@@ -600,7 +600,7 @@ export const chapters: Chapter[] = [
       {
         heading: 'Proof it worked',
         paragraphs: [
-          'Performance and SEO Authority category scores at the next audit — plus your checklist score out of 16, re-run quarterly until it holds at 15+.',
+          'Website Experience and Search Authority category scores at the next audit — plus your checklist score out of 16, re-run quarterly until it holds at 15+.',
         ],
       },
     ],
@@ -678,7 +678,7 @@ export const chapters: Chapter[] = [
       {
         heading: 'Proof it worked',
         paragraphs: [
-          'SEO Authority and Reputation category scores at the next audit — plus bounce rate and time-on-page for the top three practice pages, which should move measurably within a quarter of the rewrite.',
+          'Search Authority and Recognition category scores at the next audit — plus bounce rate and time-on-page for the top three practice pages, which should move measurably within a quarter of the rewrite.',
         ],
       },
     ],
@@ -768,7 +768,7 @@ export const chapters: Chapter[] = [
       {
         heading: 'Proof it worked',
         paragraphs: [
-          'Performance category score at the next audit — plus update latency: the time from \'this change is approved\' to \'it\'s live,\' which should fall from days to minutes.',
+          'Website Experience category score at the next audit — plus update latency: the time from \'this change is approved\' to \'it\'s live,\' which should fall from days to minutes.',
         ],
       },
     ],
@@ -864,7 +864,7 @@ export const chapters: Chapter[] = [
       {
         heading: 'Proof it worked',
         paragraphs: [
-          'Reputation category score at the next audit — plus the interchangeability test: your homepage headline should fail word-for-word the moment a competitor\'s name replaces yours.',
+          'Recognition category score at the next audit — plus the interchangeability test: your homepage headline should fail word-for-word the moment a competitor\'s name replaces yours.',
         ],
       },
     ],
@@ -1043,7 +1043,7 @@ export const chapters: Chapter[] = [
       {
         heading: 'Proof it worked',
         paragraphs: [
-          'Reputation category score at the next audit — plus the credibility audit score (Materials below), re-run after each quarter of pillar work.',
+          'Recognition category score at the next audit — plus the credibility audit score (Materials below), re-run after each quarter of pillar work.',
         ],
       },
     ],
@@ -1177,7 +1177,7 @@ export const chapters: Chapter[] = [
       {
         heading: 'Proof it worked',
         paragraphs: [
-          'Reputation and Thought Leadership category scores at your next quarterly audit — plus the share of new inquiries that arrive via recommendation, which should grow quarter over quarter.',
+          'Recognition and Thought Leadership category scores at your next quarterly audit — plus the share of new inquiries that arrive via recommendation, which should grow quarter over quarter.',
         ],
       },
     ],
@@ -1259,7 +1259,7 @@ export const chapters: Chapter[] = [
       {
         heading: 'Proof it worked',
         paragraphs: [
-          'Performance and Reputation category scores at the next audit — plus a standing zero on the ten-point sweep, re-run monthly; the sweep should take under an hour once the fixes are done.',
+          'Website Experience and Recognition category scores at the next audit — plus a standing zero on the ten-point sweep, re-run monthly; the sweep should take under an hour once the fixes are done.',
         ],
       },
     ],
@@ -1340,7 +1340,7 @@ export const chapters: Chapter[] = [
       {
         heading: 'Proof it worked',
         paragraphs: [
-          'Reputation category score at the next audit — plus review count and average rating on Google (baseline today, target +1 review per matter closed), and at least one directory submission per cycle.',
+          'Recognition category score at the next audit — plus review count and average rating on Google (baseline today, target +1 review per matter closed), and at least one directory submission per cycle.',
         ],
       },
     ],
@@ -1425,7 +1425,7 @@ export const chapters: Chapter[] = [
       {
         heading: 'Proof it worked',
         paragraphs: [
-          'Reputation and Social category scores at the next audit — plus referral attribution: the share of new matters traceable to a named referrer or alumnus, logged at intake. Baseline it this quarter; grow it every quarter after.',
+          'Recognition and Social Presence category scores at the next audit — plus referral attribution: the share of new matters traceable to a named referrer or alumnus, logged at intake. Baseline it this quarter; grow it every quarter after.',
         ],
       },
     ],
@@ -1508,7 +1508,7 @@ export const chapters: Chapter[] = [
       {
         heading: 'Proof it worked',
         paragraphs: [
-          'Reputation category score at the next audit — plus intake metrics logged per inquiry: response time, consult booked (y/n), and engagement won. Response time is the first number to move.',
+          'Recognition category score at the next audit — plus intake metrics logged per inquiry: response time, consult booked (y/n), and engagement won. Response time is the first number to move.',
         ],
       },
     ],
@@ -1677,7 +1677,7 @@ export const chapters: Chapter[] = [
       {
         heading: 'Proof it worked',
         paragraphs: [
-          'SEO Authority and Thought Leadership category scores at the next audit — plus the monthly AI-citation check (Materials below): your firm should move from absent to named on at least one tracked question.',
+          'Search Authority and Thought Leadership category scores at the next audit — plus the monthly AI-citation check (Materials below): your firm should move from absent to named on at least one tracked question.',
         ],
       },
     ],
@@ -1771,7 +1771,7 @@ export const chapters: Chapter[] = [
       {
         heading: 'Proof it worked',
         paragraphs: [
-          'Reputation category score at the next audit — plus consult-to-engagement conversion before and after adding pricing legibility (a model, a range, a packaged offer) to proposals and the site.',
+          'Recognition category score at the next audit — plus consult-to-engagement conversion before and after adding pricing legibility (a model, a range, a packaged offer) to proposals and the site.',
         ],
       },
     ],
@@ -1862,7 +1862,7 @@ export const chapters: Chapter[] = [
       {
         heading: 'Proof it worked',
         paragraphs: [
-          'Performance category score at the next audit — plus the monthly scorecard itself: twelve consecutive months of one-page reviews is the metric that proves the measurement system works.',
+          'Website Experience category score at the next audit — plus the monthly scorecard itself: twelve consecutive months of one-page reviews is the metric that proves the measurement system works.',
         ],
       },
     ],

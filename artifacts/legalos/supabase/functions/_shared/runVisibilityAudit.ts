@@ -333,7 +333,7 @@ async function measureAndPersist(
   ]);
 
   // siteHealth is informational only — not peer-normalized, not part of the
-  // 200-pt score, never blocks the audit if the crawl fails (null).
+  // 500-pt score, never blocks the audit if the crawl fails (null).
   const raw_metrics = {
     performance: performance.raw,
     social: social.raw,

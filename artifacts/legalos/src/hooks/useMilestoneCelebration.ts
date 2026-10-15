@@ -1,11 +1,11 @@
 import { useEffect, useState } from "react";
 
-// Round score thresholds (every 25 of the 200-point scale) and peer-percentile
+// Round score thresholds (every 50 of the 500-point scale) and peer-percentile
 // tiers worth celebrating distinctly from the routine "new personal best"
 // ScoreBurst, which fires on every tiny improvement. A milestone celebrates
 // exactly once ever per firm domain — tracked in localStorage, not state,
 // so it survives reloads and doesn't require a backend column.
-const SCORE_TIERS = [25, 50, 75, 100, 125, 150, 175, 200];
+const SCORE_TIERS = [50, 100, 150, 200, 250, 300, 350, 400, 450, 500];
 const PERCENTILE_TIERS = [50, 75, 90, 99];
 
 export interface Milestone {
@@ -19,7 +19,9 @@ interface Baseline {
   seenTiers: string[];
 }
 
-const storageKey = (domain: string) => `legalos_milestone_baseline_${domain}`;
+// v3: tiers moved to the 500-point scale — a fresh key so earlier 200-scale
+// baselines don't replay celebrations for tiers the firm already passed.
+const storageKey = (domain: string) => `legalos_milestone_baseline_v3_${domain}`;
 
 function loadBaseline(domain: string): Baseline | null {
   try {

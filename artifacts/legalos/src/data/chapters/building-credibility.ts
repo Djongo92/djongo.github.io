@@ -9,7 +9,7 @@ export const buildingCredibility: Chapter = {
   subtitle: "Three pillars for smaller firms",
   hook: "Build trust from zero with three proven pillars",
   categories: ["reputation", "performance"],
-  proofMetric: "Reputation category score at the next audit — plus the credibility audit score (Materials below), re-run after each quarter of pillar work.",
+  proofMetric: "Recognition category score at the next audit — plus the credibility audit score (Materials below), re-run after each quarter of pillar work.",
   actionItems: [
     { text: "Write your firm's origin story in plain, human language — one page, no corporate register", priority: "quick-win" },
     { text: "Run the credibility audit (Materials below) and fix the cheapest zero first", priority: "strategic" },

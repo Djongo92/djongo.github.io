@@ -10,8 +10,10 @@
 import { p90Ratio, type PeerStats } from "./percentileFormula.ts";
 import { calculatePerformanceScore, type LighthouseCategories } from "./performanceFormula.ts";
 import { calculateSocialScore, type SocialPlatforms } from "./socialFormula.ts";
-import { calculateThoughtLeadershipScore } from "./thoughtLeadershipFormula.ts";
+import { aggregateContentItems, calculateThoughtLeadershipScore, type ContentItem } from "./thoughtLeadershipFormula.ts";
+import { calculateSeoScore } from "./seoFormula.ts";
 import { DMV_MARKETS } from "./marketVisibilityConfig.ts";
+import { gbpPoints, REPUTATION_WEIGHTS, round2, type CategoryKey, type DirectoryKey } from "./methodology.ts";
 
 interface DirectorySubScore {
   points: number;
@@ -29,35 +31,84 @@ export interface RecomputedScores {
   total_score: number;
 }
 
-const round2 = (n: number) => Math.round(n * 100) / 100;
+export const SEO_METRIC_KEYS = [
+  "domainAuthority",
+  "referringDomains",
+  "backlinks",
+  "organicTraffic",
+  "organicKeywords",
+  "pageAuthority",
+] as const;
 
-function directoryPoints(sub: DirectorySubScore | undefined, n: number): number {
+function directoryPoints(sub: DirectorySubScore | undefined, n: number, directory: DirectoryKey): number {
   if (!sub) return 0;
-  const countScore = Math.min(10, 10 * (sub.count / n));
-  const qualityScore = sub.qualityStats ? 5 * p90Ratio(sub.qualityStats) : 0;
+  const w = REPUTATION_WEIGHTS[directory];
+  const countScore = w.breadth * Math.min(1, sub.count / n);
+  const qualityScore = sub.qualityStats ? w.depth * p90Ratio(sub.qualityStats) : 0;
   return countScore + qualityScore;
+}
+
+const isStats = (v: unknown): v is PeerStats =>
+  !!v && typeof v === "object" && typeof (v as PeerStats).p90Threshold === "number";
+
+/**
+ * Thought Leadership from stored inputs. Current audits persist separate
+ * articles/ownNews peer stats; audits scored before that split only carry
+ * one blended own-output comparison (postsStats) — for those, all own output
+ * reads as articles and the ownNews signal stays 0 until the audit is
+ * re-scored, rather than inventing a split the stored data doesn't contain.
+ */
+// deno-lint-ignore no-explicit-any
+export function thoughtLeadershipFromRaw(tl: Record<string, any>, windowDays: number): number {
+  const items = Array.isArray(tl.items) ? (tl.items as ContentItem[]) : [];
+  const agg = aggregateContentItems(items, windowDays, tl.measuredAt ? Date.parse(tl.measuredAt) : Date.now());
+  const activeMonths = typeof tl.activeMonths === "number" ? tl.activeMonths : agg.activeMonths;
+  const windowMonths = typeof tl.windowMonths === "number" && tl.windowMonths > 0 ? tl.windowMonths : agg.windowMonths;
+  const articlesRatio = isStats(tl.articlesStats)
+    ? p90Ratio(tl.articlesStats)
+    : isStats(tl.postsStats) ? p90Ratio(tl.postsStats) : 0;
+  const ownNewsRatio = isStats(tl.ownNewsStats) ? p90Ratio(tl.ownNewsStats) : 0;
+  return calculateThoughtLeadershipScore({
+    articlesRatio,
+    bylinePct: tl.bylinePct ?? 0,
+    ownNewsRatio,
+    consistency: activeMonths / windowMonths,
+    pressRatio: isStats(tl.newsStats) ? p90Ratio(tl.newsStats) : 0,
+  });
+}
+
+/** Search Authority from the per-metric peer stats seoScore.ts persists. Null when none were stored. */
+// deno-lint-ignore no-explicit-any
+export function seoFromRaw(seo: Record<string, any> | undefined): number | null {
+  if (!seo) return null;
+  const ratios = SEO_METRIC_KEYS.map((k) => (isStats(seo[k]) ? p90Ratio(seo[k]) : null));
+  const result = calculateSeoScore(ratios);
+  return result.metricsAvailable > 0 ? result.score : null;
 }
 
 /**
  * Pure, in-process recompute of the five category scores + total from a
  * (possibly corrected) raw_metrics object. Never fabricates a score for a
  * category with no stored inputs — mirrors runVisibilityAudit.ts's "missing
- * stays zero, never a silent guess" rule.
+ * stays zero, never a silent guess" rule. Search Authority audits that were
+ * carried forward from history (no per-metric stats stored) keep the
+ * caller's current score via `fallback`.
  */
 export function recomputeFromRawMetrics(
   market: string,
   // deno-lint-ignore no-explicit-any
   rawMetrics: Record<string, any>,
+  fallback: Partial<Record<CategoryKey, number>> = {},
 ): RecomputedScores {
   const marketConfig = DMV_MARKETS[market];
 
-  // Performance
+  // Website Experience
   const perf = rawMetrics.performance ?? {};
   const performance_score = perf.desktop && perf.mobile
     ? calculatePerformanceScore(perf.desktop as LighthouseCategories, perf.mobile as LighthouseCategories).score
     : 0;
 
-  // Social
+  // Social Presence
   const soc = rawMetrics.social ?? {};
   const hasSocial = soc.followersStats || soc.postsStats || soc.platforms;
   const social_score = hasSocial
@@ -70,37 +121,33 @@ export function recomputeFromRawMetrics(
     )
     : 0;
 
-  // SEO & Authority — not_configured shell, never fabricated.
-  const seo_authority_score = 0;
+  // Search Authority
+  const seo_authority_score = seoFromRaw(rawMetrics.seoAuthority) ?? fallback.seoAuthority ?? 0;
 
   // Thought Leadership
   const tl = rawMetrics.thoughtLeadership ?? {};
-  const hasTl = tl.postsStats || tl.newsStats;
+  const hasTl = tl.postsStats || tl.articlesStats || tl.newsStats;
   const thought_leadership_score = hasTl
-    ? calculateThoughtLeadershipScore(
-      tl.postsStats ? p90Ratio(tl.postsStats as PeerStats) : 0,
-      tl.bylinePct ?? 0,
-      tl.newsStats ? p90Ratio(tl.newsStats as PeerStats) : 0,
-    )
+    ? thoughtLeadershipFromRaw(tl, marketConfig?.contentWindowDays ?? 90)
     : 0;
 
-  // Reputation
+  // Recognition
   const rep = rawMetrics.reputation ?? {};
-  // Prefer the persisted gbpScore from the live Places API run (0–10 pts) over
-  // re-deriving from the self-reported boolean (which can only produce 10 or 0).
-  // Legacy audits that predate the Places integration won't have a numeric
-  // gbpScore, so fall back to the boolean so old records score correctly.
+  // Prefer the persisted 0–10 gbpScore from the live Places API run over
+  // re-deriving from the self-reported boolean (which can only produce 10 or
+  // 0). Legacy audits that predate the Places integration fall back to the
+  // boolean so old records still score.
   const gbpScore = typeof rep.gbpScore === "number" && Number.isFinite(rep.gbpScore)
     ? rep.gbpScore
     : (rep.gbpListed ? 10 : 0);
   const reputation_score = marketConfig
     ? round2(
-      gbpScore
-        + directoryPoints(rep.chambers, marketConfig.chambers.n)
-        + directoryPoints(rep.legal500, marketConfig.legal500.n)
-        + directoryPoints(rep.iflr1000, marketConfig.iflr1000.n),
+      gbpPoints(gbpScore)
+        + directoryPoints(rep.chambers, marketConfig.chambers.n, "chambers")
+        + directoryPoints(rep.legal500, marketConfig.legal500.n, "legal500")
+        + directoryPoints(rep.iflr1000, marketConfig.iflr1000.n, "iflr1000"),
     )
-    : gbpScore;
+    : round2(gbpPoints(gbpScore));
 
   const total_score = round2(
     performance_score + social_score + seo_authority_score + thought_leadership_score + reputation_score,

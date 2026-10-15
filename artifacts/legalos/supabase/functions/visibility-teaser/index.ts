@@ -14,6 +14,7 @@ import { computePerformanceScore } from "../_shared/performanceScore.ts";
 import { computeReputationScore } from "../_shared/reputationScore.ts";
 import { clientIpFrom, checkRateLimit } from "../_shared/rateLimit.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
+import { CATEGORY_MAX, REPUTATION_WEIGHTS } from "../_shared/methodology.ts";
 
 const corsHeaders = ACCESS_CORS_HEADERS;
 
@@ -50,8 +51,10 @@ Deno.serve(async (req) => {
         : Promise.resolve(null),
     ]);
 
-    const reputationScore = reputation?.score ?? (gbpListed === true ? 10 : 0);
-    const reputationMax = reputation ? 55 : 10;
+    // Without a market there's no directory lookup — only the self-reported
+    // Google Business Profile share of Recognition is scorable.
+    const reputationScore = reputation?.score ?? (gbpListed === true ? REPUTATION_WEIGHTS.googleBusinessProfile : 0);
+    const reputationMax = reputation ? CATEGORY_MAX.reputation : REPUTATION_WEIGHTS.googleBusinessProfile;
 
     return new Response(JSON.stringify({
       url: normalizedUrl,
@@ -60,7 +63,7 @@ Deno.serve(async (req) => {
         ? { score: reputation.score, provenance: reputation.provenance, directory: reputation.directory, matchedFirmName: (reputation.raw as { matchedFirmName?: string }).matchedFirmName }
         : { score: reputationScore, provenance: "self_reported", directory: "pending" },
       teaserTotal: Math.round((performance.score + reputationScore) * 100) / 100,
-      teaserMax: 20 + reputationMax,
+      teaserMax: CATEGORY_MAX.performance + reputationMax,
       remaining,
     }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },

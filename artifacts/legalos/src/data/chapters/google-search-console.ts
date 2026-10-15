@@ -10,7 +10,7 @@ export const googleSearchConsole: Chapter = {
   subtitle: "Data-driven content planning for law firms",
   hook: "Your audience is already telling you what to write about",
   categories: ["seoAuthority"],
-  proofMetric: "SEO Authority category score at the next audit — and the count of near-miss queries (positions 7–20) your firm has published targeted articles for this quarter.",
+  proofMetric: "Search Authority category score at the next audit — and the count of near-miss queries (positions 7–20) your firm has published targeted articles for this quarter.",
   actionItems: [
     { text: "Log into Google Search Console today and export your top 50 queries — circle every term with high impressions and low clicks", priority: "quick-win" },
     { text: "Run the monthly GSC review (Materials below) and commit the three best near-miss topics to the editorial calendar", priority: "strategic" },

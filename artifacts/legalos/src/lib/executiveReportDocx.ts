@@ -9,6 +9,7 @@ import { CATEGORY_META, CATEGORY_ORDER } from "@/lib/visibilityCategories";
 import type { ExecutiveReportData } from "@/lib/executiveReportData";
 import { computeTrendSummary } from "@/lib/executiveReportData";
 import { computeMeasuredTotals, measuredExcludedNote, categoryScoreCell, pickHighestLeverageCategory, toScale500, scale500Suffix } from "@/lib/measuredScore";
+import { TOTAL_MAX } from "../../supabase/functions/_shared/methodology";
 
 const GOLD = "B08D57";
 const MUTED = "78787D";
@@ -42,7 +43,7 @@ export async function buildExecutiveReportDocx(data: ExecutiveReportData): Promi
 
         new Paragraph({
           children: [
-            new TextRun({ text: `${toScale500(data.totalScore, measured.isPartial ? measured.measuredMax : 200)}`, bold: true, size: 56 }),
+            new TextRun({ text: `${toScale500(data.totalScore, measured.isPartial ? measured.measuredMax : TOTAL_MAX)}`, bold: true, size: 56 }),
             new TextRun({ text: ` ${scale500Suffix(measured)}`, color: MUTED, size: 24 }),
           ],
         }),

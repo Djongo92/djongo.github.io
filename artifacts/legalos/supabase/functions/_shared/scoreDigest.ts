@@ -13,6 +13,8 @@ export interface HistoryPoint {
   thought_leadership_score: number;
   reputation_score: number;
   recorded_at: string;
+  /** Readings from different methodology versions aren't comparable. */
+  methodology_version?: number | null;
 }
 
 export interface DigestMovement {
@@ -28,18 +30,18 @@ export interface DigestMovement {
   latestRecordedAt: string;
 }
 
-/** Below this week-over-week movement (of 200) the digest stays silent — noise is worse than no email. */
-export const DIGEST_MIN_DELTA = 2;
+/** Below this week-over-week movement (of 500) the digest stays silent — noise is worse than no email. */
+export const DIGEST_MIN_DELTA = 5;
 
 /** The baseline must be at least this old, or the "weekly" delta is really same-week jitter. */
 const BASELINE_AGE_MS = 6 * 864e5;
 
 const CATEGORIES: [keyof HistoryPoint, string][] = [
-  ["performance_score", "Performance"],
+  ["performance_score", "Website experience"],
   ["social_score", "Social presence"],
-  ["seo_authority_score", "SEO authority"],
+  ["seo_authority_score", "Search authority"],
   ["thought_leadership_score", "Thought leadership"],
-  ["reputation_score", "Reputation"],
+  ["reputation_score", "Recognition"],
 ];
 
 /**
@@ -63,7 +65,9 @@ export function computeDigestMovements(rows: HistoryPoint[], now: Date): DigestM
     const latest = sorted[sorted.length - 1];
     const baseline = [...sorted]
       .reverse()
-      .find((r) => now.getTime() - new Date(r.recorded_at).getTime() >= BASELINE_AGE_MS);
+      .find((r) =>
+        now.getTime() - new Date(r.recorded_at).getTime() >= BASELINE_AGE_MS
+        && (r.methodology_version ?? null) === (latest.methodology_version ?? null));
     if (!baseline || baseline === latest) continue;
 
     const from = Math.round(baseline.total_score);
@@ -104,6 +108,6 @@ export function digestNotification(m: DigestMovement): { title: string; body: st
   const arrow = m.delta > 0 ? "↑" : "↓";
   return {
     title: m.delta > 0 ? "Your visibility score went up this week" : "Your visibility score dipped this week",
-    body: `${arrow} ${m.from} → ${m.to} of 200 for ${m.domain} (${m.market}). Biggest mover: ${m.driver}. Open the dashboard for the full picture.`,
+    body: `${arrow} ${m.from} → ${m.to} of 500 for ${m.domain} (${m.market}). Biggest mover: ${m.driver}. Open the dashboard for the full picture.`,
   };
 }

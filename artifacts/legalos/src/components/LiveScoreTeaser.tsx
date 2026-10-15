@@ -8,6 +8,7 @@ import { setAuditPrefill } from "@/lib/auditPrefill";
 import { computePeerRank, type DirectoryFirmEntry, type PeerRank } from "@/lib/peerRank";
 import { computeMeasuredTotals, toScale500 } from "@/lib/measuredScore";
 import { categoryScoreLabel500 } from "@/lib/visibilityCategories";
+import { CATEGORY_MAX, REPUTATION_WEIGHTS } from "../../supabase/functions/_shared/methodology";
 
 const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL;
 
@@ -272,13 +273,13 @@ const LiveScoreTeaser = ({ variant = "compact", onGetFullScore }: LiveScoreTease
 
             <div className="space-y-2 text-sm font-body">
               <div className="flex items-center justify-between">
-                <span className="text-foreground">Performance (PageSpeed)</span>
+                <span className="text-foreground">Website Experience (PageSpeed)</span>
                 <span className="text-muted-foreground">
                   {result.performance.provenance === "missing" ? "Pending setup" : categoryScoreLabel500(result.performance.score, "performance")}
                 </span>
               </div>
               <div className="flex items-center justify-between">
-                <span className="text-foreground">Reputation</span>
+                <span className="text-foreground">Recognition</span>
                 <span className="text-muted-foreground">
                   {categoryScoreLabel500(
                     result.reputation.score,
@@ -301,8 +302,8 @@ const LiveScoreTeaser = ({ variant = "compact", onGetFullScore }: LiveScoreTease
             {/* Beat 3: the one sentence that turns two numbers into a reason to act. */}
             {(() => {
               if (result.performance.provenance === "missing") return null;
-              const reputationMax = result.reputation.directory === "matched" ? 55 : 10;
-              const perfRatio = result.performance.score / 20;
+              const reputationMax = result.reputation.directory === "matched" ? CATEGORY_MAX.reputation : REPUTATION_WEIGHTS.googleBusinessProfile;
+              const perfRatio = result.performance.score / CATEGORY_MAX.performance;
               const repRatio = result.reputation.score / reputationMax;
               const weaker = perfRatio <= repRatio ? "performance" : "reputation";
               const message =
@@ -324,8 +325,8 @@ const LiveScoreTeaser = ({ variant = "compact", onGetFullScore }: LiveScoreTease
             {/* Beat 4: the ask. */}
             <div className="mt-5 pt-5 border-t border-border/40 text-center space-y-3">
               <p className="text-xs text-muted-foreground font-body">
-                This is 2 of 5 categories. The full Market Visibility Score adds Social Media, SEO &amp; Authority,
-                and Thought Leadership, peer-group-normalized against other firms in your market.
+                This is 2 of 5 categories. The full Market Visibility Score adds Social Presence, Search Authority,
+                and Thought Leadership — the most heavily weighted category — each compared against similar firms in your market.
               </p>
               {onGetFullScore ? (
                 <button

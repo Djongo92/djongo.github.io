@@ -1,5 +1,5 @@
-// Social Media category (20 pts): 5×followers-ratio + 5×posts(30d)-ratio +
-// 6×engagement-rate-ratio + 4×binary platform presence, where each ratio is
+// Social Presence category (75 pts — weights in methodology.ts): followers,
+// posts (30d), and engagement-rate ratios plus platform presence, where each ratio is
 // p90Ratio() against the peer group's 90th percentile — see
 // percentileFormula.ts for why this replaced dividing by the peer group's
 // raw maximum.
@@ -8,9 +8,8 @@
 // intake (form fields, not scraped) — see CLAUDE.md Batch D item 11.
 // Engagement rate is optional (only firms with their own LinkedIn analytics
 // can supply a real one); when absent it simply contributes 0 rather than
-// being estimated. Platform presence is 4 independent booleans, each worth
-// 1 point — summing directly to the category's 4-point cap, no further
-// normalization needed.
+// being estimated. Platform presence is 4 independent booleans, each an
+// equal share of the platform weight — no peer normalization needed.
 //
 // Because followers/posts30d/engagementRate feed a LIVE peer-group
 // comparison (peerStatsFor reads other published audits, not a fixed

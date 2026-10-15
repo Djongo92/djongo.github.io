@@ -108,7 +108,7 @@ const PeerScatterMap = ({ market, peerGroup, currentDomain, currentDisplayName, 
         {isDemoMode() && <span className="text-[10px] text-amber-500 font-body">Sample data</span>}
       </div>
       <p className="text-[10px] text-muted-foreground font-body mb-3">
-        Reputation (credibility you've earned) vs. Thought Leadership (output you control) — among published peers.
+        Recognition (credibility you've earned) vs. Thought Leadership (output you control) — among published peers.
       </p>
       <ResponsiveContainer width="100%" height={220}>
         <ScatterChart margin={{ top: 10, right: 16, left: -20, bottom: 4 }}>
@@ -124,12 +124,12 @@ const PeerScatterMap = ({ market, peerGroup, currentDomain, currentDisplayName, 
           <YAxis
             type="number"
             dataKey="reputation"
-            name="Reputation"
+            name={CATEGORY_META.reputation.label}
             domain={[0, CATEGORY_META.reputation.max]}
             tick={{ fontSize: 10 }}
             stroke="hsl(var(--muted-foreground))"
             width={30}
-            label={{ value: "Reputation →", angle: -90, position: "insideLeft", fontSize: 10, fill: "hsl(var(--muted-foreground))" }}
+            label={{ value: `${CATEGORY_META.reputation.label} →`, angle: -90, position: "insideLeft", fontSize: 10, fill: "hsl(var(--muted-foreground))" }}
           />
           <ZAxis range={[60, 60]} />
           <Tooltip
@@ -140,7 +140,7 @@ const PeerScatterMap = ({ market, peerGroup, currentDomain, currentDisplayName, 
               return (
                 <div className="bg-card border border-border rounded-sm px-3 py-2 text-xs font-body">
                   <p className="text-foreground font-medium mb-0.5">{p.isSelf ? `${p.name} (you)` : p.name}</p>
-                  <p className="text-muted-foreground">Reputation {p.reputation} · Thought Leadership {p.thoughtLeadership}</p>
+                  <p className="text-muted-foreground">Recognition {p.reputation} · Thought Leadership {p.thoughtLeadership}</p>
                 </div>
               );
             }}

@@ -4,6 +4,7 @@ import { CATEGORY_META, PROVENANCE_META, type CategoryKey, type Provenance } fro
 import { CATEGORY_INPUT_FORMATTERS } from "@/lib/visibilityInputFormatters";
 import { isStale, DIRECTORY_STALE_AFTER_DAYS } from "@/lib/scoreFreshness";
 import type { ReputationRaw } from "@/components/dashboard/CommandCenter";
+import { gbpPoints, REPUTATION_WEIGHTS } from "../../../supabase/functions/_shared/methodology";
 
 // Shared "what am I looking at" layer for the Market Visibility Score —
 // used on both the Command Center's category grid and the Analytics
@@ -36,7 +37,7 @@ const ReputationInputsBreakdown = ({ r }: { r: ReputationRaw }) => {
           Google Business Profile{badge}
         </span>
         <span className="text-foreground">
-          {r.gbpScore != null ? `${r.gbpScore}/10 pts` : (r.gbpListed ? "claimed" : "not claimed")}
+          {r.gbpScore != null ? `${gbpPoints(r.gbpScore)}/${REPUTATION_WEIGHTS.googleBusinessProfile} pts` : (r.gbpListed ? "claimed" : "not claimed")}
         </span>
       </div>
       {isVerified && (r.gbpRating != null || r.gbpReviewCount != null) && (
@@ -52,7 +53,7 @@ const ReputationInputsBreakdown = ({ r }: { r: ReputationRaw }) => {
         <div className="flex items-center justify-between text-[11px] font-body">
           <span className="text-secondary-foreground/70">Chambers</span>
           <span className="text-foreground">
-            {Math.round((r.chambers.points ?? 0) * 10) / 10}/15 pts · {r.chambers.count} table{r.chambers.count !== 1 ? "s" : ""}
+            {Math.round((r.chambers.points ?? 0) * 10) / 10}/{REPUTATION_WEIGHTS.chambers.breadth + REPUTATION_WEIGHTS.chambers.depth} pts · {r.chambers.count} table{r.chambers.count !== 1 ? "s" : ""}
           </span>
         </div>
       )}
@@ -60,7 +61,7 @@ const ReputationInputsBreakdown = ({ r }: { r: ReputationRaw }) => {
         <div className="flex items-center justify-between text-[11px] font-body">
           <span className="text-secondary-foreground/70">Legal 500</span>
           <span className="text-foreground">
-            {Math.round((r.legal500.points ?? 0) * 10) / 10}/15 pts · {r.legal500.count} table{r.legal500.count !== 1 ? "s" : ""}
+            {Math.round((r.legal500.points ?? 0) * 10) / 10}/{REPUTATION_WEIGHTS.legal500.breadth + REPUTATION_WEIGHTS.legal500.depth} pts · {r.legal500.count} table{r.legal500.count !== 1 ? "s" : ""}
           </span>
         </div>
       )}
@@ -68,7 +69,7 @@ const ReputationInputsBreakdown = ({ r }: { r: ReputationRaw }) => {
         <div className="flex items-center justify-between text-[11px] font-body">
           <span className="text-secondary-foreground/70">IFLR1000</span>
           <span className="text-foreground">
-            {Math.round((r.iflr1000.points ?? 0) * 10) / 10}/15 pts · {r.iflr1000.count} table{r.iflr1000.count !== 1 ? "s" : ""}
+            {Math.round((r.iflr1000.points ?? 0) * 10) / 10}/{REPUTATION_WEIGHTS.iflr1000.breadth + REPUTATION_WEIGHTS.iflr1000.depth} pts · {r.iflr1000.count} table{r.iflr1000.count !== 1 ? "s" : ""}
           </span>
         </div>
       )}

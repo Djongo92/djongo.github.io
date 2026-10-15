@@ -45,6 +45,7 @@ import { can } from "@/lib/roles";
 import { enableDemoMode } from "@/lib/demoMode";
 import { downloadScoreCard, buildScoreCardUrl } from "@/lib/visibilityScoreCard";
 import type { PeerStats } from "../../../supabase/functions/_shared/percentileFormula";
+import { TOTAL_MAX } from "../../../supabase/functions/_shared/methodology";
 
 const CATEGORY_LABELS = CATEGORY_META;
 
@@ -128,13 +129,26 @@ export interface PressMention {
 }
 
 export interface ThoughtLeadershipRaw {
+  /** All own output (articles + own news). */
   postsCount?: number;
+  /** Own analysis/insight pieces on the firm's site. */
+  articlesCount?: number;
+  /** Own announcements (deals, hires, awards) on the firm's site. */
+  ownNewsCount?: number;
+  /** Independent press mentions (own domain excluded). */
   newsCount?: number;
-  /** Fraction 0-1, not a percentage — matches thoughtLeadershipFormula.ts's `5 * bylinePct`. */
+  /** Fraction 0-1, not a percentage. */
   bylinePct?: number;
+  /** Months of the content window with any own output, and the window's length in months. */
+  activeMonths?: number;
+  windowMonths?: number;
+  measuredAt?: string;
   items?: ThoughtLeadershipItem[];
   pressMentions?: PressMention[];
-  /** Full six-value peer comparison — see SocialRaw's comment. */
+  /** Full six-value peer comparisons — see SocialRaw's comment. */
+  articlesStats?: PeerStats;
+  ownNewsStats?: PeerStats;
+  /** Pre-v3 audits: one blended own-output comparison. */
   postsStats?: PeerStats;
   newsStats?: PeerStats;
 }
@@ -244,6 +258,8 @@ export interface HistoryRow {
    *  without recomputing anything live. */
   confidence_score?: number | null;
   sample_size?: number | null;
+  /** Which methodology scored this snapshot — pre-v3 totals were out of 200. */
+  methodology_version?: number | null;
 }
 
 interface CommandCenterProps {
@@ -382,7 +398,7 @@ const CommandCenter = ({
         // is rescaled against what THAT snapshot measured (frozen
         // provenance), so a partial-audit point matches the ring's
         // measured-denominator contract.
-        score500: historyScore500(h.total_score, h.provenance ?? null),
+        score500: historyScore500(h.total_score, h.provenance ?? null, h.methodology_version ?? null),
         // Rolled-up per-audit confidence for THIS snapshot (frozen at
         // scoring time, see auditMetadata.ts) — lets the headline trend
         // flag a thin-peer-group point without recomputing anything live.
@@ -409,7 +425,7 @@ const CommandCenter = ({
   const isPersonalBest = useMemo(() => {
     if (trend.length < 2) return false;
     // Compare the SCALED values — a raw-score rise across a provenance
-    // denominator change (70/140 → 250, then 80/200 → 200) must NOT fire
+    // denominator change (175/350 → 250, then 200/500 → 200) must NOT fire
     // the celebration while the chart shows a decline.
     const priorMax = Math.max(...trend.slice(0, -1).map((t) => t.score500));
     return trend[trend.length - 1].score500 > priorMax;
@@ -525,9 +541,9 @@ const CommandCenter = ({
 
   // Next round milestone above current score — powers the What-If teaser card.
   const nextMilestone = useMemo(() => {
-    if (!primary) return 160;
+    if (!primary) return 400;
     const score = Math.round(primary.total_score);
-    return [80, 100, 120, 140, 160, 180, 200].find((m) => m > score) ?? 200;
+    return [200, 250, 300, 350, 400, 450, 500].find((m) => m > score) ?? 500;
   }, [primary]);
 
   const battlePlanSlots = [roast, competitor, roadmap, maturity, headline, bio, visibilityScore];
@@ -636,7 +652,7 @@ const CommandCenter = ({
           <div className="flex flex-col items-center gap-2">
             <div className="relative" data-coachmark="dashboard-score">
               <ScoreRing
-                score={toScale500(primary.total_score, measured.isPartial ? measured.measuredMax : 200)}
+                score={toScale500(primary.total_score, measured.isPartial ? measured.measuredMax : TOTAL_MAX)}
                 max={500}
                 size={132}
                 sublabel="Visibility Score"
@@ -1056,7 +1072,7 @@ const CommandCenter = ({
                     const score = Math.round(primary.total_score);
                     const firm = primary.display_name || primary.audited_domain;
                     const url = `${window.location.origin}/app/`;
-                    const scoreLine = measured ? measuredScoreLabel(score, measured) : `${toScale500(score, 200)} / 500`;
+                    const scoreLine = measured ? measuredScoreLabel(score, measured) : `${toScale500(score, TOTAL_MAX)} / 500`;
                     const text = `${firm} scored ${scoreLine} on the Market Visibility Score — real, externally-verified data on legal market presence.`;
                     window.open(`https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(url)}&summary=${encodeURIComponent(text)}`, "_blank", "width=600,height=500");
                   }}
@@ -1070,7 +1086,7 @@ const CommandCenter = ({
                     const score = Math.round(primary.total_score);
                     const firm = primary.display_name || primary.audited_domain;
                     const url = `${window.location.origin}/app/`;
-                    const scoreLine = measured ? measuredScoreLabel(score, measured) : `${toScale500(score, 200)} / 500`;
+                    const scoreLine = measured ? measuredScoreLabel(score, measured) : `${toScale500(score, TOTAL_MAX)} / 500`;
                     const text = `${firm} scored ${scoreLine} on the Market Visibility Score — real, externally-verified legal market data.\n\n${url}`;
                     window.open(`https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}`, "_blank", "width=600,height=500");
                   }}
@@ -1118,11 +1134,11 @@ const CommandCenter = ({
       <MilestoneCelebration
         open={!!milestone}
         celebrationKey={milestone?.id}
-        headline={milestone ? (milestone.kind === "score" ? `${toScale500(milestone.value, 200)} / 500` : `Top ${100 - milestone.value}%`) : ""}
+        headline={milestone ? (milestone.kind === "score" ? `${Math.round(milestone.value)} / 500` : `Top ${100 - milestone.value}%`) : ""}
         body={
           milestone
             ? milestone.kind === "score"
-              ? `Your Market Visibility Score just crossed ${toScale500(milestone.value, 200)} points — a first for this firm.`
+              ? `Your Market Visibility Score just crossed ${Math.round(milestone.value)} points — a first for this firm.`
               : `You're now better than ${milestone.value}% of your peer group — a first for this firm.`
             : ""
         }

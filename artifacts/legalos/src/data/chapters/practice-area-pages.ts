@@ -9,7 +9,7 @@ export const practiceAreaPages: Chapter = {
   subtitle: "Turn boring pages into your site's most persuasive asset",
   hook: "Your most visited pages are probably your weakest",
   categories: ["seoAuthority", "reputation"],
-  proofMetric: "SEO Authority and Reputation category scores at the next audit — plus bounce rate and time-on-page for the top three practice pages, which should move measurably within a quarter of the rewrite.",
+  proofMetric: "Search Authority and Recognition category scores at the next audit — plus bounce rate and time-on-page for the top three practice pages, which should move measurably within a quarter of the rewrite.",
   actionItems: [
     { text: "Rewrite your single highest-traffic practice page using the client-first skeleton (Materials below) — one page proves the model", priority: "quick-win" },
     { text: "Roll the skeleton across every practice area page, adding case examples and outcomes to each", priority: "strategic" },

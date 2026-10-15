@@ -26,7 +26,7 @@ const Teaser = () => {
         <h1 className="font-display text-4xl text-foreground mb-3 leading-tight">Market Visibility Score — free teaser</h1>
         <p className="text-sm text-muted-foreground font-body mb-10">
           A quick, real look at two of the five categories in the full Market Visibility Score: your site's actual
-          PageSpeed performance, plus your real Reputation standing (Chambers, Legal 500, IFLR1000, and Google
+          PageSpeed performance (Website Experience), plus your real Recognition standing (Chambers, Legal 500, IFLR1000, and Google
           Business Profile). No password, no account — just real data.
         </p>
 

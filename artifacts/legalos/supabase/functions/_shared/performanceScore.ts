@@ -1,5 +1,5 @@
-// Performance category (20 pts): PSI Lighthouse, desktop + mobile.
-// 10×(desktop+mobile perf avg)/100 + 5×(access avg)/100 + 5×(seo avg)/100.
+// Website Experience category (50 pts — weights in methodology.ts): PSI
+// Lighthouse performance, accessibility, and SEO, desktop + mobile averaged.
 //
 // PAGESPEED_API_KEY is a hard-stop secret per CLAUDE.md — it's a free
 // Google API key but isn't present in Supabase secrets yet. This degrades

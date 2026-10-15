@@ -63,12 +63,11 @@ describe('DataContext identity guards', () => {
     const categories = getCategories(DEMO_FIRM);
     const measured = computeMeasuredTotals(categories);
 
-    expect(DEMO_FIRM.seoAuthority).toBe(30);
+    expect(DEMO_FIRM.seoAuthority).toBe(50);
     expect(DEMO_FIRM.provenance.seoAuthority).toBe('api');
-    expect(DEMO_FIRM.score).toBe(115);
-    // Math.round(115/200 * 100) = 57 (IEEE 754: 0.575 * 100 = 57.499...)
-    expect(DEMO_FIRM.visibilityPercent).toBe(57);
-    expect(measured.measuredMax).toBe(200);
+    expect(DEMO_FIRM.score).toBe(295);
+    expect(DEMO_FIRM.visibilityPercent).toBe(59);
+    expect(measured.measuredMax).toBe(500);
     expect(measured.isPartial).toBe(false);
     expect(measured.excludedLabels).toEqual([]);
   });

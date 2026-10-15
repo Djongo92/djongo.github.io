@@ -1,16 +1,24 @@
-// Pure Thought Leadership category math (45 pts): no Deno globals, no
-// network, no cache — kept separate from thoughtLeadershipScore.ts so it's
-// importable from a plain Vitest/Node test without transitively pulling in
-// cache.ts's top-level Deno.env.get() calls.
+// Pure Thought Leadership category math (150 pts — weights in methodology.ts):
+// no Deno globals, no network, no cache — kept separate from
+// thoughtLeadershipScore.ts so it's importable from a plain Vitest/Node test
+// without transitively pulling in cache.ts's top-level Deno.env.get() calls.
 //
-// 25×posts-ratio + 5×byline% + 15×news-ratio, where each ratio is
-// p90Ratio() against the peer group's 90th percentile (percentileFormula.ts)
-// rather than dividing by the observed maximum.
+// Five signals, tilted toward the firm's OWN writing on its OWN site:
+//   articles    — own analysis pieces (classifier type "blog"), peer p90Ratio
+//   authorship  — share of own pieces with a named lawyer's byline
+//   ownNews     — own announcements (type "news" on the firm's own site), peer p90Ratio
+//   consistency — share of the content window's months with any own output
+//   press       — independent third-party coverage (own domain excluded), peer p90Ratio
+// Own writing (articles + authorship + ownNews + consistency) carries 120 of
+// the 150 points; independent press carries 30 — enough that real coverage
+// matters, never so much that a firm can buy its way past publishing.
 //
-// postsCount/newsCount feed a LIVE peer-group comparison (peerStatsFor reads
-// other published audits), same poisoning risk as Social self-report — a
-// scraped page returning a degenerate item list would otherwise distort the
-// comparison set. Cap both at a generous ceiling.
+// articlesCount/ownNewsCount feed a LIVE peer-group comparison (peerStatsFor
+// reads other published audits), same poisoning risk as Social self-report —
+// a scraped page returning a degenerate item list would otherwise distort
+// the comparison set. Cap both at a generous ceiling.
+import { CONSISTENCY_BUCKET_DAYS, THOUGHT_LEADERSHIP_WEIGHTS as W, round2, unit } from "./methodology.ts";
+
 export interface ContentItem {
   title: string;
   date: string;
@@ -19,8 +27,18 @@ export interface ContentItem {
 }
 
 export interface ContentAggregate {
+  /** All own output in the window (articles + own news) — kept for display and older stored audits. */
   postsCount: number;
+  /** Own analysis/insight pieces. */
+  articlesCount: number;
+  /** Own announcements (deals, hires, awards) published on the firm's site. */
+  ownNewsCount: number;
+  /** Share (0–1) of own pieces carrying a named lawyer's byline. */
   bylinePct: number;
+  /** Months (CONSISTENCY_BUCKET_DAYS each) of the window with at least one own piece. */
+  activeMonths: number;
+  /** Months the window spans. */
+  windowMonths: number;
 }
 
 const MAX_ITEMS_PER_CATEGORY = 100;
@@ -33,22 +51,39 @@ export function filterToWindow(items: ContentItem[], windowDays: number, now = D
   });
 }
 
-export function aggregateContentItems(itemsInWindow: ContentItem[]): ContentAggregate {
-  // Every item here came from the firm's OWN site, so the posts axis is
-  // decided by SOURCE, not by the classifier's topic guess: an own-newsroom
-  // announcement typed "news" is still the firm's own published output. The
-  // LLM's blog/news distinction previously zeroed firms whose newsroom items
-  // read as third-person announcements (not "blog" → not posts; self-scraped
-  // → not external press) — counted nowhere despite real output. Only
-  // "other" (nav links, author bios, unrelated page text) is excluded.
+export function aggregateContentItems(
+  itemsInWindow: ContentItem[],
+  windowDays = 90,
+  now = Date.now(),
+): ContentAggregate {
+  // Every item here came from the firm's OWN site, so all of it is own
+  // output — the classifier's blog/news label only decides WHICH own signal
+  // it feeds (analysis vs announcement), never whether it counts at all.
+  // Only "other" (nav links, author bios, unrelated page text) is excluded.
   // Third-party coverage is a separate, external-only axis (pressMentions.ts).
-  const posts = itemsInWindow.filter((it) => it.type !== "other");
-  const bylined = posts.filter((it) => it.hasNamedByline);
+  const own = itemsInWindow.filter((it) => it.type !== "other");
+  const articles = own.filter((it) => it.type === "blog");
+  const news = own.filter((it) => it.type === "news");
+  const bylined = own.filter((it) => it.hasNamedByline);
 
-  const postsCount = Math.min(posts.length, MAX_ITEMS_PER_CATEGORY);
-  const bylinePct = posts.length > 0 ? bylined.length / posts.length : 0;
+  const windowMonths = Math.max(1, Math.round(windowDays / CONSISTENCY_BUCKET_DAYS));
+  const bucketMs = CONSISTENCY_BUCKET_DAYS * 24 * 60 * 60 * 1000;
+  const buckets = new Set<number>();
+  for (const it of own) {
+    const t = Date.parse(it.date);
+    if (!Number.isFinite(t)) continue;
+    const b = Math.floor((now - t) / bucketMs);
+    if (b >= 0 && b < windowMonths) buckets.add(b);
+  }
 
-  return { postsCount, bylinePct };
+  return {
+    postsCount: Math.min(own.length, MAX_ITEMS_PER_CATEGORY),
+    articlesCount: Math.min(articles.length, MAX_ITEMS_PER_CATEGORY),
+    ownNewsCount: Math.min(news.length, MAX_ITEMS_PER_CATEGORY),
+    bylinePct: own.length > 0 ? bylined.length / own.length : 0,
+    activeMonths: buckets.size,
+    windowMonths,
+  };
 }
 
 // Some newsrooms are discovery-dead from the listing side: the homepage and
@@ -134,14 +169,25 @@ export function upsertContentItem(items: ContentItem[], indexByKey: Map<string, 
   }
 }
 
-export function calculateThoughtLeadershipScore(
-  postsRatio: number,
-  bylinePct: number,
-  newsRatio: number,
-): number {
-  const postsScore = 25 * postsRatio;
-  const bylineScore = 5 * bylinePct;
-  const newsScore = 15 * newsRatio;
+export interface ThoughtLeadershipSignals {
+  /** p90Ratio of own articles against the peer group. */
+  articlesRatio: number;
+  /** Share (0–1) of own pieces with a named lawyer's byline. */
+  bylinePct: number;
+  /** p90Ratio of own announcements against the peer group. */
+  ownNewsRatio: number;
+  /** Share (0–1) of the window's months with any own output. */
+  consistency: number;
+  /** p90Ratio of independent press coverage against the peer group. */
+  pressRatio: number;
+}
 
-  return Math.round((postsScore + bylineScore + newsScore) * 100) / 100;
+export function calculateThoughtLeadershipScore(s: ThoughtLeadershipSignals): number {
+  return round2(
+    W.articles * unit(s.articlesRatio)
+      + W.authorship * unit(s.bylinePct)
+      + W.ownNews * unit(s.ownNewsRatio)
+      + W.consistency * unit(s.consistency)
+      + W.press * unit(s.pressRatio),
+  );
 }

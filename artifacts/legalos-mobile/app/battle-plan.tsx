@@ -193,7 +193,7 @@ function SlotPreview({ slots, stepKey, colors }: { slots: BattlePlanSlots; stepK
       if (!v) return null;
       return (
         <Text style={body}>
-          <Text style={{ ...strong, fontSize: 16 }}>{toScale500(v.totalScore, 200)} pts</Text>
+          <Text style={{ ...strong, fontSize: 16 }}>{toScale500(v.totalScore, 500)} pts</Text>
           {v.percentile !== null ? ` · Top ${v.percentile}%` : ''}
           {` of ${v.peerCount} firms`}
         </Text>

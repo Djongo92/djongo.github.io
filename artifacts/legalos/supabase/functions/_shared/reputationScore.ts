@@ -1,6 +1,8 @@
-// Reputation category (55 pts): GBP (up to 10 pts) + Chambers + IFLR1000 +
-// Legal500, each worth 15 pts split as 10×(count/N) +
-// 5×(peer-group 90th-percentile-normalized inverted band/tier average).
+// Recognition category (125 pts — weights in methodology.ts): Google Business
+// Profile + Chambers + Legal 500 + IFLR1000. Each directory is breadth
+// (count/N) + depth (peer-group 90th-percentile-normalized inverted
+// band/tier average); the GBP sub-score (0–10, gbpScoreFormula.ts) is
+// scaled onto its share of the category.
 //
 // GBP scoring is now live-data-first:
 //   1. Check firm_signals for a 'google_places' row (pre-fetched by the weekly
@@ -30,6 +32,7 @@ import { DMV_MARKETS, FIRM_TYPE_TO_PEER_GROUP, type PeerGroup } from "./marketVi
 import { computePeerStats, p90Ratio, MIN_PEER_SAMPLE, type PeerStats } from "./percentileFormula.ts";
 import { getFirmSignal, normalizeDomain } from "./firmSignals.ts";
 import { calculateGbpScore, type GbpDetails } from "./gbpScoreFormula.ts";
+import { gbpPoints, REPUTATION_WEIGHTS, round2, type DirectoryKey } from "./methodology.ts";
 
 export interface DirectoryRow {
   firm_name: string;
@@ -115,19 +118,21 @@ export function directoryScore(
   deepest: number,
   peerInvertedAvgs: number[],
   widened = false,
+  directory: DirectoryKey = "chambers",
 ): { points: number; count: number; avgRank: number | null; qualityStats: PeerStats | null } {
+  const w = REPUTATION_WEIGHTS[directory];
   const entries = Object.entries(rankedTables ?? {});
   const count = entries.length;
-  const countScore = Math.min(10, 10 * (count / n));
+  const countScore = w.breadth * Math.min(1, count / n);
 
   if (count === 0) return { points: countScore, count, avgRank: null, qualityStats: null };
 
   const avgRank = entries.reduce((sum, [, rank]) => sum + rank, 0) / entries.length;
   const invertedAvg = deepest + 1 - avgRank;
   const qualityStats = computePeerStats([...peerInvertedAvgs, invertedAvg], invertedAvg, { widened });
-  const qualityScore = 5 * p90Ratio(qualityStats);
+  const qualityScore = w.depth * p90Ratio(qualityStats);
 
-  return { points: countScore + qualityScore, count, avgRank, qualityStats };
+  return { points: round2(countScore + qualityScore), count, avgRank, qualityStats };
 }
 
 export function invertedAvgFor(rankedTables: Record<string, number> | undefined, deepest: number): number {
@@ -194,7 +199,7 @@ export async function computeReputationScore(
   } as const;
 
   if (!marketConfig) {
-    return { score: gbpScore, raw: gbpRaw, provenance: "missing", directory: "pending" };
+    return { score: round2(gbpPoints(gbpScore)), raw: gbpRaw, provenance: "missing", directory: "pending" };
   }
 
   const { data, error } = await serviceClient
@@ -204,7 +209,7 @@ export async function computeReputationScore(
 
   if (error || !data) {
     console.error("[visibility-audit-reputation] directory query failed:", error);
-    return { score: gbpScore, raw: gbpRaw, provenance: "missing", directory: "pending" };
+    return { score: round2(gbpPoints(gbpScore)), raw: gbpRaw, provenance: "missing", directory: "pending" };
   }
 
   const rows = data as DirectoryRow[];
@@ -217,7 +222,7 @@ export async function computeReputationScore(
 
   if (!matched) {
     await serviceClient.from("directory_lookup_requests").insert({ market, firm_domain_or_name: domainOrName });
-    return { score: gbpScore, raw: gbpRaw, provenance: "missing", directory: "pending" };
+    return { score: round2(gbpPoints(gbpScore)), raw: gbpRaw, provenance: "missing", directory: "pending" };
   }
 
   // Peer set: same firm_type when the harvest recorded one, else the whole
@@ -240,11 +245,11 @@ export async function computeReputationScore(
   const legal500PeerAvgs = peers.map((r) => invertedAvgFor(r.legal500?.rankedTables, marketConfig.legal500.deepestTier));
   const iflrPeerAvgs = peers.map((r) => invertedAvgFor(r.iflr1000?.rankedTables, marketConfig.iflr1000.deepestTier));
 
-  const chambers = directoryScore(matched.chambers?.rankedTables, marketConfig.chambers.n, marketConfig.chambers.deepestBand, chambersPeerAvgs, widened);
-  const legal500 = directoryScore(matched.legal500?.rankedTables, marketConfig.legal500.n, marketConfig.legal500.deepestTier, legal500PeerAvgs, widened);
-  const iflr1000 = directoryScore(matched.iflr1000?.rankedTables, marketConfig.iflr1000.n, marketConfig.iflr1000.deepestTier, iflrPeerAvgs, widened);
+  const chambers = directoryScore(matched.chambers?.rankedTables, marketConfig.chambers.n, marketConfig.chambers.deepestBand, chambersPeerAvgs, widened, "chambers");
+  const legal500 = directoryScore(matched.legal500?.rankedTables, marketConfig.legal500.n, marketConfig.legal500.deepestTier, legal500PeerAvgs, widened, "legal500");
+  const iflr1000 = directoryScore(matched.iflr1000?.rankedTables, marketConfig.iflr1000.n, marketConfig.iflr1000.deepestTier, iflrPeerAvgs, widened, "iflr1000");
 
-  const score = Math.round((gbpScore + chambers.points + legal500.points + iflr1000.points) * 100) / 100;
+  const score = round2(gbpPoints(gbpScore) + chambers.points + legal500.points + iflr1000.points);
 
   return {
     score,

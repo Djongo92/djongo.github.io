@@ -17,6 +17,7 @@ import { isDemoMode } from "@/lib/demoMode";
 import ModalShell from "@/components/ui/modal-shell";
 import { computeMeasuredTotals, measuredScoreLabel, measuredExcludedNote } from "@/lib/measuredScore";
 import { historyEvidenceLine } from "@/lib/visibilityInputFormatters";
+import { CATEGORY_MAX } from "../../supabase/functions/_shared/methodology";
 
 interface Props {
   primaryAudit?: AuditRow;
@@ -32,11 +33,11 @@ const ExecutiveReport = ({ primaryAudit, history }: Props) => {
   const categories = useMemo(() => {
     if (!primaryAudit) return null;
     return {
-      performance: { score: primaryAudit.performance_score, max: 20, provenance: primaryAudit.provenance?.performance ?? "missing" },
-      social: { score: primaryAudit.social_score, max: 20, provenance: primaryAudit.provenance?.social ?? "missing" },
-      seoAuthority: { score: primaryAudit.seo_authority_score, max: 60, provenance: primaryAudit.provenance?.seoAuthority ?? "missing" },
-      thoughtLeadership: { score: primaryAudit.thought_leadership_score, max: 45, provenance: primaryAudit.provenance?.thoughtLeadership ?? "missing" },
-      reputation: { score: primaryAudit.reputation_score, max: 55, provenance: primaryAudit.provenance?.reputation ?? "missing" },
+      performance: { score: primaryAudit.performance_score, max: CATEGORY_MAX.performance, provenance: primaryAudit.provenance?.performance ?? "missing" },
+      social: { score: primaryAudit.social_score, max: CATEGORY_MAX.social, provenance: primaryAudit.provenance?.social ?? "missing" },
+      seoAuthority: { score: primaryAudit.seo_authority_score, max: CATEGORY_MAX.seoAuthority, provenance: primaryAudit.provenance?.seoAuthority ?? "missing" },
+      thoughtLeadership: { score: primaryAudit.thought_leadership_score, max: CATEGORY_MAX.thoughtLeadership, provenance: primaryAudit.provenance?.thoughtLeadership ?? "missing" },
+      reputation: { score: primaryAudit.reputation_score, max: CATEGORY_MAX.reputation, provenance: primaryAudit.provenance?.reputation ?? "missing" },
     };
   }, [primaryAudit]);
 

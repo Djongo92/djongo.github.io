@@ -101,7 +101,7 @@ Deno.serve(withCronAlert("competitor-alerts-check", async (req) => {
               client_id: row.client_id,
               type: "competitor_overtake",
               title: "A tracked competitor just passed you",
-              body: `${name} is now at ${Math.round(compAudit.total_score)}/200, ahead of your ${Math.round(own.total_score)} in ${own.market}.`,
+              body: `${name} is now at ${Math.round(compAudit.total_score)}/500, ahead of your ${Math.round(own.total_score)} in ${own.market}.`,
             });
             if (!notifyError) notified++;
             else console.error("competitor-alerts-check: notification insert failed:", notifyError);

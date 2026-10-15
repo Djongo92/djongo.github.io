@@ -7,6 +7,7 @@ import { TrendingUp, TrendingDown, Minus } from "lucide-react";
 import { CATEGORY_META, CATEGORY_ORDER, type CategoryKey } from "@/lib/visibilityCategories";
 import { toScale500 } from "@/lib/measuredScore";
 import type { AuditSnapshot } from "@/hooks/useAuditSnapshots";
+import { TOTAL_MAX } from "../../../supabase/functions/_shared/methodology";
 
 interface Props {
   snapshots: AuditSnapshot[];
@@ -20,9 +21,9 @@ const BeforeAfterComparison = ({ snapshots, currentTotalScore, currentCategories
 
   const before = snapshots.find((s) => s.id === selectedId) ?? snapshots[0];
   // Snapshots carry no provenance, so both sides scale against the internal
-  // 200-point full max — a before/after pair is always the same instrument,
+  // Full 500-point max — a before/after pair is always the same instrument,
   // so the delta stays meaningful even when a snapshot was partial.
-  const totalDelta = toScale500(currentTotalScore, 200) - toScale500(before.total_score, 200);
+  const totalDelta = toScale500(currentTotalScore, TOTAL_MAX) - toScale500(before.total_score, TOTAL_MAX);
 
   return (
     <div className="bg-card border border-border/50 rounded-sm p-5">
@@ -42,7 +43,7 @@ const BeforeAfterComparison = ({ snapshots, currentTotalScore, currentCategories
       <div className="flex items-center justify-center gap-6 mb-4 text-center">
         <div>
           <p className="text-[10px] text-muted-foreground font-body uppercase tracking-wide">{before.label}</p>
-          <p className="font-display text-2xl text-foreground">{toScale500(before.total_score, 200)}</p>
+          <p className="font-display text-2xl text-foreground">{toScale500(before.total_score, TOTAL_MAX)}</p>
         </div>
         <div className={`flex items-center gap-1 font-body text-sm ${totalDelta > 0 ? "text-emerald-500" : totalDelta < 0 ? "text-destructive" : "text-muted-foreground"}`}>
           {totalDelta > 0 ? <TrendingUp className="w-4 h-4" /> : totalDelta < 0 ? <TrendingDown className="w-4 h-4" /> : <Minus className="w-4 h-4" />}
@@ -50,7 +51,7 @@ const BeforeAfterComparison = ({ snapshots, currentTotalScore, currentCategories
         </div>
         <div>
           <p className="text-[10px] text-muted-foreground font-body uppercase tracking-wide">Now</p>
-          <p className="font-display text-2xl text-foreground">{toScale500(currentTotalScore, 200)}</p>
+          <p className="font-display text-2xl text-foreground">{toScale500(currentTotalScore, TOTAL_MAX)}</p>
         </div>
       </div>
 

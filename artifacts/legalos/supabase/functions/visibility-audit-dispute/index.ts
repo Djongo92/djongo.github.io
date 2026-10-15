@@ -105,7 +105,7 @@ Deno.serve(async (req) => {
 
     const { data: audit, error: auditError } = await serviceClient
       .from("market_visibility_audits")
-      .select("id, market, peer_group, audited_domain, raw_metrics, provenance, total_score, methodology_version, data_window_start, data_window_end, sample_size, confidence_score")
+      .select("id, market, peer_group, audited_domain, raw_metrics, provenance, total_score, seo_authority_score, methodology_version, data_window_start, data_window_end, sample_size, confidence_score")
       .eq("id", auditId)
       .eq("client_id", clientId) // ownership check — never trust a bare id from the client
       .maybeSingle();
@@ -129,7 +129,7 @@ Deno.serve(async (req) => {
       });
     }
 
-    const scores = recomputeFromRawMetrics(audit.market, result.patchedRawMetrics);
+    const scores = recomputeFromRawMetrics(audit.market, result.patchedRawMetrics, { seoAuthority: Number(audit.seo_authority_score) || 0 });
 
     const { data: updatedAudit, error: updateError } = await serviceClient
       .from("market_visibility_audits")

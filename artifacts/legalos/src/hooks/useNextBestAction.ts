@@ -1,4 +1,6 @@
 import { useMemo } from "react";
+import { CATEGORY_MAX } from "../../supabase/functions/_shared/methodology";
+import { CATEGORY_META as SHARED_META } from "@/lib/visibilityCategories";
 
 export interface CategoryScore {
   score: number;
@@ -20,39 +22,39 @@ interface CategoryMeta {
   ctaLabel: string;
 }
 
-// "missing" (SEO & Authority right now — AHREFS_API_KEY/MOZ_API_KEY aren't
+// "missing" (Search Authority when — AHREFS_API_KEY/MOZ_API_KEY aren't
 // configured, per CLAUDE.md's hard stop) is excluded from consideration
 // below — recommending a fix for a category that was never measured would
 // be a false signal, not a real gap.
 const CATEGORY_META: Record<string, CategoryMeta> = {
   performance: {
-    label: "Performance",
-    max: 20,
+    label: SHARED_META.performance.label,
+    max: CATEGORY_MAX.performance,
     action: "Your site's technical performance (load speed, accessibility, on-page SEO basics) is the weak spot. Get your developer to run a Lighthouse audit and fix the worst offenders.",
     ctaLabel: "Re-run your audit after fixes",
   },
   social: {
-    label: "Social Media",
-    max: 20,
+    label: SHARED_META.social.label,
+    max: CATEGORY_MAX.social,
     action: "Your social presence is thin relative to what a peer-group firm typically shows. A steady LinkedIn posting cadence is the fastest way to move this.",
     ctaLabel: "Draft social copy in the Workshop",
   },
   thoughtLeadership: {
-    label: "Thought Leadership",
-    max: 45,
+    label: SHARED_META.thoughtLeadership.label,
+    max: CATEGORY_MAX.thoughtLeadership,
     action: "You're not publishing enough named, dated content. One article a month under a partner's byline moves this category the most.",
     ctaLabel: "Draft an article in the Workshop",
   },
   reputation: {
-    label: "Reputation",
-    max: 55,
+    label: SHARED_META.reputation.label,
+    max: CATEGORY_MAX.reputation,
     action: "Your directory standing (Chambers/Legal 500) and Google Business Profile presence are pulling this down. Confirm your GBP is claimed and active, and check your directory submission status.",
-    ctaLabel: "Review the Reputation chapter",
+    ctaLabel: "Review the Recognition chapter",
   },
   seoAuthority: {
-    label: "SEO & Authority",
-    max: 60,
-    action: "SEO & Authority scoring isn't configured for this build yet.",
+    label: SHARED_META.seoAuthority.label,
+    max: CATEGORY_MAX.seoAuthority,
+    action: "Search Authority scoring isn't configured for this build yet.",
     ctaLabel: "—",
   },
 };

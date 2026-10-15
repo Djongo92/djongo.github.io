@@ -39,7 +39,7 @@ describe("computeSocialScore", () => {
       "example.com", null, "detected",
     );
     expect(result.provenance).toBe("detected");
-    expect(result.score).toBe(2); // linkedin + facebook presence only
+    expect(result.score).toBe(7.5); // linkedin + facebook presence only: 2 of 4 platforms × 15
     expect(result.raw).not.toHaveProperty("followers");
     expect(result.raw).not.toHaveProperty("posts30d");
     expect(result.raw).not.toHaveProperty("engagementRate");
@@ -73,14 +73,14 @@ describe("computeSocialScore", () => {
     expect((result.raw as { followers: number }).followers).toBe(2_000_000);
   });
 
-  it("never exceeds the 20-point ceiling", async () => {
+  it("never exceeds the 75-point ceiling", async () => {
     const client = makeMockClient();
     const input = {
       followers: 10_000_000, posts30d: 10_000, engagementRate: 500,
       platforms: { linkedin: true, instagram: true, twitter: true, facebook: true },
     };
     const result = await computeSocialScore(client, "serbia", "regional", input, "example.com");
-    expect(result.score).toBeLessThanOrEqual(20);
+    expect(result.score).toBeLessThanOrEqual(75);
   });
 });
 

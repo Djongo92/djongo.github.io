@@ -65,20 +65,26 @@ describe("Thought Leadership explanation evidence", () => {
   it("keeps the calculation copy aligned with the measured inputs and benchmark", () => {
     const explanation = formatThoughtLeadershipInputs({
       thoughtLeadership: {
-        postsCount: 8,
+        postsCount: 10,
+        articlesCount: 8,
+        ownNewsCount: 2,
         bylinePct: 0.75,
         newsCount: 2,
-        postsStats: { p90Threshold: 12, sampleSize: 9, lowConfidence: false },
+        activeMonths: 3,
+        windowMonths: 3,
+        articlesStats: { p90Threshold: 12, sampleSize: 9, lowConfidence: false },
       },
     });
 
-    expect(explanation).toContain("8 blog posts");
+    expect(explanation).toContain("8 articles on your own site");
+    expect(explanation).toContain("2 firm news items on your own site");
     expect(explanation).toContain("75% carry a named byline");
+    expect(explanation).toContain("published in 3 of the last 3 months");
     expect(explanation).toContain("2 press mentions found via Google News");
-    expect(explanation).toContain("90th percentile (12) among 9 peer firms");
-    expect(CATEGORY_META.thoughtLeadership.how).toContain("25 pts posts");
-    expect(CATEGORY_META.thoughtLeadership.how).toContain("5 pts byline rate");
-    expect(CATEGORY_META.thoughtLeadership.how).toContain("15 pts press mentions");
+    expect(explanation).toContain("90th percentile (12) among 9 similar firms");
+    expect(CATEGORY_META.thoughtLeadership.how).toContain("60 pts articles");
+    expect(CATEGORY_META.thoughtLeadership.how).toContain("20 pts share signed by a named lawyer");
+    expect(CATEGORY_META.thoughtLeadership.how).toContain("30 pts independent press coverage");
     expect(PROVENANCE_META.ai_classified.description).toContain("read your site's content");
   });
 

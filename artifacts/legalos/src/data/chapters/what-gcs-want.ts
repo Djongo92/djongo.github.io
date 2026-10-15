@@ -10,7 +10,7 @@ export const whatGcsWant: Chapter = {
   subtitle: "Insights from 130+ in-house interviews",
   hook: "Direct insights from the people who hire law firms",
   categories: ["reputation", "thoughtLeadership"],
-  proofMetric: "Reputation and Thought Leadership category scores at your next quarterly audit — plus the share of new inquiries that arrive via recommendation, which should grow quarter over quarter.",
+  proofMetric: "Recognition and Thought Leadership category scores at your next quarterly audit — plus the share of new inquiries that arrive via recommendation, which should grow quarter over quarter.",
   actionItems: [
     { text: "Score your current pitch deck with the 7-priority self-audit (Materials below) — fix anything scoring 0 before the next pitch goes out", priority: "quick-win" },
     { text: "Run the 8-question listening survey with your top 10 clients this quarter — the managing partner makes the call, not the marketing team", priority: "strategic" },

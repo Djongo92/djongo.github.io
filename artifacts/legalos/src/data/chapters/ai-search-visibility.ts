@@ -10,7 +10,7 @@ export const aiSearchVisibility: Chapter = {
   subtitle: "Being the answer when clients ask ChatGPT, not Google",
   hook: "The next referral question is typed into an AI. Will it name you?",
   categories: ["seoAuthority", "thoughtLeadership"],
-  proofMetric: "SEO Authority and Thought Leadership category scores at the next audit — plus the monthly AI-citation check (Materials below): your firm should move from absent to named on at least one tracked question.",
+  proofMetric: "Search Authority and Thought Leadership category scores at the next audit — plus the monthly AI-citation check (Materials below): your firm should move from absent to named on at least one tracked question.",
   actionItems: [
     { text: "Run the five-question AI-citation check (Materials below) on ChatGPT, Perplexity, and Gemini today — record who gets named instead of you", priority: "quick-win" },
     { text: "Reformat your top five practice pages and articles into answer-ready structure: question headings, direct answers up front, named authors with credentials", priority: "strategic" },

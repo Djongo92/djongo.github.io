@@ -11,7 +11,7 @@
  * "visibility percent" — measured score ÷ measured max, never against a
  * denominator the firm couldn't reach — so mobile and web rank the same
  * market snapshot the same way. Directory-only rows cap at the directory's
- * own ceiling (45, not the audited Reputation category's 55): GBP status
+ * own ceiling (100, not the audited Recognition category's 125): GBP status
  * genuinely isn't knowable for a firm that's never engaged with the product.
  *
  * Extracted from DataContext so it can be unit-tested without a live
@@ -53,16 +53,16 @@ export interface DirectoryIndexFirm {
  * Public directory index ceiling — DIRECTORY_INDEX_MAX in
  * artifacts/legalos/supabase/functions/_shared/directoryStandingIndex.ts.
  */
-export const DIRECTORY_INDEX_MAX = 45;
+export const DIRECTORY_INDEX_MAX = 100;
 
 // Category point ceilings — must stay in sync with getCategories in
 // DataContext (importing it here would be a module cycle).
 const CATEGORY_MAX = {
-  performance: 20,
-  social: 20,
-  seoAuthority: 60,
-  thoughtLeadership: 45,
-  reputation: 55,
+  performance: 50,
+  social: 75,
+  seoAuthority: 100,
+  thoughtLeadership: 150,
+  reputation: 125,
 } as const;
 
 const normDomain = (d: string) => d.trim().toLowerCase();
@@ -82,11 +82,11 @@ function provFrom(prov: Record<string, string> | null): Provenance {
 function percentFromAuditRow(row: PeerAuditRow): number {
   const prov = provFrom(row.provenance);
   const measured = computeMeasuredTotals([
-    { label: 'Performance', score: row.performance_score ?? 0, max: CATEGORY_MAX.performance, provenance: prov.performance },
-    { label: 'Social Media', score: row.social_score ?? 0, max: CATEGORY_MAX.social, provenance: prov.social },
-    { label: 'SEO & Authority', score: row.seo_authority_score ?? 0, max: CATEGORY_MAX.seoAuthority, provenance: prov.seoAuthority },
+    { label: 'Website Experience', score: row.performance_score ?? 0, max: CATEGORY_MAX.performance, provenance: prov.performance },
+    { label: 'Social Presence', score: row.social_score ?? 0, max: CATEGORY_MAX.social, provenance: prov.social },
+    { label: 'Search Authority', score: row.seo_authority_score ?? 0, max: CATEGORY_MAX.seoAuthority, provenance: prov.seoAuthority },
     { label: 'Thought Leadership', score: row.thought_leadership_score ?? 0, max: CATEGORY_MAX.thoughtLeadership, provenance: prov.thoughtLeadership },
-    { label: 'Reputation', score: row.reputation_score ?? 0, max: CATEGORY_MAX.reputation, provenance: prov.reputation },
+    { label: 'Recognition', score: row.reputation_score ?? 0, max: CATEGORY_MAX.reputation, provenance: prov.reputation },
   ]);
   return measured.measuredMax > 0 ? Math.round((measured.score / measured.measuredMax) * 100) : 0;
 }
@@ -151,7 +151,7 @@ function firmFromDirectory(f: DirectoryIndexFirm, directoryMax: number): Firm {
  * Ordering is by visibility percent (measured score ÷ measured max) — the
  * same fair denominator the web Visibility Index sorts by — so a firm with
  * an unmeasurable category is not punished for it, and a directory-only
- * firm (measured on the directory's 45-point scale) competes on its percent
+ * firm (measured on the directory's 100-point scale) competes on its percent
  * rather than its raw points. Ties break on absolute score, then name, so
  * the ordering is deterministic.
  *

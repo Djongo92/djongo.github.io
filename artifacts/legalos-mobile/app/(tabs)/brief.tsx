@@ -144,7 +144,7 @@ export default function BriefScreen() {
             </View>
             <View style={[styles.scorePill, { backgroundColor: `${colors.primary}12`, borderColor: `${colors.primary}25` }]}>
               <Text style={[styles.scoreNum, { color: colors.primary, fontFamily: 'Inter_700Bold' }]}>
-                {toScale500(firm.score, measured.measuredMax || 200)}
+                {toScale500(firm.score, measured.measuredMax || 500)}
               </Text>
               <Text style={[styles.scoreMax, { color: colors.mutedForeground, fontFamily: 'Inter_400Regular' }]}>
                 /500{measured.isPartial ? '*' : ''}
@@ -217,7 +217,7 @@ export default function BriefScreen() {
             </Text>
           </View>
           <Text style={[styles.whatIfNote, { color: colors.mutedForeground, fontFamily: 'Inter_400Regular' }]}>
-            From {toScale500(firm.score, measured.measuredMax || 200)} → {toScale500(firm.score + totalPotential, measured.measuredMax || 200)}/500{measured.isPartial ? '*' : ''}
+            From {toScale500(firm.score, measured.measuredMax || 500)} → {toScale500(firm.score + totalPotential, measured.measuredMax || 500)}/500{measured.isPartial ? '*' : ''}
           </Text>
         </View>
 

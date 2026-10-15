@@ -43,7 +43,7 @@ export async function fetchLeaderboardRows(
   const url =
     `${supabaseUrl}/rest/v1/market_visibility_audits` +
     `?market=eq.${encodeURIComponent(market)}&is_public=eq.true` +
-    `&select=display_name,audited_domain,total_score,peer_group` +
+    `&select=display_name,audited_domain,total_score,peer_group,methodology_version` +
     `&order=total_score.desc,audited_domain.asc&limit=2000`;
   const resp = await fetch(url, {
     headers: { apikey: publishableKey, Authorization: `Bearer ${publishableKey}` },
@@ -51,7 +51,11 @@ export async function fetchLeaderboardRows(
   if (!resp.ok) {
     throw new Error(`leaderboard snapshot query failed: HTTP ${resp.status} ${await resp.text().catch(() => "")}`);
   }
-  const rows = await resp.json();
+  // Every total on the 500-point scale whichever methodology produced it
+  // (pre-v3 rows were out of 200), re-sorted so a mixed pool still ranks right.
+  const rows = (await resp.json())
+    .map((r) => ({ ...r, total_score: toScale500(r.total_score, r.methodology_version) }))
+    .sort((a, b) => b.total_score - a.total_score || String(a.audited_domain).localeCompare(String(b.audited_domain)));
   const seen = new Set();
   const leaders = [];
   const scores = [];
@@ -81,8 +85,16 @@ export async function fetchLeaderboardRows(
   return { leaders, scores, firms };
 }
 
+/** A stored total on the 500-point scale (methodology v3+ is native 500; earlier versions were out of 200). */
+export function toScale500(total, methodologyVersion) {
+  const n = Number(total);
+  const v = Number(methodologyVersion);
+  return Math.round((Number.isFinite(v) && v >= 3 ? n : n * 2.5) * 100) / 100;
+}
+
 export function buildSnapshot({ leaders, scores, firms }, market = "serbia", generatedAt = new Date().toISOString()) {
-  return { market, generatedAt, scoredFirms: scores.length, leaders, scores, firms };
+  // scaleMax tells consumers the totals are already on the 500-point scale.
+  return { market, generatedAt, scaleMax: 500, scoredFirms: scores.length, leaders, scores, firms };
 }
 
 export function writeSnapshot(snapshot) {

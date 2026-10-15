@@ -10,6 +10,7 @@
 // gap between #4 and #5 is a single point) — it's "how visible are you
 // today, and what would move that."
 import { useEffect, useState } from "react";
+import { DIRECTORY_MAX, TOTAL_MAX } from "../../supabase/functions/_shared/methodology";
 import { Link, useNavigate, useParams, useSearchParams } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import {
@@ -30,7 +31,6 @@ import { visibilityTierFor, VISIBILITY_TIER_ORDER, VISIBILITY_TIER_META, type Vi
 
 const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL;
 const SUPABASE_KEY = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY;
-const DIRECTORY_MAX = 45;
 
 interface FlatExportRow {
   [key: string]: unknown;
@@ -78,7 +78,7 @@ const MarketIndex = () => {
       // Demo mode: the real list is cold-start empty until real firms
       // publish, so show an illustrative (clearly fictional, clearly
       // labeled) sample instead of the real query. Demo rows are flat
-      // /200 numbers with no per-category breakdown to merge — bypasses
+      // /500 numbers with no per-category breakdown to merge — bypasses
       // mergeVisibilityRows entirely rather than feeding it data it can't
       // fairly interpret.
       if (showDemoRankings) {
@@ -90,8 +90,8 @@ const MarketIndex = () => {
             hasFullAudit: true,
             verified: r.domain === DEMO_DOMAIN,
             measuredScore: r.score,
-            measuredMax: 200,
-            visibilityPercent: Math.round((r.score / 200) * 100),
+            measuredMax: TOTAL_MAX,
+            visibilityPercent: Math.round((r.score / TOTAL_MAX) * 100),
             measuredCategoryCount: 5,
             weakestCategoryLabel: null,
             isStale: false,
@@ -307,7 +307,7 @@ const MarketIndex = () => {
         <p className="text-xs text-muted-foreground font-body mb-1">
           Not a ranking — every firm here is grouped by how visible it is today, not pitted against the others.
           Nearly every firm has a full measured audit behind its percentage; the few without an auditable
-          website show their Chambers, Legal 500 and IFLR1000 standing — which also feeds the Reputation category.
+          website show their Chambers, Legal 500 and IFLR1000 standing — which also feeds the Recognition category.
           <span className="inline-flex items-center gap-1 ml-1.5">
             <ShieldCheck className="w-3 h-3 text-emerald-500" /> = domain ownership verified.
           </span>
@@ -378,7 +378,7 @@ const MarketIndex = () => {
               {grouped[tier].map((r) => {
                 const key = rowKey(r);
                 const expanded = expandedKey === key;
-                // Demo rows are flat /200 numbers with no per-category truth
+                // Demo rows are flat /500 numbers with no per-category truth
                 // behind them — rendering a fabricated breakdown would
                 // contradict the sample-data label, so they don't expand.
                 const expandable = !!r.categoryBreakdown || !r.hasFullAudit;
@@ -393,7 +393,7 @@ const MarketIndex = () => {
                           {r.isStale && (
                             <span
                               className="inline-flex items-center gap-1 text-[10px] text-amber-500 font-body"
-                              title={r.hasFullAudit ? "This audit hasn't been re-verified in over 90 days, or the Chambers/Legal 500/IFLR1000 data behind its Reputation score hasn't been re-reviewed in over 120 days" : "This directory data hasn't been re-reviewed in over 120 days"}
+                              title={r.hasFullAudit ? "This audit hasn't been re-verified in over 90 days, or the Chambers/Legal 500/IFLR1000 data behind its Recognition score hasn't been re-reviewed in over 120 days" : "This directory data hasn't been re-reviewed in over 120 days"}
                             >
                               <Clock className="w-2.5 h-2.5" /> Needs refresh
                             </span>

@@ -178,7 +178,7 @@ async function handleOnDemandGbpRefresh(req: Request, corsHeaders: Record<string
     // the limiter or the Places API at all.
     const { data: audit } = await serviceClient
       .from("market_visibility_audits")
-      .select("id, client_id, market, peer_group, audited_domain, display_name, raw_metrics, provenance, total_score, methodology_version, data_window_start, data_window_end, sample_size, confidence_score")
+      .select("id, client_id, market, peer_group, audited_domain, display_name, raw_metrics, provenance, total_score, seo_authority_score, methodology_version, data_window_start, data_window_end, sample_size, confidence_score")
       .eq("id", auditId)
       .in("client_id", clientIds)
       .maybeSingle();
@@ -224,7 +224,7 @@ async function handleOnDemandGbpRefresh(req: Request, corsHeaders: Record<string
       Boolean(existingRaw.reputation?.gbpListed),
     );
     const patchedRawMetrics = { ...existingRaw, reputation: { ...(existingRaw.reputation ?? {}), ...rep.raw } };
-    const scores = recomputeFromRawMetrics(audit.market, patchedRawMetrics);
+    const scores = recomputeFromRawMetrics(audit.market, patchedRawMetrics, { seoAuthority: Number(audit.seo_authority_score) || 0 });
 
     const { data: updatedAudit, error: updateError } = await serviceClient
       .from("market_visibility_audits")

@@ -6,6 +6,7 @@ import { CATEGORY_META, CATEGORY_ORDER } from "@/lib/visibilityCategories";
 import type { ExecutiveReportData } from "@/lib/executiveReportData";
 import { computeTrendSummary } from "@/lib/executiveReportData";
 import { computeMeasuredTotals, measuredExcludedNote, categoryScoreCell, pickHighestLeverageCategory, toScale500, scale500Suffix } from "@/lib/measuredScore";
+import { TOTAL_MAX } from "../../supabase/functions/_shared/methodology";
 
 const NAVY = "121826";
 const GOLD = "B8893B";
@@ -37,7 +38,7 @@ export async function buildExecutiveReportPptx(data: ExecutiveReportData): Promi
   score.addText("Market Visibility Score", { x: 0.5, y: 0.4, w: 9, h: 0.5, fontFace: SANS, fontSize: 12, color: GOLD, charSpacing: 1 });
   const measured = computeMeasuredTotals(data.categories);
   const excludedNote = measuredExcludedNote(measured);
-  score.addText(`${toScale500(data.totalScore, measured.isPartial ? measured.measuredMax : 200)}`, { x: 0.5, y: 1.0, w: 4, h: 1.6, fontFace: SERIF, fontSize: 72, bold: true, color: INK });
+  score.addText(`${toScale500(data.totalScore, measured.isPartial ? measured.measuredMax : TOTAL_MAX)}`, { x: 0.5, y: 1.0, w: 4, h: 1.6, fontFace: SERIF, fontSize: 72, bold: true, color: INK });
   score.addText(scale500Suffix(measured), { x: 3.2, y: 1.9, w: 2.6, h: 0.6, fontFace: SANS, fontSize: 16, color: MUTED });
   if (data.percentile !== null) {
     score.addText(`Better than ${data.percentile}% of ${data.peerCount} peer firms in ${data.market}`, {

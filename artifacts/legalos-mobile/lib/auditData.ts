@@ -54,6 +54,7 @@ export interface HistoryRow {
   provenance?: Partial<Provenance> | null;
   confidence_score?: number | null;
   sample_size?: number | null;
+  methodology_version?: number | null;
 }
 
 export interface AuditGetResponse {
@@ -196,6 +197,7 @@ export async function loadSignedInData(
       provenance: h.provenance ?? null,
       confidenceScore: h.confidence_score ?? null,
       sampleSize: h.sample_size ?? null,
+      methodologyVersion: h.methodology_version ?? null,
     }));
 
     return { ok: true, hasAudit: !!latest, firm, leaderboard, auditHistory };

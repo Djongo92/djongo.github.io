@@ -8,8 +8,7 @@ interface ScoreRingProps {
   strokeWidth?: number;
 }
 
-// maxScore defaults to the public 0–500 display scale — the raw 0–200
-// internal scale must never reach a user-facing render by default.
+// maxScore defaults to the public 0–500 scale — the methodology's native scale.
 export function ScoreRing({ score, maxScore = 500, size = 300, strokeWidth = 8 }: ScoreRingProps) {
   const center = size / 2;
   const radius = center - strokeWidth;

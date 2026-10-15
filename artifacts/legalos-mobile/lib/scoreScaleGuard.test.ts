@@ -101,11 +101,11 @@ describe("the score-history screen renders the 500 scale", () => {
   });
 
   it("scales history points against each snapshot's frozen provenance", () => {
-    expect(src).toContain("historyScore500(entry.score, entry.provenance)");
+    expect(src).toContain("historyScore500(entry.score, entry.provenance, entry.methodologyVersion)");
   });
 
   it("plots the sparkline on the scaled values, not raw scores", () => {
-    expect(src).toContain("historyScore500(d.score, d.provenance)");
+    expect(src).toContain("historyScore500(d.score, d.provenance, d.methodologyVersion)");
     // The row diff is already the difference of scaled endpoints —
     // rescaling it again double-counts (a true +2 would render +5).
     expect(src).not.toContain("toScale500(diff");

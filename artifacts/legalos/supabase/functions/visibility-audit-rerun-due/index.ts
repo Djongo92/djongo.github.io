@@ -10,6 +10,7 @@
 // one can never drift apart.
 import { ACCESS_CORS_HEADERS } from "../_shared/access.ts";
 import { runVisibilityAudit } from "../_shared/runVisibilityAudit.ts";
+import { TOTAL_MAX } from "../_shared/methodology.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
 import { sendCronAlert, withCronAlert } from "../_shared/cronAlert.ts";
 
@@ -77,7 +78,7 @@ Deno.serve(withCronAlert("visibility-audit-rerun-due", async (req) => {
             client_id: row.client_id,
             type: "score_rerun",
             title: "Visibility Score updated",
-            body: `${direction}${delta} points since your last check — now ${Math.round(scoreAfter * 10) / 10}/200 for ${row.audited_domain}.`,
+            body: `${direction}${delta} points since your last check — now ${Math.round(scoreAfter * 10) / 10}/${TOTAL_MAX} for ${row.audited_domain}.`,
           });
           if (notifyError) console.error("visibility-audit-rerun-due: notification insert failed:", notifyError);
         }

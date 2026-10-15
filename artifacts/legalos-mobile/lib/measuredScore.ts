@@ -19,7 +19,7 @@ export interface MeasuredTotals {
   score: number;
   /** Sum of max points across measured categories only — the fair denominator. */
   measuredMax: number;
-  /** The full 200-point scale, for reference/labeling only. */
+  /** The full 500-point scale, for reference/labeling only. */
   fullMax: number;
   /** True if at least one category has provenance "missing". */
   isPartial: boolean;
@@ -45,17 +45,21 @@ export function computeMeasuredTotals(categories: MeasuredCategory[]): MeasuredT
 }
 
 /**
- * Display scale: internal scoring stays on the 200-point category rules,
- * but every user-facing total renders on the 500-point scale — a pure
- * presentation rescale, so ranks, percentiles, and stored audits are
- * untouched. Kept in parity with the web app's measuredScore.ts.
+ * Scores are native on the 500-point scale since methodology v3 — kept in
+ * parity with the web app's measuredScore.ts and the shared methodology
+ * (artifacts/legalos/supabase/functions/_shared/methodology.ts).
  */
 export const DISPLAY_SCALE_MAX = 500;
 
-/** Raw maxima per category — mirrors the web app's CATEGORY_META
- *  (artifacts/legalos/src/lib/visibilityCategories.ts; 20/20/60/45/55 = 200).
- *  Needed to rescale frozen history snapshots against what THEY measured. */
+/** Category maxima — current methodology (v3), and v1–v2 for stored history. */
 const CATEGORY_MAX: Record<string, number> = {
+  performance: 50,
+  social: 75,
+  seoAuthority: 100,
+  thoughtLeadership: 150,
+  reputation: 125,
+};
+const LEGACY_CATEGORY_MAX: Record<string, number> = {
   performance: 20,
   social: 20,
   seoAuthority: 60,
@@ -63,36 +67,40 @@ const CATEGORY_MAX: Record<string, number> = {
   reputation: 55,
 };
 
+const isCurrent = (version: number | null | undefined) => version != null && version >= 3;
+
 /**
  * The denominator for a frozen history snapshot: the sum of category maxima
- * that snapshot actually measured, from its frozen provenance — never
- * today's categories and never a flat 200 when the snapshot was partial.
- * Snapshots without provenance get the full 200-point scale.
+ * that snapshot actually measured, under the methodology version that scored
+ * it. Snapshots without provenance get their version's full scale.
  * (Parity port of the web app's measuredMaxFromProvenance.)
  */
 export function measuredMaxFromProvenance(
   provenance: Partial<Record<string, string>> | null | undefined,
+  methodologyVersion?: number | null,
 ): number {
-  if (!provenance) return 200;
+  const maxes = isCurrent(methodologyVersion) ? CATEGORY_MAX : LEGACY_CATEGORY_MAX;
+  const fullMax = isCurrent(methodologyVersion) ? 500 : 200;
+  if (!provenance) return fullMax;
   let max = 0;
-  for (const key of Object.keys(CATEGORY_MAX)) {
+  for (const key of Object.keys(maxes)) {
     if (provenance[key] === 'missing') continue;
-    max += CATEGORY_MAX[key];
+    max += maxes[key];
   }
-  return max > 0 ? max : 200;
+  return max > 0 ? max : fullMax;
 }
 
 /**
- * A history point on the 500 display scale, rescaled against what THAT
- * snapshot measured — so a point from a partial audit reads consistently
- * with the score ring, and deltas computed by subtracting two of these
- * match what the chart shows. (Parity port of the web's historyScore500.)
+ * A history point on the 500-point scale, expressed against what THAT
+ * snapshot measured under the methodology that scored it.
+ * (Parity port of the web's historyScore500.)
  */
 export function historyScore500(
   totalScore: number,
   provenance: Partial<Record<string, string>> | null | undefined,
+  methodologyVersion?: number | null,
 ): number {
-  return toScale500(Math.round(totalScore), measuredMaxFromProvenance(provenance));
+  return toScale500(totalScore, measuredMaxFromProvenance(provenance, methodologyVersion));
 }
 
 /** Converts a raw score against a raw max to the public 500-point scale. */

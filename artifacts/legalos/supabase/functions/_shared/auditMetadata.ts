@@ -6,14 +6,14 @@
 import type { PeerStats } from "./percentileFormula.ts";
 
 /**
- * Bump this whenever the scoring FORMULA changes (not when a data source is
- * merely added/removed). v1 = peer-maximum normalization; v2 = 90th-
- * percentile normalization with the minimum-sample rule. Historical rows
- * keep whatever version actually produced them — never rewritten — so a
- * trend chart can tell "this dip is a real score change" apart from "this
- * dip is two different methodologies side by side."
+ * Bumped whenever the scoring FORMULA changes (not when a data source is
+ * merely added/removed) — defined in methodology.ts next to the weights it
+ * versions. v1 = peer-maximum normalization; v2 = 90th-percentile
+ * normalization with the minimum-sample rule; v3 = native 500-point scale
+ * with Thought Leadership weighted toward the firm's own writing. Historical
+ * rows keep whatever version produced them.
  */
-export const METHODOLOGY_VERSION = 2;
+export { METHODOLOGY_VERSION } from "./methodology.ts";
 
 export interface AuditConfidence {
   /** The smallest peer-comparison sample size behind any metric in this

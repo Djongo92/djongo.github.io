@@ -13,6 +13,7 @@ import { callClaudeTool, ClaudeApiError } from "../_shared/anthropic.ts";
 import { buildFirmContext } from "../_shared/firmContextProfile.ts";
 import { resolveClientIdGuarded, headerSessionToken } from "../_shared/verifiedClientId.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
+import { TOTAL_MAX } from "../_shared/methodology.ts";
 
 const corsHeaders = ACCESS_CORS_HEADERS;
 const ONE_DAY_MS = 24 * 60 * 60 * 1000;
@@ -53,12 +54,11 @@ Deno.serve(async (req) => {
     // shaping the key as a URL-like string keeps it flowing through their
     // normalization cleanly instead of hitting their catch-all fallback path.
     // The brief is user-facing copy: every number the model sees must be on
-    // the public 500-point scale (totals) or a percentage of category
-    // potential — raw 200-scale internals would contradict the dashboard.
+    // the 500-point scale (totals) or a percentage of category potential.
     const catEntries = Object.entries(categories) as [string, { score: number; max: number; provenance: string }][];
-    const measuredMax = catEntries.reduce((sum, [, c]) => sum + (c.provenance === "missing" ? 0 : c.max), 0) || 200;
-    const isPartial = measuredMax < 200;
-    const scaledTotal = Math.round((totalScore / measuredMax) * 500);
+    const measuredMax = catEntries.reduce((sum, [, c]) => sum + (c.provenance === "missing" ? 0 : c.max), 0) || TOTAL_MAX;
+    const isPartial = measuredMax < TOTAL_MAX;
+    const scaledTotal = Math.round((totalScore / measuredMax) * TOTAL_MAX);
     const categoryLines = catEntries
       .map(([key, cat]) => cat.provenance === "missing"
         ? `- ${key}: not measured`

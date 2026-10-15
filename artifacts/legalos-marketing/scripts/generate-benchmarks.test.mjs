@@ -46,7 +46,7 @@ test("cohort page carries the stats, the anonymity fine print, and the funnel CT
   const html = renderCohortPage(COHORT);
   assert.match(html, /Serbia/);
   assert.match(html, /8 firms measured|>8</);
-  assert.match(html, /\/200/);
+  assert.match(html, /\/500/);
   assert.match(html, /no firm is ever identifiable|fewer than 5 measured firms/i);
   assert.match(html, /href="\/"[^>]*>See how your firm scores/);
   assert.match(html, /<title>Law firm website benchmarks — Serbia \| Uvid<\/title>/);

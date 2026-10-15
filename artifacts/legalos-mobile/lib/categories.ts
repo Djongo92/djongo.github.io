@@ -9,10 +9,10 @@ import type { Category, Firm } from '@/context/DataContext';
 
 export function getCategories(firm: Firm): Category[] {
   return [
-    { key: 'performance',       label: 'Performance',         score: firm.performance,       max: 20, color: '#5B8AF0', provenance: firm.provenance.performance },
-    { key: 'social',            label: 'Social Media',        score: firm.social,            max: 20, color: '#7C6FE0', provenance: firm.provenance.social },
-    { key: 'seoAuthority',      label: 'SEO & Authority',     score: firm.seoAuthority,      max: 60, color: '#E07C4A', provenance: firm.provenance.seoAuthority },
-    { key: 'thoughtLeadership', label: 'Thought Leadership',  score: firm.thoughtLeadership, max: 45, color: '#4BAF8A', provenance: firm.provenance.thoughtLeadership },
-    { key: 'reputation',        label: 'Reputation',          score: firm.reputation,        max: 55, color: '#C4A035', provenance: firm.provenance.reputation },
+    { key: 'performance',       label: 'Website Experience',  score: firm.performance,       max: 50, color: '#5B8AF0', provenance: firm.provenance.performance },
+    { key: 'social',            label: 'Social Presence',     score: firm.social,            max: 75, color: '#7C6FE0', provenance: firm.provenance.social },
+    { key: 'seoAuthority',      label: 'Search Authority',    score: firm.seoAuthority,      max: 100, color: '#E07C4A', provenance: firm.provenance.seoAuthority },
+    { key: 'thoughtLeadership', label: 'Thought Leadership',  score: firm.thoughtLeadership, max: 150, color: '#4BAF8A', provenance: firm.provenance.thoughtLeadership },
+    { key: 'reputation',        label: 'Recognition',         score: firm.reputation,        max: 125, color: '#C4A035', provenance: firm.provenance.reputation },
   ];
 }

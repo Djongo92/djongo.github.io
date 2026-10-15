@@ -78,7 +78,7 @@ export function useCommandCenterInsights({
         id: `category-${weakest.categoryKey}`,
         tone: "warning",
         title: `${weakest.categoryLabel} is your highest-leverage category`,
-        body: `Scoring ${categoryScore500(weakest.score, weakest.categoryKey as CategoryKey)} of ${CATEGORY_MAX_500[weakest.categoryKey as CategoryKey]} points — ${Math.round(weakest.pointsRecoverable * 2.5)} points still on the table, more than any other category.`,
+        body: `Scoring ${categoryScore500(weakest.score, weakest.categoryKey as CategoryKey)} of ${CATEGORY_MAX_500[weakest.categoryKey as CategoryKey]} points — ${Math.round(weakest.pointsRecoverable)} points still on the table, more than any other category.`,
         actionLabel: "Work on it in the Workshop",
         action: { kind: "workshop", toolId: weakest.toolId },
       });

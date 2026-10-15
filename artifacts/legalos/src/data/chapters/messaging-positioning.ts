@@ -9,7 +9,7 @@ export const messagingPositioning: Chapter = {
   subtitle: "Skip the buzzwords. Say something real.",
   hook: "Stand out in a sea of 'trusted advisors'",
   categories: ["reputation", "thoughtLeadership"],
-  proofMetric: "Reputation category score at the next audit — plus the interchangeability test: your homepage headline should fail word-for-word the moment a competitor's name replaces yours.",
+  proofMetric: "Recognition category score at the next audit — plus the interchangeability test: your homepage headline should fail word-for-word the moment a competitor's name replaces yours.",
   actionItems: [
     { text: "Run the interchangeability test: paste a competitor's name into your homepage headline — if it still works, start the positioning statement (Materials below) this week", priority: "quick-win" },
     { text: "Rewrite the homepage headline and practice-page ledes from the finished positioning statement", priority: "strategic" },

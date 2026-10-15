@@ -19,7 +19,7 @@ describe("chapterToText rubric serialization", () => {
 
   it("includes the proof metric", () => {
     expect(text).toContain("Proof it worked:");
-    expect(text).toContain("Reputation and Thought Leadership");
+    expect(text).toContain("Recognition and Thought Leadership");
   });
 
   it("includes stat sources", () => {

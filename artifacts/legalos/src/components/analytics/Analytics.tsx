@@ -24,6 +24,7 @@ import { useGbpRefresh } from "@/hooks/useGbpRefresh";
 import BeforeAfterComparison from "@/components/consultant/BeforeAfterComparison";
 import { toast } from "sonner";
 import type { PeerStats } from "../../../supabase/functions/_shared/percentileFormula";
+import { gbpPoints, REPUTATION_WEIGHTS } from "../../../supabase/functions/_shared/methodology";
 
 interface AnalyticsProps {
   audits: AuditRow[];
@@ -525,7 +526,7 @@ const SocialBreakdown = ({ raw, auditId, onCorrected }: { raw?: SocialRaw; audit
 const SeoBreakdown = () => (
   <p className="text-sm text-muted-foreground font-body">
     Not configured — this category needs an Ahrefs or Moz API key, which is a paid subscription this build
-    deliberately hasn't wired up sight-unseen. Performance, Reputation, and Thought Leadership score in full
+    deliberately hasn't wired up sight-unseen. Website Experience, Recognition, and Thought Leadership score in full
     regardless.
   </p>
 );
@@ -621,7 +622,7 @@ const ReputationBreakdown = ({ raw, market, auditId, onCorrected }: { raw?: Repu
           )}
         </span>
         <span className="text-foreground">
-          {raw.gbpScore != null ? `${raw.gbpScore}/10 pts` : (raw.gbpListed ? "Listed" : "Not listed")}
+          {raw.gbpScore != null ? `${gbpPoints(raw.gbpScore)}/${REPUTATION_WEIGHTS.googleBusinessProfile} pts` : (raw.gbpListed ? "Listed" : "Not listed")}
         </span>
       </div>
 
@@ -697,11 +698,11 @@ const ReputationBreakdown = ({ raw, market, auditId, onCorrected }: { raw?: Repu
         <>
           <Row label="Matched directory entry" value={raw.matchedFirmName} />
           <p className="text-xs text-muted-foreground font-body mt-4 mb-2">Directory standing</p>
-          {raw.chambers && <Row label="Chambers" value={`${Math.round(raw.chambers.points * 10) / 10}/15 pts · ${raw.chambers.count} ranked table${raw.chambers.count !== 1 ? "s" : ""}`} />}
+          {raw.chambers && <Row label="Chambers" value={`${Math.round(raw.chambers.points * 10) / 10}/${REPUTATION_WEIGHTS.chambers.breadth + REPUTATION_WEIGHTS.chambers.depth} pts · ${raw.chambers.count} ranked table${raw.chambers.count !== 1 ? "s" : ""}`} />}
           {raw.chambers?.qualityStats && <PeerStatsPanel label="Chambers ranking depth" stats={raw.chambers.qualityStats} />}
-          {raw.legal500 && <Row label="Legal 500" value={`${Math.round(raw.legal500.points * 10) / 10}/15 pts · ${raw.legal500.count} ranked table${raw.legal500.count !== 1 ? "s" : ""}`} />}
+          {raw.legal500 && <Row label="Legal 500" value={`${Math.round(raw.legal500.points * 10) / 10}/${REPUTATION_WEIGHTS.legal500.breadth + REPUTATION_WEIGHTS.legal500.depth} pts · ${raw.legal500.count} ranked table${raw.legal500.count !== 1 ? "s" : ""}`} />}
           {raw.legal500?.qualityStats && <PeerStatsPanel label="Legal 500 ranking depth" stats={raw.legal500.qualityStats} />}
-          {raw.iflr1000 && <Row label="IFLR1000" value={`${Math.round(raw.iflr1000.points * 10) / 10}/15 pts · ${raw.iflr1000.count} ranked table${raw.iflr1000.count !== 1 ? "s" : ""}`} />}
+          {raw.iflr1000 && <Row label="IFLR1000" value={`${Math.round(raw.iflr1000.points * 10) / 10}/${REPUTATION_WEIGHTS.iflr1000.breadth + REPUTATION_WEIGHTS.iflr1000.depth} pts · ${raw.iflr1000.count} ranked table${raw.iflr1000.count !== 1 ? "s" : ""}`} />}
           {raw.iflr1000?.qualityStats && <PeerStatsPanel label="IFLR1000 ranking depth" stats={raw.iflr1000.qualityStats} />}
 
           {practiceAreaCodes.length > 0 && (

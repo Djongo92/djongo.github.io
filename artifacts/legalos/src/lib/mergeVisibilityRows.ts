@@ -7,10 +7,10 @@
 //
 // Every row gets one fair "visibility percent": measured score ÷ measured
 // max, never against a flat denominator a firm was never able to reach.
-// A directory-only firm's max is capped at the directory's own ceiling (45,
-// not the audited Reputation category's 55) since GBP status genuinely
-// isn't knowable without self-report — not "missing," just not applicable
-// to a firm that's never engaged with the product at all.
+// A directory-only firm's max is capped at the directory's own ceiling
+// (DIRECTORY_MAX, not the full Recognition category) since its Google
+// Business Profile isn't part of the directory data — not "missing," just
+// not applicable to a firm that's never engaged with the product at all.
 import { computeMeasuredTotals } from "./measuredScore";
 import { findWeakestCategoryTool } from "./categoryToolMap";
 import { CATEGORY_META, CATEGORY_ORDER, type CategoryKey } from "./visibilityCategories";

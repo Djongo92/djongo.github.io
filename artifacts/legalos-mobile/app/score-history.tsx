@@ -79,7 +79,7 @@ function Sparkline({ data, color, dotFill }: { data: AuditHistoryEntry[]; color:
   // measured), not raw scores — with a provenance denominator change, raw
   // points can rise while the displayed values fall (70/140→250, then
   // 80/200→200), contradicting the audit log and summary delta.
-  const scores = data.map(d => historyScore500(d.score, d.provenance));
+  const scores = data.map(d => historyScore500(d.score, d.provenance, d.methodologyVersion));
   const minS = Math.min(...scores) - 5;
   const maxS = Math.max(...scores) + 5;
   const range = maxS - minS || 1;
@@ -142,13 +142,13 @@ export default function ScoreHistoryScreen() {
   // what it measured via its frozen provenance) — scaling the raw
   // difference instead drifts from the displayed values by rounding.
   const delta = history.length >= 2
-    ? historyScore500(history[history.length - 1].score, history[history.length - 1].provenance)
-      - historyScore500(history[0].score, history[0].provenance)
+    ? historyScore500(history[history.length - 1].score, history[history.length - 1].provenance, history[history.length - 1].methodologyVersion)
+      - historyScore500(history[0].score, history[0].provenance, history[0].methodologyVersion)
     : 0;
 
   const { categories } = useData();
   const measured = computeMeasuredTotals(categories);
-  const current500 = toScale500(firm.score, measured.measuredMax || 200);
+  const current500 = toScale500(firm.score, measured.measuredMax || 500);
 
   const anyThinSampled = history.some(isThinSampledPoint);
 
@@ -231,7 +231,7 @@ export default function ScoreHistoryScreen() {
           {[...history].reverse().map((entry, i) => {
             const prev = [...history].reverse()[i + 1];
             const diff = prev
-              ? historyScore500(entry.score, entry.provenance) - historyScore500(prev.score, prev.provenance)
+              ? historyScore500(entry.score, entry.provenance, entry.methodologyVersion) - historyScore500(prev.score, prev.provenance, prev.methodologyVersion)
               : null;
             const { evidence, confidence, thin } = historyRowDisplay(entry);
             return (
@@ -254,7 +254,7 @@ export default function ScoreHistoryScreen() {
                   )}
                 </View>
                 <View style={styles.logRight}>
-                  <Text style={[styles.logScore, { color: colors.primary }]}>{historyScore500(entry.score, entry.provenance)}</Text>
+                  <Text style={[styles.logScore, { color: colors.primary }]}>{historyScore500(entry.score, entry.provenance, entry.methodologyVersion)}</Text>
                   {diff !== null && (
                     <Text style={[styles.logDiff, { color: diff >= 0 ? '#4BAF8A' : '#ef4444' }]}>
                       {/* diff is already the difference of two 500-scale

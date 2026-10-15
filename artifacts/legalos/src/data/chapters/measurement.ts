@@ -10,7 +10,7 @@ export const measurement: Chapter = {
   subtitle: "Prove marketing works with numbers partners respect",
   hook: "The question isn't whether marketing works. It's whether you can show it.",
   categories: ["performance"],
-  proofMetric: "Performance category score at the next audit — plus the monthly scorecard itself: twelve consecutive months of one-page reviews is the metric that proves the measurement system works.",
+  proofMetric: "Website Experience category score at the next audit — plus the monthly scorecard itself: twelve consecutive months of one-page reviews is the metric that proves the measurement system works.",
   actionItems: [
     { text: "Build the one-page scorecard (Materials below) with current baselines this week — honest zeros included", priority: "quick-win" },
     { text: "Run the first monthly scorecard review with the managing partner — thirty minutes, decisions only", priority: "strategic" },

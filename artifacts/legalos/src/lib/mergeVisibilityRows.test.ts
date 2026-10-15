@@ -6,11 +6,11 @@ const fullyMeasuredAudit: MergeAuditRow = {
   display_name: "BDK Advokati",
   peer_group: "local",
   verified_at: "2026-01-01T00:00:00Z",
-  performance_score: 18,
-  social_score: 15,
+  performance_score: 45,
+  social_score: 37.5,
   seo_authority_score: 0,
-  thought_leadership_score: 30,
-  reputation_score: 40,
+  thought_leadership_score: 75,
+  reputation_score: 100,
   provenance: {
     performance: "api",
     social: "self_reported",
@@ -22,12 +22,12 @@ const fullyMeasuredAudit: MergeAuditRow = {
 
 describe("mergeVisibilityRows", () => {
   it("computes a fair measured-only percentage for an audited firm with one missing category", () => {
-    const rows = mergeVisibilityRows([fullyMeasuredAudit], [], 45);
+    const rows = mergeVisibilityRows([fullyMeasuredAudit], [], 100);
     expect(rows).toHaveLength(1);
-    // measured: 18+15+30+40 = 103 of (20+20+45+55=140), not 200 (60 excluded for missing SEO)
-    expect(rows[0].measuredMax).toBe(140);
-    expect(rows[0].measuredScore).toBe(103);
-    expect(rows[0].visibilityPercent).toBe(Math.round((103 / 140) * 100));
+    // measured: 45+37.5+75+100 = 257.5 of (50+75+150+125=400), not 500 (Search Authority's 100 excluded)
+    expect(rows[0].measuredMax).toBe(400);
+    expect(rows[0].measuredScore).toBe(257.5);
+    expect(rows[0].visibilityPercent).toBe(Math.round((257.5 / 400) * 100));
     expect(rows[0].hasFullAudit).toBe(true);
     expect(rows[0].measuredCategoryCount).toBe(4);
   });
@@ -39,12 +39,12 @@ describe("mergeVisibilityRows", () => {
       firmType: "L",
       directoryPoints: 20,
     };
-    const rows = mergeVisibilityRows([], [directoryFirm], 45);
+    const rows = mergeVisibilityRows([], [directoryFirm], 100);
     expect(rows).toHaveLength(1);
     expect(rows[0].hasFullAudit).toBe(false);
-    expect(rows[0].measuredMax).toBe(45);
+    expect(rows[0].measuredMax).toBe(100);
     expect(rows[0].measuredCategoryCount).toBe(1);
-    expect(rows[0].visibilityPercent).toBe(Math.round((20 / 45) * 100));
+    expect(rows[0].visibilityPercent).toBe(20);
   });
 
   it("deduplicates a firm that appears in both sources, keeping only the richer audited row", () => {
@@ -54,7 +54,7 @@ describe("mergeVisibilityRows", () => {
       firmType: "L",
       directoryPoints: 27,
     };
-    const rows = mergeVisibilityRows([fullyMeasuredAudit], [directoryFirm], 45);
+    const rows = mergeVisibilityRows([fullyMeasuredAudit], [directoryFirm], 100);
     expect(rows).toHaveLength(1);
     expect(rows[0].hasFullAudit).toBe(true);
   });
@@ -66,7 +66,7 @@ describe("mergeVisibilityRows", () => {
       firmType: "L",
       directoryPoints: 10,
     };
-    const rows = mergeVisibilityRows([fullyMeasuredAudit], [directoryFirm], 45);
+    const rows = mergeVisibilityRows([fullyMeasuredAudit], [directoryFirm], 100);
     expect(rows).toHaveLength(2);
   });
 
@@ -74,7 +74,7 @@ describe("mergeVisibilityRows", () => {
     const lowDirectoryFirm: MergeDirectoryFirm = {
       firmName: "Low Firm", firmDomain: "low.com", firmType: "L", directoryPoints: 2,
     };
-    const rows = mergeVisibilityRows([fullyMeasuredAudit], [lowDirectoryFirm], 45);
+    const rows = mergeVisibilityRows([fullyMeasuredAudit], [lowDirectoryFirm], 100);
     expect(rows[0].firmName).toBe("BDK Advokati");
     expect(rows[1].firmName).toBe("Low Firm");
   });
@@ -83,7 +83,7 @@ describe("mergeVisibilityRows", () => {
     const noDomainFirm: MergeDirectoryFirm = {
       firmName: "No Domain Firm", firmDomain: null, firmType: null, directoryPoints: 5,
     };
-    const rows = mergeVisibilityRows([], [noDomainFirm], 45);
+    const rows = mergeVisibilityRows([], [noDomainFirm], 100);
     expect(rows).toHaveLength(1);
     expect(rows[0].peerGroup).toBe("other");
   });
@@ -93,7 +93,7 @@ describe("mergeVisibilityRows", () => {
   it("flags an audited firm as stale past AUDIT_STALE_AFTER_DAYS since verified_at", () => {
     const stale: MergeAuditRow = { ...fullyMeasuredAudit, verified_at: "2026-01-01T00:00:00Z" };
     const fresh: MergeAuditRow = { ...fullyMeasuredAudit, audited_domain: "fresh.com", verified_at: "2026-07-20T00:00:00Z" };
-    const rows = mergeVisibilityRows([stale, fresh], [], 45, NOW);
+    const rows = mergeVisibilityRows([stale, fresh], [], 100, NOW);
     expect(rows.find((r) => r.firmDomain === "bdk-advokati.com")?.isStale).toBe(true);
     expect(rows.find((r) => r.firmDomain === "fresh.com")?.isStale).toBe(false);
   });
@@ -111,7 +111,7 @@ describe("mergeVisibilityRows", () => {
       verified_at: "2026-07-20T00:00:00Z",
       raw_metrics: { reputation: { directoryLastVerifiedAt: "2026-07-20T00:00:00Z" } },
     };
-    const rows = mergeVisibilityRows([freshAuditStaleDirectory, bothFresh], [], 45, NOW);
+    const rows = mergeVisibilityRows([freshAuditStaleDirectory, bothFresh], [], 100, NOW);
     expect(rows.find((r) => r.firmDomain === "fresh-audit-stale-directory.com")?.isStale).toBe(true);
     expect(rows.find((r) => r.firmDomain === "both-fresh.com")?.isStale).toBe(false);
   });
@@ -120,7 +120,7 @@ describe("mergeVisibilityRows", () => {
     const staleDirectory: MergeDirectoryFirm = {
       firmName: "Old Data Firm", firmDomain: "old.com", firmType: "L", directoryPoints: 10, lastVerifiedAt: "2026-01-01T00:00:00Z",
     };
-    const rows = mergeVisibilityRows([], [staleDirectory], 45, NOW);
+    const rows = mergeVisibilityRows([], [staleDirectory], 100, NOW);
     expect(rows[0].isStale).toBe(true);
   });
 
@@ -144,18 +144,18 @@ describe("mergeVisibilityRows", () => {
 
 describe("categoryBreakdown", () => {
   it("marks a missing-provenance category as unmeasured, never as an earned zero", () => {
-    const rows = mergeVisibilityRows([fullyMeasuredAudit], [], 45);
+    const rows = mergeVisibilityRows([fullyMeasuredAudit], [], 100);
     const breakdown = rows[0].categoryBreakdown!;
     expect(breakdown).toHaveLength(5);
     const seo = breakdown.find((c) => c.key === "seoAuthority")!;
     expect(seo.measured).toBe(false);
-    expect(seo.max).toBe(60);
+    expect(seo.max).toBe(100);
     const perf = breakdown.find((c) => c.key === "performance")!;
     expect(perf.measured).toBe(true);
-    expect(perf.score).toBe(18);
-    expect(perf.max).toBe(20);
+    expect(perf.score).toBe(45);
+    expect(perf.max).toBe(50);
     // The unmeasured category stays out of the denominator — same guard the percentage uses.
-    expect(rows[0].measuredMax).toBe(140);
+    expect(rows[0].measuredMax).toBe(400);
   });
 
   it("omits categoryBreakdown for directory-only rows — one measured input is not a breakdown", () => {

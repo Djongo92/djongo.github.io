@@ -9,6 +9,7 @@
 // there's no SMTP configured to actually email a finished document.
 import { ACCESS_CORS_HEADERS } from "../_shared/access.ts";
 import { computePercentile } from "../_shared/runVisibilityAudit.ts";
+import { TOTAL_MAX } from "../_shared/methodology.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
 
 const corsHeaders = ACCESS_CORS_HEADERS;
@@ -87,7 +88,7 @@ Deno.serve(async (req) => {
         client_id: schedule.client_id,
         type: "executive_report",
         title: "This month's Executive Report is ready",
-        body: `${Math.round(audit.total_score)}/200 for ${audit.display_name || audit.audited_domain} — open Reports to generate the PDF, PowerPoint, Word, or Excel export.`,
+        body: `${Math.round(audit.total_score)}/${TOTAL_MAX} for ${audit.display_name || audit.audited_domain} — open Reports to generate the PDF, PowerPoint, Word, or Excel export.`,
       });
 
       await serviceClient

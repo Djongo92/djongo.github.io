@@ -5,6 +5,7 @@
 // the exact same evidence rather than two independently-written summaries
 // that could drift apart.
 import type { CategoryKey } from "./visibilityCategories";
+import { gbpPoints, REPUTATION_WEIGHTS } from "../../supabase/functions/_shared/methodology";
 
 export function formatPerformanceInputs(raw: any): string | null {
   const p = raw?.performance;
@@ -63,8 +64,15 @@ export function formatThoughtLeadershipInputs(raw: any): string | null {
   const t = raw?.thoughtLeadership;
   if (!t) return null;
   const parts: string[] = [];
-  if (t.postsCount != null) parts.push(`${t.postsCount} blog post${t.postsCount === 1 ? "" : "s"}`);
+  const plural = (n: number, one: string, many: string) => `${n} ${n === 1 ? one : many}`;
+  if (t.articlesCount != null) {
+    parts.push(`${plural(t.articlesCount, "article", "articles")} on your own site`);
+    if (t.ownNewsCount != null) parts.push(`${plural(t.ownNewsCount, "firm news item", "firm news items")} on your own site`);
+  } else if (t.postsCount != null) {
+    parts.push(`${plural(t.postsCount, "piece", "pieces")} published on your own site`);
+  }
   if (t.bylinePct != null) parts.push(`${Math.round(t.bylinePct * 100)}% carry a named byline`);
+  if (t.activeMonths != null && t.windowMonths) parts.push(`published in ${t.activeMonths} of the last ${t.windowMonths} months`);
 
   const mentions: { title: string; source: string }[] = Array.isArray(t.pressMentions) ? t.pressMentions : [];
   if (mentions.length > 0) {
@@ -73,9 +81,9 @@ export function formatThoughtLeadershipInputs(raw: any): string | null {
   } else if (t.newsCount != null) {
     parts.push(`${t.newsCount} press mention${t.newsCount === 1 ? "" : "s"} found via Google News`);
   }
-  if (t.postsStats) {
-    const ps = t.postsStats;
-    parts.push(`posting cadence benchmarked against the 90th percentile (${Math.round(ps.p90Threshold)}) among ${ps.sampleSize} peer firms${ps.lowConfidence ? " — small sample, low confidence" : ""}`);
+  const ps = t.articlesStats ?? t.postsStats;
+  if (ps) {
+    parts.push(`publishing benchmarked against the 90th percentile (${Math.round(ps.p90Threshold)}) among ${ps.sampleSize} similar firms${ps.lowConfidence ? " — small sample, low confidence" : ""}`);
   }
   return parts.length ? parts.join(" · ") : null;
 }
@@ -88,7 +96,7 @@ export function formatReputationInputs(raw: any): string | null {
   let gbpLine: string;
   if (r.gbpScore != null) {
     const source = r.gbpSource === "google_places_api" ? "Verified · Google Places" : "Self-reported";
-    gbpLine = `GBP ${r.gbpScore}/10 pts (${source})`;
+    gbpLine = `Google Business Profile ${Math.round(gbpPoints(r.gbpScore) * 10) / 10}/${REPUTATION_WEIGHTS.googleBusinessProfile} pts (${source})`;
     if (r.gbpSource === "google_places_api") {
       if (r.gbpRating != null && r.gbpReviewCount != null) {
         gbpLine += ` · ★ ${r.gbpRating} (${r.gbpReviewCount} reviews)`;
@@ -106,7 +114,7 @@ export function formatReputationInputs(raw: any): string | null {
   if (r.iflr1000?.count) parts.push(`IFLR1000: ${r.iflr1000.count} ranked table${r.iflr1000.count > 1 ? "s" : ""}, avg tier ${r.iflr1000.avgRank}`);
   const qs = r.chambers?.qualityStats ?? r.legal500?.qualityStats;
   if (qs) {
-    parts.push(`ranking depth benchmarked against the 90th percentile among ${qs.sampleSize} peer firms${qs.lowConfidence ? " — small sample, low confidence" : ""}`);
+    parts.push(`ranking depth benchmarked against the 90th percentile among ${qs.sampleSize} similar firms${qs.lowConfidence ? " — small sample, low confidence" : ""}`);
   }
   return parts.join(" · ");
 }
@@ -146,6 +154,7 @@ export function seoTrendMetric(_raw: any): string | null {
 }
 
 export function thoughtLeadershipTrendMetric(raw: any): string | null {
+  if (raw?.articlesCount != null) return `${raw.articlesCount} article${raw.articlesCount === 1 ? "" : "s"}`;
   if (raw?.postsCount == null) return null;
   return `${raw.postsCount} post${raw.postsCount === 1 ? "" : "s"}`;
 }

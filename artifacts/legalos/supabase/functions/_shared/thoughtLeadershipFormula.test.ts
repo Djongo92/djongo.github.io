@@ -30,14 +30,16 @@ describe("filterToWindow", () => {
 });
 
 describe("aggregateContentItems", () => {
-  it("counts every own-site item (blog or news) as a post and ignores other", () => {
+  it("counts every own-site item (blog or news) as own output and ignores other", () => {
     const items = [
       item({ type: "blog" }), item({ type: "blog" }),
       item({ type: "news" }),
       item({ type: "other" }),
     ];
-    const agg = aggregateContentItems(items);
+    const agg = aggregateContentItems(items, 90, NOW);
     expect(agg.postsCount).toBe(3);
+    expect(agg.articlesCount).toBe(2);
+    expect(agg.ownNewsCount).toBe(1);
   });
 
   it("BDK regression: own-newsroom announcements typed 'news' are the firm's own output, not zero", () => {
@@ -46,8 +48,9 @@ describe("aggregateContentItems", () => {
       item({ type: "news", title: "BDK contributes to Chambers Merger Control 2026 guide" }),
       item({ type: "news", title: "Seminar on the new cybersecurity law" }),
     ];
-    const agg = aggregateContentItems(items);
+    const agg = aggregateContentItems(items, 90, NOW);
     expect(agg.postsCount).toBe(3);
+    expect(agg.ownNewsCount).toBe(3);
   });
 
   it("computes byline percentage over all own-content items", () => {
@@ -56,44 +59,63 @@ describe("aggregateContentItems", () => {
       item({ type: "blog", hasNamedByline: false }),
       item({ type: "news", hasNamedByline: true }), // own-site news counts too
     ];
-    const agg = aggregateContentItems(items);
+    const agg = aggregateContentItems(items, 90, NOW);
     expect(agg.bylinePct).toBeCloseTo(2 / 3, 5);
   });
 
-  it("returns 0 byline% when there are no posts", () => {
-    const agg = aggregateContentItems([item({ type: "other" })]);
+  it("returns 0 byline% when there is no own output", () => {
+    const agg = aggregateContentItems([item({ type: "other" })], 90, NOW);
     expect(agg.postsCount).toBe(0);
     expect(agg.bylinePct).toBe(0);
   });
 
-  it("caps postsCount so a degenerate extraction can't inflate the live peer-max forever", () => {
+  it("caps counts so a degenerate extraction can't inflate the live peer benchmark forever", () => {
     const manyPosts = Array.from({ length: 500 }, () => item({ type: "blog" }));
-    const agg = aggregateContentItems(manyPosts);
+    const agg = aggregateContentItems(manyPosts, 90, NOW);
     expect(agg.postsCount).toBeLessThanOrEqual(100);
+    expect(agg.articlesCount).toBeLessThanOrEqual(100);
+  });
+
+  it("counts the months of a 90-day window that had any own output", () => {
+    const items = [
+      item({ date: daysAgo(3) }), item({ date: daysAgo(10) }), // month 1
+      item({ type: "news", date: daysAgo(70) }),                // month 3
+      item({ type: "other", date: daysAgo(40) }),               // ignored
+    ];
+    const agg = aggregateContentItems(items, 90, NOW);
+    expect(agg.windowMonths).toBe(3);
+    expect(agg.activeMonths).toBe(2);
   });
 });
 
+const ZERO = { articlesRatio: 0, bylinePct: 0, ownNewsRatio: 0, consistency: 0, pressRatio: 0 };
+
 describe("calculateThoughtLeadershipScore", () => {
-  it("scores the full 45 points at ratio 1 (at or above the 90th percentile) and fully bylined", () => {
-    const score = calculateThoughtLeadershipScore(1, 1, 1);
-    expect(score).toBe(45);
+  it("scores the full 150 points when every signal is maxed", () => {
+    expect(calculateThoughtLeadershipScore({ articlesRatio: 1, bylinePct: 1, ownNewsRatio: 1, consistency: 1, pressRatio: 1 })).toBe(150);
   });
 
-  it("scores 0 when there is no content and no byline", () => {
-    const score = calculateThoughtLeadershipScore(0, 0, 0);
-    expect(score).toBe(0);
+  it("scores 0 when there is no output at all", () => {
+    expect(calculateThoughtLeadershipScore(ZERO)).toBe(0);
   });
 
-  it("does not divide by zero or blow up when ratios are 0", () => {
-    const score = calculateThoughtLeadershipScore(0, 0, 0);
-    expect(Number.isFinite(score)).toBe(true);
-    expect(score).toBe(0);
+  it("weights articles 60, authorship 20, own news 20, consistency 20, press 30", () => {
+    expect(calculateThoughtLeadershipScore({ ...ZERO, articlesRatio: 1 })).toBeCloseTo(60, 5);
+    expect(calculateThoughtLeadershipScore({ ...ZERO, bylinePct: 1 })).toBeCloseTo(20, 5);
+    expect(calculateThoughtLeadershipScore({ ...ZERO, ownNewsRatio: 1 })).toBeCloseTo(20, 5);
+    expect(calculateThoughtLeadershipScore({ ...ZERO, consistency: 1 })).toBeCloseTo(20, 5);
+    expect(calculateThoughtLeadershipScore({ ...ZERO, pressRatio: 1 })).toBeCloseTo(30, 5);
   });
 
-  it("weights posts 25, byline 5, news 15", () => {
-    expect(calculateThoughtLeadershipScore(1, 0, 0)).toBeCloseTo(25, 5);
-    expect(calculateThoughtLeadershipScore(0, 1, 0)).toBeCloseTo(5, 5);
-    expect(calculateThoughtLeadershipScore(0, 0, 1)).toBeCloseTo(15, 5);
+  it("weighs the firm's own writing four times as heavily as independent press", () => {
+    const own = calculateThoughtLeadershipScore({ articlesRatio: 1, bylinePct: 1, ownNewsRatio: 1, consistency: 1, pressRatio: 0 });
+    const press = calculateThoughtLeadershipScore({ ...ZERO, pressRatio: 1 });
+    expect(own / press).toBeCloseTo(4, 5);
+  });
+
+  it("clamps out-of-range signals to their own weight", () => {
+    expect(calculateThoughtLeadershipScore({ ...ZERO, articlesRatio: 3 })).toBeCloseTo(60, 5);
+    expect(calculateThoughtLeadershipScore({ ...ZERO, consistency: -1 })).toBe(0);
   });
 });
 

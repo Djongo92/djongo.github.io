@@ -1,14 +1,13 @@
 // Computes a Directory Standing score for every firm in market_directory_data
 // — Chambers + Legal 500 + IFLR1000 breadth-and-quality, the exact same math
 // reputationScore.ts applies to a single audited firm, just run across the
-// whole market at once. Deliberately excludes the 10-pt GBP component: GBP
-// status is self-reported at audit time and we don't have it for firms that
-// have never run one, so this index only covers what's derivable from
-// public directory data alone — max 45, not the full 55-pt Reputation
-// category. That's what makes it work with zero cold-start: every firm in
+// whole market at once. Deliberately excludes the Google Business Profile share:
+// this index only covers what's derivable from public directory data alone
+// — DIRECTORY_INDEX_MAX below, not the full Recognition category. That's what makes it work with zero cold-start: every firm in
 // the directory gets a real number without ever touching this product.
 import { DMV_MARKETS, FIRM_TYPE_TO_PEER_GROUP, type PeerGroup } from "./marketVisibilityConfig.ts";
 import { directoryScore, invertedAvgFor, type DirectoryRow } from "./reputationScore.ts";
+import { DIRECTORY_MAX } from "./methodology.ts";
 import { MIN_PEER_SAMPLE, type PeerStats } from "./percentileFormula.ts";
 
 interface DirectorySubScore {
@@ -29,7 +28,7 @@ export interface FirmDirectoryStanding {
   lastVerifiedAt: string | null;
 }
 
-export const DIRECTORY_INDEX_MAX = 45;
+export const DIRECTORY_INDEX_MAX = DIRECTORY_MAX;
 
 export function computeDirectoryStandingIndex(market: string, rows: DirectoryRow[]): FirmDirectoryStanding[] {
   const marketConfig = DMV_MARKETS[market];
@@ -58,9 +57,9 @@ export function computeDirectoryStandingIndex(market: string, rows: DirectoryRow
       const legal500PeerAvgs = peers.map((r) => invertedAvgFor(r.legal500?.rankedTables, marketConfig.legal500.deepestTier));
       const iflrPeerAvgs = peers.map((r) => invertedAvgFor(r.iflr1000?.rankedTables, marketConfig.iflr1000.deepestTier));
 
-      const chambers = directoryScore(firm.chambers?.rankedTables, marketConfig.chambers.n, marketConfig.chambers.deepestBand, chambersPeerAvgs, widened);
-      const legal500 = directoryScore(firm.legal500?.rankedTables, marketConfig.legal500.n, marketConfig.legal500.deepestTier, legal500PeerAvgs, widened);
-      const iflr1000 = directoryScore(firm.iflr1000?.rankedTables, marketConfig.iflr1000.n, marketConfig.iflr1000.deepestTier, iflrPeerAvgs, widened);
+      const chambers = directoryScore(firm.chambers?.rankedTables, marketConfig.chambers.n, marketConfig.chambers.deepestBand, chambersPeerAvgs, widened, "chambers");
+      const legal500 = directoryScore(firm.legal500?.rankedTables, marketConfig.legal500.n, marketConfig.legal500.deepestTier, legal500PeerAvgs, widened, "legal500");
+      const iflr1000 = directoryScore(firm.iflr1000?.rankedTables, marketConfig.iflr1000.n, marketConfig.iflr1000.deepestTier, iflrPeerAvgs, widened, "iflr1000");
 
       return {
         firmName: firm.firm_name,

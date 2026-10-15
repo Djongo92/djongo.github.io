@@ -9,7 +9,7 @@ export const websiteChecklist: Chapter = {
   subtitle: "16 essentials every law firm website needs",
   hook: "The definitive 16-point inspection for your firm's site",
   categories: ["performance", "seoAuthority"],
-  proofMetric: "Performance and SEO Authority category scores at the next audit — plus your checklist score out of 16, re-run quarterly until it holds at 15+.",
+  proofMetric: "Website Experience and Search Authority category scores at the next audit — plus your checklist score out of 16, re-run quarterly until it holds at 15+.",
   actionItems: [
     { text: "Score your site against the 16-point scorecard (Materials below) today — every zero becomes a named fix with an owner", priority: "quick-win" },
     { text: "Fix the three highest-impact gaps first: positioning, mobile experience, and conversion points", priority: "strategic" },

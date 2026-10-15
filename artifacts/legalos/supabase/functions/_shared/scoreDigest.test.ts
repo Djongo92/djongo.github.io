@@ -58,7 +58,15 @@ describe("computeDigestMovements (task #165)", () => {
     ];
     const moves = computeDigestMovements(rows, NOW);
     expect(moves).toHaveLength(1);
-    expect(moves[0]).toMatchObject({ domain: "beta.rs", delta: 11, driver: "SEO authority" });
+    expect(moves[0]).toMatchObject({ domain: "beta.rs", delta: 11, driver: "Search authority" });
+  });
+
+  it("never compares readings scored under different methodology versions", () => {
+    const rows = [
+      point({ total_score: 80, methodology_version: 2 }),
+      point({ total_score: 200, methodology_version: 3, recorded_at: daysAgo(1) }),
+    ];
+    expect(computeDigestMovements(rows, NOW)).toEqual([]);
   });
 
   it("different clients each get their own digest", () => {
@@ -77,7 +85,7 @@ describe("digestNotification copy", () => {
   it("says the direction, the numbers, and the driver", () => {
     const n = digestNotification({ clientId: "c1", domain: "alfa.rs", market: "serbia", from: 40, to: 48, delta: 8, driver: "Thought leadership", latestRecordedAt: daysAgo(1) });
     expect(n.title).toBe("Your visibility score went up this week");
-    expect(n.body).toContain("40 → 48 of 200");
+    expect(n.body).toContain("40 → 48 of 500");
     expect(n.body).toContain("alfa.rs");
     expect(n.body).toContain("Thought leadership");
   });

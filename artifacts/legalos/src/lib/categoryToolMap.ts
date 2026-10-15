@@ -1,4 +1,5 @@
 import type { WorkshopToolId } from "@/lib/handoff";
+import { CATEGORY_META } from "./visibilityCategories";
 
 /**
  * Maps a Market Visibility Score category to the single Workshop tool most
@@ -11,10 +12,10 @@ import type { WorkshopToolId } from "@/lib/handoff";
  * to send someone to fix in the Workshop.
  */
 export const CATEGORY_TOOL_MAP: Record<string, { label: string; max: number; toolId: WorkshopToolId }> = {
-  performance: { label: "Performance", max: 20, toolId: "audit" },
-  social: { label: "Social Media", max: 20, toolId: "copywriter" },
-  thoughtLeadership: { label: "Thought Leadership", max: 45, toolId: "copywriter" },
-  reputation: { label: "Reputation", max: 55, toolId: "teardown" },
+  performance: { label: CATEGORY_META.performance.label, max: CATEGORY_META.performance.max, toolId: "audit" },
+  social: { label: CATEGORY_META.social.label, max: CATEGORY_META.social.max, toolId: "copywriter" },
+  thoughtLeadership: { label: CATEGORY_META.thoughtLeadership.label, max: CATEGORY_META.thoughtLeadership.max, toolId: "copywriter" },
+  reputation: { label: CATEGORY_META.reputation.label, max: CATEGORY_META.reputation.max, toolId: "teardown" },
 };
 
 export interface WeakestCategoryTool {
@@ -33,10 +34,10 @@ const WEAK_THRESHOLD_PCT = 50;
 /**
  * The single highest-leverage category to work on — highest-leverage means
  * the most absolute points still on the table (max - score), NOT the lowest
- * percentage. A category at 22/45 (23 points recoverable) is a bigger
- * opportunity than one at 9.5/20 (10.5 points recoverable) even though the
+ * percentage. A category at 80/150 (70 points recoverable) is a bigger
+ * opportunity than one at 20/50 (30 points recoverable) even though the
  * second one's percentage looks worse — points are what actually move the
- * 200-point total, percentages don't. Both useCommandCenterInsights (Key
+ * 500-point total, percentages don't. Both useCommandCenterInsights (Key
  * Insights) and the sidebar/Monday Brief "this week's move" call this same
  * function so they can never recommend two different categories.
  */

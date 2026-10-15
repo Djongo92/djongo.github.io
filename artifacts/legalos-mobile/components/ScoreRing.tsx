@@ -22,28 +22,28 @@ const STROKE_WIDTH = 14;
 const GLOW_STROKE = 28;
 const RADIUS = (SIZE - STROKE_WIDTH) / 2;
 const CIRCUMFERENCE = 2 * Math.PI * RADIUS;
-const MAX_SCORE = 200;
+const MAX_SCORE = 500;
 
 function tierLabel(score: number): string {
-  if (score >= 160) return 'ELITE';
-  if (score >= 140) return 'ADVANCED';
-  if (score >= 120) return 'GROWING';
-  if (score >= 100) return 'EMERGING';
+  if (score >= 400) return 'ELITE';
+  if (score >= 350) return 'ADVANCED';
+  if (score >= 300) return 'GROWING';
+  if (score >= 250) return 'EMERGING';
   return 'DEVELOPING';
 }
 
 function tierColor(score: number): string {
-  if (score >= 160) return TIER_COLORS.blue;
-  if (score >= 140) return TIER_COLORS.purple;
-  if (score >= 120) return TIER_COLORS.gold;
-  if (score >= 100) return TIER_COLORS.green;
+  if (score >= 400) return TIER_COLORS.blue;
+  if (score >= 350) return TIER_COLORS.purple;
+  if (score >= 300) return TIER_COLORS.gold;
+  if (score >= 250) return TIER_COLORS.green;
   return TIER_COLORS.orange;
 }
 
 interface ScoreRingProps {
   score: number;
   percentile?: number;
-  /** Fair denominator when a category is unmeasured — defaults to the full 200-point scale. */
+  /** Fair denominator when a category is unmeasured — defaults to the full 500-point scale. */
   measuredMax?: number;
   /** True when at least one category was excluded from measuredMax. */
   isPartial?: boolean;
@@ -51,8 +51,7 @@ interface ScoreRingProps {
 
 export function ScoreRing({ score, percentile, measuredMax = MAX_SCORE, isPartial = false }: ScoreRingProps) {
   const colors = useColors();
-  // The ring's arc and tiers stay on the internal 200-point rules; only the
-  // number a user reads is rescaled to the public 500-point scale.
+  // Partial audits read against their measured max, on the 500-point scale.
   const displayTarget = toScale500(score, measuredMax);
   const progress = useSharedValue(0);
   const glowOpacity = useSharedValue(0);

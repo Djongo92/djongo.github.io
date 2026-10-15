@@ -24,13 +24,15 @@ export const DEMO_AUDIT: AuditRow = {
   display_name: DEMO_DISPLAY_NAME,
   market: "serbia",
   peer_group: "regional",
-  performance_score: 14.8,
-  social_score: 9.5,
-  seo_authority_score: 18.56,
-  thought_leadership_score: 22,
-  reputation_score: 34,
+  // Every category score below is exactly what recomputeFromRawMetrics()
+  // derives from raw_metrics — the demo exercises the real formulas.
+  performance_score: 38.23,
+  social_score: 35.83,
+  seo_authority_score: 30.93,
+  thought_leadership_score: 80.91,
+  reputation_score: 59.89,
   // Total = the exact category sum (measured-totals honesty — no padding).
-  total_score: 98.86,
+  total_score: 245.79,
   provenance: {
     performance: "api",
     social: "self_reported",
@@ -84,28 +86,36 @@ export const DEMO_AUDIT: AuditRow = {
       referringDomains: { value: 380, peerMedian: 231, p90Threshold: 1421.9, highestObserved: 2026, sampleSize: 12, comparisonDate: "2026-08-14T00:00:00.000Z", lowConfidence: false, widened: false },
     },
     thoughtLeadership: {
-      postsCount: 2,
+      postsCount: 3,
+      // Own-site output split by type: articles (the heaviest-weighted
+      // signal) vs the firm's own news/deal announcements.
+      articlesCount: 2,
+      ownNewsCount: 1,
+      // Independent third-party coverage (pressMentions below).
       newsCount: 1,
       // Fraction (0-1), matching the real formula's convention — 1 of 2
-      // posts carries a named byline.
+      // articles carries a named byline.
       bylinePct: 0.5,
+      // Publishing consistency: months (30-day buckets) of the 90-day
+      // window with at least one own-site item.
+      activeMonths: 3,
+      windowMonths: 3,
       // Full six-value peer stats (see social's comment above for why these
-      // are persisted) — p90Threshold 11/1 reproduce thought_leadership_score
-      // to within 0.05 (25*2/11 + 15*1/1 + 5*0.5 = 22.05 vs the authored 22
-      // below; the gap is demo-data noise, not a formula bug).
-      postsStats: { value: 2, peerMedian: 5, p90Threshold: 11, highestObserved: 14, sampleSize: 12, comparisonDate: "2026-07-19T00:00:00.000Z", lowConfidence: false, widened: false },
+      // are persisted) — the what-if simulator recomputes from these.
+      articlesStats: { value: 2, peerMedian: 5, p90Threshold: 11, highestObserved: 14, sampleSize: 12, comparisonDate: "2026-07-19T00:00:00.000Z", lowConfidence: false, widened: false },
+      ownNewsStats: { value: 1, peerMedian: 1, p90Threshold: 2, highestObserved: 3, sampleSize: 12, comparisonDate: "2026-07-19T00:00:00.000Z", lowConfidence: false, widened: false },
       newsStats: { value: 1, peerMedian: 1, p90Threshold: 1, highestObserved: 3, sampleSize: 12, comparisonDate: "2026-07-19T00:00:00.000Z", lowConfidence: false, widened: false },
       items: [
-        { title: "Cross-Border M&A Trends in Southeast Europe", date: "2026-06-02", type: "blog", hasNamedByline: true },
-        { title: "Regulatory Shifts Affecting Manufacturing M&A", date: "2026-05-18", type: "blog", hasNamedByline: false },
-        { title: "Petrović & Partners advises on Meridian Capital transaction", date: "2026-05-10", type: "news", hasNamedByline: false },
+        { title: "Cross-Border M&A Trends in Southeast Europe", date: new Date(now - 12 * DAY).toISOString().slice(0, 10), type: "blog", hasNamedByline: true },
+        { title: "Regulatory Shifts Affecting Manufacturing M&A", date: new Date(now - 41 * DAY).toISOString().slice(0, 10), type: "blog", hasNamedByline: false },
+        { title: "Petrović & Partners advises on Meridian Capital transaction", date: new Date(now - 70 * DAY).toISOString().slice(0, 10), type: "news", hasNamedByline: false },
       ],
       // Real third-party coverage, independently found via Google News RSS
       // (the firm's own domain is excluded from these results) — not the
       // "news"-tagged item above, which is the firm's own announcement of
-      // the same deal and isn't counted toward newsCount for that reason.
+      // the same deal: that one counts as own news, not press.
       pressMentions: [
-        { title: "Petrović & Partners advises Meridian Capital on manufacturing acquisition", source: "ceelegalmatters.com", link: "https://ceelegalmatters.com/serbia/petrovic-partners-meridian-capital", date: "2026-05-12T00:00:00.000Z" },
+        { title: "Petrović & Partners advises Meridian Capital on manufacturing acquisition", source: "regional-business-news.example", link: "https://regional-business-news.example/serbia/petrovic-partners-meridian-capital", date: new Date(now - 68 * DAY).toISOString() },
       ],
     },
     reputation: {
@@ -118,8 +128,8 @@ export const DEMO_AUDIT: AuditRow = {
       gbpScoreBreakdown: { operationalPts: 2, ratingPts: 2.5, reviewPts: 2, completenessPts: 0.5 },
       matchedFirmName: "Petrović & Partners",
       matchedFirmDomain: DEMO_DOMAIN,
-      chambers: { points: 13, count: 3, avgRank: 2.7, qualityStats: { value: 2.3, peerMedian: 1.8, p90Threshold: 3, highestObserved: 3.5, sampleSize: 17, comparisonDate: "2026-07-19T00:00:00.000Z", lowConfidence: false, widened: false } },
-      legal500: { points: 11, count: 3, avgRank: 3.2, qualityStats: { value: 1.8, peerMedian: 1.6, p90Threshold: 2.5, highestObserved: 3, sampleSize: 17, comparisonDate: "2026-07-19T00:00:00.000Z", lowConfidence: false, widened: false } },
+      chambers: { points: 22.21, count: 3, avgRank: 2.7, qualityStats: { value: 2.3, peerMedian: 1.8, p90Threshold: 3, highestObserved: 3.5, sampleSize: 17, comparisonDate: "2026-07-19T00:00:00.000Z", lowConfidence: false, widened: false } },
+      legal500: { points: 20.18, count: 3, avgRank: 3.2, qualityStats: { value: 1.8, peerMedian: 1.6, p90Threshold: 2.5, highestObserved: 3, sampleSize: 17, comparisonDate: "2026-07-19T00:00:00.000Z", lowConfidence: false, widened: false } },
       iflr1000: { points: 0, count: 0, avgRank: null, qualityStats: null },
       chambersRankedTables: { CC: 2, DR: 3, EM: 3 },
       legal500RankedTables: { CC: 2, DR: 3, EM: 4 },
@@ -129,7 +139,7 @@ export const DEMO_AUDIT: AuditRow = {
   updated_at: new Date(now).toISOString(),
   percentile: 61,
   peer_count: 18,
-  methodology_version: 2,
+  methodology_version: 3,
   data_window_start: new Date(now - 60 * DAY).toISOString(),
   data_window_end: new Date(now).toISOString(),
   sample_size: 12,
@@ -169,103 +179,103 @@ export const DEMO_HISTORY: HistoryRow[] = [
   // amber dot actually have something to flag in the demo, not just the
   // happy path.
   {
-    audited_domain: DEMO_DOMAIN, market: "serbia", total_score: 49.1, performance_score: 8.4, social_score: 3.2, seo_authority_score: 0, thought_leadership_score: 8.5, reputation_score: 29.0,
+    audited_domain: DEMO_DOMAIN, market: "serbia", total_score: 95.84, performance_score: 27.2, social_score: 13.75, seo_authority_score: 0, thought_leadership_score: 0, reputation_score: 54.89, methodology_version: 3,
     recorded_at: new Date(now - 150 * DAY).toISOString(),
     provenance: { performance: "api", social: "self_reported", seoAuthority: "missing", thoughtLeadership: "ai_classified", reputation: "api" },
     confidence_score: 0.33, sample_size: 4,
     raw_metrics: {
       performance: { desktop: { performance: 38, accessibility: 78, seo: 82 }, mobile: { performance: 24, accessibility: 74, seo: 79 }, perfAvg: 31, accessAvg: 76, seoAvg: 80.5 },
       social: { followers: 420, posts30d: 1, engagementRate: null, platforms: { linkedin: true, instagram: false, twitter: false, facebook: false }, platformCount: 1, followersStats: peerStats(420, 500, 1400, 1600, 4, 150), postsStats: peerStats(1, 3, 5, 7, 4, 150), erStats: null },
-      thoughtLeadership: { postsCount: 0, newsCount: 0, bylinePct: 0, items: [], pressMentions: [], postsStats: peerStats(0, 2, 4, 6, 4, 150), newsStats: peerStats(0, 0, 1, 2, 4, 150) },
-      reputation: { gbpListed: true, gbpScore: 5, gbpSource: "google_places_api" as const, gbpRating: 4.2, gbpReviewCount: 9, gbpOperational: true },
+      thoughtLeadership: { postsCount: 0, articlesCount: 0, ownNewsCount: 0, newsCount: 0, bylinePct: 0, activeMonths: 0, windowMonths: 3, items: [], pressMentions: [], articlesStats: peerStats(0, 2, 4, 6, 4, 150), ownNewsStats: peerStats(0, 1, 2, 3, 4, 150), newsStats: peerStats(0, 0, 1, 2, 4, 150) },
+      reputation: { gbpListed: true, gbpScore: 5, gbpSource: "google_places_api" as const, gbpRating: 4.2, gbpReviewCount: 9, gbpOperational: true, matchedFirmName: "Petrović & Partners", matchedFirmDomain: DEMO_DOMAIN, chambers: { points: 22.21, count: 3, avgRank: 2.7, qualityStats: peerStats(2.3, 1.8, 3, 3.5, 17, 0) }, legal500: { points: 20.18, count: 3, avgRank: 3.2, qualityStats: peerStats(1.8, 1.6, 2.5, 3, 17, 0) }, iflr1000: { points: 0, count: 0, avgRank: null, qualityStats: null } },
     },
   },
   {
-    audited_domain: DEMO_DOMAIN, market: "serbia", total_score: 51.8, performance_score: 9.0, social_score: 4.0, seo_authority_score: 0, thought_leadership_score: 9.8, reputation_score: 29.0,
+    audited_domain: DEMO_DOMAIN, market: "serbia", total_score: 99.23, performance_score: 29.2, social_score: 15.14, seo_authority_score: 0, thought_leadership_score: 0, reputation_score: 54.89, methodology_version: 3,
     recorded_at: new Date(now - 120 * DAY).toISOString(),
     provenance: { performance: "api", social: "self_reported", seoAuthority: "missing", thoughtLeadership: "ai_classified", reputation: "api" },
     confidence_score: 0.33, sample_size: 4,
     raw_metrics: {
       performance: { desktop: { performance: 44, accessibility: 80, seo: 84 }, mobile: { performance: 30, accessibility: 76, seo: 81 }, perfAvg: 37, accessAvg: 78, seoAvg: 82.5 },
       social: { followers: 610, posts30d: 1, engagementRate: null, platforms: { linkedin: true, instagram: false, twitter: false, facebook: false }, platformCount: 1, followersStats: peerStats(610, 620, 1650, 1850, 4, 120), postsStats: peerStats(1, 3, 5, 7, 4, 120), erStats: null },
-      thoughtLeadership: { postsCount: 0, newsCount: 0, bylinePct: 0, items: [], pressMentions: [], postsStats: peerStats(0, 2, 4, 6, 4, 120), newsStats: peerStats(0, 0, 1, 2, 4, 120) },
-      reputation: { gbpListed: true, gbpScore: 5, gbpSource: "google_places_api" as const, gbpRating: 4.2, gbpReviewCount: 12, gbpOperational: true },
+      thoughtLeadership: { postsCount: 0, articlesCount: 0, ownNewsCount: 0, newsCount: 0, bylinePct: 0, activeMonths: 0, windowMonths: 3, items: [], pressMentions: [], articlesStats: peerStats(0, 2, 4, 6, 4, 120), ownNewsStats: peerStats(0, 1, 2, 3, 4, 120), newsStats: peerStats(0, 0, 1, 2, 4, 120) },
+      reputation: { gbpListed: true, gbpScore: 5, gbpSource: "google_places_api" as const, gbpRating: 4.2, gbpReviewCount: 12, gbpOperational: true, matchedFirmName: "Petrović & Partners", matchedFirmDomain: DEMO_DOMAIN, chambers: { points: 22.21, count: 3, avgRank: 2.7, qualityStats: peerStats(2.3, 1.8, 3, 3.5, 17, 0) }, legal500: { points: 20.18, count: 3, avgRank: 3.2, qualityStats: peerStats(1.8, 1.6, 2.5, 3, 17, 0) }, iflr1000: { points: 0, count: 0, avgRank: null, qualityStats: null } },
     },
   },
   {
-    audited_domain: DEMO_DOMAIN, market: "serbia", total_score: 54.7, performance_score: 9.6, social_score: 4.5, seo_authority_score: 0, thought_leadership_score: 10.6, reputation_score: 30.0,
+    audited_domain: DEMO_DOMAIN, market: "serbia", total_score: 135.42, performance_score: 31.2, social_score: 30.16, seo_authority_score: 0, thought_leadership_score: 16.67, reputation_score: 57.39, methodology_version: 3,
     recorded_at: new Date(now - 90 * DAY).toISOString(),
     provenance: { performance: "api", social: "self_reported", seoAuthority: "missing", thoughtLeadership: "ai_classified", reputation: "api" },
     confidence_score: 0.5, sample_size: 5,
     raw_metrics: {
       performance: { desktop: { performance: 50, accessibility: 82, seo: 86 }, mobile: { performance: 36, accessibility: 78, seo: 83 }, perfAvg: 43, accessAvg: 80, seoAvg: 84.5 },
       social: { followers: 830, posts30d: 2, engagementRate: 0.7, platforms: { linkedin: true, instagram: false, twitter: false, facebook: true }, platformCount: 2, followersStats: peerStats(830, 800, 2000, 2300, 5, 90), postsStats: peerStats(2, 3, 5, 8, 5, 90), erStats: peerStats(0.7, 1.4, 2.2, 2.9, 5, 90) },
-      thoughtLeadership: { postsCount: 1, newsCount: 0, bylinePct: 0, items: [], pressMentions: [], postsStats: peerStats(1, 3, 6, 9, 5, 90), newsStats: peerStats(0, 0, 1, 2, 5, 90) },
-      reputation: { gbpListed: true, gbpScore: 6, gbpSource: "google_places_api" as const, gbpRating: 4.3, gbpReviewCount: 15, gbpOperational: true },
+      thoughtLeadership: { postsCount: 1, articlesCount: 1, ownNewsCount: 0, newsCount: 0, bylinePct: 0, activeMonths: 1, windowMonths: 3, items: [], pressMentions: [], articlesStats: peerStats(1, 3, 6, 9, 5, 90), ownNewsStats: peerStats(0, 1, 2, 3, 5, 90), newsStats: peerStats(0, 0, 1, 2, 5, 90) },
+      reputation: { gbpListed: true, gbpScore: 6, gbpSource: "google_places_api" as const, gbpRating: 4.3, gbpReviewCount: 15, gbpOperational: true, matchedFirmName: "Petrović & Partners", matchedFirmDomain: DEMO_DOMAIN, chambers: { points: 22.21, count: 3, avgRank: 2.7, qualityStats: peerStats(2.3, 1.8, 3, 3.5, 17, 0) }, legal500: { points: 20.18, count: 3, avgRank: 3.2, qualityStats: peerStats(1.8, 1.6, 2.5, 3, 17, 0) }, iflr1000: { points: 0, count: 0, avgRank: null, qualityStats: null } },
     },
   },
   {
-    audited_domain: DEMO_DOMAIN, market: "serbia", total_score: 58.2, performance_score: 10.2, social_score: 5.0, seo_authority_score: 0, thought_leadership_score: 12.0, reputation_score: 31.0,
+    audited_domain: DEMO_DOMAIN, market: "serbia", total_score: 154.37, performance_score: 33.08, social_score: 32, seo_authority_score: 0, thought_leadership_score: 31.9, reputation_score: 57.39, methodology_version: 3,
     recorded_at: new Date(now - 60 * DAY).toISOString(),
     provenance: { performance: "api", social: "self_reported", seoAuthority: "missing", thoughtLeadership: "ai_classified", reputation: "api" },
     confidence_score: 0.67, sample_size: 6,
     raw_metrics: {
       performance: { desktop: { performance: 56, accessibility: 83, seo: 87 }, mobile: { performance: 42, accessibility: 80, seo: 85 }, perfAvg: 49, accessAvg: 81.5, seoAvg: 86 },
       social: { followers: 1080, posts30d: 2, engagementRate: 0.9, platforms: { linkedin: true, instagram: false, twitter: false, facebook: true }, platformCount: 2, followersStats: peerStats(1080, 950, 2400, 2700, 6, 60), postsStats: peerStats(2, 3, 5, 8, 6, 60), erStats: peerStats(0.9, 1.5, 2.4, 3.0, 6, 60) },
-      thoughtLeadership: { postsCount: 1, newsCount: 0, bylinePct: 1, items: [], pressMentions: [], postsStats: peerStats(1, 3, 7, 10, 6, 60), newsStats: peerStats(0, 1, 1, 2, 6, 60) },
-      reputation: { gbpListed: true, gbpScore: 6, gbpSource: "google_places_api" as const, gbpRating: 4.4, gbpReviewCount: 18, gbpOperational: true },
+      thoughtLeadership: { postsCount: 2, articlesCount: 1, ownNewsCount: 1, newsCount: 0, bylinePct: 0, activeMonths: 2, windowMonths: 3, items: [], pressMentions: [], articlesStats: peerStats(1, 3, 7, 10, 6, 60), ownNewsStats: peerStats(1, 1, 2, 3, 6, 60), newsStats: peerStats(0, 1, 1, 2, 6, 60) },
+      reputation: { gbpListed: true, gbpScore: 6, gbpSource: "google_places_api" as const, gbpRating: 4.4, gbpReviewCount: 18, gbpOperational: true, matchedFirmName: "Petrović & Partners", matchedFirmDomain: DEMO_DOMAIN, chambers: { points: 22.21, count: 3, avgRank: 2.7, qualityStats: peerStats(2.3, 1.8, 3, 3.5, 17, 0) }, legal500: { points: 20.18, count: 3, avgRank: 3.2, qualityStats: peerStats(1.8, 1.6, 2.5, 3, 17, 0) }, iflr1000: { points: 0, count: 0, avgRank: null, qualityStats: null } },
     },
   },
   {
-    audited_domain: DEMO_DOMAIN, market: "serbia", total_score: 63.5, performance_score: 11.5, social_score: 6.0, seo_authority_score: 0, thought_leadership_score: 15.0, reputation_score: 31.0,
+    audited_domain: DEMO_DOMAIN, market: "serbia", total_score: 179.55, performance_score: 35.03, social_score: 36.3, seo_authority_score: 0, thought_leadership_score: 50.83, reputation_score: 57.39, methodology_version: 3,
     recorded_at: new Date(now - 45 * DAY).toISOString(),
     provenance: { performance: "api", social: "self_reported", seoAuthority: "missing", thoughtLeadership: "ai_classified", reputation: "api" },
     confidence_score: 0.83, sample_size: 8,
     raw_metrics: {
       performance: { desktop: { performance: 62, accessibility: 85, seo: 89 }, mobile: { performance: 48, accessibility: 82, seo: 86 }, perfAvg: 55, accessAvg: 83.5, seoAvg: 87.5 },
       social: { followers: 1320, posts30d: 3, engagementRate: 1.0, platforms: { linkedin: true, instagram: false, twitter: false, facebook: true }, platformCount: 2, followersStats: peerStats(1320, 1080, 2900, 3300, 8, 45), postsStats: peerStats(3, 4, 5, 8, 8, 45), erStats: peerStats(1.0, 1.6, 2.6, 3.2, 8, 45) },
-      thoughtLeadership: { postsCount: 1, newsCount: 1, bylinePct: 1, items: [], pressMentions: [], postsStats: peerStats(1, 4, 8, 11, 8, 45), newsStats: peerStats(1, 1, 1, 2, 8, 45) },
-      reputation: { gbpListed: true, gbpScore: 6, gbpSource: "google_places_api" as const, gbpRating: 4.4, gbpReviewCount: 21, gbpOperational: true },
+      thoughtLeadership: { postsCount: 2, articlesCount: 1, ownNewsCount: 1, newsCount: 0, bylinePct: 1, activeMonths: 2, windowMonths: 3, items: [], pressMentions: [], articlesStats: peerStats(1, 4, 8, 11, 8, 45), ownNewsStats: peerStats(1, 1, 2, 3, 8, 45), newsStats: peerStats(0, 1, 1, 2, 8, 45) },
+      reputation: { gbpListed: true, gbpScore: 6, gbpSource: "google_places_api" as const, gbpRating: 4.4, gbpReviewCount: 21, gbpOperational: true, matchedFirmName: "Petrović & Partners", matchedFirmDomain: DEMO_DOMAIN, chambers: { points: 22.21, count: 3, avgRank: 2.7, qualityStats: peerStats(2.3, 1.8, 3, 3.5, 17, 0) }, legal500: { points: 20.18, count: 3, avgRank: 3.2, qualityStats: peerStats(1.8, 1.6, 2.5, 3, 17, 0) }, iflr1000: { points: 0, count: 0, avgRank: null, qualityStats: null } },
     },
   },
   {
-    audited_domain: DEMO_DOMAIN, market: "serbia", total_score: 68.1, performance_score: 12.5, social_score: 7.0, seo_authority_score: 0, thought_leadership_score: 17.6, reputation_score: 31.0,
+    audited_domain: DEMO_DOMAIN, market: "serbia", total_score: 184.36, performance_score: 36.28, social_score: 34.86, seo_authority_score: 0, thought_leadership_score: 53.33, reputation_score: 59.89, methodology_version: 3,
     recorded_at: new Date(now - 30 * DAY).toISOString(),
     provenance: { performance: "api", social: "self_reported", seoAuthority: "missing", thoughtLeadership: "ai_classified", reputation: "api" },
     confidence_score: 1, sample_size: 9,
     raw_metrics: {
       performance: { desktop: { performance: 66, accessibility: 86, seo: 90 }, mobile: { performance: 52, accessibility: 83, seo: 87 }, perfAvg: 59, accessAvg: 84.5, seoAvg: 88.5 },
       social: { followers: 1520, posts30d: 3, engagementRate: 1.1, platforms: { linkedin: true, instagram: false, twitter: false, facebook: true }, platformCount: 2, followersStats: peerStats(1520, 1150, 3300, 3800, 9, 30), postsStats: peerStats(3, 4, 6, 9, 9, 30), erStats: peerStats(1.1, 1.7, 2.7, 3.3, 9, 30) },
-      thoughtLeadership: { postsCount: 2, newsCount: 1, bylinePct: 0.5, items: [], pressMentions: [], postsStats: peerStats(2, 4, 9, 12, 9, 30), newsStats: peerStats(1, 1, 1, 3, 9, 30) },
-      reputation: { gbpListed: true, gbpScore: 7, gbpSource: "google_places_api" as const, gbpRating: 4.5, gbpReviewCount: 23, gbpOperational: true },
+      thoughtLeadership: { postsCount: 3, articlesCount: 2, ownNewsCount: 1, newsCount: 0, bylinePct: 0.5, activeMonths: 3, windowMonths: 3, items: [], pressMentions: [], articlesStats: peerStats(2, 4, 9, 12, 9, 30), ownNewsStats: peerStats(1, 1, 2, 3, 9, 30), newsStats: peerStats(0, 1, 1, 3, 9, 30) },
+      reputation: { gbpListed: true, gbpScore: 7, gbpSource: "google_places_api" as const, gbpRating: 4.5, gbpReviewCount: 23, gbpOperational: true, matchedFirmName: "Petrović & Partners", matchedFirmDomain: DEMO_DOMAIN, chambers: { points: 22.21, count: 3, avgRank: 2.7, qualityStats: peerStats(2.3, 1.8, 3, 3.5, 17, 0) }, legal500: { points: 20.18, count: 3, avgRank: 3.2, qualityStats: peerStats(1.8, 1.6, 2.5, 3, 17, 0) }, iflr1000: { points: 0, count: 0, avgRank: null, qualityStats: null } },
     },
   },
   {
-    audited_domain: DEMO_DOMAIN, market: "serbia", total_score: 71.4, performance_score: 13.0, social_score: 8.0, seo_authority_score: 0, thought_leadership_score: 19.4, reputation_score: 31.0,
+    audited_domain: DEMO_DOMAIN, market: "serbia", total_score: 184.07, performance_score: 36.98, social_score: 35.2, seo_authority_score: 0, thought_leadership_score: 52, reputation_score: 59.89, methodology_version: 3,
     recorded_at: new Date(now - 18 * DAY).toISOString(),
     provenance: { performance: "api", social: "self_reported", seoAuthority: "missing", thoughtLeadership: "ai_classified", reputation: "api" },
     confidence_score: 1, sample_size: 10,
     raw_metrics: {
       performance: { desktop: { performance: 68, accessibility: 87, seo: 90 }, mobile: { performance: 54, accessibility: 84, seo: 88 }, perfAvg: 61, accessAvg: 85.5, seoAvg: 89 },
       social: { followers: 1660, posts30d: 3, engagementRate: 1.15, platforms: { linkedin: true, instagram: false, twitter: false, facebook: true }, platformCount: 2, followersStats: peerStats(1660, 1180, 3500, 4000, 10, 18), postsStats: peerStats(3, 4, 6, 9, 10, 18), erStats: peerStats(1.15, 1.75, 2.8, 3.4, 10, 18) },
-      thoughtLeadership: { postsCount: 2, newsCount: 1, bylinePct: 0.5, items: [], pressMentions: [], postsStats: peerStats(2, 4, 10, 13, 10, 18), newsStats: peerStats(1, 1, 1, 3, 10, 18) },
-      reputation: { gbpListed: true, gbpScore: 7, gbpSource: "google_places_api" as const, gbpRating: 4.5, gbpReviewCount: 25, gbpOperational: true },
+      thoughtLeadership: { postsCount: 3, articlesCount: 2, ownNewsCount: 1, newsCount: 0, bylinePct: 0.5, activeMonths: 3, windowMonths: 3, items: [], pressMentions: [], articlesStats: peerStats(2, 4, 10, 13, 10, 18), ownNewsStats: peerStats(1, 1, 2, 3, 10, 18), newsStats: peerStats(0, 1, 1, 3, 10, 18) },
+      reputation: { gbpListed: true, gbpScore: 7, gbpSource: "google_places_api" as const, gbpRating: 4.5, gbpReviewCount: 25, gbpOperational: true, matchedFirmName: "Petrović & Partners", matchedFirmDomain: DEMO_DOMAIN, chambers: { points: 22.21, count: 3, avgRank: 2.7, qualityStats: peerStats(2.3, 1.8, 3, 3.5, 17, 0) }, legal500: { points: 20.18, count: 3, avgRank: 3.2, qualityStats: peerStats(1.8, 1.6, 2.5, 3, 17, 0) }, iflr1000: { points: 0, count: 0, avgRank: null, qualityStats: null } },
     },
   },
   {
-    audited_domain: DEMO_DOMAIN, market: "serbia", total_score: 75.9, performance_score: 13.8, social_score: 8.8, seo_authority_score: 0, thought_leadership_score: 20.3, reputation_score: 33.0,
+    audited_domain: DEMO_DOMAIN, market: "serbia", total_score: 215.05, performance_score: 37.6, social_score: 35.56, seo_authority_score: 0, thought_leadership_score: 82, reputation_score: 59.89, methodology_version: 3,
     recorded_at: new Date(now - 7 * DAY).toISOString(),
     provenance: { performance: "api", social: "self_reported", seoAuthority: "missing", thoughtLeadership: "ai_classified", reputation: "api" },
     confidence_score: 1, sample_size: 11,
     raw_metrics: {
       performance: { desktop: { performance: 70, accessibility: 88, seo: 91 }, mobile: { performance: 56, accessibility: 84, seo: 88 }, perfAvg: 63, accessAvg: 86, seoAvg: 89.5 },
       social: { followers: 1760, posts30d: 3, engagementRate: 1.18, platforms: { linkedin: true, instagram: false, twitter: false, facebook: true }, platformCount: 2, followersStats: peerStats(1760, 1200, 3600, 4100, 11, 7), postsStats: peerStats(3, 4, 6, 9, 11, 7), erStats: peerStats(1.18, 1.78, 2.85, 3.45, 11, 7) },
-      thoughtLeadership: { postsCount: 2, newsCount: 1, bylinePct: 0.5, items: [], pressMentions: [], postsStats: peerStats(2, 5, 10, 13, 11, 7), newsStats: peerStats(1, 1, 1, 3, 11, 7) },
-      reputation: { gbpListed: true, gbpScore: 7, gbpSource: "google_places_api" as const, gbpRating: 4.6, gbpReviewCount: 27, gbpOperational: true },
+      thoughtLeadership: { postsCount: 3, articlesCount: 2, ownNewsCount: 1, newsCount: 1, bylinePct: 0.5, activeMonths: 3, windowMonths: 3, items: [], pressMentions: [], articlesStats: peerStats(2, 5, 10, 13, 11, 7), ownNewsStats: peerStats(1, 1, 2, 3, 11, 7), newsStats: peerStats(1, 1, 1, 3, 11, 7) },
+      reputation: { gbpListed: true, gbpScore: 7, gbpSource: "google_places_api" as const, gbpRating: 4.6, gbpReviewCount: 27, gbpOperational: true, matchedFirmName: "Petrović & Partners", matchedFirmDomain: DEMO_DOMAIN, chambers: { points: 22.21, count: 3, avgRank: 2.7, qualityStats: peerStats(2.3, 1.8, 3, 3.5, 17, 0) }, legal500: { points: 20.18, count: 3, avgRank: 3.2, qualityStats: peerStats(1.8, 1.6, 2.5, 3, 17, 0) }, iflr1000: { points: 0, count: 0, avgRank: null, qualityStats: null } },
     },
   },
   {
-    audited_domain: DEMO_DOMAIN, market: "serbia", total_score: 98.86, performance_score: 14.8, social_score: 9.5, seo_authority_score: 18.56, thought_leadership_score: 22.0, reputation_score: 34.0,
+    audited_domain: DEMO_DOMAIN, market: "serbia", total_score: 245.79, performance_score: 38.23, social_score: 35.83, seo_authority_score: 30.93, thought_leadership_score: 80.91, reputation_score: 59.89, methodology_version: 3,
     recorded_at: new Date(now).toISOString(),
     // Matches DEMO_AUDIT.provenance/raw_metrics.{performance,social,seoAuthority,thoughtLeadership,reputation}/confidence_score/sample_size exactly — this row IS the current audit's own history entry.
     provenance: { performance: "api", social: "self_reported", seoAuthority: "api", thoughtLeadership: "ai_classified", reputation: "api" },
@@ -284,8 +294,8 @@ export const DEMO_HISTORY: HistoryRow[] = [
         organicKeywords: { value: 6, peerMedian: 9, p90Threshold: 31.5, highestObserved: 45, sampleSize: 12, comparisonDate: "2026-08-14T00:00:00.000Z", lowConfidence: false, widened: false },
         referringDomains: { value: 380, peerMedian: 231, p90Threshold: 1421.9, highestObserved: 2026, sampleSize: 12, comparisonDate: "2026-08-14T00:00:00.000Z", lowConfidence: false, widened: false },
       },
-      thoughtLeadership: { postsCount: 2, newsCount: 1, bylinePct: 0.5, items: [], pressMentions: [], postsStats: peerStats(2, 5, 11, 14, 12, 0), newsStats: peerStats(1, 1, 1, 3, 12, 0) },
-      reputation: { gbpListed: true, gbpScore: 7, gbpSource: "google_places_api" as const, gbpRating: 4.6, gbpReviewCount: 28, gbpOperational: true, matchedFirmName: "Petrović & Partners", matchedFirmDomain: DEMO_DOMAIN, chambers: { points: 13, count: 3, avgRank: 2.7, qualityStats: peerStats(2.3, 1.8, 3, 3.5, 17, 0) }, legal500: { points: 11, count: 3, avgRank: 3.2, qualityStats: peerStats(1.8, 1.6, 2.5, 3, 17, 0) }, iflr1000: { points: 0, count: 0, avgRank: null, qualityStats: null } },
+      thoughtLeadership: { postsCount: 3, articlesCount: 2, ownNewsCount: 1, newsCount: 1, bylinePct: 0.5, activeMonths: 3, windowMonths: 3, items: [], pressMentions: [], articlesStats: peerStats(2, 5, 11, 14, 12, 0), ownNewsStats: peerStats(1, 1, 2, 3, 12, 0), newsStats: peerStats(1, 1, 1, 3, 12, 0) },
+      reputation: { gbpListed: true, gbpScore: 7, gbpSource: "google_places_api" as const, gbpRating: 4.6, gbpReviewCount: 28, gbpOperational: true, matchedFirmName: "Petrović & Partners", matchedFirmDomain: DEMO_DOMAIN, chambers: { points: 22.21, count: 3, avgRank: 2.7, qualityStats: peerStats(2.3, 1.8, 3, 3.5, 17, 0) }, legal500: { points: 20.18, count: 3, avgRank: 3.2, qualityStats: peerStats(1.8, 1.6, 2.5, 3, 17, 0) }, iflr1000: { points: 0, count: 0, avgRank: null, qualityStats: null } },
     },
   },
 ];
@@ -301,8 +311,8 @@ export const DEMO_SNAPSHOTS: AuditSnapshot[] = [
     market: "serbia",
     audited_domain: DEMO_DOMAIN,
     display_name: DEMO_DISPLAY_NAME,
-    total_score: 54.7,
-    categories: { performance: 9.6, social: 4.5, seoAuthority: 0, thoughtLeadership: 10.6, reputation: 30.0 },
+    total_score: 135.42,
+    categories: { performance: 31.2, social: 30.16, seoAuthority: 0, thoughtLeadership: 16.67, reputation: 57.39 },
     created_at: new Date(now - 90 * DAY).toISOString(),
   },
   {
@@ -312,8 +322,8 @@ export const DEMO_SNAPSHOTS: AuditSnapshot[] = [
     market: "serbia",
     audited_domain: DEMO_DOMAIN,
     display_name: DEMO_DISPLAY_NAME,
-    total_score: 68.1,
-    categories: { performance: 12.5, social: 7.0, seoAuthority: 0, thoughtLeadership: 17.6, reputation: 31.0 },
+    total_score: 184.36,
+    categories: { performance: 36.28, social: 34.86, seoAuthority: 0, thoughtLeadership: 53.33, reputation: 59.89 },
     created_at: new Date(now - 30 * DAY).toISOString(),
   },
 ];
@@ -462,8 +472,8 @@ export const DEMO_ROADMAP: Omit<RoadmapCache, "capturedAt"> = {
       focus: "Convert real deal experience and Chambers standing into visible proof",
       actions: [
         { title: "Publish a tombstone wall of your last 10 closed deals", why: "Chambers Band 2 and Legal 500 Tier 2 standing isn't doing any work if a prospective client can't verify it on the site", chapterRef: "building-credibility" },
-        { title: "Publish one bylined article on cross-border deal structuring", why: "Thought Leadership is scoring under half its points — this is the most controllable category in the whole audit", chapterRef: "thought-leadership" },
-        { title: "Claim and complete your Google Business Profile", why: "A free, 10-point line item that's currently unclaimed", chapterRef: "google-search-console" },
+        { title: "Publish one bylined article on cross-border deal structuring", why: "Thought Leadership is the heaviest-weighted category and barely past half its points — and it's the one you control most directly", chapterRef: "thought-leadership" },
+        { title: "Claim and complete your Google Business Profile", why: "A free, 25-point line item that's currently incomplete", chapterRef: "google-search-console" },
       ],
     },
     {
@@ -560,30 +570,30 @@ export const DEMO_VISIBILITY_SCORE: Omit<VisibilityScoreCache, "capturedAt"> = {
 // scoring below Petrović & Partners and 6 above, to exactly match the
 // "Better than 61% of 18 peers" stat already shown elsewhere in the demo.
 export const DEMO_RANKINGS: { displayName: string; domain: string; score: number }[] = [
-  { displayName: "Vasić Cross-Border Advocates", domain: "vasic-advocates.example", score: 142.0 },
-  { displayName: "Nikolić & Delić Partners", domain: "nikolic-delic.example", score: 128.5 },
-  { displayName: "Regional Corporate Law Group", domain: "regionalcorplaw.example", score: 115.2 },
-  { displayName: "Stevanović Legal Alliance", domain: "stevanovic-legal.example", score: 103.8 },
-  { displayName: "Belgrade Commercial Partners", domain: "belgradecommercial.example", score: 95.4 },
-  { displayName: "Đurić & Associates", domain: "duric-associates.example", score: 84.1 },
+  { displayName: "Vasić Cross-Border Advocates", domain: "vasic-advocates.example", score: 355.0 },
+  { displayName: "Nikolić & Delić Partners", domain: "nikolic-delic.example", score: 321.2 },
+  { displayName: "Regional Corporate Law Group", domain: "regionalcorplaw.example", score: 288.0 },
+  { displayName: "Stevanović Legal Alliance", domain: "stevanovic-legal.example", score: 259.5 },
+  { displayName: "Belgrade Commercial Partners", domain: "belgradecommercial.example", score: 252.5 },
+  { displayName: "Đurić & Associates", domain: "duric-associates.example", score: 210.2 },
   { displayName: DEMO_DISPLAY_NAME, domain: DEMO_DOMAIN, score: DEMO_AUDIT.total_score },
-  { displayName: "Antić Law Office", domain: "antic-law.example", score: 76.5 },
-  { displayName: "Southeast Legal Partners", domain: "southeastlegal.example", score: 71.2 },
-  { displayName: "Kostić & Ranković", domain: "kostic-rankovic.example", score: 68.9 },
-  { displayName: "Danube Advisory Partners", domain: "danubeadvisory.example", score: 63.4 },
-  { displayName: "Ilić Corporate Counsel", domain: "ilic-counsel.example", score: 58.7 },
-  { displayName: "Marinković Law Group", domain: "marinkovic-law.example", score: 52.1 },
-  { displayName: "Popadić & Co.", domain: "popadic-co.example", score: 47.6 },
-  { displayName: "Regional Business Law", domain: "regionalbusinesslaw.example", score: 41.3 },
-  { displayName: "Todorović Partners", domain: "todorovic-partners.example", score: 35.8 },
-  { displayName: "Savić Legal Services", domain: "savic-legal.example", score: 28.4 },
-  { displayName: "Cross-Adriatic Law", domain: "crossadriatic.example", score: 21.0 },
+  { displayName: "Antić Law Office", domain: "antic-law.example", score: 191.2 },
+  { displayName: "Southeast Legal Partners", domain: "southeastlegal.example", score: 178.0 },
+  { displayName: "Kostić & Ranković", domain: "kostic-rankovic.example", score: 172.2 },
+  { displayName: "Danube Advisory Partners", domain: "danubeadvisory.example", score: 158.5 },
+  { displayName: "Ilić Corporate Counsel", domain: "ilic-counsel.example", score: 146.8 },
+  { displayName: "Marinković Law Group", domain: "marinkovic-law.example", score: 130.2 },
+  { displayName: "Popadić & Co.", domain: "popadic-co.example", score: 119.0 },
+  { displayName: "Regional Business Law", domain: "regionalbusinesslaw.example", score: 103.2 },
+  { displayName: "Todorović Partners", domain: "todorovic-partners.example", score: 89.5 },
+  { displayName: "Savić Legal Services", domain: "savic-legal.example", score: 71.0 },
+  { displayName: "Cross-Adriatic Law", domain: "crossadriatic.example", score: 52.5 },
 ].sort((a, b) => b.score - a.score);
 
 export const DEMO_STRATEGY_BRIEF = {
   headline: "Your reputation is carrying a firm that isn't talking.",
   narrative:
-    "Petrović & Partners has real standing — the Chambers and Legal 500 bands back it up, and that's the hardest thing to fake. But Thought Leadership is scoring under half its points, and Social sits even lower, which means that credibility isn't being converted into visible momentum. A firm with your reputation should be the one setting the narrative on cross-border M&A in this market, not a quiet name in a directory. The stale copyright year on your homepage doesn't help either — it's a small thing, but it's the kind of detail a prospective client notices right before they decide you're not actively maintaining your public presence.",
+    "Petrović & Partners has real standing — the Chambers and Legal 500 bands back it up, and that's the hardest thing to fake. But Thought Leadership — the most heavily weighted category — is barely past half its points, and Social sits under half, which means that credibility isn't being converted into visible momentum. A firm with your reputation should be the one setting the narrative on cross-border M&A in this market, not a quiet name in a directory. The stale copyright year on your homepage doesn't help either — it's a small thing, but it's the kind of detail a prospective client notices right before they decide you're not actively maintaining your public presence.",
 };
 
 // The §8 workflow board's demo fixtures, built at seed time so the dates
@@ -637,7 +647,7 @@ export function buildDemoWorkflowBoard(): { items: WorkflowItem[]; comments: Wor
     {
       id: "demo-wf-4",
       title: "Claim and complete the Google Business Profile",
-      description: "A free, 10-point line item that was unclaimed",
+      description: "A free, 25-point line item that was incomplete",
       source: "roadmap_action",
       source_ref: { phaseLabel: "Phase 2 — Momentum (Weeks 3-6)", chapterRef: "google-search-console" },
       status: "approved",

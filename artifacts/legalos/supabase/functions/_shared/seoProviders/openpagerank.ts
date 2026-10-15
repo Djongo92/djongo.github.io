@@ -8,8 +8,8 @@
 //
 // This means a firm scored via Open PageRank alone only has 1 of 6 SEO
 // metrics measured. seoFormula.ts rescales the category to whatever subset
-// is actually available (10 pts × that one ratio → up to the full 60 if
-// it's at the peer group's 90th percentile) rather than silently zero-
+// is actually available (that one ratio → up to the category's full
+// points if it's at the peer group's 90th percentile) rather than silently zero-
 // filling the other 5 as if they were earned zeros — the same "no
 // fabricated total from a missing input" principle CLAUDE.md states for
 // whole categories, applied one level down within this one.

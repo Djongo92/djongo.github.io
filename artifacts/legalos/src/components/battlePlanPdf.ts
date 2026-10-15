@@ -9,6 +9,7 @@ import { SERIF_REGULAR, SERIF_BOLD, SERIF_ITALIC, SANS_REGULAR, SANS_BOLD, SANS_
 import { CATEGORY_META, CATEGORY_ORDER, CATEGORY_MAX_500, PROVENANCE_META, categoryScoreLabel500, type CategoryKey, type Provenance } from "@/lib/visibilityCategories";
 import { CATEGORY_INPUT_FORMATTERS } from "@/lib/visibilityInputFormatters";
 import { computeMeasuredTotals, measuredExcludedNote, toScale500, scale500Suffix } from "@/lib/measuredScore";
+import { TOTAL_MAX } from "../../supabase/functions/_shared/methodology";
 
 const titleCase = (s: string) => s.length ? s[0].toUpperCase() + s.slice(1) : s;
 
@@ -156,7 +157,7 @@ export function buildPdf({ roast, competitor, roadmap, maturity, headline, bio, 
     doc.setFont(SERIF, "bold");
     doc.setFontSize(22);
     doc.setTextColor(...GREEN);
-    doc.text(`${toScale500(visibilityScore.totalScore, coverMeasured.isPartial ? coverMeasured.measuredMax : 200)}`, margin + 12, badgeY + 27);
+    doc.text(`${toScale500(visibilityScore.totalScore, coverMeasured.isPartial ? coverMeasured.measuredMax : TOTAL_MAX)}`, margin + 12, badgeY + 27);
     doc.setFont(SANS, "normal");
     doc.setFontSize(9);
     doc.setTextColor(...GOLD_LIGHT);
@@ -214,7 +215,7 @@ export function buildPdf({ roast, competitor, roadmap, maturity, headline, bio, 
       ? `500 measured points (${summaryMeasured.excludedLabels.join(", ")} not yet scored)`
       : "500";
     summaryLines.push(
-      `${firmName ?? "This firm"} scores ${toScale500(visibilityScore.totalScore, summaryMeasured.isPartial ? summaryMeasured.measuredMax : 200)} out of ${outOf} on an externally verified Market Visibility Score${peerLine}.`
+      `${firmName ?? "This firm"} scores ${toScale500(visibilityScore.totalScore, summaryMeasured.isPartial ? summaryMeasured.measuredMax : TOTAL_MAX)} out of ${outOf} on an externally verified Market Visibility Score${peerLine}.`
     );
   }
   if (competitor) summaryLines.push(competitor.executiveSummary);
@@ -483,7 +484,7 @@ export function buildPdf({ roast, competitor, roadmap, maturity, headline, bio, 
     doc.setFont(SERIF, "bold");
     doc.setFontSize(48);
     doc.setTextColor(...GREEN);
-    doc.text(`${toScale500(visibilityScore.totalScore, sectionMeasured.isPartial ? sectionMeasured.measuredMax : 200)}`, margin, cursor + 36);
+    doc.text(`${toScale500(visibilityScore.totalScore, sectionMeasured.isPartial ? sectionMeasured.measuredMax : TOTAL_MAX)}`, margin, cursor + 36);
     doc.setFont(SANS, "normal");
     doc.setFontSize(10);
     doc.setTextColor(...MUTED);
@@ -834,13 +835,10 @@ function gradeColor(grade: string): [number, number, number] {
 // more firms get audited), so this appendix states the rule and this
 // firm's actual measured inputs rather than fabricating a fake peer max
 // client-side just to show a complete equation.
-const CATEGORY_FORMULA: Record<CategoryKey, string> = {
-  performance: "10 x (desktop + mobile Lighthouse performance avg) / 100 + 5 x (accessibility avg) / 100 + 5 x (SEO avg) / 100",
-  social: "Peer-normalized LinkedIn followers, posts, and engagement rate (5+5+6 pts) + up to 4 pts per platform claimed",
-  seoAuthority: "6 Ahrefs/Moz authority metrics, each 10 x (this firm's value / peer-group maximum)",
-  thoughtLeadership: "25 x (posts / peer-group max) + 5 x (byline %) + 15 x (press mentions / peer-group max), over a 90-day (quarterly) window. Press mentions are verified via Google News, excluding the firm's own site.",
-  reputation: "10 x Google Business Profile claimed + Chambers (band avg + ranked-table count/N) + Legal 500 (tier avg + count/N) + IFLR1000 (count/N + tier avg)",
-};
+// One source of truth with the in-app explainers (visibilityCategories.ts).
+const CATEGORY_FORMULA: Record<CategoryKey, string> = Object.fromEntries(
+  (Object.keys(CATEGORY_META) as CategoryKey[]).map((k) => [k, CATEGORY_META[k].how]),
+) as Record<CategoryKey, string>;
 
 // formatPerformanceInputs / formatSocialInputs / formatThoughtLeadershipInputs /
 // formatReputationInputs live in src/lib/visibilityInputFormatters.ts —

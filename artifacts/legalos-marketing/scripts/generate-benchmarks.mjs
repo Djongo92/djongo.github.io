@@ -17,12 +17,16 @@ const PROJECT_REF = "kosmxczrwrhzmmloxobq";
 /** Below this many firms a market page could identify individual firms — suppress it. */
 export const MIN_COHORT = 5;
 
+/** Scoring scale — mirrors legalos/supabase/functions/_shared/methodology.ts (v3). */
+export const TOTAL_MAX = 500;
+export const CATEGORY_MAX = { performance: 50, social: 75, seoAuthority: 100, thoughtLeadership: 150, reputation: 125 };
+
 const CATEGORY_LABELS = {
-  performance_pct: ["Performance", "page speed & Core Web Vitals"],
-  social_pct: ["Social presence", "linked & active social profiles"],
-  seo_pct: ["SEO authority", "indexing, metadata & domain strength"],
-  thought_pct: ["Thought leadership", "articles, bylines & press"],
-  reputation_pct: ["Reputation", "reviews & ratings"],
+  performance_pct: ["Website experience", "page speed, accessibility & technical basics"],
+  social_pct: ["Social presence", "followers, posting & engagement"],
+  seo_pct: ["Search authority", "domain strength, links & organic reach"],
+  thought_pct: ["Thought leadership", "own-site articles, bylines, consistency & press"],
+  reputation_pct: ["Recognition", "directory rankings & Google Business Profile"],
 };
 
 export const esc = (s) =>
@@ -122,11 +126,11 @@ ${seoTags(title, description, `/benchmarks/${slugify(c.market)}.html`)}
 <main class="wrap" style="padding-top:2.5rem">
   <p class="eyebrow">Uvid benchmarks · ${esc(name)}</p>
   <h1>How ${esc(name)} law firm websites actually score</h1>
-  <p class="sub">Measured across ${c.firms} firm websites in ${esc(name)} — performance, SEO authority, social presence, thought leadership and reputation, on a 200-point scale.</p>
+  <p class="sub">Measured across ${c.firms} firm websites in ${esc(name)} — website experience, social presence, search authority, thought leadership and recognition, on a ${TOTAL_MAX}-point scale.</p>
 
   <div class="stats">
     <div class="stat"><b>${c.firms}</b><span>firms measured</span></div>
-    <div class="stat"><b>${avg}<small style="font-size:0.9rem;color:hsl(30 10% 56%)"> /200</small></b><span>average score</span></div>
+    <div class="stat"><b>${avg}<small style="font-size:0.9rem;color:hsl(30 10% 56%)"> /${TOTAL_MAX}</small></b><span>average score</span></div>
     <div class="stat"><b>${median}</b><span>median</span></div>
     <div class="stat"><b>${Math.round(Number(c.min_total))}–${Math.round(Number(c.max_total))}</b><span>range</span></div>
   </div>
@@ -155,7 +159,7 @@ ${seoTags(title, description, `/benchmarks/${slugify(c.market)}.html`)}
 export function renderIndexPage(cohorts) {
   const title = "Law firm website benchmarks | Uvid";
   const description =
-    "Measured website benchmarks for law firms by market — performance, SEO authority, thought leadership and reputation, from anonymized Uvid audits.";
+    "Measured visibility benchmarks for law firms by market — website experience, search authority, thought leadership and recognition, from anonymized Uvid audits.";
   return `<!doctype html>
 <html lang="en">
 <head>
@@ -178,7 +182,7 @@ ${seoTags(title, description, "/benchmarks/")}
     ${cohorts
       .map(
         (c) =>
-          `<li><a href="/benchmarks/${slugify(c.market)}.html"><span>${esc(displayMarket(c.market))}</span><span class="n">${c.firms} firms · avg ${Number(c.avg_total)}/200</span></a></li>`,
+          `<li><a href="/benchmarks/${slugify(c.market)}.html"><span>${esc(displayMarket(c.market))}</span><span class="n">${c.firms} firms · avg ${Number(c.avg_total)}/${TOTAL_MAX}</span></a></li>`,
       )
       .join("\n    ")}
   </ul>`
@@ -202,12 +206,13 @@ SELECT market,
        ROUND((PERCENTILE_CONT(0.5) WITHIN GROUP (ORDER BY total_score))::numeric) AS median_total,
        MIN(total_score) AS min_total,
        MAX(total_score) AS max_total,
-       ROUND(AVG(performance_score) / 20 * 100) AS performance_pct,
-       ROUND(AVG(social_score) / 20 * 100) AS social_pct,
-       ROUND(AVG(seo_authority_score) / 60 * 100) AS seo_pct,
-       ROUND(AVG(thought_leadership_score) / 45 * 100) AS thought_pct,
-       ROUND(AVG(reputation_score) / 55 * 100) AS reputation_pct
+       ROUND(AVG(performance_score) / ${CATEGORY_MAX.performance} * 100) AS performance_pct,
+       ROUND(AVG(social_score) / ${CATEGORY_MAX.social} * 100) AS social_pct,
+       ROUND(AVG(seo_authority_score) / ${CATEGORY_MAX.seoAuthority} * 100) AS seo_pct,
+       ROUND(AVG(thought_leadership_score) / ${CATEGORY_MAX.thoughtLeadership} * 100) AS thought_pct,
+       ROUND(AVG(reputation_score) / ${CATEGORY_MAX.reputation} * 100) AS reputation_pct
 FROM market_visibility_audits
+WHERE methodology_version >= 3
 GROUP BY market
 HAVING COUNT(DISTINCT audited_domain) >= ${MIN_COHORT}
 ORDER BY firms DESC`;

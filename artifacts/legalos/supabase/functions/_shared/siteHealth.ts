@@ -1,5 +1,5 @@
 // Batch K — cheap, trust-building site-health checks layered onto the
-// Performance category's crawl. Not part of the 200-pt score (nothing here
+// Performance category's crawl. Not part of the 500-pt score (nothing here
 // is peer-normalized or point-valued) — purely an informational panel:
 // "your contact form has been down for six weeks" builds trust in
 // everything else the dashboard says, and it's nearly free to add since

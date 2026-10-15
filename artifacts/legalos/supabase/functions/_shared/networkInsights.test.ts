@@ -14,8 +14,8 @@ const firm = (
   runCount90d: opts.runs ?? 0,
   audits: totals.map((t, i) => ({
     totalScore: t,
-    socialScore: opts.social?.[i] ?? 10,
-    thoughtScore: opts.thought?.[i] ?? 20,
+    socialScore: opts.social?.[i] ?? 40,
+    thoughtScore: opts.thought?.[i] ?? 70,
     createdAt: new Date(2026, 5, ++seq).toISOString(),
   })),
 });
@@ -36,7 +36,7 @@ describe("privacy floor", () => {
 
 describe("buildNetworkInsights", () => {
   const cohort = [
-    firm("own", [120, 122], { social: [8, 8], thought: [18, 18], runs: 1 }),
+    firm("own", [120, 122], { social: [30, 30], thought: [66, 66], runs: 1 }),
     firm("p1", [100, 130], { runs: 7 }),
     firm("p2", [110, 138], { runs: 6 }),
     firm("p3", [100, 102], { runs: 0 }),
@@ -62,7 +62,7 @@ describe("buildNetworkInsights", () => {
   });
 
   it("emits category-standing only when the own-vs-peer gap exceeds 5% of category max", () => {
-    // own social 8/20 vs peers avg 10/20 → gap 2/20 = 10% → emitted
+    // own social 30/75 vs peers avg 40/75 → gap 10/75 ≈ 13% → emitted
     const s = insights.find((i) => i.key === "category-standing");
     expect(s).toBeDefined();
     expect(s!.title).toContain("Social");
@@ -81,7 +81,7 @@ describe("buildNetworkInsights", () => {
     // Own firm has wildly high social — if it leaked into the peer average,
     // the gap would invert and the insight would flip direction.
     const skewed = [
-      firm("own", [100, 100], { social: [20, 20], thought: [45, 45], runs: 9 }),
+      firm("own", [100, 100], { social: [75, 75], thought: [150, 150], runs: 9 }),
       firm("p1", [100, 130], { social: [5, 5], runs: 7 }),
       firm("p2", [100, 128], { social: [5, 5], runs: 7 }),
       firm("p3", [100, 101], { social: [5, 5], runs: 0 }),

@@ -14,6 +14,8 @@ import { computeMeasuredTotals, toScale500, scale500Suffix } from "@/lib/measure
 import { LoadingTips } from "@/components/LoadingTips";
 import { CategoryExplainer, ProvenanceBadge } from "@/components/visibility/Explainers";
 import { CATEGORY_ORDER, type CategoryKey } from "@/lib/visibilityCategories";
+import { TOTAL_MAX } from "../../supabase/functions/_shared/methodology";
+import { CATEGORY_META } from "@/lib/visibilityCategories";
 
 // Demo mode never touches the real audit backend — running a live PageSpeed/
 // directory/thought-leadership audit against whatever the visitor happens to
@@ -33,13 +35,9 @@ const buildDemoAuditResult = (): AuditResult => ({
   peerCount: DEMO_VISIBILITY_SCORE.peerCount,
 });
 
-const CATEGORY_LABELS: Record<string, { label: string; max: number }> = {
-  performance: { label: "Performance", max: 20 },
-  social: { label: "Social Media", max: 20 },
-  seoAuthority: { label: "SEO & Authority", max: 60 },
-  thoughtLeadership: { label: "Thought Leadership", max: 45 },
-  reputation: { label: "Reputation", max: 55 },
-};
+const CATEGORY_LABELS: Record<string, { label: string; max: number }> = Object.fromEntries(
+  Object.entries(CATEGORY_META).map(([k, m]) => [k, { label: m.label, max: m.max }]),
+);
 
 const MarketVisibilityScore = () => {
   const demoMode = isDemoMode();
@@ -622,9 +620,9 @@ const MarketVisibilityScore = () => {
                       <div className="inline-flex items-center justify-center w-24 h-24 rounded-full border-4 border-emerald-500/30 mb-3 relative">
                         <svg className="absolute inset-0 w-full h-full -rotate-90">
                           <circle cx="48" cy="48" r="44" fill="none" stroke="rgb(16 185 129)" strokeWidth="4"
-                           strokeDasharray={`${(visibleResult.totalScore / (measuredTotals.isPartial ? measuredTotals.measuredMax : 200)) * 276.4} 276.4`} strokeLinecap="round" />
+                           strokeDasharray={`${(visibleResult.totalScore / (measuredTotals.isPartial ? measuredTotals.measuredMax : TOTAL_MAX)) * 276.4} 276.4`} strokeLinecap="round" />
                         </svg>
-                        <span className="font-display text-2xl font-semibold text-foreground">{toScale500(visibleResult.totalScore, measuredTotals.isPartial ? measuredTotals.measuredMax : 200)}</span>
+                        <span className="font-display text-2xl font-semibold text-foreground">{toScale500(visibleResult.totalScore, measuredTotals.isPartial ? measuredTotals.measuredMax : TOTAL_MAX)}</span>
                       </div>
                       <p className="text-xs text-muted-foreground font-body mb-1">
                         {`Score ${scale500Suffix(measuredTotals)} · ${auditedDomain}`}

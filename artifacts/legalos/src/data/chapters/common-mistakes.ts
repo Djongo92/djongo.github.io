@@ -9,7 +9,7 @@ export const commonMistakes: Chapter = {
   subtitle: "Small oversights that chip away at credibility",
   hook: "10 mistakes that silently hurt your firm's reputation",
   categories: ["performance", "reputation"],
-  proofMetric: "Performance and Reputation category scores at the next audit — plus a standing zero on the ten-point sweep, re-run monthly; the sweep should take under an hour once the fixes are done.",
+  proofMetric: "Website Experience and Recognition category scores at the next audit — plus a standing zero on the ten-point sweep, re-run monthly; the sweep should take under an hour once the fixes are done.",
   actionItems: [
     { text: "Run the ten-point sweep (Materials below) right now — the footer year and dead social icons take under 30 minutes combined", priority: "quick-win" },
     { text: "Fix every failing item with a named owner this week; escalate anything touching templates to your web vendor with a deadline", priority: "strategic" },

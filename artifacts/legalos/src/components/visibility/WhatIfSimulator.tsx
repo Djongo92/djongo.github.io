@@ -26,6 +26,7 @@ import { calculatePerformanceScore } from "../../../supabase/functions/_shared/p
 import { calculateSocialScore, MAX_FOLLOWERS, MAX_POSTS_30D, MAX_ENGAGEMENT_RATE } from "../../../supabase/functions/_shared/socialFormula";
 import { calculateThoughtLeadershipScore } from "../../../supabase/functions/_shared/thoughtLeadershipFormula";
 import { p90Ratio } from "../../../supabase/functions/_shared/percentileFormula";
+import { TOTAL_MAX } from "../../../supabase/functions/_shared/methodology";
 
 interface Props {
   open: boolean;
@@ -50,8 +51,11 @@ const WhatIfSimulator = ({ open, onClose, audit }: Props) => {
     engagementRate: social?.engagementRate ?? 0,
     platforms: social?.platforms ?? { linkedin: false, instagram: false, twitter: false, facebook: false },
   };
+  // Own articles drive the biggest Thought Leadership signal. Audits scored
+  // before articles were counted separately compare all own output as one.
+  const articlesStats = tl?.articlesStats ?? tl?.postsStats;
   const initialTl = {
-    postsCount: tl?.postsCount ?? 0,
+    postsCount: tl?.articlesCount ?? tl?.postsCount ?? 0,
     newsCount: tl?.newsCount ?? 0,
     bylinePct: Math.round((tl?.bylinePct ?? 0) * 100),
   };
@@ -64,7 +68,7 @@ const WhatIfSimulator = ({ open, onClose, audit }: Props) => {
     followers: Math.max((social?.followersStats?.p90Threshold ?? 0) * 2, initialSocial.followers * 2, 1000),
     posts30d: Math.max((social?.postsStats?.p90Threshold ?? 0) * 2, initialSocial.posts30d * 2, 20, 1),
     engagementRate: Math.max((social?.erStats?.p90Threshold ?? 0) * 2, initialSocial.engagementRate * 2, 5),
-    postsCount: Math.max((tl?.postsStats?.p90Threshold ?? 0) * 2, initialTl.postsCount * 2, 20, 1),
+    postsCount: Math.max((articlesStats?.p90Threshold ?? 0) * 2, initialTl.postsCount * 2, 20, 1),
     newsCount: Math.max((tl?.newsStats?.p90Threshold ?? 0) * 2, initialTl.newsCount * 2, 10, 1),
   };
 
@@ -112,10 +116,13 @@ const WhatIfSimulator = ({ open, onClose, audit }: Props) => {
 
   const tlResult = useMemo(() => {
     if (!tl) return null;
-    const postsRatio = tl.postsStats ? p90Ratio({ value: postsCount, p90Threshold: tl.postsStats.p90Threshold }) : 0;
-    const newsRatio = tl.newsStats ? p90Ratio({ value: newsCount, p90Threshold: tl.newsStats.p90Threshold }) : 0;
-    return calculateThoughtLeadershipScore(postsRatio, bylinePct / 100, newsRatio);
-  }, [tl, postsCount, newsCount, bylinePct]);
+    const articlesRatio = articlesStats ? p90Ratio({ value: postsCount, p90Threshold: articlesStats.p90Threshold }) : 0;
+    const pressRatio = tl.newsStats ? p90Ratio({ value: newsCount, p90Threshold: tl.newsStats.p90Threshold }) : 0;
+    // Own news and publishing consistency stay at their audited values.
+    const ownNewsRatio = tl.ownNewsStats ? p90Ratio(tl.ownNewsStats) : 0;
+    const consistency = tl.windowMonths ? (tl.activeMonths ?? 0) / tl.windowMonths : 0;
+    return calculateThoughtLeadershipScore({ articlesRatio, bylinePct: bylinePct / 100, ownNewsRatio, consistency, pressRatio });
+  }, [tl, articlesStats, postsCount, newsCount, bylinePct]);
 
   const whatIfTotal = useMemo(() => {
     const performanceScore = performanceResult?.score ?? audit.performance_score;
@@ -143,7 +150,7 @@ const WhatIfSimulator = ({ open, onClose, audit }: Props) => {
   // The comparison line must speak the public 500-point scale on both sides
   // — what-if and actual share the same measured denominator (Reputation
   // and SEO are pinned to the audit's own provenance above).
-  const whatIfScaleMax = whatIfMeasured.isPartial ? whatIfMeasured.measuredMax : 200;
+  const whatIfScaleMax = whatIfMeasured.isPartial ? whatIfMeasured.measuredMax : TOTAL_MAX;
   const actualDisplay = toScale500(round1(audit.total_score), whatIfScaleMax);
   const whatIfDisplay = toScale500(whatIfTotal, whatIfScaleMax);
 
@@ -174,8 +181,8 @@ const WhatIfSimulator = ({ open, onClose, audit }: Props) => {
       <div className="overflow-y-auto px-6 py-5 space-y-6">
         <p className="text-xs text-muted-foreground font-body leading-relaxed">
           Drag any input to see how it moves your real score, computed with the exact same formula the audit
-          uses — not an estimate. Reputation and SEO &amp; Authority stay fixed here: one needs a live directory
-          lookup, the other a paid data subscription this instance doesn't have configured yet.
+          uses — not an estimate. Recognition and Search Authority stay fixed here: one needs a live directory
+          lookup, the other a fresh third-party data pull.
         </p>
 
         <div className="bg-secondary/30 rounded-sm p-4 space-y-1.5">
@@ -273,13 +280,13 @@ const WhatIfSimulator = ({ open, onClose, audit }: Props) => {
           ) : (
             <>
               <SliderRow
-                label="Blog posts published"
+                label="Articles published on your site"
                 value={postsCount}
                 onChange={setPostsCount}
                 max={sliderMax.postsCount}
               />
               <SliderRow
-                label="Press mentions found"
+                label="Independent press mentions"
                 value={newsCount}
                 onChange={setNewsCount}
                 max={sliderMax.newsCount}

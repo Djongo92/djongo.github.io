@@ -203,7 +203,7 @@ export default function ScoreScreen() {
           </View>
           {scoreToNext !== null && (
             <Text style={[styles.nextRankCaption, { color: colors.mutedForeground, fontFamily: 'Inter_400Regular', borderTopColor: colors.border }]}>
-              <Text style={{ color: colors.primary, fontFamily: 'Inter_600SemiBold' }}>{toScale500(scoreToNext, measured.measuredMax || 200)} pts</Text> to overtake #{firmAboveInRank?.rank} — one rank closer to the firms clients call first
+              <Text style={{ color: colors.primary, fontFamily: 'Inter_600SemiBold' }}>{toScale500(scoreToNext, measured.measuredMax || 500)} pts</Text> to overtake #{firmAboveInRank?.rank} — one rank closer to the firms clients call first
             </Text>
           )}
         </PressableScale>

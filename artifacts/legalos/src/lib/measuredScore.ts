@@ -1,4 +1,5 @@
 import { CATEGORY_META, CATEGORY_ORDER, type CategoryKey } from "@/lib/visibilityCategories";
+import { TOTAL_MAX, categoryMaxForVersion, totalMaxForVersion } from "../../supabase/functions/_shared/methodology";
 
 /** Per-category score + provenance, keyed by category key — the shape every surface builds before calling computeMeasuredTotals. */
 export type CategoryTotals = Record<string, { score: number; provenance: string }>;
@@ -8,7 +9,7 @@ export interface MeasuredTotals {
   score: number;
   /** Sum of max points across measured categories only — the fair denominator for a percentage. */
   measuredMax: number;
-  /** The full 200-point scale, for reference/labeling only. */
+  /** The full 500-point scale, for reference/labeling only. */
   fullMax: number;
   /** True if at least one category has provenance "missing". */
   isPartial: boolean;
@@ -17,12 +18,10 @@ export interface MeasuredTotals {
 }
 
 /**
- * A "missing" category (not yet configured, e.g. SEO & Authority without an
- * Ahrefs/Moz key) shouldn't drag down a firm's displayed percentage just
- * because it's an unmeasured 0 rather than a real, earned 0 — an 80-point
- * firm out of 140 measured points (57%) reads very differently than 80/200
- * (40%). Mirrors the transparency the Recognition Index page already
- * applies by capping its own denominator at what it actually measures.
+ * A "missing" category (e.g. Search Authority when the provider couldn't
+ * measure a domain) shouldn't drag down a firm's displayed percentage just
+ * because it's an unmeasured 0 rather than a real, earned 0 — 200 of 400
+ * measured points (50%) reads very differently than 200/500 (40%).
  */
 export function computeMeasuredTotals(
   categories: CategoryTotals | null | undefined,
@@ -45,17 +44,15 @@ export function computeMeasuredTotals(
   return { score, measuredMax, fullMax, isPartial: excludedLabels.length > 0, excludedLabels };
 }
 
-/**
- * Display scale: internal scoring stays on the 200-point category rules
- * (20/20/60/45/55), but every user-facing total renders on the 500-point
- * scale — a pure presentation rescale, so ranks, percentiles, and stored
- * audits are untouched. A partially measured firm is rescaled against its
- * *measured* max, keeping the measured-only honesty rule intact on the
- * new scale.
- */
-export const DISPLAY_SCALE_MAX = 500;
+/** The score scale. Native since methodology v3 — no display rescale. */
+export const DISPLAY_SCALE_MAX = TOTAL_MAX;
 
-/** Converts a raw score against a raw max to the public 500-point scale. */
+/**
+ * Expresses a score against a max on the 500-point scale. For a fully
+ * measured current audit this is the identity; for a partially measured
+ * one it rescales against the measured max (the measured-only honesty
+ * rule); for a stored pre-v3 snapshot it converts the old 200-point total.
+ */
 export function toScale500(score: number, max: number): number {
   if (max <= 0) return 0;
   return Math.round((score / max) * DISPLAY_SCALE_MAX);
@@ -63,41 +60,44 @@ export function toScale500(score: number, max: number): number {
 
 /**
  * The denominator for a frozen history snapshot: the sum of category maxima
- * that snapshot actually measured, from its frozen provenance — never
- * today's categories and never a flat 200 when the snapshot was partial.
- * Snapshots recorded before provenance existed (undefined) get the full
- * 200-point scale.
+ * that snapshot actually measured, from its frozen provenance, under the
+ * methodology version that scored it — never today's categories and never
+ * a flat total when the snapshot was partial. Snapshots recorded before
+ * provenance existed (undefined) get their version's full scale.
  */
 export function measuredMaxFromProvenance(
   provenance: Partial<Record<string, string>> | null | undefined,
+  methodologyVersion?: number | null,
 ): number {
-  if (!provenance) return 200;
+  const fullMax = totalMaxForVersion(methodologyVersion);
+  if (!provenance) return fullMax;
+  const maxes = categoryMaxForVersion(methodologyVersion);
   let max = 0;
   for (const key of Object.keys(CATEGORY_META) as CategoryKey[]) {
     if (provenance[key] === "missing") continue;
-    max += CATEGORY_META[key].max;
+    max += maxes[key];
   }
-  return max > 0 ? max : 200;
+  return max > 0 ? max : fullMax;
 }
 
 /**
- * A history point on the 500 display scale, rescaled against what THAT
- * snapshot measured — so a point from a partial audit reads consistently
- * with the score ring (which uses the measured denominator), and deltas
+ * A history point on the 500-point scale, expressed against what THAT
+ * snapshot measured under the methodology that scored it — so a point from
+ * a partial audit reads consistently with the score ring, and deltas
  * computed by subtracting two of these match what the chart shows.
  */
 export function historyScore500(
   totalScore: number,
   provenance: Partial<Record<string, string>> | null | undefined,
+  methodologyVersion?: number | null,
 ): number {
-  return toScale500(Math.round(totalScore), measuredMaxFromProvenance(provenance));
+  return toScale500(totalScore, measuredMaxFromProvenance(provenance, methodologyVersion));
 }
 
 /**
  * The denominator suffix every split number+suffix surface (PDF covers,
- * the share-card canvas, the score ring) renders instead of hardcoding
- * "/ 200" — partial audits read "/ 500 measured", never a shrunken raw
- * denominator that would leak the internal scale.
+ * the share-card canvas, the score ring) renders instead of hardcoding a
+ * denominator — partial audits read "/ 500 measured".
  */
 export function scale500Suffix(totals: MeasuredTotals): string {
   return totals.isPartial ? "/ 500 measured" : "/ 500";
@@ -120,7 +120,7 @@ export function measuredScoreLabel(totalScore: number, totals: MeasuredTotals): 
  * The explanatory line to pair with measuredScoreLabel whenever it's
  * partial — makes explicit that the excluded categories were left out of
  * the denominator, not scored as a zero. Returns null when there's
- * nothing to explain (full 200-point coverage).
+ * nothing to explain (full coverage).
  */
 export function measuredExcludedNote(totals: MeasuredTotals): string | null {
   if (!totals.isPartial) return null;
@@ -137,8 +137,8 @@ export function measuredExcludedNote(totals: MeasuredTotals): string | null {
 export function categoryScoreCell(cat: { score: number; provenance: string } | undefined, key: CategoryKey): string {
   const provenance = cat?.provenance ?? "missing";
   if (provenance === "missing") return "Not measured";
-  // Percentages, not raw point fractions: "14 / 20" invites confusion with
-  // the public 500-point total scale; "70%" reads the same everywhere.
+  // Percentages, not point fractions: "35 / 50" next to a "/ 500" total
+  // reads ambiguously; "70%" reads the same everywhere.
   return `${Math.round(((cat?.score ?? 0) / CATEGORY_META[key].max) * 100)}%`;
 }
 

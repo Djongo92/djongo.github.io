@@ -1,4 +1,4 @@
-// SEO & Authority category (60 pts): six metrics, each peer-normalized via
+// Search Authority category (100 pts — methodology.ts): six metrics, each peer-normalized via
 // p90Ratio (see percentileFormula.ts), sourced from whichever provider is
 // configured in Supabase secrets (see seoProviders/ — Ahrefs, Moz,
 // DataForSEO, or the free Open PageRank tier). Degrades to
@@ -16,6 +16,7 @@ import type { SupabaseClient } from "https://esm.sh/@supabase/supabase-js@2.45.0
 import { peerStatsFor } from "./peerStats.ts";
 import { p90Ratio, type PeerStats } from "./percentileFormula.ts";
 import { calculateSeoScore } from "./seoFormula.ts";
+import { carryForwardCategoryScore } from "./methodology.ts";
 import { getConfiguredSeoProvider, type NormalizedSeoMetrics, type SeoProviderName } from "./seoProviders/index.ts";
 import type { FirmSize } from "./peerDimensions.ts";
 
@@ -42,7 +43,7 @@ async function historicalSeoFallback(
 ): Promise<SeoResult | null> {
   const { data, error } = await serviceClient
     .from("market_visibility_audit_history")
-    .select("seo_authority_score,recorded_at")
+    .select("seo_authority_score,recorded_at,methodology_version")
     .eq("market", market)
     .eq("audited_domain", auditedDomain)
     .order("recorded_at", { ascending: false })
@@ -55,7 +56,9 @@ async function historicalSeoFallback(
     return null;
   }
   return {
-    score: Number(latest.seo_authority_score),
+    // Re-expressed on the current scale when the carried-forward value was
+    // scored under an older methodology.
+    score: carryForwardCategoryScore(Number(latest.seo_authority_score), "seoAuthority", latest.methodology_version),
     raw: {
       provider: "dataforseo",
       fallback: "historical",

@@ -10,7 +10,7 @@ export const pricingPackaging: Chapter = {
   subtitle: "The page nobody publishes, the question everybody asks",
   hook: "Clients don't expect cheap. They expect legible.",
   categories: ["reputation"],
-  proofMetric: "Reputation category score at the next audit — plus consult-to-engagement conversion before and after adding pricing legibility (a model, a range, a packaged offer) to proposals and the site.",
+  proofMetric: "Recognition category score at the next audit — plus consult-to-engagement conversion before and after adding pricing legibility (a model, a range, a packaged offer) to proposals and the site.",
   actionItems: [
     { text: "Publish your fee model in one honest paragraph on the website — not numbers, the logic (how you price, what drives cost, how clients control it)", priority: "quick-win" },
     { text: "Package your three most repeatable matters into named, scoped offers (template in Materials below) with a price or price logic", priority: "strategic" },

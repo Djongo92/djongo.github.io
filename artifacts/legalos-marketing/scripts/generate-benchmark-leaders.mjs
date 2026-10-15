@@ -1,9 +1,10 @@
 #!/usr/bin/env node
 // Regenerates src/data/benchmarkLeaders.ts from the census leaderboard
 // snapshot (../legalos/scripts/census/leaderboard-snapshot.json), which the
-// census runner refreshes at the end of every sweep. Scores are converted to
-// the public 0-500 display scale (raw total_score x 2.5, rounded) — the same
-// scale the Visibility Index renders — so the landing leaderboard can never
+// census runner refreshes at the end of every sweep. Scores render on the
+// public 0-500 scale (snapshots with scaleMax 500 are already native; older
+// snapshots carried 0-200 totals and are scaled x 2.5) — the same scale the
+// Visibility Index renders — so the landing leaderboard can never
 // drift from measured scores without check:leaders failing.
 //
 // The synthetic "Your Firm" row is NOT generated here — App.tsx appends it,
@@ -26,6 +27,9 @@ const PEER_GROUP_LABELS = {
  * snapshot -> display rows. Throws on a missing/empty snapshot so a broken
  * export can never silently blank the landing table.
  */
+/** Multiplier from a snapshot's stored totals to the 0–500 display scale. */
+export const displayFactor = (snapshot) => 500 / (Number(snapshot?.scaleMax) > 0 ? Number(snapshot.scaleMax) : 200);
+
 export function computeLeaderRows(snapshot) {
   if (!snapshot || !Array.isArray(snapshot.leaders) || snapshot.leaders.length === 0) {
     throw new Error("leaderboard snapshot is missing or has no leaders — run the census sweep or pnpm --filter @workspace/legalos run census:snapshot");
@@ -33,7 +37,7 @@ export function computeLeaderRows(snapshot) {
   return snapshot.leaders.map((l, i) => ({
     rank: i + 1,
     name: String(l.name),
-    score: Math.round(Number(l.totalScore) * 2.5),
+    score: Math.round(Number(l.totalScore) * displayFactor(snapshot)),
     delta: "—",
     category: PEER_GROUP_LABELS[l.peerGroup] ?? "—",
   }));
@@ -61,7 +65,8 @@ export function computeScoreBuckets(snapshot) {
   if (!snapshot || !Array.isArray(snapshot.scores) || snapshot.scores.length === 0) {
     throw new Error("leaderboard snapshot has no scores array — re-run the census sweep or pnpm --filter @workspace/uvid run census:snapshot to regenerate it");
   }
-  const display = snapshot.scores.map((s) => Math.round(Number(s) * 2.5));
+  const factor = displayFactor(snapshot);
+  const display = snapshot.scores.map((s) => Math.round(Number(s) * factor));
   if (display.some((d) => !Number.isFinite(d) || d < 0)) {
     throw new Error("leaderboard snapshot contains a non-numeric or negative score");
   }
@@ -109,7 +114,7 @@ export function renderBenchmarkLeadersTs(snapshot) {
 export interface BenchmarkLeader {
   rank: number;
   name: string;
-  /** Public 0–500 display scale (raw census total_score × 2.5, rounded). */
+  /** Public 0–500 display scale (rounded). */
   score: number;
   delta: string;
   category: string;

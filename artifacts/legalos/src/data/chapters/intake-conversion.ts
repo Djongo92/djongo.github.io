@@ -10,7 +10,7 @@ export const intakeConversion: Chapter = {
   subtitle: "The funnel's back half, where inquiries become engagements",
   hook: "All your marketing ends at one moment — the first response",
   categories: ["reputation"],
-  proofMetric: "Reputation category score at the next audit — plus intake metrics logged per inquiry: response time, consult booked (y/n), and engagement won. Response time is the first number to move.",
+  proofMetric: "Recognition category score at the next audit — plus intake metrics logged per inquiry: response time, consult booked (y/n), and engagement won. Response time is the first number to move.",
   actionItems: [
     { text: "Set the response SLA today: every inquiry acknowledged within 4 working hours, by a human, with a named next step — publish it internally", priority: "quick-win" },
     { text: "Adopt the intake script (Materials below) for every new inquiry and log the answers — source, matter, stakes, timeline", priority: "strategic" },

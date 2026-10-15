@@ -9,35 +9,36 @@ const FULL_PROVENANCE = {
   reputation: "measured",
 };
 
+const PARTIAL = {
+  performance: { score: 35, provenance: "api" },
+  social: { score: 22.5, provenance: "self_reported" },
+  seoAuthority: { score: 0, provenance: "missing" },
+  thoughtLeadership: { score: 50, provenance: "ai_classified" },
+  reputation: { score: 92.5, provenance: "api" },
+};
+const FULL = {
+  performance: { score: 45, provenance: "api" },
+  social: { score: 37.5, provenance: "self_reported" },
+  seoAuthority: { score: 75, provenance: "api" },
+  thoughtLeadership: { score: 75, provenance: "ai_classified" },
+  reputation: { score: 100, provenance: "api" },
+};
+
 describe("computeMeasuredTotals", () => {
   it("excludes a missing category from the denominator (defect 1.2)", () => {
-    // 80 points total, but SEO & Authority (max 60) is unconfigured/missing.
-    // The naive /200 reading is 40%; the true measured reading is 80/140 = ~57%.
-    const categories = {
-      performance: { score: 14, provenance: "api" },
-      social: { score: 9, provenance: "self_reported" },
-      seoAuthority: { score: 0, provenance: "missing" },
-      thoughtLeadership: { score: 20, provenance: "ai_classified" },
-      reputation: { score: 37, provenance: "api" },
-    };
-    const result = computeMeasuredTotals(categories);
-    expect(result.score).toBe(80);
-    expect(result.measuredMax).toBe(140);
-    expect(result.fullMax).toBe(200);
+    // 200 points total, but Search Authority (max 100) is missing.
+    // The naive /500 reading is 40%; the true measured reading is 200/400 = 50%.
+    const result = computeMeasuredTotals(PARTIAL);
+    expect(result.score).toBe(200);
+    expect(result.measuredMax).toBe(400);
+    expect(result.fullMax).toBe(500);
     expect(result.isPartial).toBe(true);
-    expect(result.excludedLabels).toEqual(["SEO & Authority"]);
+    expect(result.excludedLabels).toEqual(["Search Authority"]);
   });
 
-  it("uses the full 200 when nothing is missing", () => {
-    const categories = {
-      performance: { score: 18, provenance: "api" },
-      social: { score: 15, provenance: "self_reported" },
-      seoAuthority: { score: 45, provenance: "api" },
-      thoughtLeadership: { score: 30, provenance: "ai_classified" },
-      reputation: { score: 40, provenance: "api" },
-    };
-    const result = computeMeasuredTotals(categories);
-    expect(result.measuredMax).toBe(200);
+  it("uses the full 500 when nothing is missing", () => {
+    const result = computeMeasuredTotals(FULL);
+    expect(result.measuredMax).toBe(500);
     expect(result.isPartial).toBe(false);
     expect(result.excludedLabels).toEqual([]);
   });
@@ -46,63 +47,41 @@ describe("computeMeasuredTotals", () => {
     const result = computeMeasuredTotals(null);
     expect(result.score).toBe(0);
     expect(result.measuredMax).toBe(0);
-    expect(result.fullMax).toBe(200);
+    expect(result.fullMax).toBe(500);
     expect(result.isPartial).toBe(true);
   });
 });
 
 describe("measuredScoreLabel", () => {
-  it("shows the measured denominator, not 200, when a category is missing", () => {
-    const totals = computeMeasuredTotals({
-      performance: { score: 14, provenance: "api" },
-      social: { score: 9, provenance: "self_reported" },
-      seoAuthority: { score: 0, provenance: "missing" },
-      thoughtLeadership: { score: 20, provenance: "ai_classified" },
-      reputation: { score: 37, provenance: "api" },
-    });
-    // 80/140 measured = 57.1% → 286 on the public 500-point scale.
-    expect(measuredScoreLabel(80, totals)).toBe("286 / 500 measured");
+  it("shows the measured denominator when a category is missing", () => {
+    // 200/400 measured = 50% → 250 on the 500-point scale.
+    expect(measuredScoreLabel(200, computeMeasuredTotals(PARTIAL))).toBe("250 / 500 measured");
   });
 
-  it("shows the full 200 when every category is measured", () => {
-    const totals = computeMeasuredTotals({
-      performance: { score: 18, provenance: "api" },
-      social: { score: 15, provenance: "self_reported" },
-      seoAuthority: { score: 45, provenance: "api" },
-      thoughtLeadership: { score: 30, provenance: "ai_classified" },
-      reputation: { score: 40, provenance: "api" },
-    });
-    expect(measuredScoreLabel(148, totals)).toBe("370 / 500");
+  it("shows the native total when every category is measured", () => {
+    expect(measuredScoreLabel(332.5, computeMeasuredTotals(FULL))).toBe("333 / 500");
   });
 });
 
 describe("measuredExcludedNote", () => {
   it("names the excluded category and disclaims it as not a zero", () => {
     const totals = computeMeasuredTotals({
-      performance: { score: 14, provenance: "api" },
+      performance: { score: 35, provenance: "api" },
       seoAuthority: { score: 0, provenance: "missing" },
     });
-    expect(measuredExcludedNote(totals)).toContain("SEO & Authority");
+    expect(measuredExcludedNote(totals)).toContain("Search Authority");
     expect(measuredExcludedNote(totals)).toContain("not counted as a zero");
   });
 
   it("returns null when nothing is excluded", () => {
-    const totals = computeMeasuredTotals({
-      performance: { score: 18, provenance: "api" },
-      social: { score: 15, provenance: "self_reported" },
-      seoAuthority: { score: 45, provenance: "api" },
-      thoughtLeadership: { score: 30, provenance: "ai_classified" },
-      reputation: { score: 40, provenance: "api" },
-    });
-    expect(measuredExcludedNote(totals)).toBeNull();
+    expect(measuredExcludedNote(computeMeasuredTotals(FULL))).toBeNull();
   });
 });
 
 describe("categoryScoreCell", () => {
   it("renders 'Not measured' instead of a 0/max cell for a missing category", () => {
-    // This is the exact regression covered by task #38's rejection: Command
-    // Center cards and Executive Report tables must never show a missing
-    // category as an earned "0 / 60".
+    // Command Center cards and Executive Report tables must never show a
+    // missing category as an earned "0 / 100".
     expect(categoryScoreCell({ score: 0, provenance: "missing" }, "seoAuthority")).toBe("Not measured");
   });
 
@@ -111,23 +90,19 @@ describe("categoryScoreCell", () => {
   });
 
   it("renders a measured category as a percentage of its potential", () => {
-    // 37.4 / 55 = 68% — percentages, not raw point fractions, so the cell
-    // can't be confused with the public 500-point total scale.
-    expect(categoryScoreCell({ score: 37.4, provenance: "api" }, "reputation")).toBe("68%");
+    // 93.5 / 125 = 74.8% → 75%.
+    expect(categoryScoreCell({ score: 93.5, provenance: "api" }, "reputation")).toBe("75%");
   });
 });
 
 describe("pickHighestLeverageCategory", () => {
   it("never recommends a missing category as the highest-leverage focus", () => {
-    // SEO & Authority (max 60) is unmeasured — 0% would make it look like
-    // the biggest gap of all, but it must lose to a real, measured low
-    // performer (Social at 10%) because a data gap isn't actionable.
     const categories = {
-      performance: { score: 14, provenance: "api" }, // 14/20 = 70%
-      social: { score: 2, provenance: "self_reported" }, // 2/20 = 10%
+      performance: { score: 35, provenance: "api" }, // 70%
+      social: { score: 7.5, provenance: "self_reported" }, // 10%
       seoAuthority: { score: 0, provenance: "missing" },
-      thoughtLeadership: { score: 20, provenance: "ai_classified" }, // 20/45 = 44%
-      reputation: { score: 37, provenance: "api" }, // 37/55 = 67%
+      thoughtLeadership: { score: 66, provenance: "ai_classified" }, // 44%
+      reputation: { score: 84, provenance: "api" }, // 67%
     };
     expect(pickHighestLeverageCategory(categories)).toBe("social");
   });
@@ -145,33 +120,30 @@ describe("pickHighestLeverageCategory", () => {
 
   it("picks the lowest-scoring-by-percentage category when all are measured", () => {
     const categories = {
-      performance: { score: 18, provenance: "api" }, // 90%
-      social: { score: 20, provenance: "self_reported" }, // 100%
-      seoAuthority: { score: 12, provenance: "api" }, // 20%
-      thoughtLeadership: { score: 45, provenance: "ai_classified" }, // 100%
-      reputation: { score: 55, provenance: "api" }, // 100%
+      performance: { score: 45, provenance: "api" }, // 90%
+      social: { score: 75, provenance: "self_reported" }, // 100%
+      seoAuthority: { score: 20, provenance: "api" }, // 20%
+      thoughtLeadership: { score: 150, provenance: "ai_classified" }, // 100%
+      reputation: { score: 125, provenance: "api" }, // 100%
     };
     expect(pickHighestLeverageCategory(categories)).toBe("seoAuthority");
   });
 });
 
-describe("500-point display scale", () => {
-  it("rescales full-coverage totals against the internal 200", () => {
+describe("500-point scale", () => {
+  it("a fully measured current total is already on the scale", () => {
+    expect(toScale500(370, 500)).toBe(370);
+    expect(toScale500(0, 500)).toBe(0);
+  });
+
+  it("converts a pre-v3 total out of 200", () => {
     expect(toScale500(148, 200)).toBe(370);
-    expect(toScale500(0, 200)).toBe(0);
   });
 
   it("rescales partial totals against the measured max, keeping the measured qualifier", () => {
-    const totals = computeMeasuredTotals({
-      performance: { score: 14, provenance: "api" },
-      social: { score: 9, provenance: "self_reported" },
-      seoAuthority: { score: 0, provenance: "missing" },
-      thoughtLeadership: { score: 20, provenance: "ai_classified" },
-      reputation: { score: 37, provenance: "api" },
-    });
-    expect(toScale500(80, totals.measuredMax)).toBe(286);
+    const totals = computeMeasuredTotals(PARTIAL);
+    expect(toScale500(200, totals.measuredMax)).toBe(250);
     expect(scale500Suffix(totals)).toBe("/ 500 measured");
-    expect(measuredScoreLabel(80, totals)).toBe("286 / 500 measured");
   });
 
   it("guards a zero max rather than dividing by it", () => {
@@ -179,7 +151,18 @@ describe("500-point display scale", () => {
   });
 });
 
-describe("historyScore500 — frozen-snapshot scaling", () => {
+describe("historyScore500 — current-methodology snapshots", () => {
+  it("leaves a fully measured v3 snapshot as scored", () => {
+    expect(historyScore500(300, FULL_PROVENANCE, 3)).toBe(300);
+  });
+
+  it("scales a partial v3 snapshot against what it measured", () => {
+    expect(measuredMaxFromProvenance({ ...FULL_PROVENANCE, seoAuthority: "missing" }, 3)).toBe(400);
+    expect(historyScore500(200, { ...FULL_PROVENANCE, seoAuthority: "missing" }, 3)).toBe(250);
+  });
+});
+
+describe("historyScore500 — pre-v3 (200-point) snapshots", () => {
   it("scales a fully measured snapshot against the full 200", () => {
     expect(historyScore500(120, FULL_PROVENANCE)).toBe(300);
   });

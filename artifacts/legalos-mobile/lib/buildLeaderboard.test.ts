@@ -54,7 +54,7 @@ function auditRow(
   };
 }
 
-/** A fully-measured live firm: visibilityPercent = score ÷ 200. */
+/** A fully-measured live firm: visibilityPercent = score ÷ 500. */
 function liveFirm(domain: string, c: CatScores, overrides: Partial<Firm> = {}): Firm {
   const score = totalOf(c);
   return {
@@ -65,7 +65,7 @@ function liveFirm(domain: string, c: CatScores, overrides: Partial<Firm> = {}): 
     score,
     percentile: 25,
     isYou: true,
-    visibilityPercent: Math.round((score / 200) * 100),
+    visibilityPercent: Math.round((score / 500) * 100),
     hasFullAudit: true,
     performance: c.performance,
     social: c.social,
@@ -86,7 +86,7 @@ const ranks = (list: Firm[]) => list.map((f) => ({ rank: f.rank, domain: f.domai
 // ─── Tests ────────────────────────────────────────────────────────────────────
 
 describe("buildMergedLeaderboard — audit rows", () => {
-  it("carries measured SEO & Authority scores into the ranked firm", () => {
+  it("carries measured Search Authority scores into the ranked firm", () => {
     const rows = [
       auditRow("seo", "seo.rs", cats(12, 14, 30, 27, 32)),
       auditRow("other", "other.rs", cats(14, 14, 20, 27, 32)),
@@ -98,16 +98,16 @@ describe("buildMergedLeaderboard — audit rows", () => {
 
     expect(seoFirm.seoAuthority).toBe(30);
     expect(seoFirm.provenance.seoAuthority).toBe("api");
-    // Math.round(115/200 * 100) = 57 (IEEE 754: 0.575 * 100 = 57.499...)
-    expect(seoFirm.visibilityPercent).toBe(57);
+    // Math.round(115/500 * 100) = 23
+    expect(seoFirm.visibilityPercent).toBe(23);
     expect(seoFirm.rank).toBe(1);
   });
 
   it("assigns 1-based ranks from market score ordering", () => {
     const rows = [
-      auditRow("a", "a.rs", cats(20, 20, 20, 20, 20)), // 100 → 50%
-      auditRow("b", "b.rs", cats(16, 16, 16, 16, 16)), // 80 → 40%
-      auditRow("c", "c.rs", cats(12, 12, 12, 12, 12)), // 60 → 30%
+      auditRow("a", "a.rs", cats(20, 20, 20, 20, 20)), // 100 → 20%
+      auditRow("b", "b.rs", cats(16, 16, 16, 16, 16)), // 80 → 16%
+      auditRow("c", "c.rs", cats(12, 12, 12, 12, 12)), // 60 → 12%
     ];
     const live = liveFirm("b.rs", cats(16, 16, 16, 16, 16));
 
@@ -143,30 +143,30 @@ describe("buildMergedLeaderboard — audit rows", () => {
   });
 
   it("ranks by visibility percent, not raw total — a missing category shrinks the denominator", () => {
-    // a: 100 fully-measured points → 100/200 = 50%.
-    // b: 90 points with seoAuthority MISSING → 90/140 = 64% — outranks a
+    // a: 100 fully-measured points → 100/500 = 20%.
+    // b: 120 points with seoAuthority MISSING → 120/400 = 30% — outranks a
     //    despite the lower raw total (same rule as the web Visibility Index).
     const rows = [
       auditRow("a", "a.rs", cats(20, 20, 20, 20, 20)),
-      auditRow("b", "b.rs", cats(25, 25, 0, 20, 20), { ...FULL_PROV, seoAuthority: "missing" }),
+      auditRow("b", "b.rs", cats(30, 30, 0, 30, 30), { ...FULL_PROV, seoAuthority: "missing" }),
     ];
     const live = liveFirm("a.rs", cats(20, 20, 20, 20, 20));
 
     const result = buildMergedLeaderboard(rows, [], "a.rs", live);
 
     expect(result[0].domain).toBe("b.rs");
-    expect(result[0].visibilityPercent).toBe(64);
+    expect(result[0].visibilityPercent).toBe(30);
     expect(result[1].domain).toBe("a.rs");
-    expect(result[1].visibilityPercent).toBe(50);
+    expect(result[1].visibilityPercent).toBe(20);
   });
 
   describe("when the signed-in firm is not in the public list", () => {
     it("splices the firm at the correct percent position and renumbers ranks", () => {
       const rows = [
-        auditRow("a", "a.rs", cats(20, 20, 20, 20, 20)), // 100 → 50%
-        auditRow("c", "c.rs", cats(12, 12, 12, 12, 12)), // 60 → 30%
+        auditRow("a", "a.rs", cats(20, 20, 20, 20, 20)), // 100 → 20%
+        auditRow("c", "c.rs", cats(12, 12, 12, 12, 12)), // 60 → 12%
       ];
-      // live firm scores 80 → 40% — should land between a.rs and c.rs
+      // live firm scores 80 → 16% — should land between a.rs and c.rs
       const live = liveFirm("b.rs", cats(16, 16, 16, 16, 16));
 
       const result = buildMergedLeaderboard(rows, [], "b.rs", live);
@@ -184,7 +184,7 @@ describe("buildMergedLeaderboard — audit rows", () => {
         auditRow("a", "a.rs", cats(20, 20, 20, 20, 20)),
         auditRow("b", "b.rs", cats(16, 16, 16, 16, 16)),
       ];
-      const live = liveFirm("z.rs", cats(8, 8, 8, 8, 8)); // 40 → 20%
+      const live = liveFirm("z.rs", cats(8, 8, 8, 8, 8)); // 40 → 8%
 
       const result = buildMergedLeaderboard(rows, [], "z.rs", live);
 
@@ -197,7 +197,7 @@ describe("buildMergedLeaderboard — audit rows", () => {
         auditRow("b", "b.rs", cats(16, 16, 16, 16, 16)),
         auditRow("c", "c.rs", cats(12, 12, 12, 12, 12)),
       ];
-      const live = liveFirm("a.rs", cats(24, 24, 24, 24, 24)); // 120 → 60%
+      const live = liveFirm("a.rs", cats(24, 24, 24, 24, 24)); // 120 → 24%
 
       const result = buildMergedLeaderboard(rows, [], "a.rs", live);
 
@@ -213,7 +213,7 @@ describe("buildMergedLeaderboard — audit rows", () => {
         auditRow("b", "b.rs", cats(16, 16, 16, 16, 16)),
         auditRow("c", "c.rs", cats(12, 12, 12, 12, 12)),
       ];
-      const live = liveFirm("d.rs", cats(14, 14, 14, 14, 14)); // 70 → 35%
+      const live = liveFirm("d.rs", cats(14, 14, 14, 14, 14)); // 70 → 14%
 
       const result = buildMergedLeaderboard(rows, [], "d.rs", live);
       const resultRanks = result.map((f) => f.rank);
@@ -252,8 +252,8 @@ describe("buildMergedLeaderboard — audit rows", () => {
 
 describe("buildMergedLeaderboard — directory-standing merge", () => {
   it("merges directory-only firms alongside audits, ranked by their own percent scale", () => {
-    const rows = [auditRow("a", "a.rs", cats(20, 20, 20, 20, 20))]; // 100/200 → 50%
-    // 40 of the directory's 45 → 89% — ranks above the audited firm.
+    const rows = [auditRow("a", "a.rs", cats(20, 20, 20, 20, 20))]; // 100/500 → 20%
+    // 40 of the directory's 100 → 40% — ranks above the audited firm.
     const dirs = [dirFirm("DirTracked & Co", "dir.rs", 40)];
     const live = liveFirm("a.rs", cats(20, 20, 20, 20, 20));
 
@@ -262,7 +262,7 @@ describe("buildMergedLeaderboard — directory-standing merge", () => {
     expect(result[0].name).toBe("DirTracked & Co");
     expect(result[0].hasFullAudit).toBe(false);
     expect(result[0].score).toBe(40);
-    expect(result[0].visibilityPercent).toBe(89);
+    expect(result[0].visibilityPercent).toBe(40);
     expect(result[0].provenance.reputation).toBe("missing");
     expect(result[0].id).toBe("dir-dir.rs");
     expect(result[1].domain).toBe("a.rs");
@@ -297,7 +297,7 @@ describe("buildMergedLeaderboard — directory-standing merge", () => {
     // self entry, not duplicated as a directory-only row.
     const rows = [auditRow("a", "a.rs", cats(20, 20, 20, 20, 20))];
     const dirs = [dirFirm("My Firm (directory)", "my-firm.rs", 44)];
-    const live = liveFirm("my-firm.rs", cats(12, 12, 12, 12, 12)); // 60 → 30%
+    const live = liveFirm("my-firm.rs", cats(12, 12, 12, 12, 12)); // 60 → 12%
 
     const result = buildMergedLeaderboard(rows, dirs, "my-firm.rs", live);
 
@@ -310,9 +310,9 @@ describe("buildMergedLeaderboard — directory-standing merge", () => {
 
   it("breaks percent ties on absolute score so ordering is deterministic", () => {
     const rows = [
-      // y: 70 measured of 140 (seoAuthority missing) → 50%, score 70
-      auditRow("y", "y.rs", cats(20, 20, 0, 15, 15), { ...FULL_PROV, seoAuthority: "missing" }),
-      // x: 100 of 200 → 50%, score 100 — wins the tie
+      // y: 80 measured of 400 (seoAuthority missing) → 20%, score 80
+      auditRow("y", "y.rs", cats(20, 20, 0, 20, 20), { ...FULL_PROV, seoAuthority: "missing" }),
+      // x: 100 of 500 → 20%, score 100 — wins the tie
       auditRow("x", "x.rs", cats(20, 20, 20, 20, 20)),
     ];
     const live = liveFirm("x.rs", cats(20, 20, 20, 20, 20));
