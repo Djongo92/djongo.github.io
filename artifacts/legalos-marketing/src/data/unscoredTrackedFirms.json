@@ -1,0 +1,4 @@
+{
+  "_comment": "Tracked firms EXPLICITLY excluded from cohort statistics (no published audit yet). Each entry needs a reason. check:cohort fails if a firm listed here gains a published audit (remove it then) or if a tracked firm is unscored without being listed here.",
+  "maric i mujezinovc": "No verified website found yet — cannot be audited until its real domain is identified."
+}

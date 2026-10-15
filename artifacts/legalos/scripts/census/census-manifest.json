@@ -1,0 +1,653 @@
+{
+  "generatedAt": "2026-08-11T22:12:46.077Z",
+  "market": "serbia",
+  "firms": [
+    {
+      "domain": "lawofficealeksic.rs",
+      "displayName": "Aleksić & Associates",
+      "peerGroup": "local",
+      "firmSize": "mid_11_50",
+      "source": "census-new"
+    },
+    {
+      "domain": "andrejic.rs",
+      "displayName": "Andrejic & Partners",
+      "peerGroup": "local",
+      "firmSize": null,
+      "source": "census-new"
+    },
+    {
+      "domain": "ap-legal.rs",
+      "displayName": "AP Legal",
+      "peerGroup": "local",
+      "firmSize": "boutique_2_10",
+      "source": "census-new"
+    },
+    {
+      "domain": "arcliffe.com",
+      "displayName": "arcliffe",
+      "peerGroup": "local",
+      "firmSize": null,
+      "source": "census-new"
+    },
+    {
+      "domain": "atanaskovic-bozovic.com",
+      "displayName": "Atanasković Božović",
+      "peerGroup": "local",
+      "firmSize": "mid_11_50",
+      "source": "census-match"
+    },
+    {
+      "domain": "avs.legal",
+      "displayName": "AVS Legal",
+      "peerGroup": "local",
+      "firmSize": "boutique_2_10",
+      "source": "census-match"
+    },
+    {
+      "domain": "bplaw.co.rs",
+      "displayName": "bajic & popovic",
+      "peerGroup": "local",
+      "firmSize": "mid_11_50",
+      "source": "census-new"
+    },
+    {
+      "domain": "bit-law.com",
+      "displayName": "BIT Law Office",
+      "peerGroup": "local",
+      "firmSize": "mid_11_50",
+      "source": "census-match"
+    },
+    {
+      "domain": "bdkadvokati.com",
+      "displayName": "BDK Advokati",
+      "peerGroup": "local",
+      "firmSize": "mid_11_50",
+      "source": "census-match"
+    },
+    {
+      "domain": "bojovic.com",
+      "displayName": "Bojovic attorneys at law",
+      "peerGroup": "local",
+      "firmSize": "boutique_2_10",
+      "source": "census-new"
+    },
+    {
+      "domain": "bopa.rs",
+      "displayName": "BOPA Bojanović & Partners",
+      "peerGroup": "local",
+      "firmSize": "mid_11_50",
+      "source": "census-match"
+    },
+    {
+      "domain": "ctlegal.rs",
+      "displayName": "CT Legal (Caković Tomić)",
+      "peerGroup": "local",
+      "firmSize": "boutique_2_10",
+      "source": "census-match"
+    },
+    {
+      "domain": "cplaw.rs",
+      "displayName": "Cvetković Skoko & Jovičić",
+      "peerGroup": "local",
+      "firmSize": "boutique_2_10",
+      "source": "census-match"
+    },
+    {
+      "domain": "cvjeticaninlegal.com",
+      "displayName": "Cvjeticanin & Partneri",
+      "peerGroup": "local",
+      "firmSize": "boutique_2_10",
+      "source": "census-new"
+    },
+    {
+      "domain": "cwbip.com",
+      "displayName": "CWB",
+      "peerGroup": "local",
+      "firmSize": "boutique_2_10",
+      "source": "census-match"
+    },
+    {
+      "domain": "d2plaw.com",
+      "displayName": "Drašković Popović & Partners",
+      "peerGroup": "local",
+      "firmSize": "mid_11_50",
+      "source": "census-match"
+    },
+    {
+      "domain": "deloitte.com",
+      "displayName": "Deloitte Legal Serbia",
+      "peerGroup": "consultancy",
+      "firmSize": null,
+      "source": "census-match"
+    },
+    {
+      "domain": "djokicpartners.rs",
+      "displayName": "Djokić + Partners",
+      "peerGroup": "local",
+      "firmSize": "mid_11_50",
+      "source": "census-match"
+    },
+    {
+      "domain": "doklestic.law",
+      "displayName": "Doklestić Repić & Gajin",
+      "peerGroup": "local",
+      "firmSize": "mid_11_50",
+      "source": "census-match"
+    },
+    {
+      "domain": "fourlegal.rs",
+      "displayName": "four legal",
+      "peerGroup": "local",
+      "firmSize": "mid_11_50",
+      "source": "census-new"
+    },
+    {
+      "domain": "geciclaw.com",
+      "displayName": "Gecić Law",
+      "peerGroup": "local",
+      "firmSize": "mid_11_50",
+      "source": "census-match"
+    },
+    {
+      "domain": "gsm.legal",
+      "displayName": "Golubović Simić & Marinković",
+      "peerGroup": "local",
+      "firmSize": "mid_11_50",
+      "source": "census-match"
+    },
+    {
+      "domain": "gratanet.com",
+      "displayName": "Grata International",
+      "peerGroup": "international",
+      "firmSize": "boutique_2_10",
+      "source": "census-new"
+    },
+    {
+      "domain": "harrison-solicitors.com",
+      "displayName": "Harrisons Solicitors",
+      "peerGroup": "local",
+      "firmSize": "boutique_2_10",
+      "source": "census-match"
+    },
+    {
+      "domain": "ikonicstikovic.rs",
+      "displayName": "ikonic stikovic",
+      "peerGroup": "local",
+      "firmSize": "boutique_2_10",
+      "source": "census-new"
+    },
+    {
+      "domain": "injac.rs",
+      "displayName": "injac attorneys",
+      "peerGroup": "local",
+      "firmSize": "boutique_2_10",
+      "source": "census-new"
+    },
+    {
+      "domain": "advokatskakancelarija.com",
+      "displayName": "isailovic & partners",
+      "peerGroup": "regional",
+      "firmSize": "mid_11_50",
+      "source": "census-new"
+    },
+    {
+      "domain": "ivvk.rs",
+      "displayName": "ivvk lawyers",
+      "peerGroup": "local",
+      "firmSize": "mid_11_50",
+      "source": "census-new"
+    },
+    {
+      "domain": "jsplaw.co.rs",
+      "displayName": "Joksović, Stojanović & Partners",
+      "peerGroup": "local",
+      "firmSize": "mid_11_50",
+      "source": "census-match"
+    },
+    {
+      "domain": "jpm.law",
+      "displayName": "JPM & Partners",
+      "peerGroup": "local",
+      "firmSize": "mid_11_50",
+      "source": "census-match"
+    },
+    {
+      "domain": "jplaw.rs",
+      "displayName": "Jusufović & Partners",
+      "peerGroup": "local",
+      "firmSize": "boutique_2_10",
+      "source": "census-match"
+    },
+    {
+      "domain": "karanovicpartners.com",
+      "displayName": "Karanović & Partners",
+      "peerGroup": "regional",
+      "firmSize": "large_51_200",
+      "source": "census-match"
+    },
+    {
+      "domain": "lawmilos.com",
+      "displayName": "Law Office Milosevic",
+      "peerGroup": "local",
+      "firmSize": "boutique_2_10",
+      "source": "census-new"
+    },
+    {
+      "domain": "wolftheiss.com",
+      "displayName": "Wolf Theiss (Law Office Miroslav Stojanović)",
+      "peerGroup": "regional",
+      "firmSize": "boutique_2_10",
+      "source": "census-match"
+    },
+    {
+      "domain": "tsg.rs",
+      "displayName": "Law Office TSG Belgrade",
+      "peerGroup": "local",
+      "firmSize": "mid_11_50",
+      "source": "census-new"
+    },
+    {
+      "domain": "lp.rs",
+      "displayName": "lazarevic & prsic",
+      "peerGroup": "local",
+      "firmSize": "mid_11_50",
+      "source": "census-new"
+    },
+    {
+      "domain": "advokatmanic.com",
+      "displayName": "manic gojic",
+      "peerGroup": "local",
+      "firmSize": null,
+      "source": "census-new"
+    },
+    {
+      "domain": "marjanovic.law",
+      "displayName": "Marjanovic Law",
+      "peerGroup": "local",
+      "firmSize": "boutique_2_10",
+      "source": "census-new"
+    },
+    {
+      "domain": "law-marovic.com",
+      "displayName": "marovic",
+      "peerGroup": "local",
+      "firmSize": null,
+      "source": "census-new"
+    },
+    {
+      "domain": "mijatovic-providzalo.rs",
+      "displayName": "mijatovic & providzalo",
+      "peerGroup": "local",
+      "firmSize": null,
+      "source": "census-new"
+    },
+    {
+      "domain": "mjb.rs",
+      "displayName": "Mikijelj Janković & Bogdanović",
+      "peerGroup": "local",
+      "firmSize": "boutique_2_10",
+      "source": "census-match"
+    },
+    {
+      "domain": "msa-iplaw.com",
+      "displayName": "MSA IP (Milojević Sekulić & Associates)",
+      "peerGroup": "local",
+      "firmSize": "mid_11_50",
+      "source": "census-match"
+    },
+    {
+      "domain": "mim-law.com",
+      "displayName": "Mihaj, Ilić & Milanović",
+      "peerGroup": "local",
+      "firmSize": "boutique_2_10",
+      "source": "census-match"
+    },
+    {
+      "domain": "mmd-associates.com",
+      "displayName": "MMD Advokati",
+      "peerGroup": "local",
+      "firmSize": "mid_11_50",
+      "source": "census-match"
+    },
+    {
+      "domain": "schoenherr.rs",
+      "displayName": "Schoenherr (Moravčević Vojnović and Partners)",
+      "peerGroup": "regional",
+      "firmSize": "mid_11_50",
+      "source": "census-match"
+    },
+    {
+      "domain": "mpartners.legal",
+      "displayName": "mpartners legal",
+      "peerGroup": "local",
+      "firmSize": "boutique_2_10",
+      "source": "census-new"
+    },
+    {
+      "domain": "mmplegal.rs",
+      "displayName": "mrakovic markovic & partners",
+      "peerGroup": "local",
+      "firmSize": "boutique_2_10",
+      "source": "census-new"
+    },
+    {
+      "domain": "mskpartners.rs",
+      "displayName": "msk partners",
+      "peerGroup": "local",
+      "firmSize": "boutique_2_10",
+      "source": "census-new"
+    },
+    {
+      "domain": "mvj.rs",
+      "displayName": "MVJ Marković Vukotić Jovković",
+      "peerGroup": "local",
+      "firmSize": "mid_11_50",
+      "source": "census-match"
+    },
+    {
+      "domain": "naumovic-partners.com",
+      "displayName": "naumovic & partners",
+      "peerGroup": "local",
+      "firmSize": "boutique_2_10",
+      "source": "census-new"
+    },
+    {
+      "domain": "nkp.rs",
+      "displayName": "Nikčević Kapor",
+      "peerGroup": "local",
+      "firmSize": "mid_11_50",
+      "source": "census-match"
+    },
+    {
+      "domain": "en.nikoliclegal.rs",
+      "displayName": "nikolic law office",
+      "peerGroup": "local",
+      "firmSize": "boutique_2_10",
+      "source": "census-new"
+    },
+    {
+      "domain": "nko-law.com",
+      "displayName": "NKO Partners",
+      "peerGroup": "local",
+      "firmSize": "mid_11_50",
+      "source": "census-match"
+    },
+    {
+      "domain": "ompartners.rs",
+      "displayName": "OM & Partners",
+      "peerGroup": "local",
+      "firmSize": "boutique_2_10",
+      "source": "census-new"
+    },
+    {
+      "domain": "parivodic.com",
+      "displayName": "parivodic",
+      "peerGroup": "local",
+      "firmSize": "boutique_2_10",
+      "source": "census-new"
+    },
+    {
+      "domain": "cms.law",
+      "displayName": "CMS (Petrikić & Partneri AOD)",
+      "peerGroup": "international",
+      "firmSize": "mid_11_50",
+      "source": "census-match"
+    },
+    {
+      "domain": "petroviclawfirm.rs",
+      "displayName": "petrovic legal",
+      "peerGroup": "local",
+      "firmSize": "boutique_2_10",
+      "source": "census-new"
+    },
+    {
+      "domain": "prlegal.rs",
+      "displayName": "PR Legal",
+      "peerGroup": "local",
+      "firmSize": "mid_11_50",
+      "source": "census-match"
+    },
+    {
+      "domain": "pricapartners.com",
+      "displayName": "Prica & Partners",
+      "peerGroup": "local",
+      "firmSize": "mid_11_50",
+      "source": "census-match"
+    },
+    {
+      "domain": "pslegal.rs",
+      "displayName": "ps legal",
+      "peerGroup": "local",
+      "firmSize": "boutique_2_10",
+      "source": "census-new"
+    },
+    {
+      "domain": "psg.rs",
+      "displayName": "PSG Legal",
+      "peerGroup": "local",
+      "firmSize": "boutique_2_10",
+      "source": "census-match"
+    },
+    {
+      "domain": "rp-law.rs",
+      "displayName": "rabrenovic & partners",
+      "peerGroup": "local",
+      "firmSize": "boutique_2_10",
+      "source": "census-new"
+    },
+    {
+      "domain": "rspartners.rs",
+      "displayName": "Radovanović Stojanović & Partners",
+      "peerGroup": "local",
+      "firmSize": "mid_11_50",
+      "source": "census-match"
+    },
+    {
+      "domain": "sog.rs",
+      "displayName": "Kinstellar (SOG)",
+      "peerGroup": "regional",
+      "firmSize": "mid_11_50",
+      "source": "census-match"
+    },
+    {
+      "domain": "spasicpartners.com",
+      "displayName": "Spasic & Partners",
+      "peerGroup": "local",
+      "firmSize": "boutique_2_10",
+      "source": "census-new"
+    },
+    {
+      "domain": "stanivuk-manasijevski.com",
+      "displayName": "stanivuk & manasijevski",
+      "peerGroup": "local",
+      "firmSize": "boutique_2_10",
+      "source": "census-new"
+    },
+    {
+      "domain": "lawoffice.rs",
+      "displayName": "stanivukovic",
+      "peerGroup": "local",
+      "firmSize": "boutique_2_10",
+      "source": "census-new"
+    },
+    {
+      "domain": "nstlaw.rs",
+      "displayName": "Stanković & Partners (NSTLAW)",
+      "peerGroup": "local",
+      "firmSize": "mid_11_50",
+      "source": "census-match"
+    },
+    {
+      "domain": "stevic-dulic.co.rs",
+      "displayName": "stevic dulic",
+      "peerGroup": "local",
+      "firmSize": "boutique_2_10",
+      "source": "census-new"
+    },
+    {
+      "domain": "suboticlaw.rs",
+      "displayName": "subotic law",
+      "peerGroup": "local",
+      "firmSize": "boutique_2_10",
+      "source": "census-new"
+    },
+    {
+      "domain": "shp.rs",
+      "displayName": "subotic-homen & partners",
+      "peerGroup": "local",
+      "firmSize": "boutique_2_10",
+      "source": "census-new"
+    },
+    {
+      "domain": "sunjkalawoffice.com",
+      "displayName": "sunjka law",
+      "peerGroup": "local",
+      "firmSize": "boutique_2_10",
+      "source": "census-new"
+    },
+    {
+      "domain": "t-s.legal",
+      "displayName": "T-S Legal – Simić Pajović Law Firm",
+      "peerGroup": "regional",
+      "firmSize": "mid_11_50",
+      "source": "census-new"
+    },
+    {
+      "domain": "tasiclaw.com",
+      "displayName": "tasic & partners",
+      "peerGroup": "local",
+      "firmSize": "boutique_2_10",
+      "source": "census-new"
+    },
+    {
+      "domain": "advokat-velickovic.rs",
+      "displayName": "velickovic law",
+      "peerGroup": "local",
+      "firmSize": null,
+      "source": "census-new"
+    },
+    {
+      "domain": "vmtlaw.rs",
+      "displayName": "VMT Attorneys",
+      "peerGroup": "local",
+      "firmSize": "boutique_2_10",
+      "source": "census-new"
+    },
+    {
+      "domain": "vn-legal.rs",
+      "displayName": "vn legal",
+      "peerGroup": "local",
+      "firmSize": "mid_11_50",
+      "source": "census-new"
+    },
+    {
+      "domain": "vpip-zkp.com",
+      "displayName": "VP-IP Zatezalo Krnetic & PArtners",
+      "peerGroup": "local",
+      "firmSize": null,
+      "source": "census-new"
+    },
+    {
+      "domain": "vujinovicpartners.rs",
+      "displayName": "Vujinović & Partners",
+      "peerGroup": "local",
+      "firmSize": "boutique_2_10",
+      "source": "census-match"
+    },
+    {
+      "domain": "vp.rs",
+      "displayName": "Vuković & Partners (act legal Serbia)",
+      "peerGroup": "regional",
+      "firmSize": null,
+      "source": "census-match"
+    },
+    {
+      "domain": "vuliclaw.com",
+      "displayName": "Vulić Law",
+      "peerGroup": "local",
+      "firmSize": "solo",
+      "source": "census-match"
+    },
+    {
+      "domain": "zecevic-lukic.com",
+      "displayName": "zecevic & lukic",
+      "peerGroup": "local",
+      "firmSize": "boutique_2_10",
+      "source": "census-new"
+    },
+    {
+      "domain": "zip.co.rs",
+      "displayName": "zidar klemencic",
+      "peerGroup": "local",
+      "firmSize": "boutique_2_10",
+      "source": "census-new"
+    },
+    {
+      "domain": "zslaw.rs",
+      "displayName": "Živković Samardžić",
+      "peerGroup": "local",
+      "firmSize": "mid_11_50",
+      "source": "census-match"
+    },
+    {
+      "domain": "zmp.eu",
+      "displayName": "Živko Mijatović & Partners",
+      "peerGroup": "regional",
+      "firmSize": "boutique_2_10",
+      "source": "census-match"
+    },
+    {
+      "domain": "zsp-legal.com",
+      "displayName": "ZSP Advokati",
+      "peerGroup": "local",
+      "firmSize": "mid_11_50",
+      "source": "census-match"
+    },
+    {
+      "domain": "zuniclaw.com",
+      "displayName": "Zunić Law",
+      "peerGroup": "local",
+      "firmSize": "mid_11_50",
+      "source": "census-match"
+    },
+    {
+      "domain": "bnb.law",
+      "displayName": "BnB Law Firm",
+      "peerGroup": "local",
+      "firmSize": null,
+      "source": "directory"
+    },
+    {
+      "domain": "ppsp.rs",
+      "displayName": "Popović, Popović & Partners",
+      "peerGroup": "local",
+      "firmSize": null,
+      "source": "directory"
+    },
+    {
+      "domain": "kfadvokati.com",
+      "displayName": "K&F Advokati",
+      "peerGroup": "local",
+      "firmSize": null,
+      "source": "directory-backfill"
+    },
+    {
+      "domain": "kosiclawoffice.com",
+      "displayName": "Law Office Kosic",
+      "peerGroup": "local",
+      "firmSize": "boutique_2_10",
+      "source": "linkedin-sheet-verified"
+    }
+  ],
+  "skipped": [
+    {
+      "name": "maric i mujezinovc",
+      "reason": "no audit-able domain (not a hostname) — directory row only"
+    },
+    {
+      "name": "Tasić & Partners",
+      "reason": "duplicate of census row above (row 81)"
+    }
+  ]
+}

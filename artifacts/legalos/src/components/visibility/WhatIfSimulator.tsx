@@ -1,0 +1,321 @@
+// Live "what-if" score simulator: drag real inputs (PageSpeed scores,
+// LinkedIn followers, posting cadence) and watch the total recompute
+// instantly, using the exact same pure formula functions the backend
+// scores audits with — not an approximation. This is only possible
+// because performanceFormula/socialFormula/thoughtLeadershipFormula.ts are
+// deliberately pure (no Deno globals, no network, no Supabase client), and
+// because socialScore.ts/thoughtLeadershipScore.ts now persist the full
+// peer-stats (90th-percentile threshold included) they normalized against
+// into raw_metrics — see those files' comments. A hypothetical value at or
+// above the stored p90Threshold simply earns full marks for that metric —
+// no need to guess how a "what if I had more followers" scenario would
+// move a live peer maximum, since the methodology no longer depends on one.
+// Reputation and SEO & Authority aren't simulated: Reputation depends on a
+// live directory-data DB lookup and SEO & Authority requires a paid
+// Ahrefs/Moz subscription this build doesn't have — both stay pinned at
+// their current values in the total.
+import { useMemo, useState } from "react";
+import { SlidersHorizontal, X, RotateCcw } from "lucide-react";
+import ModalShell from "@/components/ui/modal-shell";
+import { Slider } from "@/components/ui/slider";
+import { Checkbox } from "@/components/ui/checkbox";
+import { CATEGORY_META } from "@/lib/visibilityCategories";
+import { computeMeasuredTotals, measuredScoreLabel, measuredExcludedNote, toScale500, type CategoryTotals } from "@/lib/measuredScore";
+import type { AuditRow } from "@/components/dashboard/CommandCenter";
+import { calculatePerformanceScore } from "../../../supabase/functions/_shared/performanceFormula";
+import { calculateSocialScore, MAX_FOLLOWERS, MAX_POSTS_30D, MAX_ENGAGEMENT_RATE } from "../../../supabase/functions/_shared/socialFormula";
+import { calculateThoughtLeadershipScore } from "../../../supabase/functions/_shared/thoughtLeadershipFormula";
+import { p90Ratio } from "../../../supabase/functions/_shared/percentileFormula";
+
+interface Props {
+  open: boolean;
+  onClose: () => void;
+  audit: AuditRow;
+}
+
+const round1 = (n: number) => Math.round(n * 10) / 10;
+
+const WhatIfSimulator = ({ open, onClose, audit }: Props) => {
+  const perf = audit.raw_metrics?.performance;
+  const social = audit.raw_metrics?.social;
+  const tl = audit.raw_metrics?.thoughtLeadership;
+
+  const initialPerf = {
+    desktop: perf?.desktop?.performance ?? 0,
+    mobile: perf?.mobile?.performance ?? 0,
+  };
+  const initialSocial = {
+    followers: social?.followers ?? 0,
+    posts30d: social?.posts30d ?? 0,
+    engagementRate: social?.engagementRate ?? 0,
+    platforms: social?.platforms ?? { linkedin: false, instagram: false, twitter: false, facebook: false },
+  };
+  const initialTl = {
+    postsCount: tl?.postsCount ?? 0,
+    newsCount: tl?.newsCount ?? 0,
+    bylinePct: Math.round((tl?.bylinePct ?? 0) * 100),
+  };
+
+  // Slider ceilings must be derived from the audit snapshot, never from the
+  // live slider value. Using `value * 2` here makes the ceiling chase the
+  // thumb: once dragged, the range expands with every update and the value
+  // can run away into the millions.
+  const sliderMax = {
+    followers: Math.max((social?.followersStats?.p90Threshold ?? 0) * 2, initialSocial.followers * 2, 1000),
+    posts30d: Math.max((social?.postsStats?.p90Threshold ?? 0) * 2, initialSocial.posts30d * 2, 20, 1),
+    engagementRate: Math.max((social?.erStats?.p90Threshold ?? 0) * 2, initialSocial.engagementRate * 2, 5),
+    postsCount: Math.max((tl?.postsStats?.p90Threshold ?? 0) * 2, initialTl.postsCount * 2, 20, 1),
+    newsCount: Math.max((tl?.newsStats?.p90Threshold ?? 0) * 2, initialTl.newsCount * 2, 10, 1),
+  };
+
+  const [desktopPerf, setDesktopPerf] = useState(initialPerf.desktop);
+  const [mobilePerf, setMobilePerf] = useState(initialPerf.mobile);
+  const [followers, setFollowers] = useState(initialSocial.followers);
+  const [posts30d, setPosts30d] = useState(initialSocial.posts30d);
+  const [engagementRate, setEngagementRate] = useState(initialSocial.engagementRate);
+  const [platforms, setPlatforms] = useState(initialSocial.platforms);
+  const [postsCount, setPostsCount] = useState(initialTl.postsCount);
+  const [newsCount, setNewsCount] = useState(initialTl.newsCount);
+  const [bylinePct, setBylinePct] = useState(initialTl.bylinePct);
+
+  const reset = () => {
+    setDesktopPerf(initialPerf.desktop);
+    setMobilePerf(initialPerf.mobile);
+    setFollowers(initialSocial.followers);
+    setPosts30d(initialSocial.posts30d);
+    setEngagementRate(initialSocial.engagementRate);
+    setPlatforms(initialSocial.platforms);
+    setPostsCount(initialTl.postsCount);
+    setNewsCount(initialTl.newsCount);
+    setBylinePct(initialTl.bylinePct);
+  };
+
+  const performanceResult = useMemo(() => {
+    if (!perf?.desktop || !perf?.mobile) return null;
+    return calculatePerformanceScore(
+      { performance: desktopPerf, accessibility: perf.desktop.accessibility, seo: perf.desktop.seo },
+      { performance: mobilePerf, accessibility: perf.mobile.accessibility, seo: perf.mobile.seo },
+    );
+  }, [perf, desktopPerf, mobilePerf]);
+
+  const socialResult = useMemo(() => {
+    if (!social) return null;
+    // The stored p90Threshold is the real benchmark now, not a live-growing
+    // maximum — a hypothetical value at or above it simply earns full marks
+    // for that metric (p90Ratio caps at 1), so there's nothing to simulate
+    // "growing" the way the old peer-max approach needed.
+    const followersRatio = social.followersStats ? p90Ratio({ value: followers, p90Threshold: social.followersStats.p90Threshold }) : 0;
+    const postsRatio = social.postsStats ? p90Ratio({ value: posts30d, p90Threshold: social.postsStats.p90Threshold }) : 0;
+    const erRatio = social.erStats ? p90Ratio({ value: engagementRate, p90Threshold: social.erStats.p90Threshold }) : 0;
+    return calculateSocialScore(followersRatio, postsRatio, engagementRate, erRatio, platforms);
+  }, [social, followers, posts30d, engagementRate, platforms]);
+
+  const tlResult = useMemo(() => {
+    if (!tl) return null;
+    const postsRatio = tl.postsStats ? p90Ratio({ value: postsCount, p90Threshold: tl.postsStats.p90Threshold }) : 0;
+    const newsRatio = tl.newsStats ? p90Ratio({ value: newsCount, p90Threshold: tl.newsStats.p90Threshold }) : 0;
+    return calculateThoughtLeadershipScore(postsRatio, bylinePct / 100, newsRatio);
+  }, [tl, postsCount, newsCount, bylinePct]);
+
+  const whatIfTotal = useMemo(() => {
+    const performanceScore = performanceResult?.score ?? audit.performance_score;
+    const socialScore = socialResult ?? audit.social_score;
+    const tlScore = tlResult ?? audit.thought_leadership_score;
+    return performanceScore + socialScore + tlScore + audit.seo_authority_score + audit.reputation_score;
+  }, [performanceResult, socialResult, tlResult, audit]);
+
+  const delta = round1(whatIfTotal - audit.total_score);
+
+  // Reputation and SEO & Authority are pinned to their actual values (see
+  // file header), including whatever provenance the real audit recorded —
+  // so a firm missing SEO & Authority here sees the same honest, excluded
+  // denominator it sees everywhere else, not a what-if total quietly
+  // deflated by an unmeasured category.
+  const whatIfCategories: CategoryTotals = {
+    performance: { score: performanceResult?.score ?? audit.performance_score, provenance: audit.provenance?.performance ?? "missing" },
+    social: { score: socialResult ?? audit.social_score, provenance: audit.provenance?.social ?? "missing" },
+    thoughtLeadership: { score: tlResult ?? audit.thought_leadership_score, provenance: audit.provenance?.thoughtLeadership ?? "missing" },
+    seoAuthority: { score: audit.seo_authority_score, provenance: audit.provenance?.seoAuthority ?? "missing" },
+    reputation: { score: audit.reputation_score, provenance: audit.provenance?.reputation ?? "missing" },
+  };
+  const whatIfMeasured = computeMeasuredTotals(whatIfCategories);
+  const whatIfExcludedNote = measuredExcludedNote(whatIfMeasured);
+  // The comparison line must speak the public 500-point scale on both sides
+  // — what-if and actual share the same measured denominator (Reputation
+  // and SEO are pinned to the audit's own provenance above).
+  const whatIfScaleMax = whatIfMeasured.isPartial ? whatIfMeasured.measuredMax : 200;
+  const actualDisplay = toScale500(round1(audit.total_score), whatIfScaleMax);
+  const whatIfDisplay = toScale500(whatIfTotal, whatIfScaleMax);
+
+  const platformKeys: { key: keyof typeof platforms; label: string }[] = [
+    { key: "linkedin", label: "LinkedIn" },
+    { key: "instagram", label: "Instagram" },
+    { key: "twitter", label: "X / Twitter" },
+    { key: "facebook", label: "Facebook" },
+  ];
+
+  return (
+    <ModalShell open={open} onClose={onClose} maxWidthClass="max-w-2xl">
+      <div className="px-6 py-5 border-b border-border/50 flex items-center justify-between">
+        <div className="flex items-center gap-2">
+          <SlidersHorizontal className="w-4 h-4 text-primary" />
+          <h3 className="font-display text-lg text-foreground">What if?</h3>
+        </div>
+        <div className="flex items-center gap-1">
+          <button onClick={reset} className="p-1.5 text-muted-foreground hover:text-foreground" title="Reset to your actual numbers">
+            <RotateCcw className="w-4 h-4" />
+          </button>
+          <button onClick={onClose} className="p-1.5 text-muted-foreground hover:text-foreground">
+            <X className="w-4 h-4" />
+          </button>
+        </div>
+      </div>
+
+      <div className="overflow-y-auto px-6 py-5 space-y-6">
+        <p className="text-xs text-muted-foreground font-body leading-relaxed">
+          Drag any input to see how it moves your real score, computed with the exact same formula the audit
+          uses — not an estimate. Reputation and SEO &amp; Authority stay fixed here: one needs a live directory
+          lookup, the other a paid data subscription this instance doesn't have configured yet.
+        </p>
+
+        <div className="bg-secondary/30 rounded-sm p-4 space-y-1.5">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="eyebrow text-[10px] text-muted-foreground">What-if total</p>
+              <p className="font-display text-3xl text-foreground font-semibold">
+                {measuredScoreLabel(whatIfTotal, whatIfMeasured)}
+              </p>
+            </div>
+            {delta !== 0 && (
+              <span className={`font-body text-sm font-medium ${delta > 0 ? "text-emerald-500" : "text-destructive"}`}>
+                {whatIfDisplay - actualDisplay > 0 ? "+" : ""}{whatIfDisplay - actualDisplay} vs your actual {actualDisplay}
+              </span>
+            )}
+          </div>
+          {whatIfExcludedNote && (
+            <p className="text-[11px] text-muted-foreground font-body">{whatIfExcludedNote}</p>
+          )}
+        </div>
+
+        {/* Performance */}
+        <div className="space-y-4">
+          <p className="text-xs font-body text-foreground flex items-center gap-1.5">
+            <span className={`w-1.5 h-1.5 rounded-full bg-sky-500`} />
+            {CATEGORY_META.performance.label}
+            {performanceResult && <span className="text-muted-foreground ml-auto">{Math.round((performanceResult.score / CATEGORY_META.performance.max) * 100)}%</span>}
+          </p>
+          {!perf?.desktop || !perf?.mobile ? (
+            <p className="text-xs text-muted-foreground font-body">Run a real audit to unlock this slider.</p>
+          ) : (
+            <>
+              <SliderRow label="Desktop PageSpeed" value={desktopPerf} onChange={setDesktopPerf} max={100} />
+              <SliderRow label="Mobile PageSpeed" value={mobilePerf} onChange={setMobilePerf} max={100} />
+            </>
+          )}
+        </div>
+
+        {/* Social */}
+        <div className="space-y-4">
+          <p className="text-xs font-body text-foreground flex items-center gap-1.5">
+            <span className="w-1.5 h-1.5 rounded-full bg-rose-500" />
+            {CATEGORY_META.social.label}
+            {socialResult != null && <span className="text-muted-foreground ml-auto">{Math.round((socialResult / CATEGORY_META.social.max) * 100)}%</span>}
+          </p>
+          {!social ? (
+            <p className="text-xs text-muted-foreground font-body">Run a real audit to unlock these sliders.</p>
+          ) : (
+            <>
+              <SliderRow
+                label="LinkedIn followers"
+                value={followers}
+                onChange={setFollowers}
+                max={sliderMax.followers}
+                format={(v) => v.toLocaleString()}
+              />
+              <SliderRow
+                label="Posts in last 30 days"
+                value={posts30d}
+                onChange={setPosts30d}
+                max={sliderMax.posts30d}
+              />
+              <SliderRow
+                label="Engagement rate"
+                value={engagementRate}
+                onChange={setEngagementRate}
+                max={sliderMax.engagementRate}
+                step={0.1}
+                format={(v) => `${v.toFixed(1)}%`}
+              />
+              <div className="flex flex-wrap gap-4">
+                {platformKeys.map(({ key, label }) => (
+                  <label key={key} className="flex items-center gap-2 text-xs font-body text-secondary-foreground/80 cursor-pointer">
+                    <Checkbox
+                      checked={platforms[key]}
+                      onCheckedChange={(checked) => setPlatforms((p) => ({ ...p, [key]: checked === true }))}
+                    />
+                    {label}
+                  </label>
+                ))}
+              </div>
+            </>
+          )}
+        </div>
+
+        {/* Thought Leadership */}
+        <div className="space-y-4">
+          <p className="text-xs font-body text-foreground flex items-center gap-1.5">
+            <span className="w-1.5 h-1.5 rounded-full bg-amber-500" />
+            {CATEGORY_META.thoughtLeadership.label}
+            {tlResult != null && <span className="text-muted-foreground ml-auto">{Math.round((tlResult / CATEGORY_META.thoughtLeadership.max) * 100)}%</span>}
+          </p>
+          {!tl ? (
+            <p className="text-xs text-muted-foreground font-body">Run a real audit to unlock these sliders.</p>
+          ) : (
+            <>
+              <SliderRow
+                label="Blog posts published"
+                value={postsCount}
+                onChange={setPostsCount}
+                max={sliderMax.postsCount}
+              />
+              <SliderRow
+                label="Press mentions found"
+                value={newsCount}
+                onChange={setNewsCount}
+                max={sliderMax.newsCount}
+              />
+              <SliderRow
+                label="Carry a named byline"
+                value={bylinePct}
+                onChange={setBylinePct}
+                max={100}
+                format={(v) => `${Math.round(v)}%`}
+              />
+            </>
+          )}
+        </div>
+      </div>
+    </ModalShell>
+  );
+};
+
+interface SliderRowProps {
+  label: string;
+  value: number;
+  onChange: (v: number) => void;
+  max: number;
+  step?: number;
+  format?: (v: number) => string;
+}
+
+const SliderRow = ({ label, value, onChange, max, step = 1, format }: SliderRowProps) => (
+  <div>
+    <div className="flex items-center justify-between mb-1.5">
+      <span className="text-xs font-body text-secondary-foreground/80">{label}</span>
+      <span className="text-xs font-body text-foreground font-medium">{format ? format(value) : Math.round(value)}</span>
+    </div>
+    <Slider value={[value]} onValueChange={([v]) => onChange(v)} min={0} max={max} step={step} />
+  </div>
+);
+
+export default WhatIfSimulator;

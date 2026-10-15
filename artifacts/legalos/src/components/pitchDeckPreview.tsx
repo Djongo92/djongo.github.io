@@ -1,0 +1,215 @@
+// DOM mirror of the pitchDeckExport.ts canvas layouts — the Deck Builder
+// stage and filmstrip render these; export renders the canvas twin. The two
+// must stay visually in sync: same palette, same five layouts, same order.
+// Slides are designed at a fixed 1280×720 and scaled with a transform so the
+// layout is pixel-identical at every size (stage, thumbnail, export).
+import { useEffect, useRef, useState } from "react";
+import type { ParsedSlide } from "./pitchDeckParser";
+import {
+  DOM_SCALE, COVER_IMAGE, COVER_TEXT_MAX, SECTION_IMAGE, SECTION_TEXT_MAX,
+  CONTENT_IMAGE, CONTENT_TEXT_MAX, QUOTE_SCRIM,
+} from "./slideVisualGeometry";
+
+const DESIGN_W = 1280;
+const DESIGN_H = 720;
+
+const NAVY = "#121826";
+const GOLD = "#B8893B";
+const GOLD_LIGHT = "#D4B279";
+const PAPER = "#F8F5EE";
+const INK = "#222226";
+const MUTED = "#6E6E78";
+
+const slideNumber = (i: number, total: number) =>
+  `${String(i + 1).padStart(2, "0")} / ${String(total).padStart(2, "0")}`;
+
+const splitStat = (bullet: string): [string, string] => {
+  const m = bullet.trim().match(/^([\d$€£%×x+~][\d.,$€£%+×x~kKmMbB]*)\s+([\s\S]*)$/);
+  return m ? [m[1], m[2]] : ["", bullet];
+};
+
+export interface SlidePreviewProps {
+  slide: ParsedSlide;
+  index: number;
+  total: number;
+  audience?: string;
+  firmName?: string | null;
+}
+
+/** Fixed 1280×720 slide surface. Wrap in <ScaledSlide> for real sizes. */
+export function SlideCanvas({ slide, index, total, audience, firmName }: SlidePreviewProps) {
+  const base: React.CSSProperties = {
+    width: DESIGN_W,
+    height: DESIGN_H,
+    position: "relative",
+    overflow: "hidden",
+    flexShrink: 0,
+    fontFamily: 'Calibri, "Segoe UI", Arial, sans-serif',
+  };
+  const serif = 'Georgia, "Times New Roman", serif';
+  const num = slideNumber(index, total);
+
+  if (slide.layout === "title") {
+    return (
+      <div style={{ ...base, background: NAVY }}>
+        <div style={{ position: "absolute", top: 0, left: 0, right: 0, height: 10, background: GOLD }} />
+        {slide.imageUrl && (
+          <div style={{ position: "absolute", top: 0, right: 0, bottom: 0, width: COVER_IMAGE.w * DOM_SCALE }}>
+            <img src={slide.imageUrl} alt="" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+            <div style={{ position: "absolute", inset: 0, background: `linear-gradient(90deg, ${NAVY} 0%, transparent 55%)` }} />
+          </div>
+        )}
+        <div style={{ position: "absolute", top: 64, left: 64, color: GOLD_LIGHT, fontSize: 20, letterSpacing: 5 }}>
+          {(firmName || "UVID").toUpperCase()}
+        </div>
+        <div style={{ position: "absolute", top: 200, left: 64, right: slide.imageUrl ? 1280 - 64 - COVER_TEXT_MAX * DOM_SCALE : 120, color: "#fff", fontFamily: serif, fontWeight: 700, fontSize: 56, lineHeight: 1.15 }}>
+          {slide.headline || slide.title}
+        </div>
+        <div style={{ position: "absolute", top: 470, left: 64, right: slide.imageUrl ? 1280 - 64 - COVER_TEXT_MAX * DOM_SCALE : 120 }}>
+          {slide.bullets.slice(0, 4).map((b, i) => (
+            <div key={i} style={{ color: GOLD_LIGHT, fontSize: 22, lineHeight: 1.6 }}>—&nbsp;&nbsp;{b}</div>
+          ))}
+        </div>
+        {audience && (
+          <div style={{ position: "absolute", bottom: 48, left: 64, color: "#fff", fontSize: 17, letterSpacing: 1 }}>
+            PREPARED FOR — {audience.toUpperCase()}
+          </div>
+        )}
+      </div>
+    );
+  }
+
+  if (slide.layout === "section") {
+    return (
+      <div style={{ ...base, background: NAVY }}>
+        {slide.imageUrl && (
+          <div style={{ position: "absolute", top: 0, right: 0, bottom: 0, width: SECTION_IMAGE.w * DOM_SCALE }}>
+            <img src={slide.imageUrl} alt="" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+            <div style={{ position: "absolute", inset: 0, background: `linear-gradient(90deg, ${NAVY} 0%, transparent 60%)` }} />
+          </div>
+        )}
+        <div style={{ position: "absolute", top: 64, left: 64, color: GOLD, fontSize: 20, fontWeight: 700 }}>{num}</div>
+        <div style={{ position: "absolute", top: 116, left: 64, color: GOLD_LIGHT, fontSize: 20, letterSpacing: 3 }}>
+          {slide.title.toUpperCase()}
+        </div>
+        <div style={{ position: "absolute", top: 280, left: 64, right: slide.imageUrl ? 1280 - 64 - SECTION_TEXT_MAX * DOM_SCALE : 140, color: "#fff", fontFamily: serif, fontWeight: 700, fontSize: 68, lineHeight: 1.15 }}>
+          {slide.headline}
+        </div>
+      </div>
+    );
+  }
+
+  if (slide.layout === "quote") {
+    return (
+      <div style={{ ...base, background: PAPER }}>
+        {slide.imageUrl && (
+          <>
+            <img src={slide.imageUrl} alt="" style={{ position: "absolute", inset: 0, width: "100%", height: "100%", objectFit: "cover" }} />
+            <div style={{ position: "absolute", inset: 0, background: QUOTE_SCRIM }} />
+          </>
+        )}
+        <div style={{ position: "absolute", top: 0, left: 0, right: 0, height: 8, background: NAVY }} />
+        <div style={{ position: "absolute", top: 8, left: 0, right: 0, height: 3, background: GOLD }} />
+        <div style={{ position: "absolute", top: 60, left: 90, color: GOLD, fontFamily: serif, fontSize: 190, lineHeight: 1 }}>“</div>
+        <div style={{ position: "absolute", top: 300, left: 140, right: 140, textAlign: "center", color: NAVY, fontFamily: serif, fontStyle: "italic", fontWeight: 700, fontSize: 42, lineHeight: 1.25 }}>
+          {slide.headline}
+        </div>
+        <div style={{ position: "absolute", bottom: 90, left: 140, right: 140, textAlign: "center" }}>
+          {slide.bullets.slice(0, 3).map((b, i) => (
+            <div key={i} style={{ color: MUTED, fontSize: 21, lineHeight: 1.5 }}>{b}</div>
+          ))}
+        </div>
+      </div>
+    );
+  }
+
+  if (slide.layout === "stats") {
+    return (
+      <div style={{ ...base, background: PAPER }}>
+        <Chrome title={slide.title} num={num} />
+        {slide.imageUrl && (
+          <img src={slide.imageUrl} alt="" style={{ position: "absolute", top: CONTENT_IMAGE.y * DOM_SCALE, right: 64, width: CONTENT_IMAGE.w * DOM_SCALE, height: CONTENT_IMAGE.h * DOM_SCALE, objectFit: "cover", borderRadius: 4 }} />
+        )}
+        <div style={{ position: "absolute", top: 170, left: 64, right: slide.imageUrl ? 1280 - 64 - CONTENT_TEXT_MAX * DOM_SCALE : 100, color: NAVY, fontFamily: serif, fontWeight: 700, fontSize: 40, lineHeight: 1.2 }}>
+          {slide.headline}
+        </div>
+        <div style={{ position: "absolute", top: 320, left: 64, right: slide.imageUrl ? 1280 - 64 - CONTENT_TEXT_MAX * DOM_SCALE : 80 }}>
+          {slide.bullets.slice(0, 4).map((b, i) => {
+            const [stat, rest] = splitStat(b);
+            return (
+              <div key={i} style={{ display: "flex", alignItems: "baseline", gap: 20, marginBottom: 34 }}>
+                {stat ? (
+                  <>
+                    <span style={{ color: GOLD, fontFamily: serif, fontWeight: 700, fontSize: 50, minWidth: 180 }}>{stat}</span>
+                    <span style={{ color: INK, fontSize: 22, lineHeight: 1.35 }}>{rest}</span>
+                  </>
+                ) : (
+                  <span style={{ color: INK, fontSize: 22 }}>•&nbsp;&nbsp;{b}</span>
+                )}
+              </div>
+            );
+          })}
+        </div>
+      </div>
+    );
+  }
+
+  // bullets (default)
+  return (
+    <div style={{ ...base, background: PAPER }}>
+      <Chrome title={slide.title} num={num} />
+      {slide.imageUrl && (
+        <img src={slide.imageUrl} alt="" style={{ position: "absolute", top: CONTENT_IMAGE.y * DOM_SCALE, right: 64, width: CONTENT_IMAGE.w * DOM_SCALE, height: CONTENT_IMAGE.h * DOM_SCALE, objectFit: "cover", borderRadius: 4 }} />
+      )}
+      <div style={{ position: "absolute", top: 170, left: 64, right: slide.imageUrl ? 1280 - 64 - CONTENT_TEXT_MAX * DOM_SCALE : 100, color: NAVY, fontFamily: serif, fontWeight: 700, fontSize: 42, lineHeight: 1.2 }}>
+        {slide.headline}
+      </div>
+      <div style={{ position: "absolute", top: 340, left: 64, right: slide.imageUrl ? 1280 - 64 - CONTENT_TEXT_MAX * DOM_SCALE : 100 }}>
+        {slide.bullets.slice(0, 5).map((b, i) => (
+          <div key={i} style={{ display: "flex", gap: 16, marginBottom: 26 }}>
+            <span style={{ color: GOLD, fontSize: 24, lineHeight: 1.4 }}>•</span>
+            <span style={{ color: INK, fontSize: 24, lineHeight: 1.4 }}>{b}</span>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+/** Shared navy+gold top rules + slide number + section eyebrow. */
+function Chrome({ title, num }: { title: string; num: string }) {
+  return (
+    <>
+      <div style={{ position: "absolute", top: 0, left: 0, right: 0, height: 8, background: NAVY }} />
+      <div style={{ position: "absolute", top: 8, left: 0, right: 0, height: 3, background: GOLD }} />
+      <div style={{ position: "absolute", top: 56, left: 64, color: GOLD, fontSize: 18, fontWeight: 700 }}>{num}</div>
+      <div style={{ position: "absolute", top: 100, left: 64, color: MUTED, fontSize: 17, letterSpacing: 2 }}>
+        {title.toUpperCase()}
+      </div>
+    </>
+  );
+}
+
+/**
+ * Scales the fixed-size SlideCanvas to fill its wrapper's width (wrapper
+ * keeps a 16:9 aspect box). Used for both the stage and filmstrip thumbs.
+ */
+export function ScaledSlide(props: SlidePreviewProps & { className?: string }) {
+  const ref = useRef<HTMLDivElement>(null);
+  const [scale, setScale] = useState(0.5);
+  useEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+    const ro = new ResizeObserver(() => setScale(el.clientWidth / DESIGN_W));
+    ro.observe(el);
+    setScale(el.clientWidth / DESIGN_W);
+    return () => ro.disconnect();
+  }, []);
+  return (
+    <div ref={ref} className={props.className} style={{ position: "relative", width: "100%", aspectRatio: "16 / 9", overflow: "hidden" }}>
+      <div style={{ transform: `scale(${scale})`, transformOrigin: "top left", width: DESIGN_W, height: DESIGN_H }}>
+        <SlideCanvas {...props} />
+      </div>
+    </div>
+  );
+}
