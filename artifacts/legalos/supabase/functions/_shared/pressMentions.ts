@@ -54,7 +54,7 @@ export async function findPressMentions(
     }
   }
 
-  // Regional legal trade press (CEE Legal Matters, SeeNews, bizlife.rs) is
+  // Regional trade press (SeeNews, bizlife.rs, and others) is
   // barely indexed by the plain Google News query above, so each outlet is
   // queried through its own structured strategy (see
   // regionalTradePressFormula.ts). Same failure posture as editions: one

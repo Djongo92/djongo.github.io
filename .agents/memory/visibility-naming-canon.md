@@ -5,7 +5,7 @@ description: Marketing must mirror the app's canonical five score categories; th
 
 Two naming rules that have lapsed before and were both user-corrected:
 
-1. **Score categories** — the canonical five live in the app's `visibilityCategories.ts`: Performance, Social Media, SEO & Authority, Thought Leadership, Reputation. Any marketing/app copy listing categories must mirror these names exactly.
+1. **Score categories** — the canonical five live in the app's `visibilityCategories.ts` (methodology v3, 500 pts): Website Experience 50, Social Presence 75, Search Authority 100, Thought Leadership 150, Recognition 125. Any marketing/app copy listing categories must mirror these names exactly.
 2. **Product surface** — the public leaderboard is the **Visibility Index**. Never call it "The Directory" in user-facing copy. "Directory" is only correct for the legal directories themselves (Chambers, Legal 500, IFLR1000) or the internal tracked-firm list.
 
 **Why:** The marketing copy pre-dates the rename and no test guards naming, so drift reappears whenever landing copy is rewritten.

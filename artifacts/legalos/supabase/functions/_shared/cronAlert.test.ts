@@ -17,13 +17,13 @@ const assert = (cond: boolean, msg: string) => {
 Deno.test("buildCronAlertPayload names the job and failure in all fields", () => {
   const p = buildCronAlertPayload("press-outlets-health", {
     message: "HTTP 500",
-    detail: { failed: ["ceelm"] },
+    detail: { failed: ["seenews"] },
   });
   assert(p.job === "press-outlets-health", "job field");
   assert(p.message === "HTTP 500", "message field");
   assert(p.text.includes('"press-outlets-health"'), "text names the job");
   assert(p.text.includes("HTTP 500"), "text carries the failure");
-  assert(p.text.includes("ceelm"), "text carries the detail");
+  assert(p.text.includes("seenews"), "text carries the detail");
   assert(p.content === p.text, "discord-compatible content mirrors text");
 });
 

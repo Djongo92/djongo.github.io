@@ -2,7 +2,7 @@
 // globals, no network — the fetch half lives in pressMentions.ts, same
 // split as pressMentionsFormula.ts.
 //
-// Why this exists: CEE Legal Matters, SeeNews, bizlife.rs and similar
+// Why this exists: SeeNews, bizlife.rs and similar
 // regional trade outlets are barely indexed in a plain Google News query —
 // a quoted RSS search for a covered firm returns only years-old items
 // despite known recent coverage. Each outlet here is queried through a
@@ -25,8 +25,6 @@ export interface TradeOutlet {
 }
 
 export const REGIONAL_TRADE_OUTLETS: TradeOutlet[] = [
-  // Cloudflare-challenged for non-browser fetches — site-scoped GN only.
-  { id: "ceelegalmatters", domain: "ceelegalmatters.com", strategy: "google-news-site" },
   // Next.js client-rendered search, no public search feed — site-scoped GN.
   { id: "seenews", domain: "seenews.com", strategy: "google-news-site" },
   // WordPress; quoted search RSS verified phrase-exact.

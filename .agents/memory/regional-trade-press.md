@@ -6,8 +6,6 @@ description: How each regional legal trade outlet must be queried for press ment
 Plain quoted Google News queries badly undercount regional legal trade press;
 per-outlet structured strategies fix it (see regionalTradePressFormula.ts):
 
-- **CEE Legal Matters**: Cloudflare-challenges ALL server-side fetches (403
-  even with browser UA, even Googlebot UA) — direct RSS/search is impossible.
 - **SeeNews**: Next.js client-rendered; no public search feed, /feed serves HTML.
 - **bizlife.rs**: WordPress; `?s="<phrase>"&feed=rss2` IS phrase-exact
   (verified: nonsense phrase returns 0 items — WP's usual OR-matching doesn't

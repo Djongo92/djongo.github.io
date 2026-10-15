@@ -3,12 +3,11 @@ import { REGIONAL_TRADE_OUTLETS, buildOutletUrl, withOutletSource, type TradeOut
 import { parseRssItems, filterPressMentions } from "./pressMentionsFormula";
 
 const wpOutlet: TradeOutlet = { id: "bizlife", domain: "bizlife.rs", strategy: "wp-search-rss" };
-const gnOutlet: TradeOutlet = { id: "ceelegalmatters", domain: "ceelegalmatters.com", strategy: "google-news-site" };
+const gnOutlet: TradeOutlet = { id: "seenews", domain: "seenews.com", strategy: "google-news-site" };
 
 describe("REGIONAL_TRADE_OUTLETS registry", () => {
   it("covers the regional trade outlets the press axis was undercounting", () => {
     const domains = REGIONAL_TRADE_OUTLETS.map((o) => o.domain);
-    expect(domains).toContain("ceelegalmatters.com");
     expect(domains).toContain("seenews.com");
     expect(domains).toContain("bizlife.rs");
     expect(domains).toContain("novaekonomija.rs");
@@ -45,7 +44,7 @@ describe("buildOutletUrl", () => {
   it("builds a site-scoped Google News RSS query for fetch-blocked outlets", () => {
     const url = buildOutletUrl(gnOutlet, "BDK Advokati");
     expect(url.startsWith("https://news.google.com/rss/search?q=")).toBe(true);
-    expect(url).toContain(encodeURIComponent('"BDK Advokati" site:ceelegalmatters.com'));
+    expect(url).toContain(encodeURIComponent('"BDK Advokati" site:seenews.com'));
   });
 
   it("trims whitespace around the firm name before quoting", () => {
@@ -69,10 +68,10 @@ describe("withOutletSource", () => {
 
   it("leaves an existing per-item source untouched (Google News feeds)", () => {
     const items = withOutletSource(
-      [{ title: "t", link: "https://x.example/a", pubDate: recent, sourceUrl: "https://ceelegalmatters.com" }],
+      [{ title: "t", link: "https://x.example/a", pubDate: recent, sourceUrl: "https://news-outlet.example" }],
       wpOutlet,
     );
-    expect(items[0].sourceUrl).toBe("https://ceelegalmatters.com");
+    expect(items[0].sourceUrl).toBe("https://news-outlet.example");
   });
 
   it("outlet items flow through the shared filter with correct source attribution", () => {
