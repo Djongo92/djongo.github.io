@@ -9,21 +9,16 @@ Market visibility intelligence for law firms — quantified audits, competitive 
 
 ## Run & Operate
 
-- `pnpm --filter @workspace/api-server run dev` — run the API server (port 5000)
 - `pnpm run typecheck` — full typecheck across all packages
-- `pnpm run build` — typecheck + build all packages
-- `pnpm --filter @workspace/api-spec run codegen` — regenerate API hooks and Zod schemas from the OpenAPI spec
-- `pnpm --filter @workspace/db run push` — push DB schema changes (dev only)
-- Required env: `DATABASE_URL` — Postgres connection string
+- `pnpm --filter @workspace/uvid run test` — web + edge-function unit tests
+- `SITE_BASE=/ node scripts/build-site.mjs` — build the deployable static site into `site-dist/`
+- Deploys: GitHub Pages (`.github/workflows/deploy-pages.yml`) or Vercel (`vercel.json`). Not Replit, not Render.
 
 ## Stack
 
-- pnpm workspaces, Node.js 24, TypeScript 5.9
-- API: Express 5
-- DB: PostgreSQL + Drizzle ORM
-- Validation: Zod (`zod/v4`), `drizzle-zod`
-- API codegen: Orval (from OpenAPI spec)
-- Build: esbuild (CJS bundle)
+- pnpm workspaces, Node.js 22, TypeScript 5.9
+- Frontends: Vite + React (web, marketing), Expo (mobile)
+- Backend: Supabase only — Postgres + Deno edge functions (`artifacts/legalos/supabase`)
 
 ## Where things live
 
@@ -39,7 +34,7 @@ _Populate as you build — short repo map plus pointers to the source-of-truth f
   Use it for staged copy, narrated asides, or teasing something unbuilt. Deviate
   in presentation, never in substance — reframe a number, don't invent one.
 - **Showcase access is server-verified.** Codes live in the `DEMO_ACCESS_CODES`
-  secret and are checked by `POST /api/demo-access`, so they are never present in
+  secret and are checked by the `showcase-access` edge function, so they are never present in
   the client bundle. The endpoint fails closed when unconfigured.
 
 ## Product
@@ -52,14 +47,6 @@ _Populate as you build — explicit user instructions worth remembering across s
 
 ## Gotchas
 
-- Changing `lib/api-spec/openapi.yaml` requires `pnpm --filter @workspace/api-spec run codegen`
-  before anything will typecheck against the new schemas.
-- The API server runs from a built bundle (`dist/index.mjs`). A new route needs
-  `pnpm --filter @workspace/api-server run build` plus a workflow restart, or it
-  404s while the source looks correct.
 - `DEMO_ACCESS_CODES` format is comma-separated `CODE` or `CODE:Who it went to`.
   The label is shown back in the showcase bar. Revoke by deleting one entry.
 
-## Pointers
-
-- See the `pnpm-workspace` skill for workspace structure, TypeScript setup, and package details

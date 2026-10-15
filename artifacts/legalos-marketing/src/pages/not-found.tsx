@@ -1,3 +1,4 @@
+import { site } from '../lib/site';
 export default function NotFound() {
   return (
     <div className="min-h-screen w-full flex items-center justify-center bg-background">
@@ -10,7 +11,7 @@ export default function NotFound() {
           That address does not lead to a published page.
         </p>
         <a
-          href="/"
+          href={site("/")}
           className="inline-flex items-center gap-2 border border-white/20 px-6 py-3 text-sm font-bold text-white uppercase tracking-wider hover:border-primary/50 hover:bg-primary/5 transition-all"
         >
           Return to Uvid

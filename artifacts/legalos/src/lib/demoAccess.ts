@@ -20,12 +20,17 @@ export interface ShowcaseGrant {
   label?: string;
 }
 
-/**
- * The API server owns `/api` at the site root, across every artifact — this is
- * deliberately root-relative rather than prefixed with the app's base path,
- * which would resolve to the app's own dev server and 404.
- */
-const ENDPOINT = "/api/demo-access";
+/** The showcase-access edge function — codes are checked server-side only. */
+const ENDPOINT = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/showcase-access`;
+
+/** Headers for an unauthenticated public edge-function call. */
+export function publicFunctionHeaders(): Record<string, string> {
+  const key = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY;
+  return {
+    "Content-Type": "application/json",
+    ...(key ? { apikey: key, Authorization: `Bearer ${key}` } : {}),
+  };
+}
 
 export function readShowcaseGrant(): ShowcaseGrant | null {
   try {
@@ -76,7 +81,7 @@ export async function verifyShowcaseCode(code: string, signal?: AbortSignal): Pr
   try {
     res = await fetch(ENDPOINT, {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
+      headers: publicFunctionHeaders(),
       body: JSON.stringify({ code: trimmed }),
       signal,
     });

@@ -3,7 +3,8 @@ import { useLocation, useNavigate } from "react-router-dom";
 import { ArrowRight, KeyRound, Loader2, Mail } from "lucide-react";
 import BootVeil from "@/components/BootVeil";
 import { isDemoMode, primeDemoMode } from "@/lib/demoMode";
-import { codeFromSearch, hasShowcaseGrant, verifyShowcaseCode } from "@/lib/demoAccess";
+import { codeFromSearch, hasShowcaseGrant, publicFunctionHeaders, verifyShowcaseCode } from "@/lib/demoAccess";
+import { MARKETING_HOME } from "@/lib/marketingSite";
 
 /**
  * /demo — the door to the gated product showcase.
@@ -84,11 +85,9 @@ export default function ShowcaseGate() {
     setRequestState("sending");
     setRequestError(null);
     try {
-      // Root-relative like demoAccess.ENDPOINT: the API server owns /api at
-      // the site root across every artifact.
-      const res = await fetch("/api/demo-requests", {
+      const res = await fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/demo-request`, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: publicFunctionHeaders(),
         body: JSON.stringify({
           email: requestEmail,
           firmName: requestFirm || undefined,
@@ -130,7 +129,7 @@ export default function ShowcaseGate() {
     >
       <div className="w-full max-w-md">
         <a
-          href="/"
+          href={MARKETING_HOME}
           className="font-display text-3xl font-semibold tracking-tight text-foreground hover:text-primary transition-colors"
         >
           Uvid

@@ -3,6 +3,7 @@ import { Menu, X, ArrowRight } from 'lucide-react';
 import { useState } from 'react';
 import { DemoLink } from './DemoLaunch';
 import { AnimatedLogoMark } from './Logo';
+import { site } from '../lib/site';
 
 const NAV_LINKS = [
   { href: '#how-it-works', label: 'How It Works' },
@@ -56,7 +57,7 @@ export function NavBar() {
 
         <div className="flex items-center gap-4">
           <a
-            href="/app/teaser"
+            href={site("/app/teaser")}
             className="hidden lg:inline-flex text-sm font-medium text-white hover:text-primary transition-colors"
           >
             Run Free Audit
@@ -69,7 +70,7 @@ export function NavBar() {
             Request Full Demo
           </DemoLink>
           <a
-            href="/app/#signin"
+            href={site("/app/#signin")}
             className="hidden sm:inline-flex bg-primary text-primary-foreground px-5 py-2.5 text-sm font-semibold rounded-xl hover:opacity-90 transition-opacity"
           >
             Log in
@@ -109,7 +110,7 @@ export function NavBar() {
               ))}
               <div className="flex flex-col gap-3 pt-5">
                 <a
-                  href="/app/teaser"
+                  href={site("/app/teaser")}
                   className="inline-flex items-center justify-center gap-2 bg-primary text-primary-foreground px-6 py-3.5 text-sm font-semibold rounded-xl"
                 >
                   Run Free Audit <ArrowRight className="w-4 h-4" />
@@ -122,7 +123,7 @@ export function NavBar() {
                   Or request the full demo <ArrowRight className="w-3.5 h-3.5" />
                 </DemoLink>
                 <a
-                  href="/app/#signin"
+                  href={site("/app/#signin")}
                   className="inline-flex items-center justify-center border border-white/20 text-white px-6 py-3.5 text-sm font-medium rounded-xl sm:hidden"
                 >
                   Log in

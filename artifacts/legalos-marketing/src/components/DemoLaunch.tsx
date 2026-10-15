@@ -17,8 +17,9 @@
 import { useCallback, useEffect, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { recordDeparture } from '@/lib/arrival';
+import { site } from '../lib/site';
 
-const DEMO_URL = '/app/demo';
+const DEMO_URL = site('/app/demo');
 const PREFETCH_ID = 'legalos-demo-prefetch';
 
 /** Ask the browser to fetch the app document while the visitor is still deciding. */

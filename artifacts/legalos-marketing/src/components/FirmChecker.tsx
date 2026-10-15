@@ -5,6 +5,7 @@ import { TRACKED_FIRMS } from '../data/trackedFirms';
 import { BENCHMARK_LEADERS, SCORED_FIRMS } from '../data/benchmarkLeaders';
 import unscoredTrackedFirms from '../data/unscoredTrackedFirms.json';
 import { classifyFirm } from '../lib/firmCheckStatus.mjs';
+import { site } from '../lib/site';
 
 // The published benchmark leaders — the same generated data the leaderboard
 // table above renders, so the checker can never drift from it.
@@ -92,7 +93,7 @@ export function FirmChecker() {
                   </div>
                 </div>
                 <a
-                  href="/app/teaser"
+                  href={site("/app/teaser")}
                   className="inline-flex items-center gap-2 text-sm font-bold text-primary uppercase tracking-wider hover:text-white transition-colors shrink-0"
                 >
                   Claim your profile <ArrowRight className="w-4 h-4" />
@@ -108,7 +109,7 @@ export function FirmChecker() {
                   </div>
                 </div>
                 <a
-                  href="/app/teaser"
+                  href={site("/app/teaser")}
                   className="inline-flex items-center gap-2 text-sm font-bold text-primary uppercase tracking-wider hover:text-white transition-colors shrink-0"
                 >
                   Reveal Your Score <ArrowRight className="w-4 h-4" />
@@ -124,7 +125,7 @@ export function FirmChecker() {
                   </div>
                 </div>
                 <a
-                  href="/app/teaser"
+                  href={site("/app/teaser")}
                   className="inline-flex items-center gap-2 text-sm font-bold text-primary uppercase tracking-wider hover:text-white transition-colors shrink-0"
                 >
                   Run Free Audit <ArrowRight className="w-4 h-4" />
@@ -140,7 +141,7 @@ export function FirmChecker() {
                   </div>
                 </div>
                 <a
-                  href="/app/teaser"
+                  href={site("/app/teaser")}
                   className="inline-flex items-center gap-2 text-sm font-bold text-primary uppercase tracking-wider hover:text-white transition-colors shrink-0"
                 >
                   Run Free Audit <ArrowRight className="w-4 h-4" />

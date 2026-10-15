@@ -1,6 +1,7 @@
 import { ArrowRight } from 'lucide-react';
 import { useState } from 'react';
 import { DemoLink } from './DemoLaunch';
+import { site } from '../lib/site';
 
 interface DomainInputProps {
   size?: 'default' | 'large';
@@ -26,7 +27,7 @@ export function DomainInput({ size = 'default', showDemoLink = false, source = '
       setError('Enter your firm\u2019s website, e.g. yourfirm.rs');
       return;
     }
-    window.location.href = `/app/teaser?domain=${encodeURIComponent(cleaned)}`;
+    window.location.href = site(`/app/teaser?domain=${encodeURIComponent(cleaned)}`);
   };
 
   const pad = size === 'large' ? 'py-5' : 'py-4';

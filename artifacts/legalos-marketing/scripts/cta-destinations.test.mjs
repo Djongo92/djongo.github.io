@@ -67,7 +67,7 @@ function sourceFiles(dir) {
 // from source so this test tracks the real destination, not a copy of it.
 function demoUrl() {
   const src = readFileSync(path.join(SRC, "components", "DemoLaunch.tsx"), "utf8");
-  const m = src.match(/const DEMO_URL\s*=\s*['"]([^'"]+)['"]/);
+  const m = src.match(/const DEMO_URL\s*=\s*(?:site\()?['"]([^'"]+)['"]/);
   assert.ok(m, "DEMO_URL constant not found in DemoLaunch.tsx");
   return m[1];
 }
@@ -90,7 +90,8 @@ function collectCtas() {
       const tagName = tag.match(/^<\s*([A-Za-z][\w.]*)/)?.[1];
 
       let href;
-      const literal = tag.match(/\bhref="([^"]*)"/);
+      // A literal href, or one routed through site() (the deploy-base helper).
+      const literal = tag.match(/\bhref="([^"]*)"/) ?? tag.match(/\bhref=\{site\(["'`]([^"'`]*)["'`]\)\}/);
       if (literal) {
         href = literal[1];
       } else if (tagName === "DemoLink") {

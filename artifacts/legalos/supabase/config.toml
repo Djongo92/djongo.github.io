@@ -212,3 +212,12 @@ verify_jwt = false
 
 [functions.firm-signals-refresh]
 verify_jwt = false
+
+[functions.showcase-access]
+verify_jwt = false
+
+[functions.demo-request]
+verify_jwt = false
+
+[functions.report-lead]
+verify_jwt = false

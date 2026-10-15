@@ -51,3 +51,6 @@ Thumbs.db
 # census run logs and the batch secret never belong in git
 artifacts/legalos/scripts/census/.census-*
 artifacts/legalos/scripts/census/.rerun.log
+
+# Assembled static site (scripts/build-site.mjs)
+site-dist/

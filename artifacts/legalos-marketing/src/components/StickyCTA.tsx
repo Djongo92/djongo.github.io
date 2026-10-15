@@ -1,6 +1,7 @@
 import { AnimatePresence, motion } from 'framer-motion';
 import { ArrowRight } from 'lucide-react';
 import { useEffect, useState } from 'react';
+import { site } from '../lib/site';
 
 export function StickyCTA() {
   const [visible, setVisible] = useState(false);
@@ -20,7 +21,7 @@ export function StickyCTA() {
     <AnimatePresence>
       {visible && (
         <motion.a
-          href="/app/teaser"
+          href={site("/app/teaser")}
           data-testid="link-sticky-cta"
           initial={{ opacity: 0, y: 24 }}
           animate={{ opacity: 1, y: 0 }}

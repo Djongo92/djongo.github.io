@@ -2,6 +2,7 @@ import { motion } from 'framer-motion';
 import { CheckCircle, Mail } from 'lucide-react';
 import { useState } from 'react';
 import { SCORED_FIRMS } from '../data/benchmarkLeaders';
+import { site } from '../lib/site';
 
 export function EmailCapture() {
   const [email, setEmail] = useState('');
@@ -19,9 +20,11 @@ export function EmailCapture() {
     }
     setSubmitting(true);
     try {
-      const res = await fetch(`${import.meta.env.BASE_URL}api/report-leads`, {
+      // report-lead edge function; the publishable key is public by design.
+      const key = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY;
+      const res = await fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/report-lead`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 'Content-Type': 'application/json', ...(key ? { apikey: key, Authorization: `Bearer ${key}` } : {}) },
         body: JSON.stringify({ email: trimmed, website }),
       });
       if (!res.ok) {
@@ -67,7 +70,7 @@ export function EmailCapture() {
               <div className="text-sm text-muted-foreground">
                 We'll email the report when the Q3 data closes. In the
                 meantime, run the free partial audit:{' '}
-                <a href="/app/teaser" className="text-primary hover:text-white transition-colors">
+                <a href={site("/app/teaser")} className="text-primary hover:text-white transition-colors">
                   get your score &rarr;
                 </a>
               </div>

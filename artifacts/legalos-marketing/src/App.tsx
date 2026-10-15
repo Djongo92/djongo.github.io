@@ -34,6 +34,7 @@ import {
 import { GUIDEBOOK_CHAPTER_COUNT } from './data/guidebookMeta';
 import { AI_TOOLS } from './data/aiTools';
 import { BENCHMARK_LEADERS, SCORED_FIRMS, type BenchmarkLeader } from './data/benchmarkLeaders';
+import { site } from './lib/site';
 
 const FIRM_COUNT = SCORED_FIRMS;
 
@@ -217,7 +218,7 @@ export default function App() {
             style={{ top: '8%', width: '44%', height: '84%' }}>
             <Parallax strength={36} className="w-full h-full overflow-hidden">
               <img
-                src="/hero-belgrade.jpg"
+                src={site("/hero-belgrade.jpg")}
                 alt="Managing partner reviewing firm data"
                 className="w-full h-full object-cover object-top scale-[1.12]"
               />
@@ -339,7 +340,7 @@ export default function App() {
             </div>
             <Reveal delay={0.4}>
               <div className="mt-12 text-center">
-                <a href="/app/teaser" data-testid="link-how-audit" className="inline-flex items-center gap-2 text-sm text-primary hover:text-white transition-colors eyebrow">
+                <a href={site("/app/teaser")} data-testid="link-how-audit" className="inline-flex items-center gap-2 text-sm text-primary hover:text-white transition-colors eyebrow">
                   Start step one now <ArrowRight className="w-4 h-4" />
                 </a>
               </div>
@@ -348,14 +349,14 @@ export default function App() {
         </section>
 
         {/* ─── 3b. IMAGE BREAK ─── */}
-        <ImageBand src="/band-bokeh.jpg" caption="Fig. 02 — City lights, after hours" />
+        <ImageBand src={site("/band-bokeh.jpg")} caption="Fig. 02 — City lights, after hours" />
 
         {/* ─── 4. THE PROBLEM ─── */}
         <section className="py-24 md:py-32 bg-card/20 border-t border-white/5 relative overflow-hidden">
           {/* Empty conference room, one glowing phone — the problem made atmospheric */}
           <div className="absolute inset-0 pointer-events-none" aria-hidden="true">
             <Parallax strength={40} className="absolute inset-0">
-              <img src="/problem-mood.jpg" alt="" className="w-full h-full object-cover scale-[1.15] opacity-25" />
+              <img src={site("/problem-mood.jpg")} alt="" className="w-full h-full object-cover scale-[1.15] opacity-25" />
             </Parallax>
             <div className="absolute inset-0 bg-gradient-to-b from-background via-background/50 to-background" />
           </div>
@@ -455,7 +456,7 @@ export default function App() {
                       Real data on your firm, not a sample.
                     </p>
                   </div>
-                  <a href="/app/teaser" data-testid="link-score-audit" className="inline-flex items-center gap-2 text-sm font-bold text-white uppercase tracking-wider relative z-10">
+                  <a href={site("/app/teaser")} data-testid="link-score-audit" className="inline-flex items-center gap-2 text-sm font-bold text-white uppercase tracking-wider relative z-10">
                     Start Free Audit <ArrowRight className="w-4 h-4" />
                   </a>
                 </div>
@@ -495,7 +496,7 @@ export default function App() {
                 <div className="mt-10 mb-12">
                   {/* Rankings are public — land on the actual leaderboard,
                       not the app's sign-in gate. */}
-                  <a href="/app/visibility-index/serbia?live=1" data-testid="link-benchmark-app" className="inline-flex items-center gap-2 border border-white/20 px-6 py-3 rounded-full text-sm font-bold text-white uppercase tracking-wider hover:border-primary/50 hover:bg-primary/5 transition-all">
+                  <a href={site("/app/visibility-index/serbia?live=1")} data-testid="link-benchmark-app" className="inline-flex items-center gap-2 border border-white/20 px-6 py-3 rounded-full text-sm font-bold text-white uppercase tracking-wider hover:border-primary/50 hover:bg-primary/5 transition-all">
                     View the Visibility Index <ChevronRight className="w-4 h-4" />
                   </a>
                 </div>
@@ -541,7 +542,7 @@ export default function App() {
                         <div className="flex items-center gap-3 shrink-0">
                           {firm.highlight ? (
                             <a
-                              href="/app/teaser"
+                              href={site("/app/teaser")}
                               data-testid="link-your-firm-audit"
                               className="inline-flex items-center gap-1.5 bg-primary text-primary-foreground px-3 py-1.5 text-xs font-bold uppercase tracking-wider hover:opacity-90 transition-opacity relative z-10"
                             >
@@ -571,7 +572,7 @@ export default function App() {
                     ))}
                   </div>
                   <div className="bg-card/40 border-t border-white/5 px-5 py-3 text-center">
-                    <a href="/app/teaser" className="text-xs text-primary hover:text-white transition-colors eyebrow">
+                    <a href={site("/app/teaser")} className="text-xs text-primary hover:text-white transition-colors eyebrow">
                       Run your audit to see where you stand &rarr;
                     </a>
                   </div>
@@ -607,7 +608,7 @@ export default function App() {
                     <span className="text-white tabular-nums">{FIRM_COUNT}</span> firms scored
                   </span>
                 </div>
-                <a href="/app/visibility-index/serbia?live=1" data-testid="link-directory-leaderboard" className="inline-flex items-center gap-2 border border-white/20 px-6 py-3 rounded-full text-sm font-bold text-white uppercase tracking-wider hover:border-primary/50 hover:bg-primary/5 transition-all">
+                <a href={site("/app/visibility-index/serbia?live=1")} data-testid="link-directory-leaderboard" className="inline-flex items-center gap-2 border border-white/20 px-6 py-3 rounded-full text-sm font-bold text-white uppercase tracking-wider hover:border-primary/50 hover:bg-primary/5 transition-all">
                   View the Visibility Index <ChevronRight className="w-4 h-4" />
                 </a>
               </div>
@@ -636,7 +637,7 @@ export default function App() {
           {/* Desk/paper texture as a soft section-wide backdrop */}
           <div className="absolute inset-0 pointer-events-none" aria-hidden="true">
             <Parallax strength={40} className="absolute inset-0">
-              <img src="/guidebook-texture.jpg" alt="" className="w-full h-full object-cover scale-[1.15] opacity-20" />
+              <img src={site("/guidebook-texture.jpg")} alt="" className="w-full h-full object-cover scale-[1.15] opacity-20" />
             </Parallax>
             <div className="absolute inset-0 bg-gradient-to-b from-background via-background/60 to-background" />
           </div>
@@ -747,7 +748,7 @@ export default function App() {
                 {/* The Workshop is behind auth — say so, and land on the
                     sign-in form (#signin opens it directly), not the gate's
                     teaser hero. Free during early access. */}
-                <a href="/app/#signin" data-testid="link-workshop-app" className="inline-flex items-center gap-2 text-sm text-primary hover:text-white transition-colors eyebrow">
+                <a href={site("/app/#signin")} data-testid="link-workshop-app" className="inline-flex items-center gap-2 text-sm text-primary hover:text-white transition-colors eyebrow">
                   Create a free account to explore all {AI_TOOLS.length} tools <ArrowRight className="w-4 h-4" />
                 </a>
               </div>
@@ -760,7 +761,7 @@ export default function App() {
           {/* Signed-document photo as a soft section-wide backdrop */}
           <div className="absolute inset-0 pointer-events-none" aria-hidden="true">
             <Parallax strength={40} className="absolute inset-0">
-              <img src="/signed-document.jpg" alt="" className="w-full h-full object-cover scale-[1.15] opacity-20" />
+              <img src={site("/signed-document.jpg")} alt="" className="w-full h-full object-cover scale-[1.15] opacity-20" />
             </Parallax>
             <div className="absolute inset-0 bg-gradient-to-b from-background via-background/60 to-background" />
           </div>
@@ -779,7 +780,7 @@ export default function App() {
                 </p>
                 {/* A Battle Plan is built from a full audit — start there.
                     The teaser is the honest first step, not a sign-in wall. */}
-                <a href="/app/teaser" data-testid="link-battleplan-app" className="inline-flex items-center gap-2 bg-primary text-primary-foreground px-8 py-4 rounded-full text-sm font-semibold hover:opacity-90 transition-opacity group">
+                <a href={site("/app/teaser")} data-testid="link-battleplan-app" className="inline-flex items-center gap-2 bg-primary text-primary-foreground px-8 py-4 rounded-full text-sm font-semibold hover:opacity-90 transition-opacity group">
                   Run the audit that builds your Battle Plan <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
                 </a>
               </Reveal>
@@ -850,7 +851,7 @@ export default function App() {
         </section>
 
         {/* ─── 9b. IMAGE BREAK ─── */}
-        <ImageBand src="/band-desk.jpg" caption="Fig. 03 — The working desk" />
+        <ImageBand src={site("/band-desk.jpg")} caption="Fig. 03 — The working desk" />
 
         {/* ─── 10. PRICING / FREE VS FULL ─── */}
         <section className="py-24 md:py-32 bg-card/20 border-t border-white/5 relative" id="pricing">
@@ -882,7 +883,7 @@ export default function App() {
                     ))}
                   </ul>
                   <a
-                    href="/app/teaser"
+                    href={site("/app/teaser")}
                     data-testid="link-pricing-free"
                     className="inline-flex items-center justify-center gap-2 border border-white/20 text-white px-6 py-4 rounded-full text-sm font-semibold hover:border-primary/50 hover:bg-primary/5 transition-all"
                   >
@@ -915,7 +916,7 @@ export default function App() {
                   {/* €0 during early access, said two lines up — the honest
                       ask is a free account, and #signin opens the form. */}
                   <a
-                    href="/app/#signin"
+                    href={site("/app/#signin")}
                     data-testid="link-pricing-full"
                     className="inline-flex items-center justify-center gap-2 bg-primary text-primary-foreground px-6 py-4 text-sm font-semibold hover:opacity-90 transition-opacity"
                   >
@@ -947,7 +948,7 @@ export default function App() {
           {/* Report-cover still life as a soft section-wide backdrop */}
           <div className="absolute inset-0 pointer-events-none" aria-hidden="true">
             <Parallax strength={40} className="absolute inset-0">
-              <img src="/report-cover.jpg" alt="" className="w-full h-full object-cover scale-[1.15] opacity-20" />
+              <img src={site("/report-cover.jpg")} alt="" className="w-full h-full object-cover scale-[1.15] opacity-20" />
             </Parallax>
             <div className="absolute inset-0 bg-gradient-to-b from-background via-background/60 to-background" />
           </div>
@@ -964,7 +965,7 @@ export default function App() {
               higher presence, held still (no parallax), lighter center veil. */}
           <div className="absolute inset-0 z-0">
             <img
-              src="/cta-architecture.jpg"
+              src={site("/cta-architecture.jpg")}
               alt=""
               aria-hidden="true"
               className="w-full h-full object-cover opacity-60 pointer-events-none select-none"
@@ -1004,8 +1005,8 @@ export default function App() {
             <span className="font-serif text-lg tracking-tight text-white font-semibold">Uvid</span>
           </div>
           <div className="flex items-center justify-center gap-6 mb-6 text-xs text-muted-foreground tabular-nums font-medium">
-            <a href="/benchmarks/" data-testid="link-benchmarks" className="hover:text-white transition-colors">Benchmarks</a>
-            <a href="/guidebook/" data-testid="link-guidebook" className="hover:text-white transition-colors">Playbook</a>
+            <a href={site("/benchmarks/")} data-testid="link-benchmarks" className="hover:text-white transition-colors">Benchmarks</a>
+            <a href={site("/guidebook/")} data-testid="link-guidebook" className="hover:text-white transition-colors">Playbook</a>
             <span className="w-px h-3 bg-white/10" />
             <a href="#/privacy" data-testid="link-privacy" className="hover:text-white transition-colors">Privacy Policy</a>
             <span className="w-px h-3 bg-white/10" />

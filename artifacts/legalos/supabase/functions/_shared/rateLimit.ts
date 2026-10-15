@@ -344,3 +344,22 @@ export async function checkBenchmarkRateLimit(
 ): Promise<RateLimitResult> {
   return checkRateLimitGeneric(serviceClient, { table: "benchmark_rate_limit", keyColumn: "client_id", key: clientId, limit, windowMs });
 }
+
+/**
+ * Rate-limits the public, unauthenticated forms (showcase-access,
+ * demo-request, report-lead) by a keyed hash of the caller's IP, one bucket
+ * per form so a busy sign-up form can't lock someone out of entering a code.
+ */
+export async function checkPublicFormRateLimit(
+  // deno-lint-ignore no-explicit-any
+  serviceClient: SupabaseClient<any, any, any>,
+  form: "showcase-access" | "demo-request" | "report-lead",
+  ip: string,
+  limit: number,
+  windowMs: number,
+): Promise<RateLimitResult> {
+  const ipHash = await hashIp(ip);
+  return checkRateLimitGeneric(serviceClient, {
+    table: "public_form_rate_limit", keyColumn: "bucket_key", key: `${form}:${ipHash}`, limit, windowMs,
+  });
+}

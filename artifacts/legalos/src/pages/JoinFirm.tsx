@@ -3,6 +3,7 @@ import { Link, useParams } from "react-router-dom";
 import { Loader2, CheckCircle2, XCircle, Users } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import { edgeHeaders } from "@/lib/edgeAuth";
+import { MARKETING_HOME } from "@/lib/marketingSite";
 
 const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL as string;
 
@@ -74,7 +75,7 @@ const JoinFirm = () => {
               </Link>
               {/* An invite link can reach the wrong person — a visible way
                   back to the public site beats a hard dead end. */}
-              <a href="/" className="text-xs text-muted-foreground hover:text-foreground font-body">
+              <a href={MARKETING_HOME} className="text-xs text-muted-foreground hover:text-foreground font-body">
                 Back to the Uvid site
               </a>
             </div>
