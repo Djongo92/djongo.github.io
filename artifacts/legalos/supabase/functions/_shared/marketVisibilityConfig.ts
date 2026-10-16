@@ -1,0 +1,32 @@
+// Server-side mirror of src/lib/marketVisibilityConfig.ts. Deno edge
+// functions can't import across the supabase/functions boundary into src/,
+// so the per-market denominators are duplicated here — keep both in sync.
+
+export interface MarketConfig {
+  chambers: { n: number; deepestBand: number };
+  legal500: { n: number; deepestTier: number };
+  iflr1000: { n: number; deepestTier: number };
+  contentWindowDays: number;
+  /** Market-local Google News edition for press-mention search — regional
+   *  trade press often appears only there, invisible to the US edition. */
+  newsEdition?: { hl: string; gl: string; ceid: string };
+}
+
+// Serbia-only for now by deliberate scope decision — Hungary/Romania
+// configs existed as unverified third-party reference values with no seed
+// data behind them and were removed rather than left half-supported.
+export const DMV_MARKETS: Record<string, MarketConfig> = {
+  serbia: { chambers: { n: 7, deepestBand: 4 }, legal500: { n: 8, deepestTier: 4 }, iflr1000: { n: 2, deepestTier: 5 }, contentWindowDays: 90, newsEdition: { hl: "sr", gl: "RS", ceid: "RS:sr" } },
+};
+
+export const getMarketConfig = (market: string): MarketConfig | null => DMV_MARKETS[market] ?? null;
+
+export type PeerGroup = "international" | "regional" | "local" | "localized_page" | "consultancy";
+
+/** Maps a market_directory_data firm_type code onto the closest peer_group, for peer-set filtering. No mapping exists for localized_page. */
+export const FIRM_TYPE_TO_PEER_GROUP: Record<string, PeerGroup> = {
+  I: "international",
+  R: "regional",
+  L: "local",
+  C: "consultancy",
+};

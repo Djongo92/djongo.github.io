@@ -1,0 +1,174 @@
+#!/usr/bin/env node
+// Regenerates src/data/benchmarkLeaders.ts from the census leaderboard
+// snapshot (../legalos/scripts/census/leaderboard-snapshot.json), which the
+// census runner refreshes at the end of every sweep. Scores render on the
+// public 0-500 scale (snapshots with scaleMax 500 are already native; older
+// snapshots carried 0-200 totals and are scaled x 2.5) — the same scale the
+// Visibility Index renders — so the landing leaderboard can never
+// drift from measured scores without check:leaders failing.
+//
+// The synthetic "Your Firm" row is NOT generated here — App.tsx appends it,
+// and the market-leader claim stays derived-not-positional (see App.tsx).
+//
+// Regenerate: pnpm run generate:leaders (also runs automatically before dev/build).
+
+import { readFileSync, writeFileSync } from "node:fs";
+import { dirname, join, resolve } from "node:path";
+import { fileURLToPath } from "node:url";
+
+const PEER_GROUP_LABELS = {
+  local: "Local",
+  regional: "Regional",
+  international: "International",
+  consultancy: "Consultancy",
+};
+
+/**
+ * snapshot -> display rows. Throws on a missing/empty snapshot so a broken
+ * export can never silently blank the landing table.
+ */
+/** Multiplier from a snapshot's stored totals to the 0–500 display scale. */
+export const displayFactor = (snapshot) => 500 / (Number(snapshot?.scaleMax) > 0 ? Number(snapshot.scaleMax) : 200);
+
+export function computeLeaderRows(snapshot) {
+  if (!snapshot || !Array.isArray(snapshot.leaders) || snapshot.leaders.length === 0) {
+    throw new Error("leaderboard snapshot is missing or has no leaders — run the census sweep or pnpm --filter @workspace/legalos run census:snapshot");
+  }
+  return snapshot.leaders.map((l, i) => ({
+    rank: i + 1,
+    name: String(l.name),
+    score: Math.round(Number(l.totalScore) * displayFactor(snapshot)),
+    delta: "—",
+    category: PEER_GROUP_LABELS[l.peerGroup] ?? "—",
+  }));
+}
+
+// Histogram buckets on the public 0–500 display scale. Ranges are the
+// product's fixed narrative frame ("most firms under 60, leaders 310+");
+// COUNTS are derived from the live snapshot. Zero-count buckets are kept so
+// the long-tail story stays visible even if a band empties out.
+export const SCORE_BUCKETS = [
+  { label: "0\u201359", min: 0, max: 59 },
+  { label: "60\u2013124", min: 60, max: 124 },
+  { label: "125\u2013184", min: 125, max: 184 },
+  { label: "185\u2013249", min: 185, max: 249 },
+  { label: "250\u2013309", min: 250, max: 309 },
+  { label: "310+", min: 310, max: Infinity },
+];
+
+/**
+ * snapshot -> histogram bucket counts on the 0–500 display scale. Throws on
+ * a snapshot without the full score list — an old-format snapshot must fail
+ * the build, not silently render an empty chart.
+ */
+export function computeScoreBuckets(snapshot) {
+  if (!snapshot || !Array.isArray(snapshot.scores) || snapshot.scores.length === 0) {
+    throw new Error("leaderboard snapshot has no scores array — re-run the census sweep or pnpm --filter @workspace/uvid run census:snapshot to regenerate it");
+  }
+  const factor = displayFactor(snapshot);
+  const display = snapshot.scores.map((s) => Math.round(Number(s) * factor));
+  if (display.some((d) => !Number.isFinite(d) || d < 0)) {
+    throw new Error("leaderboard snapshot contains a non-numeric or negative score");
+  }
+  return SCORE_BUCKETS.map((b) => ({
+    range: b.label,
+    count: display.filter((d) => d >= b.min && d <= b.max).length,
+  }));
+}
+
+/**
+ * snapshot.generatedAt -> "Q3 2026" quarter label. Throws on a missing or
+ * unparseable timestamp so a broken snapshot can't silently render a bogus
+ * period. Only the quarter string is emitted into the generated file, so
+ * check:leaders (git-diff based) fires only when the quarter actually turns.
+ */
+export function computeDataPeriod(snapshot) {
+  const t = Date.parse(snapshot?.generatedAt ?? "");
+  if (!Number.isFinite(t)) {
+    throw new Error("leaderboard snapshot has no valid generatedAt timestamp — re-run the census sweep to regenerate it");
+  }
+  const d = new Date(t);
+  return `Q${Math.floor(d.getUTCMonth() / 3) + 1} ${d.getUTCFullYear()}`;
+}
+
+export function renderBenchmarkLeadersTs(snapshot) {
+  const rows = computeLeaderRows(snapshot);
+  const buckets = computeScoreBuckets(snapshot);
+  const dataPeriod = computeDataPeriod(snapshot);
+  const bucketLines = buckets.map((b) => `  { range: ${JSON.stringify(b.range)}, count: ${b.count} },`);
+  // JSON.stringify is a complete JS string-literal encoder — a display name
+  // with a newline or control character can never break the generated TS.
+  const nameW = Math.max(...rows.map((r) => JSON.stringify(r.name).length)) + 1; // + comma
+  const lines = rows.map((r) => {
+    const nameField = `${JSON.stringify(r.name)},`;
+    return `  { rank: ${r.rank}, name: ${nameField.padEnd(nameW)} score: ${r.score}, delta: "—", category: "${r.category}" },`;
+  });
+  // Deliberately NO generatedAt here: the generated file must be a pure
+  // function of the leader rows so check:leaders (git-diff based) only fires
+  // on real score changes, never on timestamp churn.
+  return `// AUTO-GENERATED by scripts/generate-benchmark-leaders.mjs — do not edit by hand.
+// Source of truth: artifacts/legalos/scripts/census/leaderboard-snapshot.json
+// (market = '${snapshot.market}', refreshed by the census runner after each sweep).
+// Regenerate: pnpm run generate:leaders (also runs automatically before dev/build).
+
+export interface BenchmarkLeader {
+  rank: number;
+  name: string;
+  /** Public 0–500 display scale (rounded). */
+  score: number;
+  delta: string;
+  category: string;
+}
+
+export const BENCHMARK_LEADERS: BenchmarkLeader[] = [
+${lines.join("\n")}
+];
+
+export interface ScoreBucket {
+  /** Display-scale range label, e.g. "0–59" or "310+". */
+  range: string;
+  /** Number of scored firms whose 0–500 display score falls in the range. */
+  count: number;
+}
+
+/** Total scored firms in the census snapshot (histogram denominator). */
+export const SCORED_FIRMS = ${snapshot.scores.length};
+
+/**
+ * Quarter the census snapshot was gathered in, derived from its timestamp.
+ * Deliberately just the quarter (no raw ISO timestamp) so this file only
+ * changes when the quarter actually turns, not on every sweep.
+ */
+export const DATA_PERIOD = ${JSON.stringify(dataPeriod)};
+
+/**
+ * Score distribution of all scored firms on the public 0–500 display scale.
+ * Zero-count buckets are intentional — render them as empty bars.
+ */
+export const SCORE_DISTRIBUTION: ScoreBucket[] = [
+${bucketLines.join("\n")}
+];
+`;
+}
+
+function main() {
+  const here = dirname(fileURLToPath(import.meta.url));
+  // Path overrides exist so the e2e test can drive the real CLI against a
+  // temp snapshot without touching the committed files.
+  const snapshotPath = process.env.LEGALOS_LEADERBOARD_SNAPSHOT
+    ?? resolve(here, "../../legalos/scripts/census/leaderboard-snapshot.json");
+  const outPath = process.env.LEGALOS_LEADERS_OUT
+    ?? resolve(here, "../src/data/benchmarkLeaders.ts");
+  const snapshot = JSON.parse(readFileSync(snapshotPath, "utf8"));
+  writeFileSync(outPath, renderBenchmarkLeadersTs(snapshot));
+  console.log(`generate-benchmark-leaders: wrote ${snapshot.leaders.length} leaders -> ${outPath}`);
+}
+
+if (process.argv[1] === fileURLToPath(import.meta.url)) {
+  try {
+    main();
+  } catch (e) {
+    console.error(`generate-benchmark-leaders: ${e?.message ?? e}`);
+    process.exit(1);
+  }
+}

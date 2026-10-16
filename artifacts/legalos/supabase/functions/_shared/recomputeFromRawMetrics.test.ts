@@ -1,0 +1,157 @@
+import { describe, it, expect } from "vitest";
+import { recomputeFromRawMetrics, recomputeDirectorySubScore } from "./recomputeFromRawMetrics";
+import type { PeerStats } from "./percentileFormula";
+import { DMV_MARKETS } from "./marketVisibilityConfig";
+
+const stats = (value: number, p90Threshold: number): PeerStats => ({
+  value, peerMedian: p90Threshold / 2, p90Threshold, highestObserved: p90Threshold,
+  sampleSize: 10, comparisonDate: "2026-01-01T00:00:00.000Z", lowConfidence: false, widened: false,
+});
+
+describe("recomputeFromRawMetrics", () => {
+  it("scores nothing (all zero) for an empty raw_metrics object", () => {
+    const result = recomputeFromRawMetrics("serbia", {});
+    expect(result.total_score).toBe(0);
+    expect(result.performance_score).toBe(0);
+    expect(result.social_score).toBe(0);
+    expect(result.thought_leadership_score).toBe(0);
+    expect(result.reputation_score).toBe(0);
+  });
+
+  it("recomputes performance from stored desktop/mobile lighthouse categories", () => {
+    const raw = {
+      performance: {
+        desktop: { performance: 100, accessibility: 100, seo: 100 },
+        mobile: { performance: 100, accessibility: 100, seo: 100 },
+      },
+    };
+    expect(recomputeFromRawMetrics("serbia", raw).performance_score).toBe(50);
+  });
+
+  it("recomputes social from stored PeerStats — a corrected followers value changes the ratio", () => {
+    const raw = {
+      social: {
+        followersStats: stats(500, 1000),
+        postsStats: stats(5, 10),
+        platforms: { linkedin: true, instagram: false, twitter: false, facebook: false },
+      },
+    };
+    const before = recomputeFromRawMetrics("serbia", raw).social_score;
+
+    // Correct followers up to the peer 90th-percentile threshold — ratio goes from 0.5 to 1.0.
+    const corrected = structuredClone(raw);
+    corrected.social.followersStats.value = 1000;
+    const after = recomputeFromRawMetrics("serbia", corrected).social_score;
+
+    expect(after).toBeGreaterThan(before);
+  });
+
+  it("recomputes thought leadership from stored PeerStats, byline share and publishing months", () => {
+    const raw = {
+      thoughtLeadership: {
+        articlesStats: stats(10, 20),
+        ownNewsStats: stats(1, 2),
+        newsStats: stats(2, 4),
+        bylinePct: 0.5,
+        activeMonths: 2,
+        windowMonths: 3,
+      },
+    };
+    // 60*(10/20) + 20*0.5 + 20*(1/2) + 20*(2/3) + 30*(2/4) = 30 + 10 + 10 + 13.33 + 15
+    expect(recomputeFromRawMetrics("serbia", raw).thought_leadership_score).toBeCloseTo(78.33, 2);
+  });
+
+  it("reads a pre-v3 blended own-output comparison as articles, never inventing an own-news split", () => {
+    const raw = { thoughtLeadership: { postsStats: stats(10, 20), newsStats: stats(2, 4), bylinePct: 0.5, activeMonths: 0, windowMonths: 3 } };
+    // 60*0.5 + 20*0.5 + 0 + 0 + 30*0.5 = 55
+    expect(recomputeFromRawMetrics("serbia", raw).thought_leadership_score).toBeCloseTo(55, 5);
+  });
+
+  it("recomputes search authority from stored per-metric stats, and keeps a carried-forward score otherwise", () => {
+    const measured = { seoAuthority: { domainAuthority: stats(10, 20), referringDomains: stats(40, 20) } };
+    // average of 0.5 and 1 → 75 of 100
+    expect(recomputeFromRawMetrics("serbia", measured).seo_authority_score).toBe(75);
+    const carried = { seoAuthority: { provider: "dataforseo", fallback: "historical" } };
+    expect(recomputeFromRawMetrics("serbia", carried, { seoAuthority: 42 }).seo_authority_score).toBe(42);
+  });
+
+  it("recomputes reputation gbp + directory points without a peer requery", () => {
+    const raw = {
+      reputation: {
+        gbpListed: true,
+        chambers: { points: 0, count: 2, avgRank: 2, qualityStats: stats(3, 4) },
+      },
+    };
+    const result = recomputeFromRawMetrics("serbia", raw);
+    // gbp 25 + chambers breadth (25 * 2/7) + depth (15 * 3/4), rounded to 2 decimals
+    const expectedCount = 25 * (2 / 7);
+    const expected = Math.round((25 + expectedCount + 15 * 0.75) * 100) / 100;
+    expect(result.reputation_score).toBe(expected);
+  });
+
+  it("never fabricates a score for an unknown market", () => {
+    const raw = { reputation: { gbpListed: true } };
+    expect(recomputeFromRawMetrics("nowhere", raw).reputation_score).toBe(25);
+  });
+
+  it("uses persisted gbpScore (API-sourced) instead of re-deriving from gbpListed boolean", () => {
+    // A firm scored 7/10 from Google Places — correcting a directory entry must
+    // not revert GBP to 10 (the boolean fallback) or 0 (false fallback).
+    const raw = {
+      reputation: {
+        gbpListed: true,      // boolean says 10, but Places scored 7
+        gbpScore: 7,
+        gbpSource: "google_places_api",
+        chambers: { points: 0, count: 2, avgRank: 2, qualityStats: stats(3, 4) },
+      },
+    };
+    const result = recomputeFromRawMetrics("serbia", raw);
+    const expectedCount = 25 * (2 / 7);
+    const expected = Math.round((17.5 + expectedCount + 15 * 0.75) * 100) / 100;
+    expect(result.reputation_score).toBe(expected);
+    // Must NOT equal the boolean-derived full GBP share
+    const booleanDerived = Math.round((25 + expectedCount + 15 * 0.75) * 100) / 100;
+    expect(result.reputation_score).not.toBe(booleanDerived);
+  });
+
+  it("falls back to the gbpListed boolean for legacy audits without a numeric gbpScore", () => {
+    const raw = { reputation: { gbpListed: true } };
+    expect(recomputeFromRawMetrics("nowhere", raw).reputation_score).toBe(25);
+    const rawFalse = { reputation: { gbpListed: false } };
+    expect(recomputeFromRawMetrics("nowhere", rawFalse).reputation_score).toBe(0);
+  });
+
+  it("IFLR1000 at full breadth and 90th-percentile quality contributes its full 20 pts", () => {
+    const serbia = DMV_MARKETS["serbia"];
+    const iflrN = serbia.iflr1000.n;
+    // count = n (full breadth), qualityStats at p90 (ratio = 1)
+    const rawFull = {
+      reputation: {
+        gbpListed: false,
+        iflr1000: { points: 0, count: iflrN, avgRank: 1, qualityStats: stats(4, 4) },
+      },
+    };
+    const result = recomputeFromRawMetrics("serbia", rawFull);
+    // breadth 12 + depth 8 = 20
+    expect(result.reputation_score).toBe(20);
+  });
+});
+
+describe("recomputeDirectorySubScore", () => {
+  it("returns zeros for an empty ranked-tables object", () => {
+    const result = recomputeDirectorySubScore({}, 4, null);
+    expect(result.count).toBe(0);
+    expect(result.avgRank).toBeNull();
+    expect(result.qualityStats).toBeNull();
+  });
+
+  it("recomputes avgRank/invertedAvg and keeps the existing p90Threshold", () => {
+    const previous = stats(2, 4); // stale value, real p90Threshold to preserve
+    const result = recomputeDirectorySubScore({ CC: 1, DR: 1 }, 4, previous);
+    expect(result.count).toBe(2);
+    expect(result.avgRank).toBe(1);
+    // invertedAvg = deepest(4) + 1 - avgRank(1) = 4
+    expect(result.qualityStats?.value).toBe(4);
+    expect(result.qualityStats?.p90Threshold).toBe(4); // unchanged from `previous`
+  });
+});

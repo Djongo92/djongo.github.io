@@ -1,76 +1,62 @@
-# LegalOS
+# Uvid (LegalOS)
 
-A market-visibility product for law firms: an interactive marketing
-guidebook, a ten-tool AI "Workshop," a Battle Plan PDF export, and a
-peer-group-normalized **Market Visibility Score** — an externally verified,
-peer-benchmarked number (PageSpeed, legal-directory standing, thought
-leadership, social presence) that gets more meaningful as more firms run it.
-
-Built on Vite + React + TypeScript + shadcn/ui + Tailwind, with Supabase
-(Postgres + Deno edge functions) as the backend.
-
-## Quick start
-
-```bash
-npm install
-cp .env.example .env        # fill in the two VITE_ vars, see docs/ENVIRONMENT.md
-npm run dev                 # http://localhost:8080
-```
-
-```bash
-npm run test                # vitest — pure formula/logic unit tests
-npm run build                # production build (vite)
-npm run lint                 # eslint
-```
-
-To type-check the app, use `npx tsc --noEmit -p tsconfig.app.json` —
-**not** a bare `npx tsc --noEmit`. The root `tsconfig.json` only declares
-project references and has no `files`, so a bare invocation silently
-checks zero files and reports no errors regardless of what's broken. This
-project's own history has been bitten by this once already; don't repeat it.
-
-## Documentation
-
-- [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md) — how the pieces fit together
-- [`docs/ENVIRONMENT.md`](docs/ENVIRONMENT.md) — every environment variable / secret, what it's for, where it's read
-- [`docs/EDGE_FUNCTIONS.md`](docs/EDGE_FUNCTIONS.md) — inventory of every Supabase edge function
-- [`docs/MIGRATIONS.md`](docs/MIGRATIONS.md) — how to write and land a database migration safely
-- [`docs/TESTING.md`](docs/TESTING.md) — what's tested, what isn't, and why
-- [`docs/DEPLOYMENT.md`](docs/DEPLOYMENT.md) — how a change actually reaches production
-- [`docs/DECISIONS.md`](docs/DECISIONS.md) — short records of the significant technical calls and why
-- [`SECURITY.md`](SECURITY.md) — reporting a vulnerability, this project's security posture
-- [`CLAUDE.md`](CLAUDE.md) — the original Market Visibility Score build brief (historical; still the source of truth for the scoring formulas' *intent*, even as the implementation has moved past its v1.0 methodology — see `docs/DECISIONS.md`)
+Market visibility intelligence for law firms: a measured, peer-benchmarked
+**Market Visibility Score** (500 points across Website Experience, Social
+Presence, Search Authority, Thought Leadership and Recognition), plus the
+Visibility Playbook guidebook, the AI Workshop, and the Battle Plan export.
 
 ## Repository layout
 
 ```
-src/                    Frontend (Vite + React + TypeScript)
-  components/           UI — Workshop tools, dashboard, visibility score, Battle Plan PDF
-  pages/                Routed pages (public index pages, /join, /rankings, etc.)
-  hooks/                Data-fetching + local state (useAuth, useFirmContext, useMarketVisibility, ...)
-  lib/                  Pure logic shared between components and (via relative import) edge functions
-  data/                 Demo/sample data for the "Load demo data" flow
-
-supabase/
-  functions/            Deno edge functions — one directory per function
-    _shared/            Pure formulas, auth/access helpers, Supabase-client helpers — shared across functions
-  migrations/           Timestamped SQL migrations, applied in filename order
-
-docs/                   Everything listed above
+artifacts/
+  legalos/              Web app (Vite + React + TS), served at /app/
+    supabase/
+      functions/        Deno edge functions — the entire backend
+        _shared/        Pure formulas (methodology.ts = every scoring weight),
+                        auth/access, rate limiting, shared helpers
+      migrations/       Timestamped SQL migrations
+  legalos-marketing/    Marketing site (Vite + Tailwind v4), served at /
+  legalos-mobile/       Expo mobile app (source only; not deployed from here)
+scripts/build-site.mjs  Builds marketing + app into one static site (site-dist/)
+amcham-serbia-website/  Separate AmCham demo, published at /amcham-preview/
+docs/                   Project notes and screenshots
 ```
 
-## The two authorization systems, and why both exist
+## Develop
 
-- **HMAC-signed access tokens** (`supabase/functions/_shared/access.ts`) — the
-  original shared-password gate for the guidebook/workshop purchase flow.
-  Currently bypassed (`BYPASS_ACCESS_CONTROL = true`) while the app is
-  private/pre-launch, but the code path is intact and this is a live,
-  possibly revenue-generating flow — don't remove it casually.
-- **Real Supabase Auth** (`useAuth.ts`, `firms`/`firm_members` tables) — real
-  user accounts, firm/organization membership, and roles, for anything that
-  needs a persistent identity (Battle Plan ownership, team invites, audit
-  history, evidence disputes). The two systems run side by side on purpose;
-  see `docs/DECISIONS.md` for why they weren't unified.
+```bash
+pnpm install
+pnpm run typecheck                                   # every package
+pnpm --filter @workspace/uvid run test               # web app + edge-function formula tests
+pnpm --filter @workspace/uvid run dev                # app at http://localhost:21341/app/
+pnpm --filter @workspace/uvid-marketing run dev      # marketing site
+```
+
+Environment: `artifacts/legalos/.env` and `artifacts/legalos-marketing/.env`
+carry only the public Supabase URL and publishable key. Every secret lives in
+the Supabase dashboard (Edge Functions → Secrets), never in this repo.
+
+## Hosting
+
+Everything dynamic runs on Supabase (Postgres + edge functions), so the site
+is plain static files:
+
+- **GitHub Pages** — `.github/workflows/deploy-pages.yml` builds on every push
+  to `main` (`SITE_BASE=/djongo.github.io/`) and publishes the marketing site,
+  the app at `/app/`, and the AmCham demo at `/amcham-preview/`.
+- **Vercel** (optional, root domain) — `vercel.json` runs the same build with
+  `SITE_BASE=/`.
+
+Local preview of exactly what ships: `SITE_BASE=/ node scripts/build-site.mjs`,
+then serve `site-dist/`.
+
+## Scoring methodology
+
+All weights are defined once in
+`artifacts/legalos/supabase/functions/_shared/methodology.ts` (v3, 500 points).
+Every stored audit records the `methodology_version` that produced it, and
+every display converts older readings rather than mixing scales. Scores are
+recomputed from stored `raw_metrics` — no paid data re-fetch needed.
 
 ## License
 

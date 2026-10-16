@@ -1,0 +1,209 @@
+{
+  "df397495-66c3-4b30-995c-7d1ebb6bec43": {
+    "status": "done",
+    "market": "serbia",
+    "report": {
+      "previouslyMissing": [
+        "seoAuthority"
+      ],
+      "stillMissing": [
+        "seoAuthority"
+      ],
+      "recovered": []
+    },
+    "at": "2026-08-24T08:50:20.009Z"
+  },
+  "5257add3-bc56-4508-b613-f93fdd6de5b7": {
+    "status": "done",
+    "market": "serbia",
+    "report": {
+      "previouslyMissing": [
+        "social",
+        "seoAuthority",
+        "reputation"
+      ],
+      "stillMissing": [
+        "social",
+        "seoAuthority",
+        "reputation"
+      ],
+      "recovered": []
+    },
+    "at": "2026-08-24T08:50:21.392Z"
+  },
+  "5c9c91fb-106c-4a2b-b532-8f9cfcf8c0f9": {
+    "status": "done",
+    "market": "serbia",
+    "report": {
+      "previouslyMissing": [
+        "social",
+        "seoAuthority",
+        "reputation"
+      ],
+      "stillMissing": [
+        "seoAuthority",
+        "reputation"
+      ],
+      "recovered": [
+        "social"
+      ]
+    },
+    "at": "2026-08-24T08:50:46.102Z"
+  },
+  "f22e2152-e9b8-4a7a-9010-b7938c79261e": {
+    "status": "done",
+    "market": "serbia",
+    "report": {
+      "previouslyMissing": [
+        "social",
+        "seoAuthority",
+        "reputation"
+      ],
+      "stillMissing": [
+        "seoAuthority",
+        "reputation"
+      ],
+      "recovered": [
+        "social"
+      ]
+    },
+    "at": "2026-08-24T08:50:51.856Z"
+  },
+  "69770256-8c45-4927-b283-c52c06f7f8cb": {
+    "status": "done",
+    "market": "serbia",
+    "report": {
+      "previouslyMissing": [
+        "seoAuthority",
+        "reputation"
+      ],
+      "stillMissing": [
+        "seoAuthority"
+      ],
+      "recovered": [
+        "reputation"
+      ]
+    },
+    "at": "2026-08-24T08:51:05.057Z"
+  },
+  "bf2af0c8-8a22-409d-b91e-4cda32fcb4f7": {
+    "status": "done",
+    "market": "serbia",
+    "report": {
+      "previouslyMissing": [
+        "social",
+        "seoAuthority",
+        "reputation"
+      ],
+      "stillMissing": [
+        "seoAuthority"
+      ],
+      "recovered": [
+        "social",
+        "reputation"
+      ]
+    },
+    "at": "2026-08-24T08:51:09.421Z"
+  },
+  "77b8659a-f667-404c-ab54-e40445e62ede": {
+    "status": "done",
+    "market": "serbia",
+    "report": {
+      "previouslyMissing": [
+        "seoAuthority",
+        "reputation"
+      ],
+      "stillMissing": [
+        "seoAuthority"
+      ],
+      "recovered": [
+        "reputation"
+      ]
+    },
+    "at": "2026-08-24T08:51:17.203Z"
+  },
+  "9419c7cf-f4d8-48c5-938f-16b3ca841ab9": {
+    "status": "done",
+    "market": "serbia",
+    "report": {
+      "previouslyMissing": [
+        "seoAuthority"
+      ],
+      "stillMissing": [
+        "seoAuthority"
+      ],
+      "recovered": []
+    },
+    "at": "2026-08-24T08:51:46.983Z"
+  },
+  "ce3d42f7-5110-472e-b9cb-64881ef7144a": {
+    "status": "done",
+    "market": "serbia",
+    "report": {
+      "previouslyMissing": [
+        "thoughtLeadership"
+      ],
+      "stillMissing": [
+        "seoAuthority",
+        "thoughtLeadership"
+      ],
+      "recovered": []
+    },
+    "at": "2026-08-24T08:52:48.248Z"
+  },
+  "fccae792-75db-4069-bd95-7dbd4d0b0d24": {
+    "status": "done",
+    "market": "serbia",
+    "report": {
+      "previouslyMissing": [
+        "social",
+        "thoughtLeadership"
+      ],
+      "stillMissing": [
+        "social",
+        "seoAuthority",
+        "thoughtLeadership"
+      ],
+      "recovered": []
+    },
+    "at": "2026-08-24T08:52:53.915Z"
+  },
+  "9941dc96-0c4e-45d3-b382-85159e16d51d": {
+    "status": "done",
+    "market": "serbia",
+    "report": {
+      "previouslyMissing": [
+        "performance",
+        "seoAuthority",
+        "reputation"
+      ],
+      "stillMissing": [
+        "seoAuthority",
+        "reputation"
+      ],
+      "recovered": [
+        "performance"
+      ]
+    },
+    "at": "2026-08-24T08:53:36.905Z"
+  },
+  "d471f579-f600-4c04-a571-521a1a5a8102": {
+    "status": "done",
+    "market": "serbia",
+    "report": {
+      "previouslyMissing": [
+        "social",
+        "seoAuthority",
+        "reputation"
+      ],
+      "stillMissing": [
+        "seoAuthority"
+      ],
+      "recovered": [
+        "social",
+        "reputation"
+      ]
+    },
+    "at": "2026-08-24T08:53:51.788Z"
+  }
+}

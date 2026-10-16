@@ -1,0 +1,110 @@
+// Scheduled re-run for audits that opted into auto_rerun (Uvid build
+// brief item 10) — without this, a score only ever updates when someone
+// manually re-runs it, so the trend line and public ranking go stale
+// between visits. Invoked on a schedule via pg_cron + pg_net (set up
+// alongside this function's deploy, not committed here since it embeds a
+// secret), never by an end-user request — so it is gated by a dedicated
+// CRON_SECRET rather than the benchmark HMAC scope every other audit
+// endpoint uses. Reuses the exact same scoring path as visibility-audit-run
+// (see _shared/runVisibilityAudit.ts) so a scheduled re-run and a manual
+// one can never drift apart.
+import { ACCESS_CORS_HEADERS } from "../_shared/access.ts";
+import { runVisibilityAudit } from "../_shared/runVisibilityAudit.ts";
+import { TOTAL_MAX } from "../_shared/methodology.ts";
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
+import { sendCronAlert, withCronAlert } from "../_shared/cronAlert.ts";
+
+const corsHeaders = ACCESS_CORS_HEADERS;
+
+// Task #219: withCronAlert covers hard failures (5xx); per-audit rerun
+// failures are aggregated into ONE direct alert below.
+Deno.serve(withCronAlert("visibility-audit-rerun-due", async (req) => {
+  if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
+
+  const cronSecret = Deno.env.get("CRON_SECRET");
+  const provided = req.headers.get("x-cron-secret");
+  if (!cronSecret || provided !== cronSecret) {
+    return new Response(JSON.stringify({ error: "Unauthorized" }), {
+      status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" },
+    });
+  }
+
+  try {
+    const serviceClient = createClient(
+      Deno.env.get("SUPABASE_URL")!,
+      Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!,
+      { auth: { persistSession: false } },
+    );
+
+    // Due = auto_rerun on, a frequency set, and it's been at least that
+    // many days since the last run. Postgres does the date arithmetic so
+    // this doesn't depend on clock skew between the cron caller and the DB.
+    const { data: dueRows, error: dueError } = await serviceClient
+      .rpc("market_visibility_audits_due_for_rerun");
+
+    if (dueError) {
+      console.error("visibility-audit-rerun-due lookup error:", dueError);
+      return new Response(JSON.stringify({ error: "Couldn't look up due audits" }), {
+        status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
+    let reran = 0;
+    let failed = 0;
+    for (const row of dueRows ?? []) {
+      const lastIntake = (row.last_intake ?? {}) as { gbpListed?: boolean; social?: unknown };
+      const scoreBefore = row.total_score as number;
+      const result = await runVisibilityAudit(serviceClient, {
+        clientId: row.client_id,
+        auditedDomain: row.audited_domain,
+        displayName: row.display_name,
+        market: row.market,
+        peerGroup: row.peer_group,
+        gbpListed: lastIntake.gbpListed === true,
+        social: lastIntake.social,
+      });
+      if (result.ok) {
+        reran++;
+        // A scheduled re-run is the one place a score changes without the
+        // user watching it happen — the only case that actually needs a
+        // notification. A manual re-run (visibility-audit-run) never goes
+        // through this path, so it never generates one; the user is
+        // already looking at the result live.
+        const scoreAfter = result.payload!.totalScore;
+        const delta = Math.round((scoreAfter - scoreBefore) * 10) / 10;
+        if (delta !== 0) {
+          const direction = delta > 0 ? "+" : "";
+          const { error: notifyError } = await serviceClient.from("notifications").insert({
+            client_id: row.client_id,
+            type: "score_rerun",
+            title: "Visibility Score updated",
+            body: `${direction}${delta} points since your last check — now ${Math.round(scoreAfter * 10) / 10}/${TOTAL_MAX} for ${row.audited_domain}.`,
+          });
+          if (notifyError) console.error("visibility-audit-rerun-due: notification insert failed:", notifyError);
+        }
+      } else {
+        failed++;
+        console.error(`visibility-audit-rerun-due: failed to rerun ${row.id} (${row.audited_domain}):`, result.error);
+      }
+    }
+
+    // One aggregate alert per failing run (task #219) — never one per row.
+    // The response stays 200: successful reruns are durable, and failed
+    // audits stay due, so they retry on the next scheduled run.
+    if (failed > 0) {
+      await sendCronAlert("visibility-audit-rerun-due", {
+        message: `${failed} of ${(dueRows ?? []).length} due rerun(s) failed`,
+        detail: { checked: (dueRows ?? []).length, reran, failed },
+      });
+    }
+
+    return new Response(JSON.stringify({ checked: (dueRows ?? []).length, reran, failed }), {
+      headers: { ...corsHeaders, "Content-Type": "application/json" },
+    });
+  } catch (e) {
+    console.error("visibility-audit-rerun-due error:", e);
+    return new Response(JSON.stringify({ error: e instanceof Error ? e.message : "Unknown error" }), {
+      status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" },
+    });
+  }
+}));

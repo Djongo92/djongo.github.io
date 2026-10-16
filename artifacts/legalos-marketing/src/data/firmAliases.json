@@ -1,0 +1,19 @@
+{
+  "_comment": "Hand-maintained aliases (short forms & directory spellings) keyed by exact firm name from the Supabase seed data. Merged into the auto-generated trackedFirms.ts by scripts/generate-tracked-firms.mjs. Aliases for firms no longer in the seed data cause the generator to fail loudly.",
+  "Schoenherr (Moravčević Vojnović and Partners)": ["Moravcevic Vojnovic", "Schoenherr Serbia"],
+  "Karanović & Partners": ["Karanovic Partners"],
+  "Wolf Theiss (Law Office Miroslav Stojanović)": ["Wolf Theiss Belgrade", "Miroslav Stojanovic"],
+  "CMS (Petrikić & Partneri AOD)": ["CMS Belgrade", "Petrikic Partneri"],
+  "JPM & Partners": ["JPM Jankovic Popovic", "Jankovic Popovic Mitic"],
+  "Kinstellar (SOG)": ["SOG Law", "SOG Kinstellar"],
+  "Stanković & Partners (NSTLAW)": ["NSTLAW"],
+  "Radovanović Stojanović & Partners": ["RSP Legal"],
+  "Harrisons Solicitors": ["Harrisons"],
+  "BOPA Bojanović & Partners": ["BOPA"],
+  "MSA IP (Milojević Sekulić & Associates)": ["MSA IP"],
+  "Živko Mijatović & Partners": ["ZMP"],
+  "Djokić + Partners": ["Djokic Partners"],
+  "Vuković & Partners (act legal Serbia)": ["act legal Serbia", "Vukovic Partners"],
+  "CT Legal (Caković Tomić)": ["Cakovic Tomic"],
+  "Deloitte Legal Serbia": ["Deloitte Legal"]
+}

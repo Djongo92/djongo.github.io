@@ -1,0 +1,501 @@
+{
+  "market": "serbia",
+  "generatedAt": "2026-09-11T11:04:10.776Z",
+  "scoredFirms": 91,
+  "leaders": [
+    {
+      "name": "BDK Advokati",
+      "totalScore": 154.71,
+      "peerGroup": "local"
+    },
+    {
+      "name": "JPM & Partners",
+      "totalScore": 152.19,
+      "peerGroup": "local"
+    },
+    {
+      "name": "Karanović & Partners",
+      "totalScore": 152,
+      "peerGroup": "regional"
+    },
+    {
+      "name": "Wolf Theiss (Law Office Miroslav Stojanović)",
+      "totalScore": 151.89,
+      "peerGroup": "regional"
+    },
+    {
+      "name": "CWB",
+      "totalScore": 146.48,
+      "peerGroup": "local"
+    },
+    {
+      "name": "Gecić Law",
+      "totalScore": 142.46,
+      "peerGroup": "local"
+    },
+    {
+      "name": "tasic & partners",
+      "totalScore": 135.63,
+      "peerGroup": "local"
+    }
+  ],
+  "scores": [
+    154.71,
+    152.19,
+    152,
+    151.89,
+    146.48,
+    142.46,
+    135.63,
+    132.26,
+    125.93,
+    116.63,
+    112.06,
+    109.77,
+    104.1,
+    103.17,
+    102.89,
+    100.97,
+    98.03,
+    96.19,
+    95.1,
+    94.33,
+    90.87,
+    86.44,
+    85.11,
+    83.89,
+    83.47,
+    83.34,
+    82.96,
+    81.98,
+    80.84,
+    79.47,
+    77.17,
+    75.98,
+    75.8,
+    73.48,
+    72.58,
+    72.47,
+    72.32,
+    71.2,
+    70.88,
+    69.02,
+    66.77,
+    64.85,
+    64.61,
+    64.1,
+    62.2,
+    60.49,
+    58.71,
+    58.16,
+    56.41,
+    56.01,
+    55.89,
+    55.71,
+    53.13,
+    52.36,
+    51.5,
+    51.07,
+    50.69,
+    50.15,
+    48.75,
+    48.74,
+    48.62,
+    46.76,
+    46.03,
+    45.67,
+    45.14,
+    44.78,
+    44.7,
+    43.38,
+    42.98,
+    41.69,
+    40.78,
+    39.7,
+    38.2,
+    37.72,
+    37.63,
+    36.33,
+    35.98,
+    35.83,
+    34.43,
+    34.3,
+    33.82,
+    33.16,
+    32.09,
+    31.98,
+    31.63,
+    31.33,
+    30.86,
+    30.2,
+    28.95,
+    26.75,
+    17.5
+  ],
+  "firms": [
+    {
+      "name": "BDK Advokati",
+      "domain": "bdkadvokati.com"
+    },
+    {
+      "name": "JPM & Partners",
+      "domain": "jpm.law"
+    },
+    {
+      "name": "Karanović & Partners",
+      "domain": "karanovicpartners.com"
+    },
+    {
+      "name": "Wolf Theiss (Law Office Miroslav Stojanović)",
+      "domain": "wolftheiss.com"
+    },
+    {
+      "name": "CWB",
+      "domain": "cwbip.com"
+    },
+    {
+      "name": "Gecić Law",
+      "domain": "geciclaw.com"
+    },
+    {
+      "name": "tasic & partners",
+      "domain": "tasiclaw.com"
+    },
+    {
+      "name": "CMS (Petrikić & Partneri AOD)",
+      "domain": "cms.law"
+    },
+    {
+      "name": "Grata International",
+      "domain": "gratanet.com"
+    },
+    {
+      "name": "Drašković Popović & Partners",
+      "domain": "d2plaw.com"
+    },
+    {
+      "name": "Harrisons Solicitors",
+      "domain": "harrison-solicitors.com"
+    },
+    {
+      "name": "Vuković & Partners (act legal Serbia)",
+      "domain": "vp.rs"
+    },
+    {
+      "name": "MMD Advokati",
+      "domain": "mmd-associates.com"
+    },
+    {
+      "name": "Schoenherr (Moravčević Vojnović and Partners)",
+      "domain": "schoenherr.rs"
+    },
+    {
+      "name": "naumovic & partners",
+      "domain": "naumovic-partners.com"
+    },
+    {
+      "name": "Zunić Law",
+      "domain": "zuniclaw.com"
+    },
+    {
+      "name": "Deloitte Legal Serbia",
+      "domain": "deloitte.com"
+    },
+    {
+      "name": "Vujinović & Partners",
+      "domain": "vujinovicpartners.rs"
+    },
+    {
+      "name": "Radovanović Stojanović & Partners",
+      "domain": "rspartners.rs"
+    },
+    {
+      "name": "Mikijelj Janković & Bogdanović",
+      "domain": "mjb.rs"
+    },
+    {
+      "name": "velickovic law",
+      "domain": "advokat-velickovic.rs"
+    },
+    {
+      "name": "Stanković & Partners (NSTLAW)",
+      "domain": "nstlaw.rs"
+    },
+    {
+      "name": "NKO Partners",
+      "domain": "nko-law.com"
+    },
+    {
+      "name": "Prica & Partners",
+      "domain": "pricapartners.com"
+    },
+    {
+      "name": "Cvjeticanin & Partneri",
+      "domain": "cvjeticaninlegal.com"
+    },
+    {
+      "name": "Mihaj, Ilić & Milanović",
+      "domain": "mim-law.com"
+    },
+    {
+      "name": "MSA IP (Milojević Sekulić & Associates)",
+      "domain": "msa-iplaw.com"
+    },
+    {
+      "name": "Doklestić Repić & Gajin",
+      "domain": "doklestic.law"
+    },
+    {
+      "name": "Jusufović & Partners",
+      "domain": "jplaw.rs"
+    },
+    {
+      "name": "Law Office TSG Belgrade",
+      "domain": "tsg.rs"
+    },
+    {
+      "name": "PR Legal",
+      "domain": "prlegal.rs"
+    },
+    {
+      "name": "Andrejic & Partners",
+      "domain": "andrejic.rs"
+    },
+    {
+      "name": "sunjka law",
+      "domain": "sunjkalawoffice.com"
+    },
+    {
+      "name": "Aleksić & Associates",
+      "domain": "lawofficealeksic.rs"
+    },
+    {
+      "name": "Kinstellar (SOG)",
+      "domain": "sog.rs"
+    },
+    {
+      "name": "BOPA Bojanović & Partners",
+      "domain": "bopa.rs"
+    },
+    {
+      "name": "Živković Samardžić",
+      "domain": "zslaw.rs"
+    },
+    {
+      "name": "Živko Mijatović & Partners",
+      "domain": "zmp.eu"
+    },
+    {
+      "name": "MVJ Marković Vukotić Jovković",
+      "domain": "mvj.rs"
+    },
+    {
+      "name": "T-S Legal – Simić Pajović Law Firm",
+      "domain": "t-s.legal"
+    },
+    {
+      "name": "ZSP Advokati",
+      "domain": "zsp-legal.com"
+    },
+    {
+      "name": "stanivukovic",
+      "domain": "lawoffice.rs"
+    },
+    {
+      "name": "Joksović, Stojanović & Partners",
+      "domain": "jsplaw.co.rs"
+    },
+    {
+      "name": "ikonic stikovic",
+      "domain": "ikonicstikovic.rs"
+    },
+    {
+      "name": "Nikčević Kapor",
+      "domain": "nkp.rs"
+    },
+    {
+      "name": "injac attorneys",
+      "domain": "injac.rs"
+    },
+    {
+      "name": "AVS Legal",
+      "domain": "avs.legal"
+    },
+    {
+      "name": "BIT Law Office",
+      "domain": "bit-law.com"
+    },
+    {
+      "name": "Spasic & Partners",
+      "domain": "spasicpartners.com"
+    },
+    {
+      "name": "Law Office Milosevic",
+      "domain": "lawmilos.com"
+    },
+    {
+      "name": "mijatovic & providzalo",
+      "domain": "mijatovic-providzalo.rs"
+    },
+    {
+      "name": "Cvetković Skoko & Jovičić",
+      "domain": "cplaw.rs"
+    },
+    {
+      "name": "Vulić Law",
+      "domain": "vuliclaw.com"
+    },
+    {
+      "name": "OM & Partners",
+      "domain": "ompartners.rs"
+    },
+    {
+      "name": "Marjanovic Law",
+      "domain": "marjanovic.law"
+    },
+    {
+      "name": "subotic law",
+      "domain": "suboticlaw.rs"
+    },
+    {
+      "name": "Popović, Popović & Partners",
+      "domain": "ppsp.rs"
+    },
+    {
+      "name": "mpartners legal",
+      "domain": "mpartners.legal"
+    },
+    {
+      "name": "CT Legal (Caković Tomić)",
+      "domain": "ctlegal.rs"
+    },
+    {
+      "name": "Atanasković Božović",
+      "domain": "atanaskovic-bozovic.com"
+    },
+    {
+      "name": "Djokić + Partners",
+      "domain": "djokicpartners.rs"
+    },
+    {
+      "name": "marovic",
+      "domain": "law-marovic.com"
+    },
+    {
+      "name": "BnB Law Firm",
+      "domain": "bnb.law"
+    },
+    {
+      "name": "PSG Legal",
+      "domain": "psg.rs"
+    },
+    {
+      "name": "msk partners",
+      "domain": "mskpartners.rs"
+    },
+    {
+      "name": "K&F Advokati",
+      "domain": "kfadvokati.com"
+    },
+    {
+      "name": "AP Legal",
+      "domain": "ap-legal.rs"
+    },
+    {
+      "name": "Law Office Kosic",
+      "domain": "kosiclawoffice.com"
+    },
+    {
+      "name": "parivodic",
+      "domain": "parivodic.com"
+    },
+    {
+      "name": "zidar klemencic",
+      "domain": "zip.co.rs"
+    },
+    {
+      "name": "VMT Attorneys",
+      "domain": "vmtlaw.rs"
+    },
+    {
+      "name": "four legal",
+      "domain": "fourlegal.rs"
+    },
+    {
+      "name": "Golubović Simić & Marinković",
+      "domain": "gsm.legal"
+    },
+    {
+      "name": "stanivuk & manasijevski",
+      "domain": "stanivuk-manasijevski.com"
+    },
+    {
+      "name": "lazarevic & prsic",
+      "domain": "lp.rs"
+    },
+    {
+      "name": "Bojovic attorneys at law",
+      "domain": "bojovic.com"
+    },
+    {
+      "name": "vn legal",
+      "domain": "vn-legal.rs"
+    },
+    {
+      "name": "petrovic legal",
+      "domain": "petroviclawfirm.rs"
+    },
+    {
+      "name": "isailovic & partners",
+      "domain": "advokatskakancelarija.com"
+    },
+    {
+      "name": "ivvk lawyers",
+      "domain": "ivvk.rs"
+    },
+    {
+      "name": "arcliffe",
+      "domain": "arcliffe.com"
+    },
+    {
+      "name": "ps legal",
+      "domain": "pslegal.rs"
+    },
+    {
+      "name": "rabrenovic & partners",
+      "domain": "rp-law.rs"
+    },
+    {
+      "name": "stevic dulic",
+      "domain": "stevic-dulic.co.rs"
+    },
+    {
+      "name": "bajic & popovic",
+      "domain": "bplaw.co.rs"
+    },
+    {
+      "name": "mrakovic markovic & partners",
+      "domain": "mmplegal.rs"
+    },
+    {
+      "name": "zecevic & lukic",
+      "domain": "zecevic-lukic.com"
+    },
+    {
+      "name": "manic gojic",
+      "domain": "advokatmanic.com"
+    },
+    {
+      "name": "VP-IP Zatezalo Krnetic & PArtners",
+      "domain": "vpip-zkp.com"
+    },
+    {
+      "name": "nikolic law office",
+      "domain": "en.nikoliclegal.rs"
+    },
+    {
+      "name": "subotic-homen & partners",
+      "domain": "shp.rs"
+    }
+  ]
+}

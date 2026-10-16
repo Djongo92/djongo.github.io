@@ -19,28 +19,31 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 10
       - uses: actions/setup-node@v4
         with:
-          node-version: 20
-          cache: npm
-      - run: npm ci
-      - run: npm run build
+          node-version: 22
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+
+      # Marketing site at the root, web app at /app/, plain static files —
+      # everything dynamic is Supabase. SITE_BASE is the project-site subpath
+      # (see the AmCham note below for why Pages serves this repo there).
+      - name: Build site
+        env:
+          SITE_BASE: /djongo.github.io/
+        run: node scripts/build-site.mjs
 
       # AmCham Serbia demo — built separately (its own pnpm workspace) and
-      # published alongside the main site at /amcham-preview/. Additive only:
-      # nothing above this point changes, and a failure here does not affect
-      # the main site's own build/deploy steps.
+      # published alongside the main site at /amcham-preview/.
       #
       # BASE_PATH includes /djongo.github.io/: this repo's name doesn't
       # exactly match the special `<owner>.github.io` user-site pattern
       # (owner is Djongo92, repo is djongo.github.io), so Pages serves it
       # as a project site at that subpath rather than at the bare domain —
       # confirmed via the deploy job's own "Evaluated environment url".
-      # The main app's index.html hardcodes the same /djongo.github.io/
-      # prefix for its manifest/icon links for the same reason.
-      - uses: pnpm/action-setup@v4
-        with:
-          version: 10
       - name: Install AmCham demo dependencies
         working-directory: amcham-serbia-website
         run: pnpm install --frozen-lockfile
@@ -52,14 +55,14 @@ jobs:
         run: pnpm run build
       - name: Copy AmCham demo into Pages output
         run: |
-          mkdir -p dist/amcham-preview
-          cp -r amcham-serbia-website/artifacts/amcham-serbia/dist/public/* dist/amcham-preview/
-          rm -f dist/amcham-preview/preview-platform.html dist/amcham-preview/robots.txt
+          mkdir -p site-dist/amcham-preview
+          cp -r amcham-serbia-website/artifacts/amcham-serbia/dist/public/* site-dist/amcham-preview/
+          rm -f site-dist/amcham-preview/preview-platform.html site-dist/amcham-preview/robots.txt
 
       - uses: actions/configure-pages@v5
       - uses: actions/upload-pages-artifact@v3
         with:
-          path: dist
+          path: site-dist
 
   deploy:
     needs: build

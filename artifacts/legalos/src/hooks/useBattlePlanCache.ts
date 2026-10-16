@@ -1,0 +1,285 @@
+import { useCallback, useEffect, useRef, useState } from "react";
+import { useAuth } from "@/hooks/useAuth";
+import { useActiveWorkspace } from "@/hooks/useActiveWorkspace";
+import { pushServerState, noteResolvedClientId } from "@/lib/serverStateSync";
+import { edgeHeaders } from "@/lib/edgeAuth";
+import { isDemoMode } from "@/lib/demoMode";
+import {
+  DEMO_ROAST, DEMO_COMPETITOR, DEMO_ROADMAP, DEMO_MATURITY, DEMO_HEADLINE, DEMO_BIO, DEMO_VISIBILITY_SCORE,
+} from "@/data/demoData";
+
+/**
+ * Lightweight caches for the analyses that feed the Battle Plan PDF.
+ * Persisted in localStorage so the user can build the plan over multiple
+ * sessions and it survives page reload — and synced to the server for a
+ * real account, same pattern as every other localStorage hook (see
+ * useReadingProgress.ts). The save* functions are called from plain tool
+ * components, not a hook, so they reach the current user via
+ * src/lib/currentUser.ts rather than useAuth() directly.
+ */
+
+const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL;
+
+export interface RoastCache {
+  url: string;
+  grade: string;
+  verdict: string;
+  burn: string;
+  topThreeFixes: string[];
+  annotations: { element: string; whatYouSaid: string; whatItSounds: string; rewrite: string }[];
+  redemption?: string;
+  pageTitle?: string;
+  capturedAt: number;
+}
+
+export interface CompetitorCache {
+  yourUrl: string;
+  competitorUrls: string[];
+  executiveSummary: string;
+  yourPositioning: { summary: string; strengths: string[]; weaknesses: string[] };
+  competitors: { url: string; positioning: string; doingBetter: string[]; doingWorse: string[] }[];
+  gaps: { gap: string; why: string }[];
+  opportunities: string[];
+  recommendedMoves: { move: string; impact: "high" | "medium" | "low"; effort: "low" | "medium" | "high" }[];
+  capturedAt: number;
+}
+
+export interface RoadmapCache {
+  summary: string;
+  phases: { label: string; focus: string; actions: { title: string; why: string; chapterRef: string }[] }[];
+  capturedAt: number;
+}
+
+export interface MaturityCache {
+  score: number;            // 0–100
+  dimensions: { label: string; score: number }[];
+  plan: string;             // markdown
+  capturedAt: number;
+}
+
+export interface HeadlineWinnerCache {
+  text: string;
+  angle: string;
+  why: string;
+  brief: string;
+  capturedAt: number;
+}
+
+export interface BioCache {
+  name?: string;
+  role?: string;
+  emphases: string[];
+  rewrite: string;          // markdown
+  capturedAt: number;
+}
+
+export interface VisibilityScoreCache {
+  /** The persisted audit row, so the score can be reopened and managed later. */
+  id?: string;
+  isPublic?: boolean;
+  auditedDomain: string;
+  displayName?: string | null;
+  market: string;
+  peerGroup: string;
+  totalScore: number;       // out of `categories`' measured max — see computeMeasuredTotals, not always /200
+  categories: Record<string, { score: number; provenance: string }>;
+  percentile: number | null;
+  peerCount: number;
+  // Every raw input behind the category scores (PSI lighthouse figures,
+  // directory ranked-table counts, thought-leadership post counts, etc.) —
+  // stored so the Battle Plan can show its arithmetic, not just the
+  // resulting number. Optional because older cached audits won't have it.
+  rawMetrics?: Record<string, unknown>;
+  capturedAt: number;
+}
+
+const ROAST_KEY = "guidebook_battleplan_roast";
+const COMP_KEY = "guidebook_battleplan_competitor";
+const ROADMAP_KEY = "guidebook_battleplan_roadmap";
+const MATURITY_KEY = "guidebook_battleplan_maturity";
+const HEADLINE_KEY = "guidebook_battleplan_headline";
+const BIO_KEY = "guidebook_battleplan_bio";
+const VISIBILITY_KEY = "guidebook_battleplan_visibility";
+
+// Server-side keys, distinct from the localStorage keys above only in that
+// they don't need the "guidebook_battleplan_" prefix that made sense for
+// namespacing many unrelated localStorage keys together.
+const SERVER_KEYS = {
+  roast: "battleplan_roast",
+  competitor: "battleplan_competitor",
+  roadmap: "battleplan_roadmap",
+  maturity: "battleplan_maturity",
+  headline: "battleplan_headline",
+  bio: "battleplan_bio",
+  visibilityScore: "battleplan_visibility",
+} as const;
+
+const LOCAL_KEY_FOR: Record<keyof typeof SERVER_KEYS, string> = {
+  roast: ROAST_KEY,
+  competitor: COMP_KEY,
+  roadmap: ROADMAP_KEY,
+  maturity: MATURITY_KEY,
+  headline: HEADLINE_KEY,
+  bio: BIO_KEY,
+  visibilityScore: VISIBILITY_KEY,
+};
+
+const read = <T,>(key: string): T | null => {
+  try {
+    const raw = localStorage.getItem(key);
+    return raw ? (JSON.parse(raw) as T) : null;
+  } catch {
+    return null;
+  }
+};
+
+// Demo mode reads always resolve to the current DEMO_* constants rather than
+// whatever got written into localStorage back when demo mode was first
+// switched on (seedDemoData() is a one-shot write — it never re-runs on
+// reload, so a browser that entered demo mode before a Battle Plan content
+// fix would otherwise keep downloading the stale, pre-fix version forever).
+const demoNow = Date.now();
+const DEMO_BY_KEY: Record<string, unknown> = {
+  [ROAST_KEY]: { ...DEMO_ROAST, capturedAt: demoNow },
+  [COMP_KEY]: { ...DEMO_COMPETITOR, capturedAt: demoNow },
+  [ROADMAP_KEY]: { ...DEMO_ROADMAP, capturedAt: demoNow },
+  [MATURITY_KEY]: { ...DEMO_MATURITY, capturedAt: demoNow },
+  [HEADLINE_KEY]: { ...DEMO_HEADLINE, capturedAt: demoNow },
+  [BIO_KEY]: { ...DEMO_BIO, capturedAt: demoNow },
+  [VISIBILITY_KEY]: { ...DEMO_VISIBILITY_SCORE, capturedAt: demoNow },
+};
+
+const readSlot = <T,>(key: string): T | null => (isDemoMode() ? (DEMO_BY_KEY[key] as T) : read<T>(key));
+
+export const saveRoast = (roast: Omit<RoastCache, "capturedAt">) => {
+  const value = { ...roast, capturedAt: Date.now() };
+  localStorage.setItem(ROAST_KEY, JSON.stringify(value));
+  pushServerState(SERVER_KEYS.roast, value);
+  window.dispatchEvent(new Event("battleplan:update"));
+};
+
+export const saveCompetitor = (data: Omit<CompetitorCache, "capturedAt">) => {
+  const value = { ...data, capturedAt: Date.now() };
+  localStorage.setItem(COMP_KEY, JSON.stringify(value));
+  pushServerState(SERVER_KEYS.competitor, value);
+  window.dispatchEvent(new Event("battleplan:update"));
+};
+
+export const saveRoadmap = (data: Omit<RoadmapCache, "capturedAt">) => {
+  const value = { ...data, capturedAt: Date.now() };
+  localStorage.setItem(ROADMAP_KEY, JSON.stringify(value));
+  pushServerState(SERVER_KEYS.roadmap, value);
+  window.dispatchEvent(new Event("battleplan:update"));
+};
+
+export const saveMaturity = (data: Omit<MaturityCache, "capturedAt">) => {
+  const value = { ...data, capturedAt: Date.now() };
+  localStorage.setItem(MATURITY_KEY, JSON.stringify(value));
+  pushServerState(SERVER_KEYS.maturity, value);
+  window.dispatchEvent(new Event("battleplan:update"));
+};
+
+export const saveHeadlineWinner = (data: Omit<HeadlineWinnerCache, "capturedAt">) => {
+  const value = { ...data, capturedAt: Date.now() };
+  localStorage.setItem(HEADLINE_KEY, JSON.stringify(value));
+  pushServerState(SERVER_KEYS.headline, value);
+  window.dispatchEvent(new Event("battleplan:update"));
+};
+
+export const saveBio = (data: Omit<BioCache, "capturedAt">) => {
+  const value = { ...data, capturedAt: Date.now() };
+  localStorage.setItem(BIO_KEY, JSON.stringify(value));
+  pushServerState(SERVER_KEYS.bio, value);
+  window.dispatchEvent(new Event("battleplan:update"));
+};
+
+export const saveVisibilityScore = (data: Omit<VisibilityScoreCache, "capturedAt">) => {
+  const value = { ...data, capturedAt: Date.now() };
+  localStorage.setItem(VISIBILITY_KEY, JSON.stringify(value));
+  pushServerState(SERVER_KEYS.visibilityScore, value);
+  window.dispatchEvent(new Event("battleplan:update"));
+};
+
+export const useBattlePlanCache = () => {
+  const { user, session } = useAuth();
+  const { activeFirmId } = useActiveWorkspace();
+  const [roast, setRoast] = useState<RoastCache | null>(() => readSlot<RoastCache>(ROAST_KEY));
+  const [competitor, setCompetitor] = useState<CompetitorCache | null>(() => readSlot<CompetitorCache>(COMP_KEY));
+  const [roadmap, setRoadmap] = useState<RoadmapCache | null>(() => readSlot<RoadmapCache>(ROADMAP_KEY));
+  const [maturity, setMaturity] = useState<MaturityCache | null>(() => readSlot<MaturityCache>(MATURITY_KEY));
+  const [headline, setHeadline] = useState<HeadlineWinnerCache | null>(() => readSlot<HeadlineWinnerCache>(HEADLINE_KEY));
+  const [bio, setBio] = useState<BioCache | null>(() => readSlot<BioCache>(BIO_KEY));
+  const [visibilityScore, setVisibilityScore] = useState<VisibilityScoreCache | null>(() => readSlot<VisibilityScoreCache>(VISIBILITY_KEY));
+  const syncedForUser = useRef<string | null>(null);
+
+  const refresh = useCallback(() => {
+    setRoast(readSlot<RoastCache>(ROAST_KEY));
+    setCompetitor(readSlot<CompetitorCache>(COMP_KEY));
+    setRoadmap(readSlot<RoadmapCache>(ROADMAP_KEY));
+    setMaturity(readSlot<MaturityCache>(MATURITY_KEY));
+    setHeadline(readSlot<HeadlineWinnerCache>(HEADLINE_KEY));
+    setBio(readSlot<BioCache>(BIO_KEY));
+    setVisibilityScore(readSlot<VisibilityScoreCache>(VISIBILITY_KEY));
+  }, []);
+
+  useEffect(() => {
+    const onUpdate = () => refresh();
+    window.addEventListener("battleplan:update", onUpdate);
+    window.addEventListener("storage", onUpdate);
+    return () => {
+      window.removeEventListener("battleplan:update", onUpdate);
+      window.removeEventListener("storage", onUpdate);
+    };
+  }, [refresh]);
+
+  // One batched round-trip for all 7 slots rather than 7 separate ones.
+  useEffect(() => {
+    if (!user || isDemoMode() || syncedForUser.current === user.id) return;
+    syncedForUser.current = user.id;
+    (async () => {
+      try {
+        const resp = await fetch(`${SUPABASE_URL}/functions/v1/user-state-get`, {
+          method: "POST",
+          headers: edgeHeaders(),
+          body: JSON.stringify({ clientId: user.id, accessToken: session?.access_token, keys: Object.values(SERVER_KEYS), activeFirmId: activeFirmId ?? undefined }),
+        });
+        const data = await resp.json();
+        // §11: pin later writes (the promotion pushes below, and every
+        // save* via pushServerState) to the firm this read resolved to.
+        if (typeof data?.resolvedClientId === "string") noteResolvedClientId(data.resolvedClientId);
+        const remoteState = (data?.state ?? {}) as Record<string, unknown>;
+        let foundAny = false;
+        (Object.keys(SERVER_KEYS) as (keyof typeof SERVER_KEYS)[]).forEach((slot) => {
+          const remote = remoteState[SERVER_KEYS[slot]];
+          if (remote) {
+            foundAny = true;
+            localStorage.setItem(LOCAL_KEY_FOR[slot], JSON.stringify(remote));
+          }
+        });
+        if (foundAny) {
+          refresh();
+        } else {
+          (Object.keys(SERVER_KEYS) as (keyof typeof SERVER_KEYS)[]).forEach((slot) => {
+            const local = read(LOCAL_KEY_FOR[slot]);
+            if (local) pushServerState(SERVER_KEYS[slot], local);
+          });
+        }
+      } catch {
+        // Local storage already has whatever was there.
+      }
+    })();
+  }, [user, session?.access_token, refresh, activeFirmId]);
+
+  const clear = useCallback(() => {
+    localStorage.removeItem(ROAST_KEY);
+    localStorage.removeItem(COMP_KEY);
+    localStorage.removeItem(ROADMAP_KEY);
+    localStorage.removeItem(MATURITY_KEY);
+    localStorage.removeItem(HEADLINE_KEY);
+    localStorage.removeItem(BIO_KEY);
+    localStorage.removeItem(VISIBILITY_KEY);
+    refresh();
+  }, [refresh]);
+
+  return { roast, competitor, roadmap, maturity, headline, bio, visibilityScore, clear, refresh };
+};
