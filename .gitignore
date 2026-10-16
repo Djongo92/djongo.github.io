@@ -54,3 +54,6 @@ artifacts/legalos/scripts/census/.rerun.log
 
 # Assembled static site (scripts/build-site.mjs)
 site-dist/
+
+# Supabase CLI local link cache
+**/supabase/.temp/

@@ -81,9 +81,11 @@ export function computePeerStats(
 
 /**
  * The share of full marks this metric earns: 1.0 at or above the 90th
- * percentile, scaled linearly below it, 0 when there's no usable threshold
- * (e.g. every observed value, including this firm's, is 0).
+ * percentile, scaled linearly below it. For a sparse signal the 90th
+ * percentile can itself be 0 (most firms have none) — then any positive value
+ * is above it and earns full marks, and 0 earns nothing.
  */
 export function p90Ratio(stats: Pick<PeerStats, "value" | "p90Threshold">): number {
-  return stats.p90Threshold > 0 ? Math.min(1, stats.value / stats.p90Threshold) : 0;
+  if (stats.p90Threshold > 0) return Math.min(1, Math.max(0, stats.value / stats.p90Threshold));
+  return stats.value > 0 ? 1 : 0;
 }

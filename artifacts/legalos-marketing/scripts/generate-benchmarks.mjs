@@ -12,7 +12,7 @@ import { join, dirname } from "path";
 import { fileURLToPath } from "url";
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), "..");
-const PROJECT_REF = "kosmxczrwrhzmmloxobq";
+const PROJECT_REF = "qeopoiumlnzqwaqzwqcj";
 
 /** Below this many firms a market page could identify individual firms — suppress it. */
 export const MIN_COHORT = 5;

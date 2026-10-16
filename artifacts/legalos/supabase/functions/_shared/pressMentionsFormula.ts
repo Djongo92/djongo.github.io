@@ -64,9 +64,55 @@ export function parseRssItems(xml: string): RawRssItem[] {
 
 const MAX_MENTIONS = 50;
 
+// Words that appear in many firm names and so identify nobody on their own.
+const GENERIC_NAME_WORDS = new Set([
+  "law", "legal", "lawyers", "lawoffice", "office", "firm", "partners", "partner", "associates",
+  "attorneys", "attorney", "advokati", "advokat", "advokatska", "kancelarija", "solicitors",
+  "llp", "aod", "and", "the", "international", "serbia", "srbija", "belgrade", "beograd", "group",
+]);
+
+// A headline that names the firm by only ONE distinctive word (a surname,
+// an acronym) also has to read as law-firm news: surnames and acronyms are
+// shared with politicians, athletes and unrelated companies.
+const LEGAL_CONTEXT = /\b(law|legal|lawyers?|advokat\w*|pravn\w*|kancelarij\w*|advis(e|es|ed|er|ers|or|ors|ory)|counsel|deal|deals|acqui\w*|merger\w*|transakc\w*|arbitra\w*)\b/;
+
+/** Lowercase, strip diacritics (đ → dj), so "Gecić" matches "Gecic". */
+export function normalizeForMatch(s: string): string {
+  return s
+    .toLowerCase()
+    .replace(/đ/g, "dj")
+    .normalize("NFKD")
+    .replace(/[\u0300-\u036f]/g, "");
+}
+
+/** The distinctive words of a firm's names — what a headline must contain to be about it. */
+export function distinctiveNameTokens(names: string[]): string[] {
+  const tokens = new Set<string>();
+  for (const name of names) {
+    for (const t of normalizeForMatch(name).split(/[^a-z0-9]+/)) {
+      if (t.length >= 3 && !GENERIC_NAME_WORDS.has(t)) tokens.add(t);
+    }
+  }
+  return [...tokens];
+}
+
+/**
+ * Whether a headline is plausibly ABOUT the firm. Search feeds match loosely,
+ * so a mention only counts when the title names the firm by two of its
+ * distinctive words, or by one alongside a law-firm context word.
+ */
+export function titleMentionsFirm(title: string, names: string[]): boolean {
+  const tokens = distinctiveNameTokens(names);
+  if (tokens.length === 0) return false;
+  const t = normalizeForMatch(title);
+  const words = new Set(t.split(/[^a-z0-9]+/));
+  const hits = tokens.filter((tok) => words.has(tok)).length;
+  return hits >= 2 || (hits === 1 && LEGAL_CONTEXT.test(t));
+}
+
 export function filterPressMentions(
   rawItems: RawRssItem[],
-  opts: { windowDays: number; targetDomain: string; now?: number },
+  opts: { windowDays: number; targetDomain: string; now?: number; firmNames?: string[] },
 ): PressMention[] {
   const now = opts.now ?? Date.now();
   const cutoff = now - opts.windowDays * 24 * 60 * 60 * 1000;
@@ -84,6 +130,9 @@ export function filterPressMentions(
     // Exclude the firm's own domain — this measures OTHER outlets covering
     // the firm, not the firm covering itself.
     if (targetDomain && (linkDomain === targetDomain || sourceDomain === targetDomain)) continue;
+
+    // Only coverage that is actually about the firm counts (see titleMentionsFirm).
+    if (opts.firmNames && !titleMentionsFirm(it.title, opts.firmNames)) continue;
 
     const dedupeKey = it.title.trim().toLowerCase();
     if (!dedupeKey || seen.has(dedupeKey)) continue;

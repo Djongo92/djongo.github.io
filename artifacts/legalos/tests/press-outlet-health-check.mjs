@@ -14,7 +14,7 @@
 // Env: SUPABASE_ACCESS_TOKEN (secret, in Replit Secrets).
 
 const MGMT_API = "https://api.supabase.com/v1/projects";
-const PROJECT_REF = "kosmxczrwrhzmmloxobq";
+const PROJECT_REF = "qeopoiumlnzqwaqzwqcj";
 // Weekly Monday run + a day of slack for a delayed/retried invocation.
 const STALE_AFTER_DAYS = 8;
 

@@ -32,7 +32,7 @@ BEGIN
   END IF;
 
   PERFORM net.http_post(
-    url     := 'https://kosmxczrwrhzmmloxobq.supabase.co/functions/v1/visibility-audit-rerun-due',
+    url     := 'https://qeopoiumlnzqwaqzwqcj.supabase.co/functions/v1/visibility-audit-rerun-due',
     headers := jsonb_build_object(
       'Content-Type', 'application/json',
       'x-cron-secret', _cron_secret
@@ -69,7 +69,7 @@ BEGIN
   END IF;
 
   PERFORM net.http_post(
-    url     := 'https://kosmxczrwrhzmmloxobq.supabase.co/functions/v1/competitor-alerts-check',
+    url     := 'https://qeopoiumlnzqwaqzwqcj.supabase.co/functions/v1/competitor-alerts-check',
     headers := jsonb_build_object(
       'Content-Type', 'application/json',
       'x-cron-secret', _cron_secret

@@ -49,7 +49,7 @@ BEGIN
   END IF;
 
   PERFORM net.http_post(
-    url     := 'https://kosmxczrwrhzmmloxobq.supabase.co/functions/v1/network-insights',
+    url     := 'https://qeopoiumlnzqwaqzwqcj.supabase.co/functions/v1/network-insights',
     headers := jsonb_build_object(
       'Content-Type', 'application/json',
       'x-cron-secret', _cron_secret

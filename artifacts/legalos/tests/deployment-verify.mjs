@@ -29,7 +29,7 @@ if (!SUPABASE_URL || !ANON_KEY) {
   process.exit(1);
 }
 
-// Extract project ref from the URL (e.g. kosmxczrwrhzmmloxobq)
+// Extract project ref from the URL (e.g. qeopoiumlnzqwaqzwqcj)
 const projectRef = new URL(SUPABASE_URL).hostname.split(".")[0];
 const MGMT_BASE = `https://api.supabase.com/v1/projects/${projectRef}`;
 

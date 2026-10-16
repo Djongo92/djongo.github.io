@@ -2,7 +2,7 @@ import { describe, it, expect } from "vitest";
 import { clientIpFrom, UNVERIFIED_IP_KEY, checkVerifyAccessRateLimit } from "./rateLimit";
 
 function makeReq(headers: Record<string, string>): Request {
-  return new Request("https://kosmxczrwrhzmmloxobq.supabase.co/functions/v1/verify-access", { headers });
+  return new Request("https://qeopoiumlnzqwaqzwqcj.supabase.co/functions/v1/verify-access", { headers });
 }
 
 describe("clientIpFrom", () => {

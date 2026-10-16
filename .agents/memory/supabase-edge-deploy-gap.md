@@ -14,7 +14,7 @@ install across sessions — invoke it via `npx -y supabase@latest` (works fine).
 cd artifacts/legalos
 SUPABASE_ACCESS_TOKEN=$SUPABASE_ACCESS_TOKEN \
   npx -y supabase@latest functions deploy <slug> \
-  --project-ref kosmxczrwrhzmmloxobq \
+  --project-ref qeopoiumlnzqwaqzwqcj \
   --no-verify-jwt \
   --use-api
 ```
@@ -33,7 +33,7 @@ Run SQL directly against the hosted project via the Management API:
 
 ```bash
 SQL=$(cat artifacts/legalos/supabase/migrations/<file>.sql)
-curl -s -X POST "https://api.supabase.com/v1/projects/kosmxczrwrhzmmloxobq/database/query" \
+curl -s -X POST "https://api.supabase.com/v1/projects/qeopoiumlnzqwaqzwqcj/database/query" \
   -H "Authorization: Bearer $SUPABASE_ACCESS_TOKEN" \
   -H "Content-Type: application/json" \
   -d "{\"query\": $(echo "$SQL" | python3 -c 'import json,sys; print(json.dumps(sys.stdin.read()))')}"

@@ -9,7 +9,7 @@
 // Env: SUPABASE_ACCESS_TOKEN (in Replit Secrets), VITE_SUPABASE_URL (public).
 
 const MGMT_API = "https://api.supabase.com/v1/projects";
-const PROJECT_REF = "kosmxczrwrhzmmloxobq";
+const PROJECT_REF = "qeopoiumlnzqwaqzwqcj";
 const WINDOW_HOURS = 25;
 
 async function runSql(query) {

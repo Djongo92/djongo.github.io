@@ -7,7 +7,7 @@
 //   { job, message, detail, text, content }
 //
 // Deploy: npx -y supabase@latest functions deploy cron-alert-inbox \
-//   --project-ref kosmxczrwrhzmmloxobq --no-verify-jwt --use-api
+//   --project-ref qeopoiumlnzqwaqzwqcj --no-verify-jwt --use-api
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
 
 const RETENTION_DAYS = 90;

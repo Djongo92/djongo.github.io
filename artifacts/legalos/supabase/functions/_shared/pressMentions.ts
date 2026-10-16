@@ -27,6 +27,7 @@ export async function findPressMentions(
     return filterPressMentions((cached.hit as { raw: ReturnType<typeof parseRssItems> }).raw, {
       windowDays,
       targetDomain: extractDomain(auditedDomain),
+      firmNames: [query],
     });
   }
 
@@ -80,5 +81,5 @@ export async function findPressMentions(
     await setCached(cached.key, "press-mentions-v4", cacheKey, { raw: rawItems }, SEVEN_DAYS_MS);
   }
 
-  return filterPressMentions(rawItems, { windowDays, targetDomain: extractDomain(auditedDomain) });
+  return filterPressMentions(rawItems, { windowDays, targetDomain: extractDomain(auditedDomain), firmNames: [query] });
 }

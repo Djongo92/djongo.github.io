@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { decodeXmlEntities, extractDomain, parseRssItems, filterPressMentions, type RawRssItem } from "./pressMentionsFormula";
+import { decodeXmlEntities, extractDomain, parseRssItems, filterPressMentions, titleMentionsFirm, type RawRssItem } from "./pressMentionsFormula";
 
 const NOW = new Date("2026-07-22T00:00:00Z").getTime();
 const daysAgo = (n: number) => new Date(NOW - n * 24 * 60 * 60 * 1000).toUTCString();
@@ -124,5 +124,48 @@ describe("filterPressMentions", () => {
 
   it("returns an empty array when there are no items", () => {
     expect(filterPressMentions([], { windowDays: 60, targetDomain: "firm.com", now: NOW })).toEqual([]);
+  });
+});
+
+describe("titleMentionsFirm", () => {
+  it("accepts a headline that names the firm, diacritics or not", () => {
+    expect(titleMentionsFirm("Gecić Law advises on landmark energy deal", ["Gecić Law"])).toBe(true);
+    expect(titleMentionsFirm("Gecic Law advises on landmark energy deal", ["Gecić Law"])).toBe(true);
+  });
+
+  it("rejects unrelated stories a loose search returned (real cases from the audit data)", () => {
+    expect(titleMentionsFirm("Tepić odgovorila Vučiću na optužbe: Kontroliši se i spremi, novi dokazi stižu", ["ZSP"])).toBe(false);
+    expect(titleMentionsFirm("A $150M contract for migrant kids' lawyers goes to a Trump-linked Texas firm", ["AP Legal"])).toBe(false);
+  });
+
+  it("rejects namesakes: a lone surname or acronym in non-legal news", () => {
+    expect(titleMentionsFirm("Drasko Stanivukovic gave up his Candidacy for President of Republika Srpska", ["stanivukovic"])).toBe(false);
+    expect(titleMentionsFirm("Electronic monitoring system is 'broken' and needs legislative fix, State's Attorney says - CWB Chicago", ["CWB"])).toBe(false);
+  });
+
+  it("accepts two distinctive name words without extra context", () => {
+    expect(titleMentionsFirm("Ikonic Stikovic Opens Doors in Belgrade", ["Ikonic Stikovic"])).toBe(true);
+  });
+
+  it("requires a legal context for short names and acronyms", () => {
+    expect(titleMentionsFirm("CWB reports quarterly earnings", ["CWB"])).toBe(false);
+    expect(titleMentionsFirm("CWB law firm advises on trademark dispute", ["CWB"])).toBe(true);
+  });
+
+  it("never matches on generic words alone", () => {
+    expect(titleMentionsFirm("Law office opens in Belgrade", ["Law Office"])).toBe(false);
+  });
+});
+
+describe("filterPressMentions with firmNames", () => {
+  it("drops items that are not about the firm", () => {
+    const now = Date.parse("2026-08-24T00:00:00Z");
+    const recent = new Date(now - 864e5).toUTCString();
+    const items = [
+      { title: "JPM & Partners advises on bond issue", link: "https://x.example/a", pubDate: recent, sourceUrl: "https://x.example" },
+      { title: "Unrelated political news", link: "https://x.example/b", pubDate: recent, sourceUrl: "https://x.example" },
+    ];
+    const out = filterPressMentions(items, { windowDays: 90, targetDomain: "jpm.law", now, firmNames: ["JPM & Partners"] });
+    expect(out.map((m) => m.title)).toEqual(["JPM & Partners advises on bond issue"]);
   });
 });

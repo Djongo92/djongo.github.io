@@ -9,7 +9,7 @@ sandbox can't run):
 cd artifacts/legalos
 SUPABASE_ACCESS_TOKEN=$SUPABASE_ACCESS_TOKEN \
   supabase functions deploy <slug> \
-  --project-ref kosmxczrwrhzmmloxobq \
+  --project-ref qeopoiumlnzqwaqzwqcj \
   --no-verify-jwt \
   --use-api
 ```

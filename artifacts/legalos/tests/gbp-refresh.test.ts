@@ -22,7 +22,7 @@ const PASSWORD = process.env.SMOKE_PASSWORD;
 const MGMT_TOKEN = process.env.SUPABASE_ACCESS_TOKEN;
 
 const REF = BASE ? new URL(BASE).hostname.split(".")[0] : "";
-const PROJECT_REF = REF === "127" ? "kosmxczrwrhzmmloxobq" : REF;
+const PROJECT_REF = REF === "127" ? "qeopoiumlnzqwaqzwqcj" : REF;
 
 const hasCreds = !!(BASE && ANON && EMAIL && PASSWORD);
 const hasMgmt = !!(hasCreds && MGMT_TOKEN);

@@ -18,10 +18,11 @@
 import { recomputeFromRawMetrics } from "../../supabase/functions/_shared/recomputeFromRawMetrics.ts";
 import { aggregateContentItems, filterToWindow } from "../../supabase/functions/_shared/thoughtLeadershipFormula.ts";
 import { computePeerStats, MIN_PEER_SAMPLE } from "../../supabase/functions/_shared/percentileFormula.ts";
+import { titleMentionsFirm } from "../../supabase/functions/_shared/pressMentionsFormula.ts";
 import { DMV_MARKETS } from "../../supabase/functions/_shared/marketVisibilityConfig.ts";
 import { METHODOLOGY_VERSION } from "../../supabase/functions/_shared/methodology.ts";
 
-const PROJECT_REF = "kosmxczrwrhzmmloxobq";
+const PROJECT_REF = "qeopoiumlnzqwaqzwqcj";
 const APPLY = process.argv.includes("--apply");
 
 async function sql(query) {
@@ -44,26 +45,36 @@ export function ownOutputSignals(tl, windowDays, measuredAtMs) {
   return aggregateContentItems(filterToWindow(items, windowDays, measuredAtMs), windowDays, measuredAtMs);
 }
 
-/** Peer values for one metric: same peer group, widened to the market when thin. */
+/**
+ * Peer values for one metric: published audits in the same peer group (the
+ * same pool live audits benchmark against), widened to the whole market when
+ * the group is thin.
+ */
 export function peerPool(rows, row, metric) {
-  const others = rows.filter((r) => r.market === row.market && r.audited_domain !== row.audited_domain);
+  const others = rows.filter((r) => r.is_public !== false && r.market === row.market && r.audited_domain !== row.audited_domain);
   const group = others.filter((r) => r.peer_group === row.peer_group);
   const pool = group.length + 1 >= MIN_PEER_SAMPLE ? group : others;
   return { values: [...pool.map((r) => r.signals[metric]), row.signals[metric]], widened: pool !== group };
 }
 
-async function main() {
-  const rows = await sql(`
-    SELECT id, client_id, audited_domain, market, peer_group, raw_metrics, provenance,
-           seo_authority_score, methodology_version, updated_at, sample_size, confidence_score,
-           data_window_start, data_window_end
-      FROM public.market_visibility_audits`);
-  console.log(`${rows.length} audit rows`);
-
+/**
+ * Re-scores audit rows onto v3 from their stored raw_metrics. Each row needs
+ * market, peer_group, audited_domain, display_name, is_public, raw_metrics,
+ * seo_authority_score, methodology_version and updated_at.
+ */
+export function rescoreRows(rows) {
   for (const r of rows) {
     const windowDays = DMV_MARKETS[r.market]?.contentWindowDays ?? 90;
     const measuredAt = Date.parse(r.updated_at);
-    r.signals = ownOutputSignals(r.raw_metrics?.thoughtLeadership, windowDays, measuredAt);
+    const tl = r.raw_metrics?.thoughtLeadership;
+    r.signals = ownOutputSignals(tl, windowDays, measuredAt);
+    // Independent press: only stored mentions whose headline actually names
+    // the firm count (search feeds match loosely — see titleMentionsFirm).
+    const names = [r.display_name, r.raw_metrics?.reputation?.matchedFirmName].filter(Boolean);
+    r.pressMentions = Array.isArray(tl?.pressMentions)
+      ? tl.pressMentions.filter((p) => titleMentionsFirm(p.title ?? "", names))
+      : null;
+    r.signals.newsCount = r.pressMentions ? r.pressMentions.length : Number(tl?.newsCount) || 0;
   }
 
   const out = [];
@@ -74,6 +85,7 @@ async function main() {
       const now = new Date(r.updated_at);
       const a = peerPool(rows, r, "articlesCount");
       const o = peerPool(rows, r, "ownNewsCount");
+      const n = peerPool(rows, r, "newsCount");
       Object.assign(tl, {
         articlesCount: r.signals.articlesCount,
         ownNewsCount: r.signals.ownNewsCount,
@@ -82,6 +94,9 @@ async function main() {
         measuredAt: r.updated_at,
         articlesStats: computePeerStats(a.values, r.signals.articlesCount, { widened: a.widened, now }),
         ownNewsStats: computePeerStats(o.values, r.signals.ownNewsCount, { widened: o.widened, now }),
+        newsCount: r.signals.newsCount,
+        newsStats: computePeerStats(n.values, r.signals.newsCount, { widened: n.widened, now }),
+        ...(r.pressMentions ? { pressMentions: r.pressMentions } : {}),
       });
     }
     const scores = recomputeFromRawMetrics(r.market, raw, {
@@ -91,6 +106,17 @@ async function main() {
     });
     out.push({ row: r, raw, scores });
   }
+  return out;
+}
+
+async function main() {
+  const rows = await sql(`
+    SELECT id, client_id, audited_domain, display_name, market, peer_group, is_public, raw_metrics, provenance,
+           seo_authority_score, methodology_version, updated_at, sample_size, confidence_score,
+           data_window_start, data_window_end
+      FROM public.market_visibility_audits`);
+  console.log(`${rows.length} audit rows`);
+  const out = rescoreRows(rows);
 
   out.sort((x, y) => y.scores.total_score - x.scores.total_score);
   for (const { row, scores } of out.slice(0, 15)) {

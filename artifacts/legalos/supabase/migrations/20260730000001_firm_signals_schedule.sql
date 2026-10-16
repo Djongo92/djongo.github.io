@@ -42,7 +42,7 @@ BEGIN
   END IF;
 
   PERFORM net.http_post(
-    url     := 'https://kosmxczrwrhzmmloxobq.supabase.co/functions/v1/firm-signals-refresh',
+    url     := 'https://qeopoiumlnzqwaqzwqcj.supabase.co/functions/v1/firm-signals-refresh',
     headers := jsonb_build_object(
       'Content-Type', 'application/json',
       'x-cron-secret', _cron_secret

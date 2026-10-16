@@ -51,7 +51,7 @@ export const UNVERIFIED_IP_KEY = "unverified-ip";
  * `cf-connecting-ip`, never `x-forwarded-for` or `x-real-ip`.
  *
  * This project's edge functions are only ever reached through Supabase's
- * shared *.supabase.co gateway (kosmxczrwrhzmmloxobq.supabase.co here),
+ * shared *.supabase.co gateway (qeopoiumlnzqwaqzwqcj.supabase.co here),
  * which is fronted by Cloudflare — Cloudflare unconditionally overwrites any
  * inbound `CF-Connecting-IP` with the real TCP peer address before
  * forwarding (see Cloudflare's HTTP headers reference), so a caller cannot
