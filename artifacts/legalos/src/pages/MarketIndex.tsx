@@ -27,6 +27,10 @@ import { setAuditPrefill } from "@/lib/auditPrefill";
 import {
   mergeVisibilityRows, type CombinedVisibilityRow, type MergeAuditRow, type MergeDirectoryFirm,
 } from "@/lib/mergeVisibilityRows";
+import { applyLens, FIXED_PRESETS, parsePillarParam, type LensedRow } from "@/lib/pillarLens";
+import { usePillarPresets } from "@/hooks/usePillarPresets";
+import { PillarLensBar } from "@/components/visibility/PillarLensBar";
+import type { CategoryKey } from "@/lib/visibilityCategories";
 import { visibilityTierFor, VISIBILITY_TIER_ORDER, VISIBILITY_TIER_META, type VisibilityTier } from "@/lib/visibilityTiers";
 
 const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL;
@@ -65,7 +69,38 @@ const MarketIndex = () => {
   const [copiedKey, setCopiedKey] = useState<string | null>(null);
   const [copyFailedKey, setCopyFailedKey] = useState<string | null>(null);
 
-  const [searchParams] = useSearchParams();
+  const [searchParams, setSearchParams] = useSearchParams();
+  const { presets: savedPresets, savePreset, removePreset, canSaveMore } = usePillarPresets();
+
+  // Pillar lens — lives in the URL (?view=expert, ?view=custom&pillars=a,b)
+  // so any view is a shareable link; a visitor's last view is remembered on
+  // this device when they arrive without one.
+  const LENS_KEY = "uvid_index_view";
+  const urlView = searchParams.get("view");
+  const rememberedView = (() => {
+    if (urlView) return null;
+    try { return JSON.parse(localStorage.getItem(LENS_KEY) || "null") as { view: string; pillars: string } | null; } catch { return null; }
+  })();
+  const viewParam = urlView ?? rememberedView?.view ?? "overall";
+  const pillarsParam = urlView ? searchParams.get("pillars") : rememberedView?.pillars ?? null;
+  const fixed = FIXED_PRESETS.find((p) => p.id === viewParam);
+  const saved = savedPresets.find((p) => p.id === viewParam);
+  const lensView = fixed || saved || viewParam === "custom" ? viewParam : "overall";
+  const lensPillars: CategoryKey[] = fixed?.pillars ?? saved?.pillars ?? (lensView === "custom" ? parsePillarParam(pillarsParam) : []);
+  const lensActive = lensPillars.length > 0 && lensPillars.length < 5;
+  const lensLabel = lensPillars.map((k) => CATEGORY_META[k].label).join(" + ");
+
+  const selectLens = (view: string, pillars: CategoryKey[]) => {
+    const next = new URLSearchParams(searchParams);
+    if (view === "overall") { next.delete("view"); next.delete("pillars"); }
+    else { next.set("view", view); if (view === "custom" && pillars.length) next.set("pillars", pillars.join(",")); else next.delete("pillars"); }
+    setSearchParams(next, { replace: true });
+    try { localStorage.setItem(LENS_KEY, JSON.stringify({ view, pillars: pillars.join(",") })); } catch { /* storage blocked */ }
+  };
+  const saveLens = (label: string, pillars: CategoryKey[]) => {
+    const p = savePreset(label, pillars);
+    if (p) selectLens(p.id, p.pillars);
+  };
   // ?live=1 forces the real list even in a demo-flagged browser — the
   // marketing site's index CTAs promise the real rankings, so those links
   // must never land on sample rows.
@@ -145,7 +180,12 @@ const MarketIndex = () => {
 
   // Peer groups stay internal (scoring + CSV export only) — the public list
   // deliberately doesn't classify firms by type.
-  const filtered = (rows ?? []).filter((r) => {
+  const lensed = applyLens(rows ?? [], lensActive ? lensPillars : []);
+  const lensRows: (CombinedVisibilityRow | LensedRow)[] = lensed.scored;
+  const unscoredCount = lensActive ? lensed.unscored.length : 0;
+  const overallOf = (r: CombinedVisibilityRow | LensedRow) => ("overallPercent" in r ? r.overallPercent : r.visibilityPercent);
+
+  const filtered = lensRows.filter((r) => {
     const q = query.trim().toLowerCase();
     if (q && !r.firmName.toLowerCase().includes(q) && !(r.firmDomain ?? "").toLowerCase().includes(q)) return false;
     return true;
@@ -160,7 +200,7 @@ const MarketIndex = () => {
   // Nearest-rivals window: the index is deliberately not a ranking, but a
   // firm looking at itself wants to know who sits just above and below it on
   // measured visibility — a sliding ±5 window over the full score ordering.
-  const byVisibility = [...(rows ?? [])].sort((a, b) => b.visibilityPercent - a.visibilityPercent);
+  const byVisibility = [...lensRows].sort((a, b) => b.visibilityPercent - a.visibilityPercent);
   const rivalsFor = (row: CombinedVisibilityRow) => {
     const i = byVisibility.findIndex((x) => rowKey(x) === rowKey(row));
     return {
@@ -174,9 +214,10 @@ const MarketIndex = () => {
   // Sharing points at the live index itself — a firm's row is a claim about
   // the whole list, so the link lands on the list, not a per-firm URL that
   // doesn't exist.
-  const indexShareUrl = `${window.location.origin}${import.meta.env.BASE_URL}visibility-index/${market}`;
+  const lensQuery = lensActive ? `?view=${lensView}${lensView === "custom" ? `&pillars=${lensPillars.join(",")}` : ""}` : "";
+  const indexShareUrl = `${window.location.origin}${import.meta.env.BASE_URL}visibility-index/${market}${saved ? `?view=custom&pillars=${lensPillars.join(",")}` : lensQuery}`;
   const shareTextFor = (r: CombinedVisibilityRow) =>
-    `${r.firmName} — ${r.visibilityPercent}% measured visibility on the Uvid ${marketLabelText} Visibility Index (${
+    `${r.firmName} — ${r.visibilityPercent}% measured visibility${lensActive ? ` on ${lensLabel}` : ""} on the Uvid ${marketLabelText} Visibility Index (${
       r.hasFullAudit ? `${r.measuredCategoryCount} of 5 categories measured` : "legal-directory standing measured"
     }).`;
   const shareToLinkedIn = () =>
@@ -318,6 +359,25 @@ const MarketIndex = () => {
 
         {!loading && !error && rows && rows.length > 0 && (
           <div className="mb-6 space-y-3">
+            {!showDemoRankings && (
+              <PillarLensBar
+                view={lensView}
+                pillars={lensPillars}
+                savedPresets={savedPresets}
+                canSaveMore={canSaveMore}
+                onSelect={selectLens}
+                onSave={saveLens}
+                onRemove={removePreset}
+              />
+            )}
+            {lensActive && (
+              <p className="text-[11px] text-foreground font-body">
+                Viewing on: <span className="text-primary">{lensLabel}</span>
+                <span className="text-muted-foreground"> — percentages count only these pillars. Each firm's overall figure is shown beside it.
+                  {unscoredCount > 0 && ` ${unscoredCount} firm${unscoredCount === 1 ? " has" : "s have"} none of these pillars measured yet and ${unscoredCount === 1 ? "is" : "are"} left out.`}
+                </span>
+              </p>
+            )}
             <div className="relative">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-muted-foreground pointer-events-none" />
               <input
@@ -330,9 +390,9 @@ const MarketIndex = () => {
             </div>
             <div className="flex items-center justify-between">
               <p className="text-[11px] text-muted-foreground font-body">
-                {filtered.length === rows.length
-                  ? `${rows.length} firms — expand any row for the breakdown and share links.`
-                  : `${filtered.length} of ${rows.length} firms match.`}
+                {filtered.length === lensRows.length
+                  ? `${lensRows.length} firms — expand any row for the breakdown and share links.`
+                  : `${filtered.length} of ${lensRows.length} firms match.`}
               </p>
               <button
                 onClick={exportCsv}
@@ -426,6 +486,11 @@ const MarketIndex = () => {
                         )}
                       </div>
                       <div className="flex items-center gap-2 shrink-0">
+                        {lensActive && (
+                          <span className="text-[10px] text-muted-foreground font-body tabular-nums" title="Official overall visibility">
+                            Overall {overallOf(r)}%
+                          </span>
+                        )}
                         <span className="font-display text-base text-emerald-500 font-semibold">
                           {r.visibilityPercent}%
                         </span>
@@ -476,7 +541,7 @@ const MarketIndex = () => {
                         {(rivals.above.length > 0 || rivals.below.length > 0) && (
                           <div>
                             <p className="eyebrow text-[9px] text-muted-foreground/70 mb-1.5">
-                              Closest firms by measured visibility
+                              Closest firms by measured visibility{lensActive ? ` on ${lensLabel}` : ""}
                             </p>
                             <div className="space-y-1">
                               {rivals.above.map((n) => {
