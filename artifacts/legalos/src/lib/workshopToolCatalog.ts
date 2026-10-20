@@ -20,6 +20,10 @@ export const WORKSHOP_TOOL_LABELS: Record<WorkshopToolId, string> = {
   deckroast: "Roast My Deck",
   bio: "Bio Rewriter",
   calendar: "12-Month Calendar",
+  article: "Article Drafter",
+  pitch: "Press Pitch Builder",
+  linkedin: "LinkedIn Post Planner",
+  casestudy: "Case Study Writer",
 };
 
 export const WORKSHOP_TOOL_IDS = Object.keys(WORKSHOP_TOOL_LABELS) as WorkshopToolId[];

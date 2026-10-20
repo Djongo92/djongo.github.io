@@ -77,7 +77,7 @@ const HeadlineLab = () => {
         if (err) { toast.error(err); setJudging(false); return; }
         const j = await resp.json();
         const aiWinner = j.winner === "A" ? 0 : 1;
-        toast.message(`AI picks ${j.winner}`, { description: j.reason });
+        toast.message(`AI opinion: ${j.winner}`, { description: `${j.reason} — an AI judgement, not a tested result. Run real A/B tests before betting on it.` });
         winnerIdx = aiWinner as 0 | 1;
       } catch (e) { console.error(e); toast.error("Judge failed."); setJudging(false); return; }
       setJudging(false);
@@ -191,7 +191,7 @@ const HeadlineLab = () => {
             </div>
             <div className="flex justify-center">
               <button disabled={judging} onClick={() => pickWinner(0, true)} className="text-xs text-muted-foreground hover:text-primary font-body inline-flex items-center gap-1 disabled:opacity-40">
-                {judging ? <Loader2 className="w-3 h-3 animate-spin" /> : <Sparkles className="w-3 h-3" />} Let AI judge this match
+                {judging ? <Loader2 className="w-3 h-3 animate-spin" /> : <Sparkles className="w-3 h-3" />} AI opinion on this match (not tested)
               </button>
             </div>
           </motion.div>

@@ -111,3 +111,30 @@ export const CalendarIcon = (p: IconProps) => (
     <circle cx="17" cy="14" r="0.8" fill="currentColor" />
   </Svg>
 );
+export const ArticleIcon = (p: IconProps) => (
+  <Svg {...p}>
+    <path d="M6 3h9l4 4v14H6z" />
+    <path d="M15 3v4h4M9 11h7M9 14h7M9 17h4" />
+  </Svg>
+);
+
+export const PressPitchIcon = (p: IconProps) => (
+  <Svg {...p}>
+    <rect x="3" y="6" width="18" height="12" rx="1.5" />
+    <path d="M3 8l9 6 9-6" />
+  </Svg>
+);
+
+export const LinkedInPlanIcon = (p: IconProps) => (
+  <Svg {...p}>
+    <rect x="3" y="4" width="18" height="16" rx="1.5" />
+    <path d="M3 9h18M8 4v5M8 13v4M12 13v4M16 13v4" />
+  </Svg>
+);
+
+export const CaseStudyIcon = (p: IconProps) => (
+  <Svg {...p}>
+    <path d="M4 7h16v12H4zM9 7V5h6v2" />
+    <path d="M4 12h16M12 11v2" />
+  </Svg>
+);

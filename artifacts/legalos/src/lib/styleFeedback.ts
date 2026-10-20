@@ -6,7 +6,7 @@ import { getOrCreateClientId } from "@/lib/clientId";
 import { getCurrentUser } from "@/lib/currentUser";
 import { fnUrl, authHeaders } from "@/components/workshop/shared";
 
-export type StyleToolId = "bio" | "headlines" | "copywriter" | "rewrite";
+export type StyleToolId = "bio" | "headlines" | "copywriter" | "rewrite" | "article" | "pitch" | "linkedin" | "casestudy" | "submission" | "pagedraft";
 export type StyleVerdict = "approved" | "edited" | "rejected";
 
 export async function recordStyleFeedback(

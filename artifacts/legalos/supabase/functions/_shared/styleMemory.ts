@@ -6,7 +6,7 @@
 import type { SupabaseClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
 import { getEmbedding } from "./embeddings.ts";
 
-export type StyleToolId = "bio" | "headlines" | "copywriter" | "rewrite";
+export type StyleToolId = "bio" | "headlines" | "copywriter" | "rewrite" | "article" | "pitch" | "linkedin" | "casestudy" | "submission" | "pagedraft";
 export type StyleVerdict = "approved" | "edited" | "rejected";
 
 export interface StyleExample {

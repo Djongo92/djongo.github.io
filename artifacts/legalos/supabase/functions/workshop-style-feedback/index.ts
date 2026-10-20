@@ -9,7 +9,7 @@ import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
 
 const corsHeaders = ACCESS_CORS_HEADERS;
 
-const VALID_TOOLS: StyleToolId[] = ["bio", "headlines", "copywriter", "rewrite"];
+const VALID_TOOLS: StyleToolId[] = ["bio", "headlines", "copywriter", "rewrite", "article", "pitch", "linkedin", "casestudy", "submission", "pagedraft"];
 const VALID_VERDICTS: StyleVerdict[] = ["approved", "edited", "rejected"];
 
 Deno.serve(async (req) => {
