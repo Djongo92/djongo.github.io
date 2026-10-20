@@ -5,7 +5,9 @@ import { useRef, useState } from "react";
 import { motion } from "framer-motion";
 import { Loader2, RefreshCw, Flame, X, ChevronLeft, ImagePlus, Wand2 } from "lucide-react";
 import { toast } from "sonner";
-import type { ParsedSlide } from "@/components/pitchDeckParser";
+import { ALL_LAYOUTS, type ParsedSlide } from "@/components/pitchDeckParser";
+import type { DeckTheme } from "@/lib/deckTheme";
+import BrandPanel from "./BrandPanel";
 import { ScaledSlide } from "@/components/pitchDeckPreview";
 import { fileToSlideImage } from "@/lib/slideImage";
 import type { ReactNode } from "react";
@@ -14,7 +16,7 @@ export interface DeckBuilderProps {
   slides: ParsedSlide[];
   activeIndex: number;
   onSelect: (i: number) => void;
-  onEdit: (i: number, patch: Partial<Pick<ParsedSlide, "title" | "headline" | "bullets" | "notes" | "imageUrl">>) => void;
+  onEdit: (i: number, patch: Partial<Pick<ParsedSlide, "title" | "headline" | "bullets" | "notes" | "imageUrl" | "layout">>) => void;
   onRegenerate: (i: number, feedback?: string) => void;
   /** Omit to hide AI visuals (no image provider is configured). Upload stays available. */
   onGenerateImage?: (i: number, prompt: string) => void;
@@ -23,6 +25,8 @@ export interface DeckBuilderProps {
   applyingFixes: boolean;
   audience: string;
   firmName?: string | null;
+  theme: DeckTheme;
+  onThemeChange: (t: DeckTheme) => void;
   /** Fixes handed over from Roast My Deck, if any. */
   pendingFixes: string[] | null;
   onApplyFixes: () => void;
@@ -38,12 +42,13 @@ const LAYOUT_LABEL: Record<ParsedSlide["layout"], string> = {
   stats: "Stats",
   process: "Steps",
   cards: "Cards",
+  split: "Split",
   bullets: "Bullets",
 };
 
 const DeckBuilder = ({
   slides, activeIndex, onSelect, onEdit, onRegenerate, onGenerateImage, regenerating, generatingImage, applyingFixes,
-  audience, firmName, pendingFixes, onApplyFixes, onDismissFixes, onStartOver, exportBar,
+  audience, firmName, theme, onThemeChange, pendingFixes, onApplyFixes, onDismissFixes, onStartOver, exportBar,
 }: DeckBuilderProps) => {
   const [feedback, setFeedback] = useState("");
   const [imagePrompt, setImagePrompt] = useState("");
@@ -96,6 +101,8 @@ const DeckBuilder = ({
         </div>
       )}
 
+      <BrandPanel theme={theme} onChange={onThemeChange} />
+
       {/* Filmstrip */}
       <div className="flex gap-2 overflow-x-auto pb-1">
         {slides.map((s, i) => (
@@ -106,7 +113,7 @@ const DeckBuilder = ({
               i === activeIndex ? "border-primary ring-1 ring-primary" : "border-border/50 hover:border-border"
             }`}
           >
-            <ScaledSlide slide={s} index={i} total={slides.length} audience={audience} firmName={firmName} />
+            <ScaledSlide slide={s} index={i} total={slides.length} audience={audience} firmName={firmName} theme={theme} />
             <div className={`text-[10px] font-body px-1.5 py-1 flex justify-between ${i === activeIndex ? "text-primary" : "text-muted-foreground"}`}>
               <span className="truncate">{s.title}</span>
               <span className="opacity-60 ml-1">{i + 1}</span>
@@ -123,7 +130,7 @@ const DeckBuilder = ({
         transition={{ duration: 0.18 }}
         className="relative rounded-sm border border-border/50 overflow-hidden"
       >
-        <ScaledSlide slide={slide} index={activeIndex} total={slides.length} audience={audience} firmName={firmName} />
+        <ScaledSlide slide={slide} index={activeIndex} total={slides.length} audience={audience} firmName={firmName} theme={theme} />
         {(regenerating === activeIndex || generatingImage === activeIndex) && (
           <div className="absolute inset-0 bg-background/70 flex items-center justify-center gap-2 text-sm text-muted-foreground font-body">
             <Loader2 className="w-4 h-4 animate-spin" />
@@ -138,6 +145,16 @@ const DeckBuilder = ({
           <p className="eyebrow text-[10px] text-muted-foreground">
             Slide {activeIndex + 1} · {LAYOUT_LABEL[slide.layout]} layout — edits update every export
           </p>
+          <label className="flex items-center gap-1.5 text-[11px] text-muted-foreground font-body">
+            Layout
+            <select
+              value={slide.layout}
+              onChange={(e) => onEdit(activeIndex, { layout: e.target.value as ParsedSlide["layout"] })}
+              className="bg-background border border-border rounded-sm px-2 py-1 text-xs font-body"
+            >
+              {ALL_LAYOUTS.map((l) => <option key={l.id} value={l.id}>{l.label}</option>)}
+            </select>
+          </label>
         </div>
         <div className="grid sm:grid-cols-2 gap-3">
           <label className="block">
@@ -204,7 +221,7 @@ const DeckBuilder = ({
                 <input
                   value={imagePrompt}
                   onChange={(e) => setImagePrompt(e.target.value)}
-                  placeholder='or describe a visual — e.g. "glass courthouse at dusk, navy and gold"'
+                  placeholder='or describe an illustration — e.g. "calm architectural lines, sense of structure"'
                   className="flex-1 bg-background border border-border rounded-sm px-3 py-2 text-xs font-body focus:outline-none focus:border-primary"
                 />
                 <button
@@ -213,7 +230,7 @@ const DeckBuilder = ({
                   className="inline-flex items-center gap-1.5 text-xs text-primary hover:text-gold-light font-body border border-primary/30 hover:border-primary/60 rounded-sm px-3 py-2 transition-colors disabled:opacity-40 whitespace-nowrap"
                 >
                   {generatingImage === activeIndex ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Wand2 className="w-3.5 h-3.5" />}
-                  Generate with AI
+                  Illustrate with AI
                 </button>
               </div>
               )}

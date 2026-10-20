@@ -25,3 +25,15 @@ describe("pagePreview", () => {
     expect(buildPageDocument("<p>x</p>", { theme: "classic", accent: "red;}</style><script>" })).not.toContain("<script>");
   });
 });
+
+describe("brand theme", () => {
+  it("uses the brand colours, fonts and logo", () => {
+    const doc = buildPageDocument("<h1>T</h1>", {
+      theme: "brand", accent: "#000000",
+      brand: { primary: "#112233", accent: "#AA5500", paper: "#FFFFFF", fonts: "modern", logoUrl: "data:image/png;base64,AAAA" },
+    });
+    expect(doc).toContain("#AA5500");
+    expect(doc).toContain("Arial");
+    expect(doc).toContain("data:image/png;base64,AAAA");
+  });
+});

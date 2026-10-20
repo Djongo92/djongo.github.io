@@ -239,3 +239,6 @@ verify_jwt = false
 
 [functions.workshop-page-draft]
 verify_jwt = false
+
+[functions.workshop-slide-visual]
+verify_jwt = false
