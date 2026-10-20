@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import { Loader2, Globe, Clipboard, Target, Crosshair, Lightbulb } from "lucide-react";
 import { LoadingTips } from "@/components/LoadingTips";
@@ -9,6 +9,22 @@ import { SegmentedControl } from "../ui/segmented-control";
 import { useHandoffReceive } from "@/lib/handoff";
 import { recordRun } from "@/hooks/useWorkshopHistory";
 import { styleMemoryIdentity } from "@/lib/styleFeedback";
+import { supabase } from "@/integrations/supabase/client";
+import { CATEGORY_META, CATEGORY_ORDER } from "@/lib/visibilityCategories";
+
+interface PeerRow {
+  audited_domain: string;
+  display_name: string | null;
+  performance_score: number | null;
+  social_score: number | null;
+  seo_authority_score: number | null;
+  thought_leadership_score: number | null;
+  reputation_score: number | null;
+}
+const SCORE_COL = {
+  performance: "performance_score", social: "social_score", seoAuthority: "seo_authority_score",
+  thoughtLeadership: "thought_leadership_score", reputation: "reputation_score",
+} as const;
 
 interface Result {
   positioning: string;
@@ -31,6 +47,36 @@ const CompetitorTeardown = () => {
   const [advanced, setAdvanced] = useState(false);
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState<Result | null>(null);
+  // Named peer from the public visibility list (anchors the teardown to real scores).
+  const [peers, setPeers] = useState<PeerRow[]>([]);
+  const [peer, setPeer] = useState<PeerRow | null>(null);
+
+  useEffect(() => {
+    const market = (context?.market || "serbia").trim().toLowerCase();
+    let cancelled = false;
+    supabase
+      .from("market_visibility_audits")
+      .select("audited_domain, display_name, performance_score, social_score, seo_authority_score, thought_leadership_score, reputation_score")
+      .eq("market", market)
+      .eq("is_public", true)
+      .then(({ data }) => {
+        if (cancelled || !data) return;
+        setPeers((data as PeerRow[]).sort((a, b) => (a.display_name || a.audited_domain).localeCompare(b.display_name || b.audited_domain)));
+      });
+    return () => { cancelled = true; };
+  }, [context?.market]);
+
+  const choosePeer = (domain: string) => {
+    const row = peers.find((p) => p.audited_domain === domain) ?? null;
+    setPeer(row);
+    if (row) { setInput("url"); setUrl(`https://${row.audited_domain.replace(/^https?:\/\//, "")}`); }
+  };
+  const peerScores = peer
+    ? Object.fromEntries(CATEGORY_ORDER.map((k) => {
+        const raw = peer[SCORE_COL[k]];
+        return [CATEGORY_META[k].label, raw == null ? null : Math.round((raw / CATEGORY_META[k].max) * 100)];
+      }).filter(([, v]) => v !== null))
+    : undefined;
 
   useHandoffReceive("teardown", (p) => {
     if (p.kind === "url") { setInput("url"); setUrl(p.url); }
@@ -50,6 +96,7 @@ const CompetitorTeardown = () => {
           competitorUrl: input === "url" ? url : undefined,
           pastedContent: input === "paste" ? pasted : undefined,
           ourAngle, firmContext: context,
+          peer: peer ? { name: peer.display_name || peer.audited_domain, scores: peerScores } : undefined,
           ...identity,
         }),
       });
@@ -78,6 +125,17 @@ const CompetitorTeardown = () => {
             { label: "Paste content", value: "paste", icon: <Clipboard className="w-3 h-3" /> },
           ]} />
       </div>
+      {input === "url" && peers.length > 0 && (
+        <div className="space-y-1">
+          <label className="eyebrow text-[10px] text-muted-foreground" htmlFor="teardown-peer">Or pick a firm from the visibility list</label>
+          <select id="teardown-peer" value={peer?.audited_domain ?? ""} onChange={(e) => choosePeer(e.target.value)}
+            className="w-full bg-card border border-border rounded-sm px-3 py-2.5 text-sm font-body focus:outline-none focus:border-primary">
+            <option value="">— none —</option>
+            {peers.map((p) => <option key={p.audited_domain} value={p.audited_domain}>{p.display_name || p.audited_domain}</option>)}
+          </select>
+          {peer && <p className="text-[11px] text-muted-foreground font-body">The teardown will be anchored to {peer.display_name || peer.audited_domain}'s measured scores.</p>}
+        </div>
+      )}
       {input === "url" ? (
         <input value={url} onChange={(e) => setUrl(e.target.value)} placeholder="https://competitorfirm.com" className="w-full bg-card border border-border rounded-sm px-4 py-3 text-sm font-body focus:outline-none focus:border-primary" />
       ) : (

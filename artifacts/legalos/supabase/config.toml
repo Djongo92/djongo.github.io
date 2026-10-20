@@ -233,3 +233,6 @@ verify_jwt = false
 
 [functions.workshop-case-study]
 verify_jwt = false
+
+[functions.workshop-library]
+verify_jwt = false

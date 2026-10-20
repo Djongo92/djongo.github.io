@@ -19,6 +19,7 @@ type SupabaseClient = any;
 
 import { synthesisNoteLine, SYNTHESIS_NOTES_IN_CONTEXT, type SynthesisNote } from "./postRunSynthesis.ts";
 import { TOTAL_MAX, categoryMaxForVersion, totalMaxForVersion } from "./methodology.ts";
+import { getVoiceProfileBlock } from "./voiceProfile.ts";
 
 interface AuditRow {
   total_score: number | null;
@@ -138,7 +139,7 @@ export async function buildFirmContext(
   firmId: string,
 ): Promise<FirmContextResult> {
   try {
-    const [profileResult, auditsResult, historyResult] = await Promise.all([
+    const [profileResult, auditsResult, historyResult, voiceBlock] = await Promise.all([
       serviceClient
         .from("firm_profiles")
         .select("tone_of_voice,brand_rules,client_restrictions,practice_areas,jurisdictions,competitor_set,preferred_terminology,approved_content,lawyer_roster,synthesis_notes")
@@ -156,6 +157,8 @@ export async function buildFirmContext(
         .eq("client_id", firmId)
         .eq("key", "workshop_run_history")
         .maybeSingle(),
+      // Best-effort: a missing table/row just means "no voice learned yet".
+      getVoiceProfileBlock(serviceClient, firmId).catch(() => ""),
     ]);
 
     const profile = (profileResult.data ?? null) as FirmProfileRow | null;
@@ -211,6 +214,9 @@ export async function buildFirmContext(
       const names = profile.lawyer_roster.slice(0, 8).map((l) => `${l.name} (${l.title})`).join(", ");
       sections.push(`TEAM\n${names}`);
     }
+
+    // ── Learned voice (distilled from kept/edited drafts) ────────────────
+    if (voiceBlock) sections.push(voiceBlock);
 
     // ── Learned preferences (post-run synthesis) ─────────────────────────
     // Notes the synthesis loop distilled from past workshop runs — tone

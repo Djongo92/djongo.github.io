@@ -55,7 +55,22 @@ Deno.serve(async (req) => {
       const serviceClient = createClient(Deno.env.get("SUPABASE_URL")!, Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!, { auth: { persistSession: false } });
       const identityToken = typeof accessToken === "string" && accessToken ? accessToken : headerSessionToken(req);
       const clientId = await resolveClientIdGuarded(serviceClient, rawClientId, identityToken, typeof activeFirmId === "string" && activeFirmId ? activeFirmId : undefined);
-      if (clientId) firmContextBlock = await buildFirmContext(serviceClient, clientId).then((ctx) => { profileJurisdictions = ctx.jurisdictions; return ctx.block; });
+      if (clientId) {
+        firmContextBlock = await buildFirmContext(serviceClient, clientId).then((ctx) => { profileJurisdictions = ctx.jurisdictions; return ctx.block; });
+        // Proof points the firm already signed off: case studies it kept in the Workshop.
+        const { data: cs } = await serviceClient
+          .from("workshop_style_examples")
+          .select("final_text")
+          .eq("client_id", clientId)
+          .eq("tool_id", "casestudy")
+          .in("verdict", ["approved", "edited"])
+          .order("created_at", { ascending: false })
+          .limit(3);
+        if (cs?.length) {
+          firmContextBlock += "\n\nAPPROVED PROOF POINTS (case studies this firm has already approved — draw on these for the proof slide; do not invent others):\n" +
+            cs.map((r: { final_text: string }, i: number) => `${i + 1}. ${String(r.final_text).slice(0, 700)}`).join("\n---\n");
+        }
+      }
     }
     const firmBlock = firmContextLine(firmContext, profileJurisdictions);
 

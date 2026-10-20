@@ -32,6 +32,9 @@ import { WORKSHOP_TOOL_LABELS } from "@/lib/workshopToolCatalog";
 import { styleMemoryIdentity } from "@/lib/styleFeedback";
 import { isDemoMode } from "@/lib/demoMode";
 import StyleFeedback from "./workshop/StyleFeedback";
+import MyLibrary from "./workshop/MyLibrary";
+import ScoreGain from "./workshop/ScoreGain";
+import Diagnose, { type DiagnoseMode } from "./workshop/Diagnose";
 
 const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL;
 const SUPABASE_KEY = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY;
@@ -59,13 +62,20 @@ const Workshop = ({ onBack, initialToolId }: Props) => {
   // already mounted and listening by the time it dispatches an event);
   // the event listener below still covers switching tools while Workshop
   // is already open and mounted.
-  const [tool, setTool] = useState<string | null>(initialToolId ?? null);
+  // "audit" is now the page mode of Diagnose; every entry point that still
+  // says "audit" (hand-offs, the weak-category shortcut) lands there.
+  const [diagnoseMode, setDiagnoseMode] = useState<DiagnoseMode>(initialToolId === "audit" ? "page" : "copy");
+  const resolveTool = (id: string): string => {
+    if (id === "audit") { setDiagnoseMode("page"); return "autopsy"; }
+    return id;
+  };
+  const [tool, setTool] = useState<string | null>(() => (initialToolId === "audit" ? "autopsy" : initialToolId ?? null));
 
   // Cross-tool handoff: another tool / drawer can request a tool switch
   useEffect(() => {
     const handler = (e: Event) => {
       const ce = e as CustomEvent<{ toolId: string }>;
-      if (ce.detail?.toolId) setTool(ce.detail.toolId);
+      if (ce.detail?.toolId) setTool(resolveTool(ce.detail.toolId));
     };
     window.addEventListener("workshop:switch-tool", handler);
     return () => window.removeEventListener("workshop:switch-tool", handler);
@@ -147,11 +157,10 @@ const Workshop = ({ onBack, initialToolId }: Props) => {
   }
 
   const TOOLS: { id: string; title: string; tag: string; blurb: string; icon: React.ReactNode; render: () => JSX.Element }[] = [
-    { id: "swipe", tag: "Library", title: WORKSHOP_TOOL_LABELS.swipe, blurb: "Field-tested templates from real firms — heroes, bios, emails, ads.", icon: <SwipeIcon size={18} />, render: () => <SwipeFileLibrary /> },
+    { id: "swipe", tag: "Library", title: WORKSHOP_TOOL_LABELS.swipe, blurb: "Field-tested templates — plus My Library: your own kept drafts and the voice the Workshop has learned from them.", icon: <SwipeIcon size={18} />, render: () => <LibraryHub /> },
     { id: "copywriter", tag: "Generate", title: WORKSHOP_TOOL_LABELS.copywriter, blurb: "Three on-brand variations for hero, email, LinkedIn, ad or bio copy.", icon: <CopywriterIcon size={18} />, render: () => <Copywriter /> },
     { id: "rewrite", tag: "Improve", title: WORKSHOP_TOOL_LABELS.rewrite, blurb: "Paste copy; rewrite with the framework from any chapter.", icon: <RewriteIcon size={18} />, render: () => <Rewriter /> },
-    { id: "autopsy", tag: "Diagnose", title: WORKSHOP_TOOL_LABELS.autopsy, blurb: "6-axis scoring with weak-spot highlights and drop-in fixes.", icon: <AutopsyIcon size={18} />, render: () => <CopyAutopsy /> },
-    { id: "audit", tag: "Diagnose", title: WORKSHOP_TOOL_LABELS.audit, blurb: "Score any practice page against the Chapter 8 framework.", icon: <AuditIcon size={18} />, render: () => <PracticePageAudit /> },
+    { id: "autopsy", tag: "Diagnose", title: "Diagnose", blurb: "Grade pasted copy on six axes, or score a live page — one tool, two ways in.", icon: <AutopsyIcon size={18} />, render: () => <Diagnose mode={diagnoseMode} onModeChange={setDiagnoseMode} /> },
     { id: "headlines", tag: "Test", title: WORKSHOP_TOOL_LABELS.headlines, blurb: "20 angles, then a head-to-head tournament judged by AI.", icon: <HeadlinesIcon size={18} />, render: () => <HeadlineLab /> },
     { id: "teardown", tag: "Strategy", title: WORKSHOP_TOOL_LABELS.teardown, blurb: "Strong moves, weak spots, gaps you can own — and how.", icon: <TeardownIcon size={18} />, render: () => <CompetitorTeardown /> },
     { id: "deck", tag: "Pitch", title: WORKSHOP_TOOL_LABELS.deck, blurb: "Pick your sections, draft a deck sized to fit — with a real .pptx download.", icon: <PitchDeckIcon size={18} />, render: () => <PitchDeck /> },
@@ -237,6 +246,30 @@ const Workshop = ({ onBack, initialToolId }: Props) => {
           )}
         </AnimatePresence>
       </div>
+    </div>
+  );
+};
+
+const LibraryHub = () => {
+  const [tab, setTab] = useState<"templates" | "mine">("templates");
+  return (
+    <div>
+      <div className="flex gap-2 mb-6" role="tablist" aria-label="Library">
+        {([["templates", "Templates"], ["mine", "My Library"]] as const).map(([id, label]) => (
+          <button
+            key={id}
+            role="tab"
+            aria-selected={tab === id}
+            onClick={() => setTab(id)}
+            className={`px-4 py-2 text-xs font-body rounded-sm border transition-all ${
+              tab === id ? "border-primary bg-primary/10 text-primary" : "border-border text-muted-foreground hover:border-primary/40"
+            }`}
+          >
+            {label}
+          </button>
+        ))}
+      </div>
+      {tab === "templates" ? <SwipeFileLibrary /> : <MyLibrary />}
     </div>
   );
 };
@@ -649,6 +682,8 @@ const Rewriter = () => {
           </div>
         </div>
       </div>
+
+      {output && !loading && !isDemoMode() && <ScoreGain original={original} rewritten={output} />}
 
       <div className="flex justify-center">
         <button

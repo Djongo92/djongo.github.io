@@ -20,6 +20,7 @@ import { useScoreGoals } from "@/hooks/useScoreGoals";
 import { PEER_GROUPS } from "@/lib/marketVisibilityConfig";
 import { CATEGORY_META, CATEGORY_ORDER, CATEGORY_COLOR_CLASSES, type CategoryKey } from "@/lib/visibilityCategories";
 import { CategoryExplainer, ProvenanceBadge } from "@/components/visibility/Explainers";
+import { CATEGORY_FIX_TOOLS } from "@/lib/categoryToolMap";
 import ScoreRing from "@/components/visibility/ScoreRing";
 import Sparkline from "@/components/visibility/Sparkline";
 import ScoreBurst from "@/components/visibility/ScoreBurst";
@@ -818,6 +819,21 @@ const CommandCenter = ({
                       <span className="text-[10px] text-primary font-body">Target {Math.round((goals[key]! / meta.max) * 100)}%</span>
                     )}
                   </div>
+                  {!isMissing && !isReadOnly && pct < 70 && (CATEGORY_FIX_TOOLS[key]?.length ?? 0) > 0 && (
+                    <div className="mt-3 pt-3 border-t border-border/40 space-y-1">
+                      <p className="eyebrow text-[9px] text-muted-foreground/70">Improve this</p>
+                      {CATEGORY_FIX_TOOLS[key].map((t) => (
+                        <button
+                          key={t.toolId + t.label}
+                          onClick={() => onOpenWorkshopTool(t.toolId)}
+                          className="w-full flex items-center justify-between gap-2 text-left text-[11px] font-body text-primary hover:text-gold-light"
+                        >
+                          <span>{t.label}</span>
+                          <ArrowRight className="w-3 h-3 shrink-0" />
+                        </button>
+                      ))}
+                    </div>
+                  )}
                 </motion.div>
               );
             })}
