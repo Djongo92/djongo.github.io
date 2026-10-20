@@ -135,7 +135,6 @@ const DEMO_METERED_FUNCTIONS = new Set([
   "workshop-competitor-teardown",
   "workshop-copywriter",
   "workshop-deck-roast",
-  "workshop-deck-image",
   "workshop-headlines",
   "workshop-pitch-deck",
   "workshop-practice-audit",

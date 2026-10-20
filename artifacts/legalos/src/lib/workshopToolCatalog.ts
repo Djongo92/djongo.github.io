@@ -24,6 +24,8 @@ export const WORKSHOP_TOOL_LABELS: Record<WorkshopToolId, string> = {
   pitch: "Press Pitch Builder",
   linkedin: "LinkedIn Post Planner",
   casestudy: "Case Study Writer",
+  submission: "Directory Submission Helper",
+  pagedraft: "Page Drafter",
 };
 
 export const WORKSHOP_TOOL_IDS = Object.keys(WORKSHOP_TOOL_LABELS) as WorkshopToolId[];

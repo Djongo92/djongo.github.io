@@ -105,6 +105,61 @@ const CASE_STUDY: WritingToolConfig = {
   ],
 };
 
+const SUBMISSION: WritingToolConfig = {
+  toolId: "submission",
+  toolLabel: "Directory Submission Helper",
+  endpoint: "workshop-submission",
+  titleKey: "practiceArea",
+  cta: "Prepare the submission",
+  emptyText: "Ranked work highlights, a department narrative, a referee plan and a list of gaps will appear here.",
+  note: "Directories change their formats, word limits and deadlines every cycle — check the publisher's current guidelines before you submit. Nothing is invented: missing facts show as [PLACEHOLDERS].",
+  fields: [
+    { key: "directory", label: "Directory", type: "select", options: [
+      { value: "chambers", label: "Chambers" },
+      { value: "legal500", label: "The Legal 500" },
+      { value: "iflr1000", label: "IFLR1000" },
+    ] },
+    { key: "practiceArea", label: "Practice area", type: "text", required: true, placeholder: "E.g. Banking & Finance, Dispute Resolution, Competition" },
+    { key: "market", label: "Market / jurisdiction", type: "text", placeholder: "E.g. Serbia" },
+    { key: "matters", label: "Matters from the review period", type: "textarea", rows: 12, required: true, receivesHandoff: true,
+      hint: "One block per matter, rough notes are fine: client (or type), what you did, value, dates, cross-border element, what made it hard, whether it is confidential. About the last 12 months." },
+    { key: "team", label: "Team", type: "textarea", rows: 3, placeholder: "Partners and key lawyers in this practice, headcount" },
+    { key: "clients", label: "Key clients and sectors", type: "textarea", rows: 2, placeholder: "Only those you may mention" },
+    { key: "changes", label: "Team changes this year", type: "textarea", rows: 2, placeholder: "Promotions, lateral hires, departures" },
+    { key: "referees", label: "Possible referees", type: "textarea", rows: 2, placeholder: "Client types or relationships, not private contact details" },
+    { key: "lastYear", label: "How you were ranked or described last cycle", type: "textarea", rows: 2 },
+  ],
+};
+
+const PAGE_DRAFT: WritingToolConfig = {
+  toolId: "pagedraft",
+  toolLabel: "Page Drafter",
+  endpoint: "workshop-page-draft",
+  titleKey: "topic",
+  cta: "Draft the page",
+  emptyText: "A page plan, SEO fields, section copy and clean HTML will appear here.",
+  note: "This drafts the words and structure — paste them into your own site or CMS and let your designer style them.",
+  fields: [
+    { key: "pageType", label: "Page type", type: "select", options: [
+      { value: "practice", label: "Practice-area page" },
+      { value: "lawyer", label: "Lawyer profile" },
+      { value: "about", label: "About the firm" },
+      { value: "industry", label: "Industry / sector page" },
+      { value: "insight", label: "Insights landing page" },
+      { value: "home", label: "Homepage" },
+    ] },
+    { key: "topic", label: "What is the page about", type: "text", required: true, placeholder: "E.g. Banking & finance for regional lenders" },
+    { key: "audience", label: "Who it is for", type: "text", placeholder: "E.g. CFOs and general counsel of mid-size banks" },
+    { key: "goal", label: "What visitors should do", type: "text", placeholder: "E.g. Request a 20-minute call" },
+    { key: "keywords", label: "Search phrases", type: "text", placeholder: "E.g. banking lawyer Belgrade, loan documentation" },
+    { key: "proof", label: "Proof and facts you can use", type: "textarea", rows: 4, receivesHandoff: true, hint: "Credentials, matters you may mention, rankings, numbers. Anything not here becomes a placeholder." },
+    { key: "existing", label: "Current page text (optional)", type: "textarea", rows: 5, hint: "Paste it to have it rewritten rather than started from scratch." },
+    { key: "vibe", label: "Tone / feel", type: "text", placeholder: "E.g. calm, precise, plain-spoken" },
+  ],
+};
+
+export const DirectorySubmissionHelper = () => <WritingToolShell config={SUBMISSION} />;
+export const PageDrafter = () => <WritingToolShell config={PAGE_DRAFT} />;
 export const ArticleDrafter = () => <WritingToolShell config={ARTICLE} />;
 export const PressPitchBuilder = () => <WritingToolShell config={PITCH} />;
 export const LinkedInPlanner = () => <WritingToolShell config={LINKEDIN} />;

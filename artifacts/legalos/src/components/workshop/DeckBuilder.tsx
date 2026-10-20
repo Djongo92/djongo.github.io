@@ -16,9 +16,10 @@ export interface DeckBuilderProps {
   onSelect: (i: number) => void;
   onEdit: (i: number, patch: Partial<Pick<ParsedSlide, "title" | "headline" | "bullets" | "notes" | "imageUrl">>) => void;
   onRegenerate: (i: number, feedback?: string) => void;
-  onGenerateImage: (i: number, prompt: string) => void;
+  /** Omit to hide AI visuals (no image provider is configured). Upload stays available. */
+  onGenerateImage?: (i: number, prompt: string) => void;
   regenerating: number | null;
-  generatingImage: number | null;
+  generatingImage?: number | null;
   applyingFixes: boolean;
   audience: string;
   firmName?: string | null;
@@ -196,6 +197,7 @@ const DeckBuilder = ({
               >
                 <ImagePlus className="w-3.5 h-3.5" /> Upload image (logo, headshot, chart…)
               </button>
+              {onGenerateImage && (
               <div className="flex items-center gap-2">
                 <input
                   value={imagePrompt}
@@ -212,6 +214,7 @@ const DeckBuilder = ({
                   Generate with AI
                 </button>
               </div>
+              )}
             </div>
           )}
         </div>

@@ -15,7 +15,7 @@ import {
 } from "lucide-react";
 import {
   SwipeIcon, CopywriterIcon, RewriteIcon, AutopsyIcon, AuditIcon,
-  HeadlinesIcon, TeardownIcon, PitchDeckIcon, DeckRoastIcon, BioIcon, CalendarIcon, ArticleIcon, PressPitchIcon, LinkedInPlanIcon, CaseStudyIcon,
+  HeadlinesIcon, TeardownIcon, PitchDeckIcon, DeckRoastIcon, BioIcon, CalendarIcon, ArticleIcon, PressPitchIcon, LinkedInPlanIcon, CaseStudyIcon, SubmissionIcon, PageDraftIcon,
 } from "@/components/workshop/icons";
 import { WORKSHOP_TOOL_LABELS } from "@/lib/workshopToolCatalog";
 import { chapters } from "@/data/chapters";
@@ -528,6 +528,8 @@ const Index = () => {
     pitch: <PressPitchIcon size={16} />,
     linkedin: <LinkedInPlanIcon size={16} />,
     casestudy: <CaseStudyIcon size={16} />,
+    submission: <SubmissionIcon size={16} />,
+    pagedraft: <PageDraftIcon size={16} />,
   };
   const paletteItems: PaletteItem[] = [
     { id: "nav-dashboard", label: "Dashboard", group: "Navigate", icon: <LayoutDashboard className="w-4 h-4" />, onSelect: () => goToSection("dashboard") },

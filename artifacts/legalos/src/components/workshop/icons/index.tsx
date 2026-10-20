@@ -132,6 +132,20 @@ export const LinkedInPlanIcon = (p: IconProps) => (
   </Svg>
 );
 
+export const SubmissionIcon = (p: IconProps) => (
+  <Svg {...p}>
+    <path d="M6 3h9l4 4v14H6z" />
+    <path d="M15 3v4h4M9 12h7M9 16h5" />
+  </Svg>
+);
+
+export const PageDraftIcon = (p: IconProps) => (
+  <Svg {...p}>
+    <rect x="3" y="4" width="18" height="16" rx="1.5" />
+    <path d="M3 8h18M7 12h6M7 15h10" />
+  </Svg>
+);
+
 export const CaseStudyIcon = (p: IconProps) => (
   <Svg {...p}>
     <path d="M4 7h16v12H4zM9 7V5h6v2" />

@@ -6,9 +6,6 @@ verify_jwt = false
 [functions.census-audit-remeasure-missing]
 verify_jwt = false
 
-[functions.workshop-deck-image]
-verify_jwt = false
-
 [functions.chapter-chat]
 verify_jwt = false
 
@@ -235,4 +232,10 @@ verify_jwt = false
 verify_jwt = false
 
 [functions.workshop-library]
+verify_jwt = false
+
+[functions.workshop-submission]
+verify_jwt = false
+
+[functions.workshop-page-draft]
 verify_jwt = false
