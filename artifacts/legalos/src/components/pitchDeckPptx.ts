@@ -10,7 +10,7 @@
 // pure assemblePitchDeckPptx is exported separately from writeFile so tests
 // can assert the slide sequence without triggering a browser download.
 import PptxGenJS from "pptxgenjs";
-import type { ParsedSlide } from "./pitchDeckParser";
+import { stripStepPrefix, splitLead, type ParsedSlide } from "./pitchDeckParser";
 import {
   INCH_PER_PX, COVER_IMAGE, COVER_TEXT_MAX, SECTION_IMAGE, SECTION_TEXT_MAX,
   CONTENT_IMAGE, CONTENT_TEXT_MAX, QUOTE_SCRIM_TRANSPARENCY_PCT,
@@ -151,6 +151,57 @@ function addStatsSlide(pptx: PptxGenJS, slide: ParsedSlide, i: number, total: nu
   return s;
 }
 
+function addProcessSlide(pptx: PptxGenJS, slide: ParsedSlide, i: number, total: number): PptxGenJS.Slide {
+  const s = pptx.addSlide();
+  addChrome(s, slide, i, total);
+  if (slide.headline) {
+    s.addText(slide.headline, { x: 0.5, y: 0.95, w: 9, h: 1.1, fontFace: SERIF, fontSize: 26, bold: true, color: NAVY, shrinkText: true });
+  }
+  const steps = slide.bullets.slice(0, 5);
+  const colW = 9 / Math.max(steps.length, 1);
+  const cy = 3.15;
+  s.addShape("rect", { x: 0.5, y: cy - 0.01, w: 9, h: 0.02, fill: { color: GOLD, transparency: 60 } });
+  steps.forEach((b, k) => {
+    const cx = 0.5 + colW * (k + 0.5);
+    s.addShape("ellipse", { x: cx - 0.33, y: cy - 0.33, w: 0.66, h: 0.66, fill: { color: NAVY }, line: { color: PAPER, width: 3 } });
+    s.addText(String(k + 1), { x: cx - 0.33, y: cy - 0.33, w: 0.66, h: 0.66, align: "center", valign: "middle", fontFace: SERIF, fontSize: 20, bold: true, color: GOLD_LIGHT });
+    const [lead, rest] = splitLead(stripStepPrefix(b));
+    const runs: PptxGenJS.TextProps[] = lead
+      ? [
+          { text: lead, options: { fontFace: SERIF, fontSize: 13, bold: true, color: NAVY, breakLine: true } },
+          { text: rest, options: { fontFace: SANS, fontSize: 11, color: INK } },
+        ]
+      : [{ text: rest, options: { fontFace: SERIF, fontSize: 13, bold: true, color: NAVY } }];
+    s.addText(runs, { x: cx - colW / 2 + 0.08, y: cy + 0.5, w: colW - 0.16, h: 1.6, align: "center", valign: "top" });
+  });
+  return s;
+}
+
+function addCardsSlide(pptx: PptxGenJS, slide: ParsedSlide, i: number, total: number): PptxGenJS.Slide {
+  const s = pptx.addSlide();
+  addChrome(s, slide, i, total);
+  if (slide.headline) {
+    s.addText(slide.headline, { x: 0.5, y: 0.95, w: 9, h: 1.1, fontFace: SERIF, fontSize: 26, bold: true, color: NAVY, shrinkText: true });
+  }
+  const cards = slide.bullets.slice(0, 4);
+  const gap = 0.2;
+  const cw = (9 - gap * (cards.length - 1)) / Math.max(cards.length, 1);
+  cards.forEach((b, k) => {
+    const x = 0.5 + k * (cw + gap);
+    s.addShape("rect", { x, y: 2.3, w: cw, h: 2.7, fill: { color: "FFFFFF" }, line: { color: "E4DFD3", width: 0.75 } });
+    s.addShape("rect", { x, y: 2.3, w: cw, h: 0.04, fill: { color: GOLD } });
+    const [lead, rest] = splitLead(b);
+    s.addText(
+      [
+        { text: lead, options: { fontFace: SERIF, fontSize: 15, bold: true, color: NAVY, breakLine: true } },
+        { text: rest, options: { fontFace: SANS, fontSize: 11.5, color: INK } },
+      ],
+      { x: x + 0.15, y: 2.45, w: cw - 0.3, h: 2.45, valign: "top", paraSpaceAfter: 6 },
+    );
+  });
+  return s;
+}
+
 function addBulletsSlide(pptx: PptxGenJS, slide: ParsedSlide, i: number, total: number): PptxGenJS.Slide {
   const s = pptx.addSlide();
   addChrome(s, slide, i, total);
@@ -190,6 +241,8 @@ export function assemblePitchDeckPptx(args: BuildPptxArgs): PptxGenJS {
       case "section": s = addSectionSlide(pptx, slide, i, slides.length); break;
       case "quote": s = addQuoteSlide(pptx, slide, i, slides.length); break;
       case "stats": s = addStatsSlide(pptx, slide, i, slides.length); break;
+      case "process": s = addProcessSlide(pptx, slide, i, slides.length); break;
+      case "cards": s = addCardsSlide(pptx, slide, i, slides.length); break;
       default: s = addBulletsSlide(pptx, slide, i, slides.length); break;
     }
     if (slide.notes) s.addNotes(slide.notes);

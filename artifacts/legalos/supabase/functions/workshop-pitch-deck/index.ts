@@ -144,6 +144,12 @@ For each slide use this exact markdown shape (N = the slide's number), with spea
 
 ${SLIDE_SHAPE(0).replace("Slide 0", "Slide N")}
 
+Visual layouts are chosen automatically from how you write the bullets, so write them to fit the slide's job:
+- Approach / timeline / process slides: exactly 3-4 bullets that start with "1. ", "2. ", "3. " and read "1. Step name: what happens" — they render as numbered steps on a line.
+- Team, differentiators, investment or "pillars" slides: exactly 3 bullets in the form "Short label: one-line explanation" — they render as cards.
+- Proof slides: bullets that LEAD with the number ("40+ cross-border deals", "98% client retention") — they render as big stat callouts. Never invent numbers; use [Insert proof: …] if none were provided.
+- Other slides: 2-3 plain bullets.
+
 Be ruthless about specificity and about slide density — if a slide needs more than 3 bullets to make its point, the point is too complicated for one slide; split the idea into the speaker notes instead of cramming the slide. If proof is missing, write "[Insert proof: …]" as a clear placeholder.
 
 ${tone ? `Tone: ${tone}.` : ""}

@@ -36,6 +36,8 @@ const LAYOUT_LABEL: Record<ParsedSlide["layout"], string> = {
   section: "Divider",
   quote: "Quote",
   stats: "Stats",
+  process: "Steps",
+  cards: "Cards",
   bullets: "Bullets",
 };
 

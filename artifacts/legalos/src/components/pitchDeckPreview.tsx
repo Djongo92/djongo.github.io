@@ -4,7 +4,7 @@
 // Slides are designed at a fixed 1280×720 and scaled with a transform so the
 // layout is pixel-identical at every size (stage, thumbnail, export).
 import { useEffect, useRef, useState } from "react";
-import type { ParsedSlide } from "./pitchDeckParser";
+import { stripStepPrefix, splitLead, type ParsedSlide } from "./pitchDeckParser";
 import {
   DOM_SCALE, COVER_IMAGE, COVER_TEXT_MAX, SECTION_IMAGE, SECTION_TEXT_MAX,
   CONTENT_IMAGE, CONTENT_TEXT_MAX, QUOTE_SCRIM,
@@ -146,6 +146,54 @@ export function SlideCanvas({ slide, index, total, audience, firmName }: SlidePr
                 ) : (
                   <span style={{ color: INK, fontSize: 22 }}>•&nbsp;&nbsp;{b}</span>
                 )}
+              </div>
+            );
+          })}
+        </div>
+      </div>
+    );
+  }
+
+  if (slide.layout === "process") {
+    const steps = slide.bullets.slice(0, 5);
+    return (
+      <div style={{ ...base, background: PAPER }}>
+        <Chrome title={slide.title} num={num} />
+        <div style={{ position: "absolute", top: 170, left: 64, right: 100, color: NAVY, fontFamily: serif, fontWeight: 700, fontSize: 40, lineHeight: 1.2 }}>
+          {slide.headline}
+        </div>
+        <div style={{ position: "absolute", top: 380, left: 64, right: 64, height: 3, background: `${GOLD}66` }} />
+        <div style={{ position: "absolute", top: 340, left: 64, right: 64, display: "flex" }}>
+          {steps.map((b, i) => {
+            const [lead, rest] = splitLead(stripStepPrefix(b));
+            return (
+              <div key={i} style={{ flex: 1, padding: "0 14px", textAlign: "center" }}>
+                <div style={{ width: 84, height: 84, margin: "-3px auto 0", borderRadius: "50%", background: NAVY, color: GOLD_LIGHT, fontFamily: serif, fontWeight: 700, fontSize: 36, display: "flex", alignItems: "center", justifyContent: "center", border: `4px solid ${PAPER}` }}>{i + 1}</div>
+                <div style={{ marginTop: 28, color: NAVY, fontFamily: serif, fontWeight: 700, fontSize: 24, lineHeight: 1.25 }}>{lead || rest}</div>
+                {lead && <div style={{ marginTop: 10, color: INK, fontSize: 19, lineHeight: 1.4 }}>{rest}</div>}
+              </div>
+            );
+          })}
+        </div>
+      </div>
+    );
+  }
+
+  if (slide.layout === "cards") {
+    const cards = slide.bullets.slice(0, 4);
+    return (
+      <div style={{ ...base, background: PAPER }}>
+        <Chrome title={slide.title} num={num} />
+        <div style={{ position: "absolute", top: 170, left: 64, right: 100, color: NAVY, fontFamily: serif, fontWeight: 700, fontSize: 40, lineHeight: 1.2 }}>
+          {slide.headline}
+        </div>
+        <div style={{ position: "absolute", top: 330, left: 64, right: 64, display: "flex", gap: 24 }}>
+          {cards.map((b, i) => {
+            const [lead, rest] = splitLead(b);
+            return (
+              <div key={i} style={{ flex: 1, background: "#fff", borderTop: `4px solid ${GOLD}`, boxShadow: "0 1px 6px rgba(18,24,38,0.12)", padding: "26px 24px", minHeight: 270 }}>
+                <div style={{ color: NAVY, fontFamily: serif, fontWeight: 700, fontSize: 26, lineHeight: 1.2 }}>{lead}</div>
+                <div style={{ marginTop: 14, color: INK, fontSize: 20, lineHeight: 1.45 }}>{rest}</div>
               </div>
             );
           })}

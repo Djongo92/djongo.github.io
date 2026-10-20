@@ -3,6 +3,7 @@
 // everything else — identity, streaming, run history, hand-off to other
 // tools, copy/download, and the "keep as-is / edit & save" learning loop —
 // is shared, so every tool built on it learns the firm's voice the same way.
+import PagePreview from "./PagePreview";
 import { useEffect, useRef, useState } from "react";
 import ReactMarkdown from "react-markdown";
 import { Copy, Download, Loader2, Sparkles } from "lucide-react";
@@ -42,6 +43,8 @@ export interface WritingToolConfig {
   titleKey: string;
   /** Plain-language reminder shown under the button. */
   note?: string;
+  /** Show a Draft | Preview toggle that renders the draft's HTML block as a page. */
+  pagePreview?: boolean;
   /** Tools this draft can be handed to. */
   handoffExclude?: WorkshopToolId;
 }
@@ -56,6 +59,7 @@ const WritingToolShell = ({ config }: { config: WritingToolConfig }) => {
   );
   const [output, setOutput] = useState("");
   const [loading, setLoading] = useState(false);
+  const [view, setView] = useState<"draft" | "preview">("draft");
   const runIdentity = useRef<ReturnType<typeof styleMemoryIdentity> | null>(null);
 
   useHandoffReceive(config.toolId, (p) => {
@@ -169,7 +173,24 @@ const WritingToolShell = ({ config }: { config: WritingToolConfig }) => {
           )}
           {output && (
             <div className="prose prose-sm dark:prose-invert max-w-none prose-headings:font-display prose-headings:text-primary prose-strong:text-foreground">
-              <ReactMarkdown>{output}</ReactMarkdown>
+              {config.pagePreview && (
+                <div className="flex gap-1.5 mb-4 not-prose" role="tablist" aria-label="Draft or page preview">
+                  {(["draft", "preview"] as const).map((v) => (
+                    <button
+                      key={v}
+                      role="tab"
+                      aria-selected={view === v}
+                      onClick={() => setView(v)}
+                      className={`px-3 py-1 rounded-sm border text-xs font-body ${view === v ? "border-primary bg-primary/10 text-foreground" : "border-border/50 text-muted-foreground hover:text-foreground"}`}
+                    >
+                      {v === "draft" ? "Draft" : "Page preview"}
+                    </button>
+                  ))}
+                </div>
+              )}
+              {config.pagePreview && view === "preview"
+                ? <div className="not-prose"><PagePreview output={output} title={values[config.titleKey]} /></div>
+                : <ReactMarkdown>{output}</ReactMarkdown>}
               <div className="mt-4 pt-4 border-t border-border/50 flex justify-end gap-2 not-prose">
                 <HandoffButton payload={{ kind: "text", text: output, source: config.toolLabel }} exclude={config.handoffExclude ?? config.toolId} />
                 <button onClick={download} className="text-xs text-primary hover:text-gold-light font-body inline-flex items-center gap-1">

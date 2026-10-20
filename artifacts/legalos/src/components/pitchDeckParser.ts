@@ -16,7 +16,7 @@
 // skipped rather than rendered with garbled/partial text — a slide with no
 // title is worse than one slide missing from the deck.
 /** Visual treatment a slide gets in the builder, PPTX, PDF, and PNG exports. */
-export type SlideLayout = "title" | "section" | "quote" | "stats" | "bullets";
+export type SlideLayout = "title" | "section" | "quote" | "stats" | "process" | "cards" | "bullets";
 
 export interface ParsedSlide {
   title: string;
@@ -35,6 +35,19 @@ export interface ParsedSlide {
 
 const STAT_LEAD = /^[\d$€£%×x+~]/;
 const QUOTE_LEAD = /^["“‘]/;
+const STEP_LEAD = /^(?:\d{1,2}[.):]|step\s*\d+|phase\s*\d+|week\s*\d+)\s+\S/i;
+const STEP_PREFIX = /^(?:\d{1,2}[.):]|step\s*\d+[.:)]?|phase\s*\d+[.:)]?)\s+/i;
+
+/** "1. Scope the work" → "Scope the work" (process layout shows its own numbers). */
+export function stripStepPrefix(bullet: string): string {
+  return bullet.trim().replace(STEP_PREFIX, "");
+}
+
+/** "Fixed fee: no surprises" → ["Fixed fee", "no surprises"]; ["", bullet] when there is no short lead. */
+export function splitLead(bullet: string): [string, string] {
+  const m = bullet.trim().match(/^([^:—–]{2,32}?)\s*(?::|\s[—–]\s)\s*(\S[\s\S]*)$/);
+  return m ? [m[1].trim(), m[2].trim()] : ["", bullet.trim()];
+}
 
 /**
  * Deterministic layout classification — positional first (slide 1 is always
@@ -52,9 +65,14 @@ export function classifySlideLayout(
     (slide.bullets.length > 0 && slide.bullets.every((b) => QUOTE_LEAD.test(b.trim())))
   ) return "quote";
   if (
+    slide.bullets.length >= 3 && slide.bullets.length <= 5 &&
+    slide.bullets.filter((b) => STEP_LEAD.test(b.trim())).length >= Math.ceil(slide.bullets.length * 0.6)
+  ) return "process";
+  if (
     slide.bullets.length >= 2 &&
     slide.bullets.filter((b) => STAT_LEAD.test(b.trim())).length >= Math.ceil(slide.bullets.length * 0.6)
   ) return "stats";
+  if (slide.bullets.length >= 3 && slide.bullets.length <= 4 && slide.bullets.every((b) => splitLead(b)[0] !== "")) return "cards";
   return "bullets";
 }
 
