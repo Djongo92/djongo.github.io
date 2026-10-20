@@ -129,16 +129,23 @@ const DEMO_METERED_FUNCTIONS = new Set([
   "score-website",
   "steal-homepage",
   "visibility-audit-narrative",
+  "workshop-article",
   "workshop-autopsy",
   "workshop-bio-rewrite",
   "workshop-calendar",
+  "workshop-case-study",
   "workshop-competitor-teardown",
   "workshop-copywriter",
   "workshop-deck-roast",
   "workshop-headlines",
+  "workshop-linkedin",
+  "workshop-page-draft",
   "workshop-pitch-deck",
   "workshop-practice-audit",
+  "workshop-press-pitch",
   "workshop-rewrite",
+  "workshop-slide-visual",
+  "workshop-submission",
 ]);
 
 // There is deliberately no blanket "public function" exemption list here.
