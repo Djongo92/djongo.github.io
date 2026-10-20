@@ -80,16 +80,28 @@ const WORKSHOP_STATE = {
 };
 
 describe("buildFirmContextBlock", () => {
+  it("includes the learned voice profile so every tool writes like the firm", async () => {
+    const { client } = stubClient({
+      firm_profiles: PROFILE,
+      workshop_voice_profiles: { profile: "Register: plain, direct. Opens with the point." },
+    });
+    // deno-lint-ignore no-explicit-any
+    const block = await buildFirmContextBlock(client as any, "firm-A");
+    expect(block).toContain("VOICE PROFILE");
+    expect(block).toContain("Opens with the point.");
+  });
+
   it("scopes every query to the verified firm id — never another firm's rows", async () => {
     const { client, calls } = stubClient({
       firm_profiles: PROFILE,
       market_visibility_audits: AUDITS,
       user_app_state: WORKSHOP_STATE,
+      workshop_voice_profiles: { profile: "Register: plain" },
     });
     // deno-lint-ignore no-explicit-any
     await buildFirmContextBlock(client as any, "firm-A");
 
-    expect(calls.length).toBe(3);
+    expect(calls.length).toBe(4);
     for (const c of calls) {
       const scoped = c.eqs.some(([col, val]) => (col === "firm_id" || col === "client_id") && val === "firm-A");
       expect(scoped, `query on ${c.table} must filter by the verified firm id`).toBe(true);

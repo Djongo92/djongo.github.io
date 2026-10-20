@@ -9,6 +9,7 @@ import { useHandoffReceive } from "@/lib/handoff";
 import { recordRun } from "@/hooks/useWorkshopHistory";
 import { styleMemoryIdentity } from "@/lib/styleFeedback";
 import { useFirmContext } from "@/hooks/useFirmContext";
+import { Delta } from "./ScoreGain";
 
 interface Axis { name: string; score: number; note: string; }
 interface WeakSpot { quote: string; issue: string; fix: string; }
@@ -28,6 +29,8 @@ const CopyAutopsy = () => {
   const [advanced, setAdvanced] = useState(false);
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState<Result | null>(null);
+  // The previous run, kept so a re-run after editing shows what moved.
+  const [previous, setPrevious] = useState<Result | null>(null);
   // Local "context" state is the copy's placement; firmCtx is the saved firm
   // profile (carries the market so critiques cite the right jurisdiction).
   const { context: firmCtx } = useFirmContext();
@@ -38,7 +41,7 @@ const CopyAutopsy = () => {
 
   const run = async () => {
     if (copy.trim().length < 20 || loading) return;
-    setLoading(true); setResult(null);
+    setLoading(true); setPrevious(result); setResult(null);
     const identity = styleMemoryIdentity();
     try {
       const resp = await fetch(fnUrl("workshop-autopsy"), {
@@ -96,6 +99,11 @@ const CopyAutopsy = () => {
           <div className="bg-card border border-border/50 rounded-sm p-6 text-center">
             <div className="eyebrow text-[10px] text-muted-foreground mb-2">Overall</div>
             <div className="font-display text-6xl text-primary mb-2">{result.overallScore}</div>
+            {previous && (
+              <p className="text-xs font-body text-muted-foreground mb-2">
+                Last run {previous.overallScore} → now {result.overallScore} <Delta value={Math.round(result.overallScore - previous.overallScore)} />
+              </p>
+            )}
             <p className="font-display text-lg text-foreground italic">"{result.oneLineVerdict}"</p>
           </div>
 
@@ -104,6 +112,7 @@ const CopyAutopsy = () => {
               <div key={a.name} className="bg-card border border-border/50 rounded-sm p-4">
                 <div className="flex items-baseline justify-between mb-2">
                   <span className="text-[10px] uppercase tracking-wider text-muted-foreground font-body">{a.name}</span>
+                  {previous && (() => { const pa = previous.axes.find((x) => x.name === a.name); return pa ? <span className="text-[10px] font-body"><Delta value={a.score - pa.score} /></span> : null; })()}
                   <span className={`font-display text-xl ${a.score >= 7 ? "text-primary" : a.score >= 4 ? "text-foreground" : "text-destructive"}`}>{a.score}<span className="text-xs text-muted-foreground">/10</span></span>
                 </div>
                 <div className="h-1 bg-muted/40 rounded-full overflow-hidden mb-2">

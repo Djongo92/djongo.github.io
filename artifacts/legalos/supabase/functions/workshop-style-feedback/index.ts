@@ -5,6 +5,7 @@
 import { requireAccess, ACCESS_CORS_HEADERS } from "../_shared/access.ts";
 import { resolveClientIdGuarded, headerSessionToken } from "../_shared/verifiedClientId.ts";
 import { recordStyleExample, type StyleToolId, type StyleVerdict } from "../_shared/styleMemory.ts";
+import { maybeRefreshVoiceProfile } from "../_shared/voiceProfile.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
 
 const corsHeaders = ACCESS_CORS_HEADERS;
@@ -71,6 +72,15 @@ Deno.serve(async (req) => {
       return new Response(JSON.stringify({ error: "Couldn't save feedback" }), {
         status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
+    }
+
+    // Learning loop: once enough drafts have been kept, re-distil the firm's
+    // voice profile in the background (never blocks or fails the save).
+    if (verdict !== "rejected") {
+      const p = maybeRefreshVoiceProfile(serviceClient, clientId);
+      // deno-lint-ignore no-explicit-any
+      const rt = (globalThis as any).EdgeRuntime;
+      if (rt?.waitUntil) rt.waitUntil(p);
     }
 
     return new Response(JSON.stringify({ ok: true }), {

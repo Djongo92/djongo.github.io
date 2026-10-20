@@ -8,14 +8,44 @@ import { CATEGORY_META } from "./visibilityCategories";
  * sidebar's "Work on your weakest category" shortcut, so the two surfaces
  * never recommend two different tools for the same weak category.
  *
- * seoAuthority is excluded — "missing" (not configured) isn't a real gap
- * to send someone to fix in the Workshop.
+ * A "missing" category (not configured) is skipped by
+ * findWeakestCategoryTool — that isn't a real gap to send anyone to fix.
  */
 export const CATEGORY_TOOL_MAP: Record<string, { label: string; max: number; toolId: WorkshopToolId }> = {
   performance: { label: CATEGORY_META.performance.label, max: CATEGORY_META.performance.max, toolId: "audit" },
-  social: { label: CATEGORY_META.social.label, max: CATEGORY_META.social.max, toolId: "copywriter" },
-  thoughtLeadership: { label: CATEGORY_META.thoughtLeadership.label, max: CATEGORY_META.thoughtLeadership.max, toolId: "copywriter" },
-  reputation: { label: CATEGORY_META.reputation.label, max: CATEGORY_META.reputation.max, toolId: "teardown" },
+  social: { label: CATEGORY_META.social.label, max: CATEGORY_META.social.max, toolId: "linkedin" },
+  seoAuthority: { label: CATEGORY_META.seoAuthority.label, max: CATEGORY_META.seoAuthority.max, toolId: "article" },
+  thoughtLeadership: { label: CATEGORY_META.thoughtLeadership.label, max: CATEGORY_META.thoughtLeadership.max, toolId: "article" },
+  reputation: { label: CATEGORY_META.reputation.label, max: CATEGORY_META.reputation.max, toolId: "casestudy" },
+};
+
+/**
+ * Every Workshop tool that can move a category, first = the primary one
+ * CATEGORY_TOOL_MAP recommends. Powers the "Improve this" shortcuts on the
+ * category cards, so a weak pillar is one click from the tool that fixes it.
+ */
+export const CATEGORY_FIX_TOOLS: Record<string, { toolId: WorkshopToolId; label: string }[]> = {
+  performance: [
+    { toolId: "audit", label: "Check a live page" },
+    { toolId: "rewrite", label: "Rewrite weak copy" },
+  ],
+  social: [
+    { toolId: "linkedin", label: "Plan a week of LinkedIn posts" },
+    { toolId: "copywriter", label: "Write a post" },
+  ],
+  seoAuthority: [
+    { toolId: "article", label: "Publish an insight article" },
+    { toolId: "pitch", label: "Earn press links and mentions" },
+  ],
+  thoughtLeadership: [
+    { toolId: "article", label: "Draft an article" },
+    { toolId: "pitch", label: "Pitch the press" },
+    { toolId: "calendar", label: "Plan a content calendar" },
+  ],
+  reputation: [
+    { toolId: "casestudy", label: "Write up a matter" },
+    { toolId: "teardown", label: "Study a ranked peer" },
+  ],
 };
 
 export interface WeakestCategoryTool {

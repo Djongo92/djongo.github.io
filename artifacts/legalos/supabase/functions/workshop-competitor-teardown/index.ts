@@ -38,7 +38,20 @@ Deno.serve(async (req) => {
 
     const unauthorized = await requireAccess(req, corsHeaders, "workshop");
     if (unauthorized) return unauthorized;try {
-    const { competitorUrl, pastedContent, ourAngle, firmContext, clientId: rawClientId, accessToken, activeFirmId } = await req.json();
+    const { competitorUrl, pastedContent, ourAngle, firmContext, peer, clientId: rawClientId, accessToken, activeFirmId } = await req.json();
+
+    // Optional: a named peer picked from the visibility list, with its measured
+    // category scores (% of potential) so the teardown is anchored to real data.
+    const peerLine = (() => {
+      if (!peer || typeof peer !== "object") return "";
+      const name = typeof peer.name === "string" ? peer.name.slice(0, 120) : "";
+      const scores = peer.scores && typeof peer.scores === "object" ? Object.entries(peer.scores as Record<string, unknown>) : [];
+      const parts = scores
+        .filter(([k, v]) => typeof k === "string" && k.length < 40 && typeof v === "number" && v >= 0 && v <= 100)
+        .map(([k, v]) => `${k.slice(0, 40)} ${Math.round(v as number)}%`);
+      if (!name || !parts.length) return "";
+      return `The competitor is ${name}, a firm on the public visibility list. Their measured scores (% of potential): ${parts.join(", ")}. Anchor the teardown to this: where they outscore our firm, say what is visibly behind it on their site; where we outscore them, that is a lead to press.`;
+    })();
 
     let firmContextBlock = "";
     let profileJurisdictions: string[] = [];
@@ -62,7 +75,7 @@ Deno.serve(async (req) => {
       // Cache scoped by verified firm — teardown output embeds the
       // requester's context profile, so a bare-URL key would leak one
       // firm's context-derived analysis to any other firm.
-      const cached = await getCached("workshop-competitor-teardown", `${competitorUrl}::${resolvedClientId ?? "anon"}`);
+      const cached = await getCached("workshop-competitor-teardown", `${competitorUrl}::${resolvedClientId ?? "anon"}::${peerLine ? peerLine.length + peerLine.slice(0, 80) : ""}`);
       cacheKey = cached.key;
       if (cached.hit) {
         return new Response(JSON.stringify({ ...(cached.hit as object), cached: true }), {
@@ -85,6 +98,7 @@ Deno.serve(async (req) => {
 
     const ctx = [
       ourAngle && `Our preferred angle / current position: ${ourAngle}`,
+      peerLine,
       firmContextLine(firmContext, profileJurisdictions),
     ].filter(Boolean).join("\n");
 
