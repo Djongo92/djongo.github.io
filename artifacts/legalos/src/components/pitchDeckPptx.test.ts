@@ -109,4 +109,49 @@ describe("assemblePitchDeckPptx", () => {
     const notes1 = await zip.file("ppt/notesSlides/notesSlide1.xml")!.async("string");
     expect(notes1).toContain("Open with the number.");
   });
+
+  it("process and cards slides export their steps and labels", async () => {
+    const md = `## Slide 1 — Cover
+
+**Headline:** Deal counsel
+
+**Speaker notes:** n
+
+---
+
+## Slide 2 — Approach
+
+**Headline:** Three phases
+
+**Body:**
+- 1. Scope: agree the brief
+- 2. Draft: first pass in a week
+- 3. Close: sign-off
+
+**Speaker notes:** n
+
+---
+
+## Slide 3 — Team
+
+**Headline:** Who runs it
+
+**Body:**
+- Banking: twelve lawyers
+- Disputes: eight lawyers
+- Tax: five lawyers
+
+**Speaker notes:** n`;
+    const slides = parsePitchDeckMarkdown(md);
+    expect(slides.map((x) => x.layout)).toEqual(["title", "process", "cards"]);
+    const buf = await assemblePitchDeckPptx({ slides, audience: "GC", opportunity: "x" }).write({ outputType: "arraybuffer" });
+    const zip = await JSZip.loadAsync(buf);
+    const process = await zip.file("ppt/slides/slide2.xml")!.async("string");
+    expect(process).toContain("Scope");
+    expect(process).toContain("agree the brief");
+    expect(process).not.toContain("1. Scope");
+    const cards = await zip.file("ppt/slides/slide3.xml")!.async("string");
+    expect(cards).toContain("Banking");
+    expect(cards).toContain("five lawyers");
+  });
 });

@@ -133,6 +133,7 @@ const SUBMISSION: WritingToolConfig = {
 
 const PAGE_DRAFT: WritingToolConfig = {
   toolId: "pagedraft",
+  pagePreview: true,
   toolLabel: "Page Drafter",
   endpoint: "workshop-page-draft",
   titleKey: "topic",

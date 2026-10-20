@@ -3,7 +3,7 @@
 // exports — same dynamic-import pattern as pitchDeckPptx.ts and
 // battlePlanPdf.ts. The five layouts mirror pitchDeckPreview.tsx exactly;
 // if a treatment changes, change it in both.
-import type { ParsedSlide } from "./pitchDeckParser";
+import { stripStepPrefix, splitLead, type ParsedSlide } from "./pitchDeckParser";
 import {
   COVER_IMAGE, COVER_TEXT_MAX, COVER_TEXT_MAX_PLAIN, SECTION_IMAGE, SECTION_TEXT_MAX, SECTION_TEXT_MAX_PLAIN,
   CONTENT_IMAGE, CONTENT_TEXT_MAX, CONTENT_TEXT_MAX_PLAIN, CONTENT_BULLETS_MAX, CONTENT_BULLETS_MAX_PLAIN,
@@ -241,6 +241,74 @@ export async function renderSlideToCanvas(
       }
       y += 120;
     }
+    return canvas;
+  }
+
+  if (slide.layout === "process") {
+    // ── Process / timeline: numbered steps along a line ──
+    paperChrome(ctx, slide, index, total);
+    ctx.font = `bold 52px ${SERIF}`;
+    ctx.fillStyle = NAVY;
+    wrapText(ctx, slide.headline, CONTENT_TEXT_MAX_PLAIN).slice(0, 2).forEach((l, li) => ctx.fillText(l, 80, 260 + li * 66));
+    const steps = slide.bullets.slice(0, 5);
+    const colW = 1440 / Math.max(steps.length, 1);
+    const cy = 520;
+    ctx.fillStyle = `${GOLD}66`;
+    ctx.fillRect(80, cy - 2, 1440, 4);
+    ctx.textAlign = "center";
+    steps.forEach((b, i) => {
+      const cx = 80 + colW * (i + 0.5);
+      ctx.fillStyle = PAPER;
+      ctx.beginPath(); ctx.arc(cx, cy, 58, 0, Math.PI * 2); ctx.fill();
+      ctx.fillStyle = NAVY;
+      ctx.beginPath(); ctx.arc(cx, cy, 52, 0, Math.PI * 2); ctx.fill();
+      ctx.font = `bold 48px ${SERIF}`;
+      ctx.fillStyle = GOLD_LIGHT;
+      ctx.fillText(String(i + 1), cx, cy + 17);
+      const [lead, rest] = splitLead(stripStepPrefix(b));
+      ctx.font = `bold 32px ${SERIF}`;
+      ctx.fillStyle = NAVY;
+      let ty = cy + 110;
+      wrapText(ctx, lead || rest, colW - 50).slice(0, 2).forEach((l) => { ctx.fillText(l, cx, ty); ty += 40; });
+      if (lead) {
+        ctx.font = `26px ${SANS}`;
+        ctx.fillStyle = INK;
+        wrapText(ctx, rest, colW - 50).slice(0, 3).forEach((l) => { ctx.fillText(l, cx, ty + 8); ty += 34; });
+      }
+    });
+    ctx.textAlign = "left";
+    return canvas;
+  }
+
+  if (slide.layout === "cards") {
+    // ── Cards: 3–4 lead + description tiles ──
+    paperChrome(ctx, slide, index, total);
+    ctx.font = `bold 52px ${SERIF}`;
+    ctx.fillStyle = NAVY;
+    wrapText(ctx, slide.headline, CONTENT_TEXT_MAX_PLAIN).slice(0, 2).forEach((l, li) => ctx.fillText(l, 80, 260 + li * 66));
+    const cards = slide.bullets.slice(0, 4);
+    const gap = 30;
+    const cw = (1440 - gap * (cards.length - 1)) / Math.max(cards.length, 1);
+    cards.forEach((b, i) => {
+      const x = 80 + i * (cw + gap);
+      const y = 410;
+      ctx.save();
+      ctx.shadowColor = "rgba(18,24,38,0.15)"; ctx.shadowBlur = 12; ctx.shadowOffsetY = 2;
+      ctx.fillStyle = "#FFFFFF";
+      ctx.fillRect(x, y, cw, 400);
+      ctx.restore();
+      ctx.fillStyle = GOLD;
+      ctx.fillRect(x, y, cw, 6);
+      const [lead, rest] = splitLead(b);
+      ctx.font = `bold 34px ${SERIF}`;
+      ctx.fillStyle = NAVY;
+      let ty = y + 70;
+      wrapText(ctx, lead, cw - 56).slice(0, 2).forEach((l) => { ctx.fillText(l, x + 28, ty); ty += 42; });
+      ctx.font = `26px ${SANS}`;
+      ctx.fillStyle = INK;
+      ty += 12;
+      wrapText(ctx, rest, cw - 56).slice(0, 7).forEach((l) => { ctx.fillText(l, x + 28, ty); ty += 36; });
+    });
     return canvas;
   }
 

@@ -29,6 +29,13 @@ const SAMPLE = `## Slide 1 — Title / First Impression
 `;
 
 describe("parsePitchDeckMarkdown", () => {
+  it("classifies numbered bullets as a process slide and lead:detail bullets as cards", () => {
+    const steps = { title: "Approach", headline: "H", bullets: ["1. Scope: agree the brief", "2. Draft: first pass in a week", "3. Close: sign-off"] };
+    expect(classifySlideLayout(steps, 3)).toBe("process");
+    const cards = { title: "Team", headline: "H", bullets: ["Banking: 12 lawyers", "Disputes: 8 lawyers", "Tax: 5 lawyers"] };
+    expect(classifySlideLayout(cards, 3)).toBe("cards");
+  });
+
   it("parses each slide's title, headline, bullets, and notes", () => {
     const slides = parsePitchDeckMarkdown(SAMPLE);
     expect(slides).toHaveLength(2);
