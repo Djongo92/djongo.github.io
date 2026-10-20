@@ -5,6 +5,7 @@
 // layout is pixel-identical at every size (stage, thumbnail, export).
 import { useEffect, useRef, useState } from "react";
 import { paletteFor, type DeckTheme, type DeckPalette } from "@/lib/deckTheme";
+import { resolveColor, FREE_W, FREE_H, isSafeImage, LINE_HEIGHT, type FreeItem, type FreeDesign } from "@/lib/freeSlide";
 import { stripStepPrefix, splitLead, type ParsedSlide } from "./pitchDeckParser";
 import {
   DOM_SCALE, COVER_IMAGE, COVER_TEXT_MAX, SECTION_IMAGE, SECTION_TEXT_MAX,
@@ -45,6 +46,16 @@ export function SlideCanvas({ slide, index, total, audience, firmName, theme }: 
   };
   const serif = C.serif;
   const num = slideNumber(index, total);
+
+  if (slide.free) {
+    return (
+      <div style={{ ...base, background: resolveColor(slide.free.bg, C) }}>
+        <div style={{ position: "absolute", left: 0, top: 0, width: FREE_W, height: FREE_H, transform: `scale(${DOM_SCALE})`, transformOrigin: "top left" }}>
+          {slide.free.items.map((it) => <FreeItemView key={it.id} item={it} C={C} />)}
+        </div>
+      </div>
+    );
+  }
 
   if (slide.layout === "title") {
     return (
@@ -109,8 +120,8 @@ export function SlideCanvas({ slide, index, total, audience, firmName, theme }: 
             <div style={{ position: "absolute", inset: 0, background: `rgba(${C.paperRgb}, 0.88)` }} />
           </>
         )}
-        <div style={{ position: "absolute", top: 0, left: 0, right: 0, height: 8, background: C.navy }} />
-        <div style={{ position: "absolute", top: 8, left: 0, right: 0, height: 3, background: C.gold }} />
+        {C.rules && <div style={{ position: "absolute", top: 0, left: 0, right: 0, height: 8, background: C.navy }} />}
+        {C.rules && <div style={{ position: "absolute", top: 8, left: 0, right: 0, height: 3, background: C.gold }} />}
         <div style={{ position: "absolute", top: 60, left: 90, color: C.gold, fontFamily: serif, fontSize: 190, lineHeight: 1 }}>“</div>
         <div style={{ position: "absolute", top: 300, left: 140, right: 140, textAlign: "center", color: C.navy, fontFamily: serif, fontStyle: "italic", fontWeight: 700, fontSize: 42, lineHeight: 1.25 }}>
           {slide.headline}
@@ -129,7 +140,7 @@ export function SlideCanvas({ slide, index, total, audience, firmName, theme }: 
       <div style={{ ...base, background: C.paper }}>
         <Chrome C={C} title={slide.title} num={num} />
         {slide.imageUrl && (
-          <img src={slide.imageUrl} alt="" style={{ position: "absolute", top: CONTENT_IMAGE.y * DOM_SCALE, right: 64, width: CONTENT_IMAGE.w * DOM_SCALE, height: CONTENT_IMAGE.h * DOM_SCALE, objectFit: "cover", borderRadius: 4 }} />
+          <img src={slide.imageUrl} alt="" style={{ position: "absolute", top: CONTENT_IMAGE.y * DOM_SCALE, right: 64, width: CONTENT_IMAGE.w * DOM_SCALE, height: CONTENT_IMAGE.h * DOM_SCALE, objectFit: "cover", borderRadius: C.radius * DOM_SCALE }} />
         )}
         <div style={{ position: "absolute", top: 170, left: 64, right: slide.imageUrl ? 1280 - 64 - CONTENT_TEXT_MAX * DOM_SCALE : 100, color: C.navy, fontFamily: serif, fontWeight: 700, fontSize: 40, lineHeight: 1.2 }}>
           {slide.headline}
@@ -193,7 +204,9 @@ export function SlideCanvas({ slide, index, total, audience, firmName, theme }: 
             const [lead, rest] = splitLead(stripStepPrefix(b));
             return (
               <div key={i} style={{ flex: 1, padding: "0 14px", textAlign: "center" }}>
-                <div style={{ width: 84, height: 84, margin: "-3px auto 0", borderRadius: "50%", background: C.navy, color: C.goldLight, fontFamily: serif, fontWeight: 700, fontSize: 36, display: "flex", alignItems: "center", justifyContent: "center", border: `4px solid ${C.paper}` }}>{i + 1}</div>
+                <div style={{ width: 84, height: 84, margin: "-3px auto 0", borderRadius: "50%", background: C.navy, color: C.goldLight, fontFamily: serif, fontWeight: 700, fontSize: 36, display: "flex", alignItems: "center", justifyContent: "center", border: `4px solid ${C.paper}`, overflow: "hidden" }}>
+                  {isSafeImage(slide.itemImages?.[i]) ? <img src={slide.itemImages![i]} alt="" style={{ width: "100%", height: "100%", objectFit: "cover" }} /> : i + 1}
+                </div>
                 <div style={{ marginTop: 28, color: C.navy, fontFamily: serif, fontWeight: 700, fontSize: 24, lineHeight: 1.25 }}>{lead || rest}</div>
                 {lead && <div style={{ marginTop: 10, color: C.ink, fontSize: 19, lineHeight: 1.4 }}>{rest}</div>}
               </div>
@@ -216,7 +229,10 @@ export function SlideCanvas({ slide, index, total, audience, firmName, theme }: 
           {cards.map((b, i) => {
             const [lead, rest] = splitLead(b);
             return (
-              <div key={i} style={{ flex: 1, background: "#fff", borderTop: `4px solid ${C.gold}`, boxShadow: "0 1px 6px rgba(18,24,38,0.12)", padding: "26px 24px", minHeight: 270 }}>
+              <div key={i} style={{ flex: 1, background: "#fff", borderTop: `4px solid ${C.gold}`, boxShadow: "0 1px 6px rgba(18,24,38,0.12)", padding: "26px 24px", minHeight: 270, borderRadius: C.radius * DOM_SCALE, overflow: "hidden" }}>
+                {isSafeImage(slide.itemImages?.[i]) && (
+                  <img src={slide.itemImages![i]} alt="" style={{ display: "block", width: "calc(100% + 48px)", height: 120, objectFit: "cover", margin: "-26px -24px 18px" }} />
+                )}
                 <div style={{ color: C.navy, fontFamily: serif, fontWeight: 700, fontSize: 26, lineHeight: 1.2 }}>{lead}</div>
                 <div style={{ marginTop: 14, color: C.ink, fontSize: 20, lineHeight: 1.45 }}>{rest}</div>
               </div>
@@ -232,7 +248,7 @@ export function SlideCanvas({ slide, index, total, audience, firmName, theme }: 
     <div style={{ ...base, background: C.paper }}>
       <Chrome C={C} title={slide.title} num={num} />
       {slide.imageUrl && (
-        <img src={slide.imageUrl} alt="" style={{ position: "absolute", top: CONTENT_IMAGE.y * DOM_SCALE, right: 64, width: CONTENT_IMAGE.w * DOM_SCALE, height: CONTENT_IMAGE.h * DOM_SCALE, objectFit: "cover", borderRadius: 4 }} />
+        <img src={slide.imageUrl} alt="" style={{ position: "absolute", top: CONTENT_IMAGE.y * DOM_SCALE, right: 64, width: CONTENT_IMAGE.w * DOM_SCALE, height: CONTENT_IMAGE.h * DOM_SCALE, objectFit: "cover", borderRadius: C.radius * DOM_SCALE }} />
       )}
       <div style={{ position: "absolute", top: 170, left: 64, right: slide.imageUrl ? 1280 - 64 - CONTENT_TEXT_MAX * DOM_SCALE : 100, color: C.navy, fontFamily: serif, fontWeight: 700, fontSize: 42, lineHeight: 1.2 }}>
         {slide.headline}
@@ -253,8 +269,8 @@ export function SlideCanvas({ slide, index, total, audience, firmName, theme }: 
 function Chrome({ C, title, num }: { C: DeckPalette; title: string; num: string }) {
   return (
     <>
-      <div style={{ position: "absolute", top: 0, left: 0, right: 0, height: 8, background: C.navy }} />
-      <div style={{ position: "absolute", top: 8, left: 0, right: 0, height: 3, background: C.gold }} />
+      {C.rules && <div style={{ position: "absolute", top: 0, left: 0, right: 0, height: 8, background: C.navy }} />}
+      {C.rules && <div style={{ position: "absolute", top: 8, left: 0, right: 0, height: 3, background: C.gold }} />}
       <div style={{ position: "absolute", top: 56, left: 64, color: C.gold, fontSize: 18, fontWeight: 700 }}>{num}</div>
       <div style={{ position: "absolute", top: 100, left: 64, color: C.muted, fontSize: 17, letterSpacing: 2 }}>
         {title.toUpperCase()}
@@ -286,3 +302,36 @@ export function ScaledSlide(props: SlidePreviewProps & { className?: string }) {
     </div>
   );
 }
+
+/** One free-form item as DOM, in 1600×900 canvas px. Shared by the filmstrip/stage preview and the drag editor. */
+export function FreeItemView({ item: it, C, extra }: { item: FreeItem; C: DeckPalette; extra?: React.CSSProperties }) {
+  const box: React.CSSProperties = { position: "absolute", left: it.x, top: it.y, width: it.w, height: it.h, ...extra };
+  if (it.kind === "shape") {
+    return <div style={{ ...box, background: resolveColor(it.fill, C), borderRadius: it.shape === "ellipse" ? "50%" : it.shape === "round" ? 24 : 0 }} />;
+  }
+  if (it.kind === "image") {
+    return isSafeImage(it.src)
+      ? <img src={it.src} alt="" draggable={false} style={{ ...box, objectFit: "cover", borderRadius: it.round ? "50%" : 0 }} />
+      : <div style={box} />;
+  }
+  return (
+    <div
+      style={{
+        ...box,
+        color: resolveColor(it.color, C),
+        fontFamily: it.font === "serif" ? C.serif : C.sans,
+        fontSize: it.fontSize ?? 32,
+        fontWeight: it.bold ? 700 : 400,
+        fontStyle: it.italic ? "italic" : "normal",
+        textAlign: it.align ?? "left",
+        lineHeight: LINE_HEIGHT,
+        whiteSpace: "pre-wrap",
+        overflow: "hidden",
+        wordBreak: "break-word",
+      }}
+    >
+      {it.text}
+    </div>
+  );
+}
+

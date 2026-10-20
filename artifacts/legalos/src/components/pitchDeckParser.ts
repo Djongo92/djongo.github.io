@@ -15,6 +15,8 @@
 // If the model drifts from that shape for a given slide, that slide is
 // skipped rather than rendered with garbled/partial text — a slide with no
 // title is worse than one slide missing from the deck.
+import type { FreeDesign } from "@/lib/freeSlide";
+
 /** Visual treatment a slide gets in the builder, PPTX, PDF, and PNG exports. */
 export type SlideLayout = "title" | "section" | "quote" | "stats" | "process" | "cards" | "split" | "bullets";
 
@@ -45,6 +47,10 @@ export interface ParsedSlide {
   imageUrl?: string;
   /** Set when the person picked this layout by hand; automatic classification then leaves it alone. */
   layoutLocked?: boolean;
+  /** One optional picture per bullet (team headshots, step icons) — Steps and Cards layouts. Session-local like imageUrl. */
+  itemImages?: (string | undefined)[];
+  /** Free-form (drag and drop) design; when set it replaces the template layout. Session-local. */
+  free?: FreeDesign;
 }
 
 const STAT_LEAD = /^[\d$€£%×x+~]/;

@@ -4,6 +4,7 @@
 // battlePlanPdf.ts. The five layouts mirror pitchDeckPreview.tsx exactly;
 // if a treatment changes, change it in both.
 import { paletteFor, type DeckTheme, type DeckPalette } from "@/lib/deckTheme";
+import { resolveColor, isSafeImage, LINE_HEIGHT, type FreeDesign } from "@/lib/freeSlide";
 import { stripStepPrefix, splitLead, type ParsedSlide } from "./pitchDeckParser";
 import {
   COVER_IMAGE, COVER_TEXT_MAX, COVER_TEXT_MAX_PLAIN, SECTION_IMAGE, SECTION_TEXT_MAX, SECTION_TEXT_MAX_PLAIN,
@@ -56,14 +57,74 @@ function loadImageEl(src: string): Promise<HTMLImageElement> {
   });
 }
 
+/** Loads per-bullet pictures; a failed or missing one is null. */
+async function loadItemImages(srcs: (string | undefined)[] | undefined, n: number): Promise<(HTMLImageElement | null)[]> {
+  return Promise.all(Array.from({ length: n }, async (_, i) => {
+    const src = srcs?.[i];
+    if (!isSafeImage(src)) return null;
+    try { return await loadImageEl(src!); } catch { return null; }
+  }));
+}
+
+/** Rounded-rect path (radius 0 = plain rect). */
+function rrect(ctx: CanvasRenderingContext2D, x: number, y: number, w: number, h: number, r: number) {
+  ctx.beginPath();
+  if (r <= 0) { ctx.rect(x, y, w, h); return; }
+  const k = Math.min(r, w / 2, h / 2);
+  ctx.moveTo(x + k, y);
+  ctx.arcTo(x + w, y, x + w, y + h, k);
+  ctx.arcTo(x + w, y + h, x, y + h, k);
+  ctx.arcTo(x, y + h, x, y, k);
+  ctx.arcTo(x, y, x + w, y, k);
+  ctx.closePath();
+}
+
+/** Free-form slide: background, then every item in order. */
+async function drawFreeSlide(ctx: CanvasRenderingContext2D, free: FreeDesign, C: DeckPalette) {
+  ctx.fillStyle = resolveColor(free.bg, C);
+  ctx.fillRect(0, 0, W, H);
+  for (const it of free.items) {
+    if (it.kind === "shape") {
+      ctx.fillStyle = resolveColor(it.fill, C);
+      if (it.shape === "ellipse") { ctx.beginPath(); ctx.ellipse(it.x + it.w / 2, it.y + it.h / 2, it.w / 2, it.h / 2, 0, 0, Math.PI * 2); ctx.fill(); }
+      else { rrect(ctx, it.x, it.y, it.w, it.h, it.shape === "round" ? 24 : 0); ctx.fill(); }
+    } else if (it.kind === "image") {
+      if (!isSafeImage(it.src)) continue;
+      try {
+        const img = await loadImageEl(it.src!);
+        ctx.save();
+        if (it.round) { ctx.beginPath(); ctx.ellipse(it.x + it.w / 2, it.y + it.h / 2, it.w / 2, it.h / 2, 0, 0, Math.PI * 2); ctx.clip(); }
+        drawCover(ctx, img, it.x, it.y, it.w, it.h);
+        ctx.restore();
+      } catch { /* a picture that fails to load is skipped, not fatal */ }
+    } else {
+      const size = it.fontSize ?? 32;
+      ctx.font = `${it.italic ? "italic " : ""}${it.bold ? "bold " : ""}${size}px ${it.font === "serif" ? C.serif : C.sans}`;
+      ctx.fillStyle = resolveColor(it.color, C);
+      ctx.textAlign = it.align ?? "left";
+      const ax = it.align === "center" ? it.x + it.w / 2 : it.align === "right" ? it.x + it.w : it.x;
+      let y = it.y + size * 1.02;
+      const maxY = it.y + it.h;
+      for (const para of (it.text ?? "").split("\n")) {
+        const lines = para.trim() ? wrapText(ctx, para, it.w) : [""];
+        for (const l of lines) {
+          if (y - size > maxY) break;
+          ctx.fillText(l, ax, y);
+          y += size * LINE_HEIGHT;
+        }
+      }
+      ctx.textAlign = "left";
+    }
+  }
+}
+
 /** Cover-crop draw into a rect — mirrors object-fit: cover in the DOM preview. */
-function drawCover(ctx: CanvasRenderingContext2D, img: HTMLImageElement, x: number, y: number, w: number, h: number) {
+function drawCover(ctx: CanvasRenderingContext2D, img: HTMLImageElement, x: number, y: number, w: number, h: number, r = 0) {
   const scale = Math.max(w / img.width, h / img.height);
   const dw = img.width * scale;
   const dh = img.height * scale;
   ctx.save();
-  ctx.beginPath();
-  ctx.rect(x, y, w, h);
+  rrect(ctx, x, y, w, h, r);
   ctx.clip();
   ctx.drawImage(img, x + (w - dw) / 2, y + (h - dh) / 2, dw, dh);
   ctx.restore();
@@ -82,10 +143,12 @@ function paperChrome(ctx: CanvasRenderingContext2D, C: DeckPalette, slide: Parse
   const SANS = C.sans;
   ctx.fillStyle = C.paper;
   ctx.fillRect(0, 0, W, H);
-  ctx.fillStyle = C.navy;
-  ctx.fillRect(0, 0, W, 10);
-  ctx.fillStyle = C.gold;
-  ctx.fillRect(0, 10, W, 4);
+  if (C.rules) {
+    ctx.fillStyle = C.navy;
+    ctx.fillRect(0, 0, W, 10);
+    ctx.fillStyle = C.gold;
+    ctx.fillRect(0, 10, W, 4);
+  }
   ctx.font = `bold 24px ${SANS}`;
   ctx.fillStyle = C.gold;
   ctx.fillText(slideNumber(i, total), 80, 110);
@@ -120,6 +183,11 @@ export async function renderSlideToCanvas(
     } catch {
       visual = null;
     }
+  }
+
+  if (slide.free) {
+    await drawFreeSlide(ctx, slide.free, C);
+    return canvas;
   }
 
   if (slide.layout === "title") {
@@ -197,10 +265,12 @@ export async function renderSlideToCanvas(
       ctx.fillStyle = `rgba(${C.paperRgb}, 0.88)`;
       ctx.fillRect(0, 0, W, H);
     }
-    ctx.fillStyle = C.navy;
-    ctx.fillRect(0, 0, W, 10);
-    ctx.fillStyle = C.gold;
-    ctx.fillRect(0, 10, W, 4);
+    if (C.rules) {
+      ctx.fillStyle = C.navy;
+      ctx.fillRect(0, 0, W, 10);
+      ctx.fillStyle = C.gold;
+      ctx.fillRect(0, 10, W, 4);
+    }
     ctx.font = `240px ${SERIF}`;
     ctx.fillStyle = C.gold;
     ctx.fillText("“", 100, 320);
@@ -219,7 +289,7 @@ export async function renderSlideToCanvas(
   if (slide.layout === "stats") {
     // ── Stats callout ──
     paperChrome(ctx, C, slide, index, total);
-    if (visual) drawCover(ctx, visual, CONTENT_IMAGE.x, CONTENT_IMAGE.y, CONTENT_IMAGE.w, CONTENT_IMAGE.h);
+    if (visual) drawCover(ctx, visual, CONTENT_IMAGE.x, CONTENT_IMAGE.y, CONTENT_IMAGE.w, CONTENT_IMAGE.h, C.radius);
     const textMax = visual ? CONTENT_TEXT_MAX : CONTENT_TEXT_MAX_PLAIN;
     ctx.font = `bold 52px ${SERIF}`;
     ctx.fillStyle = C.navy;
@@ -290,6 +360,7 @@ export async function renderSlideToCanvas(
     ctx.fillStyle = C.navy;
     wrapText(ctx, slide.headline, CONTENT_TEXT_MAX_PLAIN).slice(0, 2).forEach((l, li) => ctx.fillText(l, 80, 260 + li * 66));
     const steps = slide.bullets.slice(0, 5);
+    const itemImgs = await loadItemImages(slide.itemImages, steps.length);
     const colW = 1440 / Math.max(steps.length, 1);
     const cy = 520;
     ctx.fillStyle = `${C.gold}66`;
@@ -301,9 +372,17 @@ export async function renderSlideToCanvas(
       ctx.beginPath(); ctx.arc(cx, cy, 58, 0, Math.PI * 2); ctx.fill();
       ctx.fillStyle = C.navy;
       ctx.beginPath(); ctx.arc(cx, cy, 52, 0, Math.PI * 2); ctx.fill();
-      ctx.font = `bold 48px ${SERIF}`;
-      ctx.fillStyle = C.goldLight;
-      ctx.fillText(String(i + 1), cx, cy + 17);
+      const stepImg = itemImgs[i];
+      if (stepImg) {
+        ctx.save();
+        ctx.beginPath(); ctx.arc(cx, cy, 52, 0, Math.PI * 2); ctx.clip();
+        drawCover(ctx, stepImg, cx - 52, cy - 52, 104, 104);
+        ctx.restore();
+      } else {
+        ctx.font = `bold 48px ${SERIF}`;
+        ctx.fillStyle = C.goldLight;
+        ctx.fillText(String(i + 1), cx, cy + 17);
+      }
       const [lead, rest] = splitLead(stripStepPrefix(b));
       ctx.font = `bold 32px ${SERIF}`;
       ctx.fillStyle = C.navy;
@@ -326,6 +405,7 @@ export async function renderSlideToCanvas(
     ctx.fillStyle = C.navy;
     wrapText(ctx, slide.headline, CONTENT_TEXT_MAX_PLAIN).slice(0, 2).forEach((l, li) => ctx.fillText(l, 80, 260 + li * 66));
     const cards = slide.bullets.slice(0, 4);
+    const itemImgs = await loadItemImages(slide.itemImages, cards.length);
     const gap = 30;
     const cw = (1440 - gap * (cards.length - 1)) / Math.max(cards.length, 1);
     cards.forEach((b, i) => {
@@ -334,26 +414,33 @@ export async function renderSlideToCanvas(
       ctx.save();
       ctx.shadowColor = "rgba(18,24,38,0.15)"; ctx.shadowBlur = 12; ctx.shadowOffsetY = 2;
       ctx.fillStyle = "#FFFFFF";
-      ctx.fillRect(x, y, cw, 400);
+      rrect(ctx, x, y, cw, 400, C.radius);
+      ctx.fill();
       ctx.restore();
+      ctx.save();
+      rrect(ctx, x, y, cw, 400, C.radius);
+      ctx.clip();
       ctx.fillStyle = C.gold;
       ctx.fillRect(x, y, cw, 6);
+      const cardImg = itemImgs[i];
+      if (cardImg) drawCover(ctx, cardImg, x, y + 6, cw, 150);
       const [lead, rest] = splitLead(b);
       ctx.font = `bold 34px ${SERIF}`;
       ctx.fillStyle = C.navy;
-      let ty = y + 70;
+      let ty = y + (cardImg ? 215 : 70);
       wrapText(ctx, lead, cw - 56).slice(0, 2).forEach((l) => { ctx.fillText(l, x + 28, ty); ty += 42; });
       ctx.font = `26px ${SANS}`;
       ctx.fillStyle = C.ink;
       ty += 12;
-      wrapText(ctx, rest, cw - 56).slice(0, 7).forEach((l) => { ctx.fillText(l, x + 28, ty); ty += 36; });
+      wrapText(ctx, rest, cw - 56).slice(0, cardImg ? 4 : 7).forEach((l) => { ctx.fillText(l, x + 28, ty); ty += 36; });
+      ctx.restore();
     });
     return canvas;
   }
 
   // ── Bullets (default) ──
   paperChrome(ctx, C, slide, index, total);
-  if (visual) drawCover(ctx, visual, CONTENT_IMAGE.x, CONTENT_IMAGE.y, CONTENT_IMAGE.w, CONTENT_IMAGE.h);
+  if (visual) drawCover(ctx, visual, CONTENT_IMAGE.x, CONTENT_IMAGE.y, CONTENT_IMAGE.w, CONTENT_IMAGE.h, C.radius);
   const textMax = visual ? CONTENT_TEXT_MAX : CONTENT_TEXT_MAX_PLAIN;
   ctx.font = `bold 56px ${SERIF}`;
   ctx.fillStyle = C.navy;

@@ -128,7 +128,7 @@ const PitchDeck = () => {
       // the model returns, so re-attach them by position.
       setSlides((prev) => parsed.map((s, i) => {
         const old = prev?.[i];
-        return { ...s, imageUrl: old?.imageUrl, ...(old?.layoutLocked ? { layout: old.layout, layoutLocked: true } : {}) };
+        return { ...s, imageUrl: old?.imageUrl, itemImages: old?.itemImages, ...(old?.layoutLocked ? { layout: old.layout, layoutLocked: true } : {}) };
       }));
       setActiveSlide(0);
       setPendingFixes(null);
@@ -169,7 +169,7 @@ const PitchDeck = () => {
       const replacement = { ...parsed[0], layout: classifySlideLayout(parsed[0], index) };
       // Keep the slide's visual — regenerating the text shouldn't drop an
       // uploaded or AI-generated image.
-      setSlides((prev) => (prev ? prev.map((s, i) => (i === index ? { ...replacement, imageUrl: s.imageUrl, ...(s.layoutLocked ? { layout: s.layout, layoutLocked: true } : {}) } : s)) : prev));
+      setSlides((prev) => (prev ? prev.map((s, i) => (i === index ? { ...replacement, imageUrl: s.imageUrl, itemImages: s.itemImages, ...(s.layoutLocked ? { layout: s.layout, layoutLocked: true } : {}) } : s)) : prev));
       return true;
     } catch (e) { console.error(e); toast.error("Couldn't regenerate that slide."); return false; }
     finally { setRegenerating(null); }
@@ -225,7 +225,7 @@ const PitchDeck = () => {
     finally { setGeneratingImage(null); }
   };
 
-  const handleEdit = (i: number, patch: Partial<Pick<ParsedSlide, "title" | "headline" | "bullets" | "notes" | "imageUrl" | "layout">>) => {
+  const handleEdit = (i: number, patch: Partial<Pick<ParsedSlide, "title" | "headline" | "bullets" | "notes" | "imageUrl" | "layout" | "itemImages" | "free">>) => {
     setSlides((prev) => {
       if (!prev) return prev;
       const next = prev.map((s, j) => (j === i ? { ...s, ...patch, ...(patch.layout ? { layoutLocked: true } : {}) } : s));

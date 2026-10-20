@@ -11,6 +11,10 @@ export interface DeckTheme {
   paper: string;     // content-slide background
   fonts: FontPairId;
   logoUrl?: string;  // data URL, shown on the cover
+  /** Top accent rules on content slides (default on). */
+  rules?: boolean;
+  /** Corner style for cards and pictures (default sharp). */
+  corners?: "sharp" | "round";
 }
 
 export const DEFAULT_DECK_THEME: DeckTheme = { primary: "#121826", accent: "#B8893B", paper: "#F8F5EE", fonts: "classic" };
@@ -57,6 +61,10 @@ export interface DeckPalette {
   /** "r, g, b" of the paper colour. */
   paperRgb: string;
   logoUrl?: string;
+  /** Show the top accent rules. */
+  rules: boolean;
+  /** Corner radius in 1600×900 canvas px (0 = sharp). */
+  radius: number;
 }
 
 /** Resolves a theme to concrete colours. Primary is auto-darkened if too light for white text. */
@@ -79,6 +87,8 @@ export function paletteFor(theme?: Partial<DeckTheme> | null): DeckPalette {
     primaryRgb: toRgb(navy).join(", "),
     paperRgb: toRgb(paper).join(", "),
     logoUrl: t.logoUrl,
+    rules: t.rules !== false,
+    radius: t.corners === "round" ? 18 : 0,
   };
 }
 
@@ -93,6 +103,8 @@ export function loadDeckTheme(): DeckTheme {
         accent: clampHex(raw.accent, DEFAULT_DECK_THEME.accent),
         paper: clampHex(raw.paper, DEFAULT_DECK_THEME.paper),
         fonts: raw.fonts in FONT_PAIRS ? raw.fonts : "classic",
+        rules: raw.rules !== false,
+        corners: raw.corners === "round" ? "round" : "sharp",
         logoUrl: typeof raw.logoUrl === "string" && raw.logoUrl.startsWith("data:image/") ? raw.logoUrl : undefined,
       };
     }
@@ -102,4 +114,35 @@ export function loadDeckTheme(): DeckTheme {
 
 export function saveDeckTheme(theme: DeckTheme): void {
   try { localStorage.setItem(KEY, JSON.stringify(theme)); } catch { /* storage full or blocked — theme just won't persist */ }
+}
+
+export interface BrandKit { id: string; name: string; theme: DeckTheme }
+const KITS_KEY = "uvid_brand_kits";
+const MAX_KITS = 8;
+
+export function loadBrandKits(): BrandKit[] {
+  try {
+    const raw = JSON.parse(localStorage.getItem(KITS_KEY) || "[]");
+    if (!Array.isArray(raw)) return [];
+    return raw
+      .filter((k) => k && typeof k.name === "string" && k.theme && typeof k.theme === "object")
+      .slice(0, MAX_KITS)
+      .map((k) => ({
+        id: String(k.id),
+        name: k.name.slice(0, 40),
+        theme: {
+          primary: clampHex(k.theme.primary, DEFAULT_DECK_THEME.primary),
+          accent: clampHex(k.theme.accent, DEFAULT_DECK_THEME.accent),
+          paper: clampHex(k.theme.paper, DEFAULT_DECK_THEME.paper),
+          fonts: k.theme.fonts in FONT_PAIRS ? k.theme.fonts : "classic",
+          rules: k.theme.rules !== false,
+          corners: k.theme.corners === "round" ? "round" : "sharp",
+          logoUrl: typeof k.theme.logoUrl === "string" && k.theme.logoUrl.startsWith("data:image/") ? k.theme.logoUrl : undefined,
+        } as DeckTheme,
+      }));
+  } catch { return []; }
+}
+
+export function saveBrandKits(kits: BrandKit[]): boolean {
+  try { localStorage.setItem(KITS_KEY, JSON.stringify(kits.slice(0, MAX_KITS))); return true; } catch { return false; }
 }
