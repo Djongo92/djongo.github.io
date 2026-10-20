@@ -1,6 +1,8 @@
 import { useMemo, useState } from "react";
 import { Download, Copy, Monitor, Tablet, Smartphone } from "lucide-react";
 import { toast } from "sonner";
+import BrandPanel from "./BrandPanel";
+import { loadDeckTheme, saveDeckTheme, type DeckTheme } from "@/lib/deckTheme";
 import { extractHtml, sanitizeHtml, buildPageDocument, PAGE_THEMES, type PageTheme } from "@/lib/pagePreview";
 
 const DEVICES = [
@@ -10,12 +12,14 @@ const DEVICES = [
 ] as const;
 
 const PagePreview = ({ output, title }: { output: string; title?: string }) => {
-  const [theme, setTheme] = useState<PageTheme>("classic");
+  const [theme, setTheme] = useState<PageTheme>("brand");
   const [accent, setAccent] = useState("#b8893b");
+  const [brand, setBrand] = useState<DeckTheme>(loadDeckTheme);
+  const changeBrand = (t: DeckTheme) => { setBrand(t); saveDeckTheme(t); };
   const [device, setDevice] = useState<(typeof DEVICES)[number]["id"]>("desktop");
 
   const html = useMemo(() => extractHtml(output), [output]);
-  const doc = useMemo(() => (html ? buildPageDocument(html, { theme, accent, title }) : ""), [html, theme, accent, title]);
+  const doc = useMemo(() => (html ? buildPageDocument(html, { theme, accent, title, brand }) : ""), [html, theme, accent, title, brand]);
   const width = DEVICES.find((d) => d.id === device)!.width;
 
   if (!html) {
@@ -39,10 +43,10 @@ const PagePreview = ({ output, title }: { output: string; title?: string }) => {
         {PAGE_THEMES.map((t) => (
           <button key={t.id} className={chip(theme === t.id)} aria-pressed={theme === t.id} onClick={() => setTheme(t.id)}>{t.label}</button>
         ))}
-        <label className="inline-flex items-center gap-1.5 text-xs text-muted-foreground font-body ml-1">
+        {theme !== "brand" && (<label className="inline-flex items-center gap-1.5 text-xs text-muted-foreground font-body ml-1">
           Accent
           <input type="color" value={accent} onChange={(e) => setAccent(e.target.value)} aria-label="Accent colour" className="w-6 h-6 p-0 border border-border rounded-sm bg-transparent" />
-        </label>
+        </label>)}
         <span className="flex-1" />
         {DEVICES.map((d) => (
           <button key={d.id} className={`${chip(device === d.id)} inline-flex items-center gap-1`} aria-pressed={device === d.id} onClick={() => setDevice(d.id)} title={d.label}>
@@ -50,6 +54,8 @@ const PagePreview = ({ output, title }: { output: string; title?: string }) => {
           </button>
         ))}
       </div>
+
+      {theme === "brand" && <BrandPanel theme={brand} onChange={changeBrand} />}
 
       <div className="bg-secondary/40 border border-border/50 rounded-sm p-3 flex justify-center">
         <iframe

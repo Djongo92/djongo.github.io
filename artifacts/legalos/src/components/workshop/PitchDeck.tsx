@@ -15,6 +15,8 @@ import { styleMemoryIdentity } from "@/lib/styleFeedback";
 import { useHandoffReceive } from "@/lib/handoff";
 import { applyToAllSlides } from "@/components/deckApplyFixes";
 import DeckBuilder from "./DeckBuilder";
+import { loadDeckTheme, saveDeckTheme, paletteFor, type DeckTheme } from "@/lib/deckTheme";
+import { svgToSlideImage } from "@/lib/slideImage";
 
 const TONES = ["Formal & authoritative", "Confident & direct", "Warm & consultative"] as const;
 
@@ -24,6 +26,8 @@ const PitchDeck = () => {
   const { context } = useFirmContext();
   const firmName = useActiveFirmName();
   const [step, setStep] = useState(0);
+  const [theme, setTheme] = useState<DeckTheme>(loadDeckTheme);
+  const changeTheme = (t: DeckTheme) => { setTheme(t); saveDeckTheme(t); };
 
   // Step 1 — basics
   const [audience, setAudience] = useState("");
@@ -122,7 +126,10 @@ const PitchDeck = () => {
       // Preserve per-slide visuals across regenerate-all / roast-fixes:
       // uploads and AI images are session-local, not part of the markdown
       // the model returns, so re-attach them by position.
-      setSlides((prev) => parsed.map((s, i) => ({ ...s, imageUrl: prev?.[i]?.imageUrl })));
+      setSlides((prev) => parsed.map((s, i) => {
+        const old = prev?.[i];
+        return { ...s, imageUrl: old?.imageUrl, ...(old?.layoutLocked ? { layout: old.layout, layoutLocked: true } : {}) };
+      }));
       setActiveSlide(0);
       setPendingFixes(null);
     } catch (e) { console.error(e); toast.error("Couldn't draft deck."); }
@@ -162,7 +169,7 @@ const PitchDeck = () => {
       const replacement = { ...parsed[0], layout: classifySlideLayout(parsed[0], index) };
       // Keep the slide's visual — regenerating the text shouldn't drop an
       // uploaded or AI-generated image.
-      setSlides((prev) => (prev ? prev.map((s, i) => (i === index ? { ...replacement, imageUrl: s.imageUrl } : s)) : prev));
+      setSlides((prev) => (prev ? prev.map((s, i) => (i === index ? { ...replacement, imageUrl: s.imageUrl, ...(s.layoutLocked ? { layout: s.layout, layoutLocked: true } : {}) } : s)) : prev));
       return true;
     } catch (e) { console.error(e); toast.error("Couldn't regenerate that slide."); return false; }
     finally { setRegenerating(null); }
@@ -192,13 +199,40 @@ const PitchDeck = () => {
   };
 
 
-  const handleEdit = (i: number, patch: Partial<Pick<ParsedSlide, "title" | "headline" | "bullets" | "notes" | "imageUrl">>) => {
+  const [generatingImage, setGeneratingImage] = useState<number | null>(null);
+
+  /** AI abstract illustration: Claude writes an on-brand SVG, which is rasterised into the slide. */
+  const generateImage = async (index: number, brief: string) => {
+    const target = slides?.[index];
+    if (!target || generatingImage !== null || regenerating !== null || applyingFixes) return;
+    setGeneratingImage(index);
+    const identity = styleMemoryIdentity();
+    const P = paletteFor(theme);
+    const shape = target.layout === "quote" ? "wide" : "tall";
+    try {
+      const resp = await fetch(fnUrl("workshop-slide-visual"), {
+        method: "POST", headers: authHeaders(),
+        body: JSON.stringify({ brief, context: `${target.title}: ${target.headline}`, primary: P.navy, accent: P.gold, paper: P.paper, shape, ...identity }),
+      });
+      const err = await handleHttpError(resp);
+      if (err) { toast.error(err); return; }
+      const data = await resp.json();
+      if (!data?.svg) { toast.error("The illustration came back empty — try rephrasing the brief."); return; }
+      const png = await svgToSlideImage(data.svg, shape);
+      setSlides((prev) => (prev ? prev.map((s, i) => (i === index ? { ...s, imageUrl: png } : s)) : prev));
+      toast.success("Illustration added to the slide.");
+    } catch (e) { console.error(e); toast.error("Couldn't generate that illustration."); }
+    finally { setGeneratingImage(null); }
+  };
+
+  const handleEdit = (i: number, patch: Partial<Pick<ParsedSlide, "title" | "headline" | "bullets" | "notes" | "imageUrl" | "layout">>) => {
     setSlides((prev) => {
       if (!prev) return prev;
-      const next = prev.map((s, j) => (j === i ? { ...s, ...patch } : s));
+      const next = prev.map((s, j) => (j === i ? { ...s, ...patch, ...(patch.layout ? { layoutLocked: true } : {}) } : s));
       // Layout is content-derived — re-classify so an emptied bullet list
       // becomes a divider, a numbered list becomes a stats slide, etc.
-      next[i] = { ...next[i], layout: classifySlideLayout(next[i], i) };
+      // A layout the person picked by hand stays put.
+      if (!next[i].layoutLocked) next[i] = { ...next[i], layout: classifySlideLayout(next[i], i) };
       return next;
     });
   };
@@ -217,7 +251,7 @@ const PitchDeck = () => {
     setExportingPptx(true);
     try {
       const { buildPitchDeckPptx } = await import("@/components/pitchDeckPptx");
-      await buildPitchDeckPptx({ slides, audience, opportunity, firmName });
+      await buildPitchDeckPptx({ slides, audience, opportunity, firmName, theme });
     } catch (e) {
       console.error(e);
       toast.error("Couldn't build the .pptx file.");
@@ -231,7 +265,7 @@ const PitchDeck = () => {
     setExportingPdf(true);
     try {
       const { buildPitchDeckPdf } = await import("@/components/pitchDeckExport");
-      await buildPitchDeckPdf({ slides, audience, opportunity, firmName });
+      await buildPitchDeckPdf({ slides, audience, opportunity, firmName, theme });
     } catch (e) {
       console.error(e);
       toast.error("Couldn't build the PDF.");
@@ -245,7 +279,7 @@ const PitchDeck = () => {
     setExportingPng(true);
     try {
       const { downloadSlidesAsPngZip } = await import("@/components/pitchDeckExport");
-      await downloadSlidesAsPngZip({ slides, audience, firmName });
+      await downloadSlidesAsPngZip({ slides, audience, firmName, theme });
       toast.success("One PNG per slide — sized for LinkedIn carousels.");
     } catch (e) {
       console.error(e);
@@ -309,6 +343,10 @@ const PitchDeck = () => {
               applyingFixes={applyingFixes}
               audience={audience}
               firmName={firmName}
+              theme={theme}
+              onThemeChange={changeTheme}
+              onGenerateImage={generateImage}
+              generatingImage={generatingImage}
               pendingFixes={pendingFixes}
               onApplyFixes={applyFixes}
               onDismissFixes={() => setPendingFixes(null)}

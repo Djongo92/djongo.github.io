@@ -4,8 +4,11 @@
 // wrap it in a built-in theme so the firm sees a designed page — while the
 // "clean HTML" they copy stays unstyled for their own developer or CMS.
 
-export type PageTheme = "classic" | "modern" | "dark";
+import { paletteFor, type DeckTheme } from "./deckTheme";
+
+export type PageTheme = "brand" | "classic" | "modern" | "dark";
 export const PAGE_THEMES: { id: PageTheme; label: string }[] = [
+  { id: "brand", label: "My brand" },
   { id: "classic", label: "Classic" },
   { id: "modern", label: "Modern" },
   { id: "dark", label: "Dark" },
@@ -42,16 +45,23 @@ export function sanitizeHtml(html: string): string {
 const escapeHtml = (s: string) => s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
 const safeColor = (c: string) => (/^#[0-9a-f]{6}$/i.test(c) ? c : "#b8893b");
 
-const THEMES: Record<PageTheme, { bg: string; ink: string; muted: string; card: string; head: string; body: string }> = {
+const THEMES: Record<Exclude<PageTheme, "brand">, { bg: string; ink: string; muted: string; card: string; head: string; body: string }> = {
   classic: { bg: "#f8f5ee", ink: "#222226", muted: "#6e6e78", card: "#ffffff", head: "Georgia, 'Times New Roman', serif", body: "Calibri, 'Segoe UI', Arial, sans-serif" },
   modern: { bg: "#ffffff", ink: "#16181d", muted: "#5b6270", card: "#f4f5f7", head: "'Segoe UI', Arial, sans-serif", body: "'Segoe UI', Arial, sans-serif" },
   dark: { bg: "#101521", ink: "#ecebe6", muted: "#a2a7b5", card: "#1a2133", head: "Georgia, 'Times New Roman', serif", body: "Calibri, 'Segoe UI', Arial, sans-serif" },
 };
 
 /** A complete, self-contained HTML document: sanitized body inside the chosen theme. */
-export function buildPageDocument(bodyHtml: string, opts: { theme: PageTheme; accent: string; title?: string }): string {
-  const t = THEMES[opts.theme];
-  const accent = safeColor(opts.accent);
+export function buildPageDocument(bodyHtml: string, opts: { theme: PageTheme; accent: string; title?: string; brand?: DeckTheme }): string {
+  let t = THEMES[opts.theme === "brand" ? "classic" : opts.theme];
+  let accent = safeColor(opts.accent);
+  let logo = "";
+  if (opts.theme === "brand") {
+    const P = paletteFor(opts.brand);
+    t = { bg: P.paper, ink: P.ink, muted: P.muted, card: "#ffffff", head: P.serif, body: P.sans };
+    accent = P.gold;
+    if (P.logoUrl) logo = `<img src="${P.logoUrl}" alt="" style="display:block;max-height:48px;max-width:220px;margin:0 0 36px">`;
+  }
   const body = sanitizeHtml(bodyHtml);
   return `<!doctype html>
 <html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
@@ -74,6 +84,6 @@ dd{margin:.3em 0 0;color:${t.muted}}
 blockquote{margin:1.5em 0;padding:.4em 1.2em;border-left:4px solid ${accent};background:${t.card}}
 table{border-collapse:collapse;width:100%}td,th{padding:.6em;border-bottom:1px solid ${t.muted}55;text-align:left}
 </style></head><body><main>
-${body}
+${logo}${body}
 </main></body></html>`;
 }

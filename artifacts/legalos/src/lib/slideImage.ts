@@ -49,3 +49,25 @@ export async function fileToSlideImage(file: File): Promise<string> {
   ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
   return keepPng ? canvas.toDataURL("image/png") : canvas.toDataURL("image/jpeg", 0.85);
 }
+
+/**
+ * AI-written SVG → PNG data URL. Rasterising (rather than embedding the SVG)
+ * means it behaves like any uploaded picture in the builder, PDF and PPTX,
+ * and an <img>-loaded SVG can never run script.
+ */
+export async function svgToSlideImage(svg: string, shape: "wide" | "tall" | "square" = "square"): Promise<string> {
+  const [w, h] = shape === "wide" ? [1600, 900] : shape === "tall" ? [960, 1200] : [1200, 1200];
+  const url = URL.createObjectURL(new Blob([svg], { type: "image/svg+xml;charset=utf-8" }));
+  try {
+    const img = await loadImage(url);
+    const canvas = document.createElement("canvas");
+    canvas.width = w;
+    canvas.height = h;
+    const ctx = canvas.getContext("2d");
+    if (!ctx) throw new Error("Canvas unavailable.");
+    ctx.drawImage(img, 0, 0, w, h);
+    return canvas.toDataURL("image/png");
+  } finally {
+    URL.revokeObjectURL(url);
+  }
+}

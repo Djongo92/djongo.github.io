@@ -16,7 +16,19 @@
 // skipped rather than rendered with garbled/partial text — a slide with no
 // title is worse than one slide missing from the deck.
 /** Visual treatment a slide gets in the builder, PPTX, PDF, and PNG exports. */
-export type SlideLayout = "title" | "section" | "quote" | "stats" | "process" | "cards" | "bullets";
+export type SlideLayout = "title" | "section" | "quote" | "stats" | "process" | "cards" | "split" | "bullets";
+
+/** Layouts a person can pick by hand; "split" is never chosen automatically. */
+export const ALL_LAYOUTS: { id: SlideLayout; label: string }[] = [
+  { id: "bullets", label: "Bullets" },
+  { id: "split", label: "Split" },
+  { id: "stats", label: "Stats" },
+  { id: "process", label: "Steps" },
+  { id: "cards", label: "Cards" },
+  { id: "quote", label: "Quote" },
+  { id: "section", label: "Divider" },
+  { id: "title", label: "Cover" },
+];
 
 export interface ParsedSlide {
   title: string;
@@ -31,6 +43,8 @@ export interface ParsedSlide {
    * preview, canvas PDF/PNG export, and PPTX export.
    */
   imageUrl?: string;
+  /** Set when the person picked this layout by hand; automatic classification then leaves it alone. */
+  layoutLocked?: boolean;
 }
 
 const STAT_LEAD = /^[\d$€£%×x+~]/;
