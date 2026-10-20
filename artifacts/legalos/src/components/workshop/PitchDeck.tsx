@@ -191,28 +191,6 @@ const PitchDeck = () => {
     }
   };
 
-  const [generatingImage, setGeneratingImage] = useState<number | null>(null);
-
-  /** AI slide visual via the workshop-deck-image edge function (gpt-image-1). */
-  const generateImage = async (index: number, prompt: string) => {
-    const target = slidesRef.current?.[index];
-    if (!target || generatingImage !== null || regenerating !== null || applyingFixes) return;
-    setGeneratingImage(index);
-    const identity = styleMemoryIdentity();
-    try {
-      const resp = await fetch(fnUrl("workshop-deck-image"), {
-        method: "POST", headers: authHeaders(),
-        body: JSON.stringify({ prompt, slideTitle: target.title, headline: target.headline, ...identity }),
-      });
-      const err = await handleHttpError(resp);
-      if (err) { toast.error(err); return; }
-      const data = await resp.json();
-      if (!data?.image) { toast.error("Image generation returned nothing — try rephrasing the brief."); return; }
-      setSlides((prev) => (prev ? prev.map((s, i) => (i === index ? { ...s, imageUrl: data.image } : s)) : prev));
-      toast.success("Visual added to the slide.");
-    } catch (e) { console.error(e); toast.error("Couldn't generate that image."); }
-    finally { setGeneratingImage(null); }
-  };
 
   const handleEdit = (i: number, patch: Partial<Pick<ParsedSlide, "title" | "headline" | "bullets" | "notes" | "imageUrl">>) => {
     setSlides((prev) => {
@@ -327,9 +305,7 @@ const PitchDeck = () => {
               onSelect={setActiveSlide}
               onEdit={handleEdit}
               onRegenerate={regenerateSlide}
-              onGenerateImage={generateImage}
               regenerating={regenerating}
-              generatingImage={generatingImage}
               applyingFixes={applyingFixes}
               audience={audience}
               firmName={firmName}

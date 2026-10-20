@@ -4,9 +4,9 @@ import { ArrowLeft, Hammer, Copy, Loader2, Filter, ArrowRight, Sparkles, Wand2 }
 import {
   SwipeIcon, CopywriterIcon, RewriteIcon, AutopsyIcon, AuditIcon,
   HeadlinesIcon, TeardownIcon, PitchDeckIcon, BioIcon, CalendarIcon, DeckRoastIcon,
-  ArticleIcon, PressPitchIcon, LinkedInPlanIcon, CaseStudyIcon,
+  ArticleIcon, PressPitchIcon, LinkedInPlanIcon, CaseStudyIcon, SubmissionIcon, PageDraftIcon,
 } from "./workshop/icons";
-import { ArticleDrafter, PressPitchBuilder, LinkedInPlanner, CaseStudyWriter } from "./workshop/writingTools";
+import { ArticleDrafter, PressPitchBuilder, LinkedInPlanner, CaseStudyWriter, DirectorySubmissionHelper, PageDrafter } from "./workshop/writingTools";
 import ReactMarkdown from "react-markdown";
 import { swipeFile, SwipeItem } from "@/data/swipeFile";
 import { chapters } from "@/data/chapters";
@@ -170,6 +170,8 @@ const Workshop = ({ onBack, initialToolId }: Props) => {
     { id: "pitch", tag: "Press", title: WORKSHOP_TOOL_LABELS.pitch, blurb: "Turn a deal, ruling or article into a pitch email, announcement and quotes for the press.", icon: <PressPitchIcon size={18} />, render: () => <PressPitchBuilder /> },
     { id: "linkedin", tag: "Social", title: WORKSHOP_TOOL_LABELS.linkedin, blurb: "One piece becomes a week of posts, first comments and a carousel outline.", icon: <LinkedInPlanIcon size={18} />, render: () => <LinkedInPlanner /> },
     { id: "casestudy", tag: "Proof", title: WORKSHOP_TOOL_LABELS.casestudy, blurb: "A matter becomes a deal announcement, case study and one-line proof point — confidentiality first.", icon: <CaseStudyIcon size={18} />, render: () => <CaseStudyWriter /> },
+    { id: "submission", tag: "Prestige", title: WORKSHOP_TOOL_LABELS.submission, blurb: "Prepare a Chambers, Legal 500 or IFLR1000 submission: ranked work highlights, department narrative, referee plan and gaps to fill.", icon: <SubmissionIcon size={18} />, render: () => <DirectorySubmissionHelper /> },
+    { id: "pagedraft", tag: "Draft", title: WORKSHOP_TOOL_LABELS.pagedraft, blurb: "Vibe-draft a practice, profile or about page — copy, SEO fields and clean HTML to paste into your own site.", icon: <PageDraftIcon size={18} />, render: () => <PageDrafter /> },
     { id: "calendar", tag: "Plan", title: WORKSHOP_TOOL_LABELS.calendar, blurb: "Themed content calendar with tempo, channels, and key moments.", icon: <CalendarIcon size={18} />, render: () => <MarketingCalendar /> },
   ];
 

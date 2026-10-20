@@ -16,7 +16,7 @@ export const CATEGORY_TOOL_MAP: Record<string, { label: string; max: number; too
   social: { label: CATEGORY_META.social.label, max: CATEGORY_META.social.max, toolId: "linkedin" },
   seoAuthority: { label: CATEGORY_META.seoAuthority.label, max: CATEGORY_META.seoAuthority.max, toolId: "article" },
   thoughtLeadership: { label: CATEGORY_META.thoughtLeadership.label, max: CATEGORY_META.thoughtLeadership.max, toolId: "article" },
-  reputation: { label: CATEGORY_META.reputation.label, max: CATEGORY_META.reputation.max, toolId: "casestudy" },
+  reputation: { label: CATEGORY_META.reputation.label, max: CATEGORY_META.reputation.max, toolId: "submission" },
 };
 
 /**
@@ -43,6 +43,7 @@ export const CATEGORY_FIX_TOOLS: Record<string, { toolId: WorkshopToolId; label:
     { toolId: "calendar", label: "Plan a content calendar" },
   ],
   reputation: [
+    { toolId: "submission", label: "Prepare a directory submission" },
     { toolId: "casestudy", label: "Write up a matter" },
     { toolId: "teardown", label: "Study a ranked peer" },
   ],

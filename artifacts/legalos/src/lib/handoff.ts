@@ -16,7 +16,7 @@ const KEY = (toolId: string) => `workshop:handoff:${toolId}`;
 export type WorkshopToolId =
   | "swipe" | "copywriter" | "rewrite" | "autopsy" | "audit"
   | "headlines" | "teardown" | "deck" | "bio" | "calendar" | "deckroast"
-  | "article" | "pitch" | "linkedin" | "casestudy";
+  | "article" | "pitch" | "linkedin" | "casestudy" | "submission" | "pagedraft";
 
 /** Compatibility map: which destinations can receive which payload kinds. */
 export const HANDOFF_TARGETS: { id: WorkshopToolId; label: string; accepts: HandoffPayload["kind"][] }[] = [
@@ -32,6 +32,8 @@ export const HANDOFF_TARGETS: { id: WorkshopToolId; label: string; accepts: Hand
   { id: "pitch",      label: "Press Pitch Builder",  accepts: ["text"] },
   { id: "linkedin",   label: "LinkedIn Planner",     accepts: ["text"] },
   { id: "casestudy",  label: "Case Study Writer",    accepts: ["text"] },
+  { id: "submission", label: "Directory Submission", accepts: ["text"] },
+  { id: "pagedraft",  label: "Page Drafter",         accepts: ["text"] },
 ];
 
 export function sendTo(toolId: WorkshopToolId, payload: HandoffPayload) {
