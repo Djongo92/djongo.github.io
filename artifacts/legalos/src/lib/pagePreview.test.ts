@@ -37,3 +37,22 @@ describe("brand theme", () => {
     expect(doc).toContain("data:image/png;base64,AAAA");
   });
 });
+
+describe("page options", () => {
+  it("strips imports, external urls and style breakouts from custom CSS", async () => {
+    const { sanitizeCss } = await import("./pagePreview");
+    const out = sanitizeCss("@import url(//evil.css); h1{background:url(http://evil/x.png)} </style><script>x</script>");
+    expect(out).not.toMatch(/@import|evil|<\/?style/i);
+  });
+
+  it("applies width, spacing, hero image and custom CSS", () => {
+    const doc = buildPageDocument("<h1>T</h1>", { theme: "classic", accent: "#111111", width: "wide", density: "airy", heroSrc: "data:image/png;base64,AAAA", customCss: "h1{color:red}" });
+    expect(doc).toContain("max-width:1100px");
+    expect(doc).toContain("data:image/png;base64,AAAA");
+    expect(doc).toContain("h1{color:red}");
+  });
+
+  it("ignores a non-data hero source", () => {
+    expect(buildPageDocument("<p>x</p>", { theme: "classic", accent: "#111111", heroSrc: "https://evil.example/x.png" })).not.toContain("evil.example");
+  });
+});

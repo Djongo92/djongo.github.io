@@ -154,4 +154,20 @@ describe("assemblePitchDeckPptx", () => {
     expect(cards).toContain("Banking");
     expect(cards).toContain("five lawyers");
   });
+
+  it("a free-form slide exports its items as native objects, with pictures and theme colours", async () => {
+    const { slideToFree } = await import("@/lib/freeSlide");
+    const slides = parsePitchDeckMarkdown(SAMPLE);
+    const base = slides[1];
+    const free = slideToFree(base, 1, slides.length);
+    free.items.push({ id: "pic", kind: "image", x: 100, y: 100, w: 300, h: 200, src: "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwAEhQGAhKmMIQAAAABJRU5ErkJggg==" });
+    slides[1] = { ...base, free };
+    const buf = await assemblePitchDeckPptx({ slides, audience: "GC", opportunity: "x", theme: { primary: "#0B3D2E", accent: "#C8553D", paper: "#FFFFFF", fonts: "modern" } }).write({ outputType: "arraybuffer" });
+    const zip = await JSZip.loadAsync(buf);
+    const xml = await zip.file("ppt/slides/slide2.xml")!.async("string");
+    expect(xml).toContain("<p:pic>");
+    expect(xml).toContain("Deal flow into CEE");
+    expect(xml).toContain("Arial");
+    expect(Object.keys(zip.files).some((f) => /^ppt\/media\//.test(f))).toBe(true);
+  });
 });

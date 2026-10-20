@@ -8,6 +8,8 @@ import { toast } from "sonner";
 import { ALL_LAYOUTS, type ParsedSlide } from "@/components/pitchDeckParser";
 import type { DeckTheme } from "@/lib/deckTheme";
 import BrandPanel from "./BrandPanel";
+import FreeSlideEditor from "./FreeSlideEditor";
+import { slideToFree } from "@/lib/freeSlide";
 import { ScaledSlide } from "@/components/pitchDeckPreview";
 import { fileToSlideImage } from "@/lib/slideImage";
 import type { ReactNode } from "react";
@@ -16,7 +18,7 @@ export interface DeckBuilderProps {
   slides: ParsedSlide[];
   activeIndex: number;
   onSelect: (i: number) => void;
-  onEdit: (i: number, patch: Partial<Pick<ParsedSlide, "title" | "headline" | "bullets" | "notes" | "imageUrl" | "layout">>) => void;
+  onEdit: (i: number, patch: Partial<Pick<ParsedSlide, "title" | "headline" | "bullets" | "notes" | "imageUrl" | "layout" | "itemImages" | "free">>) => void;
   onRegenerate: (i: number, feedback?: string) => void;
   /** Omit to hide AI visuals (no image provider is configured). Upload stays available. */
   onGenerateImage?: (i: number, prompt: string) => void;
@@ -44,6 +46,31 @@ const LAYOUT_LABEL: Record<ParsedSlide["layout"], string> = {
   cards: "Cards",
   split: "Split",
   bullets: "Bullets",
+};
+
+const ItemImageSlot = ({ label, src, onChange }: { label: string; src?: string; onChange: (src: string | undefined) => void }) => {
+  const ref = useRef<HTMLInputElement>(null);
+  const pick = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    e.target.value = "";
+    if (!file) return;
+    try { onChange(await fileToSlideImage(file)); }
+    catch (err) { toast.error(err instanceof Error ? err.message : "Couldn't read that image."); }
+  };
+  return (
+    <div className="flex items-center gap-2 border border-border/50 rounded-sm p-1.5 w-[190px]">
+      <input ref={ref} type="file" accept="image/png,image/jpeg,image/webp" className="hidden" onChange={pick} />
+      {src ? (
+        <img src={src} alt="" className="w-10 h-10 object-cover rounded-sm border border-border/50" />
+      ) : (
+        <button onClick={() => ref.current?.click()} className="w-10 h-10 rounded-sm border border-dashed border-border flex items-center justify-center text-muted-foreground hover:text-foreground" aria-label={`Add picture for ${label}`}>
+          <ImagePlus className="w-4 h-4" />
+        </button>
+      )}
+      <span className="text-[11px] text-muted-foreground font-body truncate flex-1">{label}</span>
+      {src && <button onClick={() => onChange(undefined)} aria-label="Remove picture" className="text-muted-foreground hover:text-foreground"><X className="w-3 h-3" /></button>}
+    </div>
+  );
 };
 
 const DeckBuilder = ({
@@ -123,21 +150,33 @@ const DeckBuilder = ({
       </div>
 
       {/* Stage */}
-      <motion.div
-        key={activeIndex}
-        initial={{ opacity: 0, y: 6 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.18 }}
-        className="relative rounded-sm border border-border/50 overflow-hidden"
-      >
-        <ScaledSlide slide={slide} index={activeIndex} total={slides.length} audience={audience} firmName={firmName} theme={theme} />
-        {(regenerating === activeIndex || generatingImage === activeIndex) && (
-          <div className="absolute inset-0 bg-background/70 flex items-center justify-center gap-2 text-sm text-muted-foreground font-body">
-            <Loader2 className="w-4 h-4 animate-spin" />
-            {generatingImage === activeIndex ? "Generating visual…" : `Regenerating slide ${activeIndex + 1}…`}
+      {!slide.free && (
+        <motion.div
+          key={activeIndex}
+          initial={{ opacity: 0, y: 6 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.18 }}
+          className="relative rounded-sm border border-border/50 overflow-hidden"
+        >
+          <ScaledSlide slide={slide} index={activeIndex} total={slides.length} audience={audience} firmName={firmName} theme={theme} />
+          {(regenerating === activeIndex || generatingImage === activeIndex) && (
+            <div className="absolute inset-0 bg-background/70 flex items-center justify-center gap-2 text-sm text-muted-foreground font-body">
+              <Loader2 className="w-4 h-4 animate-spin" />
+              {generatingImage === activeIndex ? "Generating visual…" : `Regenerating slide ${activeIndex + 1}…`}
+            </div>
+          )}
+        </motion.div>
+      )}
+
+      {slide.free && (
+        <div className="bg-card border border-border/50 rounded-sm p-4">
+          <div className="flex items-center justify-between mb-3">
+            <p className="eyebrow text-[10px] text-muted-foreground">Free layout — drag, resize and restyle anything. This slide exports exactly as arranged.</p>
+            <button onClick={() => onEdit(activeIndex, { free: undefined })} className="text-xs text-muted-foreground hover:text-foreground font-body">Back to template</button>
           </div>
-        )}
-      </motion.div>
+          <FreeSlideEditor free={slide.free} theme={theme} onChange={(free) => onEdit(activeIndex, { free })} />
+        </div>
+      )}
 
       {/* Editing panel */}
       <div className="bg-card border border-border/50 rounded-sm p-4 space-y-3">
@@ -148,11 +187,15 @@ const DeckBuilder = ({
           <label className="flex items-center gap-1.5 text-[11px] text-muted-foreground font-body">
             Layout
             <select
-              value={slide.layout}
-              onChange={(e) => onEdit(activeIndex, { layout: e.target.value as ParsedSlide["layout"] })}
+              value={slide.free ? "free" : slide.layout}
+              onChange={(e) => {
+                if (e.target.value === "free") onEdit(activeIndex, { free: slideToFree(slide, activeIndex, slides.length, firmName, theme.corners === "round") });
+                else onEdit(activeIndex, { free: undefined, layout: e.target.value as ParsedSlide["layout"] });
+              }}
               className="bg-background border border-border rounded-sm px-2 py-1 text-xs font-body"
             >
               {ALL_LAYOUTS.map((l) => <option key={l.id} value={l.id}>{l.label}</option>)}
+              <option value="free">Free (drag &amp; drop)</option>
             </select>
           </label>
         </div>
@@ -183,6 +226,25 @@ const DeckBuilder = ({
             className="mt-1 w-full bg-background border border-border rounded-sm px-3 py-2 text-sm font-body focus:outline-none focus:border-primary resize-y"
           />
         </label>
+        {!slide.free && (slide.layout === "cards" || slide.layout === "process") && (
+          <div>
+            <span className="text-[11px] text-muted-foreground font-body">Pictures for each {slide.layout === "cards" ? "card" : "step"} — headshots, icons, logos</span>
+            <div className="mt-1.5 flex flex-wrap gap-3">
+              {slide.bullets.slice(0, slide.layout === "cards" ? 4 : 5).map((b, i) => (
+                <ItemImageSlot
+                  key={i}
+                  label={b.length > 22 ? `${b.slice(0, 22)}…` : b}
+                  src={slide.itemImages?.[i]}
+                  onChange={(src) => {
+                    const next = [...(slide.itemImages ?? [])];
+                    next[i] = src;
+                    onEdit(activeIndex, { itemImages: next });
+                  }}
+                />
+              ))}
+            </div>
+          </div>
+        )}
         <label className="block">
           <span className="text-[11px] text-muted-foreground font-body">Speaker notes</span>
           <textarea

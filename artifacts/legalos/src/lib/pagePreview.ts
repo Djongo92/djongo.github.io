@@ -52,7 +52,21 @@ const THEMES: Record<Exclude<PageTheme, "brand">, { bg: string; ink: string; mut
 };
 
 /** A complete, self-contained HTML document: sanitized body inside the chosen theme. */
-export function buildPageDocument(bodyHtml: string, opts: { theme: PageTheme; accent: string; title?: string; brand?: DeckTheme }): string {
+export type PageWidth = "narrow" | "standard" | "wide";
+export type PageDensity = "compact" | "comfortable" | "airy";
+
+/** Author CSS is allowed (the preview is sandboxed) but can't pull in anything external or break out of its <style> tag. */
+export function sanitizeCss(css: string): string {
+  return css
+    .replace(/<\/?style[^>]*>/gi, "")
+    .replace(/@import[^;]*;?/gi, "")
+    .replace(/url\s*\([^)]*\)/gi, "none")
+    .replace(/expression\s*\([^)]*\)/gi, "")
+    .replace(/behavior\s*:[^;}]*/gi, "")
+    .slice(0, 8000);
+}
+
+export function buildPageDocument(bodyHtml: string, opts: { theme: PageTheme; accent: string; title?: string; brand?: DeckTheme; width?: PageWidth; density?: PageDensity; heroSrc?: string; customCss?: string }): string {
   let t = THEMES[opts.theme === "brand" ? "classic" : opts.theme];
   let accent = safeColor(opts.accent);
   let logo = "";
@@ -63,17 +77,22 @@ export function buildPageDocument(bodyHtml: string, opts: { theme: PageTheme; ac
     if (P.logoUrl) logo = `<img src="${P.logoUrl}" alt="" style="display:block;max-height:48px;max-width:220px;margin:0 0 36px">`;
   }
   const body = sanitizeHtml(bodyHtml);
+  const maxW = { narrow: 700, standard: 860, wide: 1100 }[opts.width ?? "standard"];
+  const gap = { compact: 0.8, comfortable: 1, airy: 1.35 }[opts.density ?? "comfortable"];
+  const hero = opts.heroSrc && opts.heroSrc.startsWith("data:image/") ? `<img src="${opts.heroSrc}" alt="" style="display:block;width:100%;max-height:340px;object-fit:cover;margin:0 0 36px">` : "";
+  const extra = opts.customCss ? sanitizeCss(opts.customCss) : "";
   return `<!doctype html>
 <html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
 <title>${escapeHtml(opts.title || "Draft page")}</title>
 <style>
 *{box-sizing:border-box}
 body{margin:0;background:${t.bg};color:${t.ink};font-family:${t.body};font-size:17px;line-height:1.65}
-main{max-width:860px;margin:0 auto;padding:56px 28px 96px}
+main{max-width:${maxW}px;margin:0 auto;padding:${Math.round(56 * gap)}px 28px ${Math.round(96 * gap)}px}
 h1{font-family:${t.head};font-size:2.5rem;line-height:1.15;margin:0 0 .6em;letter-spacing:-.01em}
-h2{font-family:${t.head};font-size:1.6rem;line-height:1.25;margin:2.2em 0 .5em;padding-top:.9em;border-top:3px solid ${accent}}
+h2{font-family:${t.head};font-size:1.6rem;line-height:1.25;margin:${(2.2 * gap).toFixed(2)}em 0 .5em;padding-top:.9em;border-top:3px solid ${accent}}
 h3{font-family:${t.head};font-size:1.2rem;margin:1.6em 0 .4em}
 p,li{color:${t.ink}}
+p{margin:${(1 * gap).toFixed(2)}em 0}
 p.lead,h1+p{font-size:1.2rem;color:${t.muted}}
 ul,ol{padding-left:1.3em}li{margin:.35em 0}
 a{color:${accent}}
@@ -83,7 +102,8 @@ dt{font-weight:700;margin-top:1.2em;font-family:${t.head}}
 dd{margin:.3em 0 0;color:${t.muted}}
 blockquote{margin:1.5em 0;padding:.4em 1.2em;border-left:4px solid ${accent};background:${t.card}}
 table{border-collapse:collapse;width:100%}td,th{padding:.6em;border-bottom:1px solid ${t.muted}55;text-align:left}
+${extra}
 </style></head><body><main>
-${logo}${body}
+${logo}${hero}${body}
 </main></body></html>`;
 }
