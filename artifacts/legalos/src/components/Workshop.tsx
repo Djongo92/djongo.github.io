@@ -4,7 +4,9 @@ import { ArrowLeft, Hammer, Copy, Loader2, Filter, ArrowRight, Sparkles, Wand2 }
 import {
   SwipeIcon, CopywriterIcon, RewriteIcon, AutopsyIcon, AuditIcon,
   HeadlinesIcon, TeardownIcon, PitchDeckIcon, BioIcon, CalendarIcon, DeckRoastIcon,
+  ArticleIcon, PressPitchIcon, LinkedInPlanIcon, CaseStudyIcon,
 } from "./workshop/icons";
+import { ArticleDrafter, PressPitchBuilder, LinkedInPlanner, CaseStudyWriter } from "./workshop/writingTools";
 import ReactMarkdown from "react-markdown";
 import { swipeFile, SwipeItem } from "@/data/swipeFile";
 import { chapters } from "@/data/chapters";
@@ -155,6 +157,10 @@ const Workshop = ({ onBack, initialToolId }: Props) => {
     { id: "deck", tag: "Pitch", title: WORKSHOP_TOOL_LABELS.deck, blurb: "Pick your sections, draft a deck sized to fit — with a real .pptx download.", icon: <PitchDeckIcon size={18} />, render: () => <PitchDeck /> },
     { id: "deckroast", tag: "Diagnose", title: WORKSHOP_TOOL_LABELS.deckroast, blurb: "Upload an existing pitch deck — brutally honest, slide-by-slide critique.", icon: <DeckRoastIcon size={18} />, render: () => <DeckRoast /> },
     { id: "bio", tag: "Profile", title: WORKSHOP_TOOL_LABELS.bio, blurb: "Rewrite an attorney bio with emphasis you control.", icon: <BioIcon size={18} />, render: () => <BioRewriter /> },
+    { id: "article", tag: "Write", title: WORKSHOP_TOOL_LABELS.article, blurb: "Client alerts and insight pieces to publish on your own site — with SEO fields and a verify-before-publishing list.", icon: <ArticleIcon size={18} />, render: () => <ArticleDrafter /> },
+    { id: "pitch", tag: "Press", title: WORKSHOP_TOOL_LABELS.pitch, blurb: "Turn a deal, ruling or article into a pitch email, announcement and quotes for the press.", icon: <PressPitchIcon size={18} />, render: () => <PressPitchBuilder /> },
+    { id: "linkedin", tag: "Social", title: WORKSHOP_TOOL_LABELS.linkedin, blurb: "One piece becomes a week of posts, first comments and a carousel outline.", icon: <LinkedInPlanIcon size={18} />, render: () => <LinkedInPlanner /> },
+    { id: "casestudy", tag: "Proof", title: WORKSHOP_TOOL_LABELS.casestudy, blurb: "A matter becomes a deal announcement, case study and one-line proof point — confidentiality first.", icon: <CaseStudyIcon size={18} />, render: () => <CaseStudyWriter /> },
     { id: "calendar", tag: "Plan", title: WORKSHOP_TOOL_LABELS.calendar, blurb: "Themed content calendar with tempo, channels, and key moments.", icon: <CalendarIcon size={18} />, render: () => <MarketingCalendar /> },
   ];
 

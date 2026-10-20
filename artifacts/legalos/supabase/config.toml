@@ -221,3 +221,15 @@ verify_jwt = false
 
 [functions.report-lead]
 verify_jwt = false
+
+[functions.workshop-article]
+verify_jwt = false
+
+[functions.workshop-press-pitch]
+verify_jwt = false
+
+[functions.workshop-linkedin]
+verify_jwt = false
+
+[functions.workshop-case-study]
+verify_jwt = false
