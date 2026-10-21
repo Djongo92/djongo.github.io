@@ -2,23 +2,21 @@ import React, { useMemo, useState } from 'react';
 import { useI18n } from '@/lib/i18n';
 import { platformData } from '@/data/platform';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Search, Command, X, Book, ArrowRight, Compass, UserMinus, Keyboard, Eye, EyeOff } from 'lucide-react';
+import { Search, Command, X, Book, ArrowRight, Compass, UserMinus, Keyboard } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { runFixtureQuery } from '../views/ask';
 import { AI_NAME } from '@/components/ui/ai-badge';
 
-export function TourOverlay({ step, setStep, endTour, steps, labels, onBack, badge, noteHidden, onToggleNote, align = 'center' }: {
+export function TourOverlay({ step, setStep, endTour, steps, labels, onBack, badge, align = 'center' }: {
   step: number, setStep: (s:number)=>void, endTour: ()=>void,
   steps: { title: string, desc: string, note?: string }[],
-  labels: { skip: string, next: string, done: string, back?: string, note?: string, hideNote?: string, showNote?: string },
+  labels: { skip: string, next: string, done: string, back?: string, note?: string },
   onBack?: () => void,
   badge?: { icon: React.ComponentType<{ className?: string }>, label: string },
-  // Presenter notes: a quiet "click this" line the presenter can hide per step.
-  noteHidden?: boolean,
-  onToggleNote?: () => void,
   // 'left' keeps the card in the bottom-left corner so it covers less of the page being shown.
   align?: 'center' | 'left',
 }) {
+  // An optional short hint for the reader, such as what to click.
   const note = steps[step]?.note;
   const total = steps.length;
 
@@ -47,24 +45,16 @@ export function TourOverlay({ step, setStep, endTour, steps, labels, onBack, bad
           </div>
         </div>
         <h3 className={cn("font-serif font-light mb-3", align === 'left' ? "text-2xl" : "text-3xl")}>{steps[step].title}</h3>
-        <p className={cn("text-sm font-medium text-background/80 leading-relaxed", note && !noteHidden ? "mb-4" : "mb-8")}>{steps[step].desc}</p>
-        {note && !noteHidden && (
-          <div className="mb-6 rounded-xl border border-background/15 bg-background/5 px-4 py-3 flex items-start gap-3">
-            <div className="flex-1 min-w-0">
-              <div className="text-[10px] font-bold uppercase tracking-widest text-accent mb-0.5">{labels.note || 'Presenter note'}</div>
-              <p className="text-xs text-background/80 leading-relaxed">{note}</p>
-            </div>
-            {onToggleNote && (
-              <button onClick={onToggleNote} aria-label={labels.hideNote || 'Hide note'} title={labels.hideNote || 'Hide note'} className="shrink-0 w-6 h-6 rounded-full text-background/50 hover:text-background hover:bg-background/10 flex items-center justify-center"><EyeOff className="w-3.5 h-3.5" /></button>
-            )}
+        <p className={cn("text-sm font-medium text-background/80 leading-relaxed", note ? "mb-4" : "mb-8")}>{steps[step].desc}</p>
+        {note && (
+          <div className="mb-6 rounded-xl border border-background/15 bg-background/5 px-4 py-3">
+            <div className="text-[10px] font-bold uppercase tracking-widest text-accent mb-0.5">{labels.note || 'Try it'}</div>
+            <p className="text-xs text-background/80 leading-relaxed">{note}</p>
           </div>
         )}
         <div className="flex justify-between items-center">
           <div className="flex items-center gap-2">
             <div className="text-xs font-bold text-background/60">{step + 1} / {total}</div>
-            {note && noteHidden && onToggleNote && (
-              <button onClick={onToggleNote} aria-label={labels.showNote || 'Show note'} title={labels.showNote || 'Show note'} className="w-6 h-6 rounded-full text-background/30 hover:text-background/80 flex items-center justify-center"><Eye className="w-3.5 h-3.5" /></button>
-            )}
           </div>
           <button onClick={() => {
             if (step === total - 1) endTour();

@@ -131,8 +131,8 @@ export default function PlatformSeam() {
             <div className="mb-8"><RouterExample /></div>
             <DataClassTable />
             <p className="mt-6 text-sm text-muted-foreground">
-              {t('platform.seam.ai_more', 'The full approach, including the roadmap and the questions a board will ask, is in the proposal.')}{' '}
-              <Link href="/proposal#how" className="font-bold text-primary hover:underline">{t('platform.seam.ai_link', 'Read the proposal')} →</Link>
+              {t('platform.seam.ai_more', 'How requests are routed, which data each model may see, and where AI shows up across the platform.')}{' '}
+              <Link href="/ai#how" className="font-bold text-primary hover:underline">{t('platform.seam.ai_link', 'See how AI works')} →</Link>
             </p>
           </div>
 

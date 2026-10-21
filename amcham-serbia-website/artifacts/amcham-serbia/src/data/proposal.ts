@@ -1,5 +1,5 @@
-// Content for the client-facing proposal (/proposal) and the shared
-// "How AI handles your data" definitions also shown on Privacy & Sharing.
+// Content for "How AI works in the platform" (/ai, also /proposal) and the
+// shared "How AI handles your data" definitions shown on Privacy & Sharing.
 // English only for now; the structure is kept flat so a Serbian copy can be
 // added alongside without touching the page.
 
@@ -80,63 +80,5 @@ export const USE_CASES: UseCase[] = [
   { area: 'Staff', title: 'Compass for the team', body: 'A morning brief of what needs attention, meeting briefs, follow-up drafts and CRM clean-up, inside the staff console.', tier: 'on-prem', phase: 1 },
   { area: 'Staff', title: 'Meeting notes to actions', body: 'Notes from a call become a summary, the commitments made and the follow-ups due, filed against the account.', tier: 'on-prem', phase: 1 },
   { area: 'Research', title: 'Survey open answers', body: 'Themes and sentiment from hundreds of written survey answers, by sector, in hours instead of weeks. Individual answers never leave the building.', tier: 'on-prem', phase: 2 },
-  { area: 'Advocacy', title: 'Committee drafting assistant', body: 'First drafts of comments and position papers from committee discussions and past positions, for the committee to edit.', tier: 'on-prem', phase: 2 },
   { area: 'Members', title: 'Introductions and personal digests', body: 'Suggested introductions between members and a digest tuned to each company’s sector and committees, for members who opt in.', tier: 'on-prem', phase: 2 },
-];
-
-export const PHASES = [
-  {
-    phase: 0,
-    name: 'With the new website',
-    duration: 'Ships with the redesign',
-    goal: 'Visible wins on public content only. No member data involved, so nothing to approve but the design.',
-    items: ['“Ask AmCham” site search and answers', 'Serbian ↔ English translation drafts', 'Analytics on what visitors actually ask'],
-  },
-  {
-    phase: 1,
-    name: 'A staff pilot',
-    duration: 'About 8–12 weeks, indicative',
-    goal: 'Two or three people on the team use Compass every day. We measure the hours it saves and the renewals it helps protect.',
-    items: ['Private model installed and running', 'Compass morning brief, meeting briefs, follow-up drafts', 'Legislation radar', 'Data-protection impact assessment completed'],
-  },
-  {
-    phase: 2,
-    name: 'Sensitive work and members',
-    duration: 'Planned after the pilot review',
-    goal: 'Extend to the work that matters most, once the pilot has earned trust.',
-    items: ['Survey analysis', 'Committee drafting assistant', 'Member-facing introductions and digests, opt-in', 'Board-level AI audit report'],
-  },
-];
-
-export const ASKS = [
-  { title: 'A discovery fortnight', body: 'Two weeks to see how member data is kept today (spreadsheets, Outlook, any CRM) and what is worth connecting first.' },
-  { title: 'A small pilot group', body: 'Two or three people from the team, around an hour a week of feedback during the pilot.' },
-  { title: 'A privacy owner', body: 'One named person who signs off what data each AI feature may use.' },
-  { title: 'Board visibility', body: 'A short session with the board on the principles above before any member data is used.' },
-];
-
-export const RISKS = [
-  { risk: 'Serbian quality', answer: 'Smaller private models are weaker in Serbian than in English. We test with your real documents during discovery and route only what passes to the private model.' },
-  { risk: 'Data readiness', answer: 'AI is only as good as the records behind it. Discovery tells us what exists; the pilot starts with what is already clean.' },
-  { risk: 'Profiling members', answer: 'Engagement scores describe companies, but notes can describe people. A data-protection impact assessment comes before the pilot, and members are told plainly.' },
-  { risk: 'Who keeps it running', answer: 'We do. The private model is a managed service; AmCham does not need an IT department to own it.' },
-  { risk: 'Over-promising', answer: 'Everything in the demo is a mock-up built to show the idea. Each phase is scoped and measured before the next one starts.' },
-];
-
-export const FAQ = [
-  { q: 'Will our data be used to train AI models?', a: 'No. Member data is processed on a model AmCham controls. When a cloud model is used, it is under terms that exclude training, and it only receives anonymised or public content.' },
-  { q: 'What happens if the internet goes down?', a: 'Everything that runs on the private model keeps working. The demo shows Compass answering with the network switched off.' },
-  { q: 'Does it work in Serbian?', a: 'The website and public-content features do, today. For the private model, we confirm Serbian quality on your own documents before relying on it.' },
-  { q: 'Can members opt out?', a: 'Yes. Member-facing AI features are opt-in, and every member can see what AI does with their data in Privacy & Sharing.' },
-  { q: 'What if our staff already use ChatGPT?', a: 'They probably do, and that is the real privacy risk today: member details pasted into public tools with no record. A governed tool is the safer answer than a ban.' },
-];
-
-// What changes for each team, in their words. The showcase tracks end on the
-// matching card (/proposal#teams-<id>).
-export const TEAMS = [
-  { id: 'leadership', name: 'Leadership and the board', points: ['The state of the membership on one page, any day.', 'The board report ready without a night of spreadsheets.', 'Renewals at risk spotted months ahead, with the reason.', 'Every AI action logged, and approved by a person.'] },
-  { id: 'membership', name: 'Membership team', points: ['A short list each morning of who to call and why.', 'Call notes turned into tasks and a follow-up email.', 'Introductions between members followed to the end.', 'Contact records that tidy themselves.'] },
-  { id: 'comms', name: 'Communications and events', points: ['Serbian and English drafts of everything you publish.', 'Social posts, recaps and press releases ready to approve.', 'A monthly email built for each member.', 'Event invitations, reminders and thank-yous handled.'] },
-  { id: 'policy', name: 'Policy and committees', points: ['An alert when a law that matters to members opens for comment.', 'Drafts checked against what AmCham has said before.', 'Survey results summarised by sector.', 'Committee comments drafted from meeting notes, for the chair to approve.'] },
-  { id: 'members', name: 'Members', points: ['A clear record of what membership did for them this year.', 'Introductions they can ask for and follow.', 'One useful email a month instead of many.', 'They see what AmCham holds about them, and decide how it is used.'] },
 ];

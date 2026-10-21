@@ -152,12 +152,12 @@ en: {
       showcase_platform: "Member Platform",
       showcase_platform_desc: "Staff console and member portal",
       showcase_blueprint_desc: "Why the site is built this way, and the roadmap",
-      showcase_tour_desc: "Pick your audience and walk them through it",
+      showcase_tour_desc: "A few minutes through the whole platform",
       join: "Join AmCham",
       search: "Search...",
     },
     footer: {
-      proposal: "Proposal: website + private AI",
+      proposal: "How AI works here",
       address: "Smiljanićeva 24/I, 11111 Beograd",
       phone: "(+381 11) 3088 132",
       email: "info@amcham.rs",
@@ -464,11 +464,11 @@ en: {
       back: "Back"
     },
     showcase: {
-      badge: "Showcase",
+      badge: "Guided tour",
       back: "Back",
-      cta_label: "Showing someone the platform?",
-      cta_body: "Pick who is in the room, and the walkthrough shows what matters to them.",
-      cta_button: "Start Showcase"
+      cta_label: "New here?",
+      cta_body: "A few minutes through the website, the staff console and the member portal.",
+      cta_button: "Take the guided tour"
     },
 
     platform: {
@@ -1121,8 +1121,8 @@ nav_today: "Today",
           "ai_eyebrow": "AI and your data",
           "ai_title": "How AI handles your data",
           "ai_desc": "Every AI request passes a privacy router first. Anything that names a member stays on a model AmCham controls; cloud models only ever see anonymised or public content, and nothing is used to train anyone’s AI.",
-          "ai_more": "The full approach, including the roadmap and the questions a board will ask, is in the proposal.",
-          "ai_link": "Read the proposal"
+          "ai_more": "How requests are routed, which data each model may see, and where AI shows up across the platform.",
+          "ai_link": "See how AI works"
         }
       },
     common: {
@@ -1288,12 +1288,12 @@ sr: {
       showcase_platform: "Platforma za članove",
       showcase_platform_desc: "Konzola za tim i portal za članove",
       showcase_blueprint_desc: "Zašto je sajt ovako napravljen, i plan razvoja",
-      showcase_tour_desc: "Izaberite publiku i provedite je kroz platformu",
+      showcase_tour_desc: "Nekoliko minuta kroz celu platformu",
       join: "Pridruži se",
       search: "Pretraga...",
     },
     footer: {
-      proposal: "Predlog: novi sajt i privatni AI",
+      proposal: "Kako ovde radi AI",
       address: "Smiljanićeva 24/I, 11111 Beograd",
       phone: "(+381 11) 3088 132",
       email: "info@amcham.rs",
@@ -1600,50 +1600,27 @@ sr: {
       back: "Nazad"
     },
     showcase: {
-      badge: "Prikaz",
+      badge: "Vođeni obilazak",
       back: "Nazad",
-      cta_label: "Predstavljate platformu nekome?",
-      cta_body: "Izaberite ko je u sali, a prikaz pokazuje ono što je važno baš njima.",
-      cta_button: "Pokreni prikaz",
-      picker_title: "Ko je u sali?",
-      picker_desc: "Izaberite publiku i prikaz će pokazati ono što je njima važno. Strelicama idete napred i nazad, a slovom N skrivate svoje beleške.",
-      picker_close: "Zatvori",
-      steps_word: "koraka",
-      note_label: "Beleška za predstavljanje",
-      note_hide: "Sakrij belešku (N)",
-      note_show: "Prikaži belešku (N)",
-      tracks: {
-        full: { name: "Svi", desc: "Cela priča, od početka do kraja." },
-        leadership: { name: "Rukovodstvo i upravni odbor", desc: "Opšta slika, izveštaj za odbor i zaštita podataka." },
-        membership: { name: "Tim za članstvo", desc: "Prioriteti, pozivi, planovi zadržavanja i upoznavanja." },
-        comms: { name: "Komunikacije i događaji", desc: "Nacrti za odobrenje, mejl za članove i događaji." },
-        policy: { name: "Javne politike i odbori", desc: "Upozorenja o zakonima, odbori, ankete i saopštenja." },
-        members: { name: "Članovi", desc: "Šta im članstvo donosi i šta AmCham vidi." }
-      },
+      cta_label: "Prvi put ovde?",
+      cta_body: "Nekoliko minuta kroz sajt, konzolu za tim i portal za članove.",
+      cta_button: "Pokrenite vođeni obilazak",
+      tip_label: "Probajte",
       s: {
-        website: { title: "Ovo je novi sajt", desc: "Javni sajt, obnovljen tako da posetioci za nekoliko klikova nađu ono po šta su došli: učlanjenje, događaje, članove i istraživanja. Radi na telefonu, na engleskom i srpskom.", note: "Polako skrolujte jednom nadole, pa kliknite Dalje." },
-        morning: { title: "Vaše jutro u jednom panelu", desc: "Pre nego što iko otvori mejl, Compass je razvrstao zajedničko sanduče, pripremio jednostavne odgovore i spremio kratak pregled za današnji sastanak u 11:00. Tim ga pročita i odobri ono što je spremno.", note: "Pokažite „Since you left” desno." },
-        priorities: { title: "Odakle počinje dan tima", desc: "Svakog jutra tim dobija kratku listu onoga što je najvažnije, sa iznosom koji je u igri pored svake stavke. Adriatica Grupa je na vrhu: njihova obnova članstva je u riziku.", note: "Kliknite na red Adriatica Grupe." },
-        dossier: { title: "Zašto Adriatica posustaje", desc: "Njihov rezultat aktivnosti pao je 9 poena od maja. Raščlanjivanje pokazuje zašto: manje događaja i niko u odborima.", note: "Pokažite na Prisustvo događajima." },
-        saveplan: { title: "Plan da ih zadržimo", desc: "Pad je otvorio plan zadržavanja: sastanak sa njihovim direktorom, uz odgovornu osobu i rok. Niko ne mora da pamti.", note: "Pokažite odgovornu osobu i rok na prvoj kartici." },
-        notes: { title: "Posle razgovora", desc: "Marija je razgovarala sa direktorom Adriatice. Nalepi svoje grube beleške, a Compass napiše sažetak, ko je šta obećao i mejl.", note: "Kliknite „Pretvori u zadatke” i sačekajte dve sekunde." },
-        match: { title: "Upoznavanje koje im treba", desc: "Adriatici treba energija za novu proizvodnu liniju, a NIS a.d. može da pomogne. AmCham pita obe strane pre nego što ih upozna.", note: "Kliknite „Request Opt-in from NIS a.d.”, pa „Schedule Introduction”." },
-        cleanup: { title: "Podaci koji se sami sređuju", desc: "Compass primećuje duple kontakte, vraćene mejlove i zastarele funkcije i predlaže ispravku. Jedan klik je prihvata.", note: "Kliknite „Prihvati sve”." },
-        compass: { title: "Compass, pomoćnik tima", desc: "Compass prati šta se dešava u članstvu i predlaže sledeći korak. Danas je na vrhu: javna rasprava o Zakonu o radu ističe za 6 dana, a AmCham još nije dao komentar.", note: "Pokažite zelene oznake „On premises”: taj posao nikada nije napustio AmCham." },
-        committees: { title: "Odbori na jednom mestu", desc: "Svaki odbor, ko je u njemu i na čemu radi. Ovde se organizuje rad na javnim politikama." },
-        press: { title: "Od stava do saopštenja", desc: "Kada se odbor dogovori o stavu, saopštenje za medije se priprema iz njega, spremno da se odobri i pošalje novinarima.", note: "Kliknite „Odobri i pošalji”." },
-        newsroom: { title: "Nacrti, spremni za odobrenje", desc: "Prevodi, objave za mreže, izveštaji sa događaja i saopštenja stižu kao nacrti. Neko iz tima proveri svaki i odobri ga. Ništa ne izlazi samo.", note: "Pokažite žute reči: Compass traži da ih čovek proveri." },
-        digest: { title: "Jedan mejl po članu", desc: "Svaki član dobija mesečni mejl napravljen za njega: vesti za njegovu delatnost, njegove odbore, događaje koji bi mu se dopali. Kliknite drugu kompaniju da vidite razliku.", note: "Kliknite „Adriatica Grupa”." },
-        events: { title: "Događaj od početka do kraja", desc: "Pozivi, potvrde, podsetnici i mejlovi zahvalnosti dešavaju se sami. Tim bira temu, odobrava tekstove i vodi događaj.", note: "Kliknite „5. Posle događaja”." },
-        board: { title: "Izveštaj za upravni odbor, već gotov", desc: "Kvartal na jednoj strani: koliko je članstvo zdravo i koliko je novca sigurno ili u riziku. Bez tabela noć pre sednice.", note: "Pokažite 88% i pročitajte red ispod." },
+        website: { title: "Ovo je novi sajt", desc: "Javni sajt, obnovljen tako da posetioci za nekoliko klikova nađu ono po šta su došli: učlanjenje, događaje, članove i istraživanja. Radi na telefonu, na engleskom i srpskom.", tip: "Skrolujte nadole da vidite ostatak stranice." },
+        priorities: { title: "Odakle počinje dan tima", desc: "Svakog jutra tim dobija kratku listu onoga što je najvažnije, sa iznosom koji je u igri pored svake stavke. Adriatica Grupa je na vrhu: njihova obnova članstva je u riziku.", tip: "Kliknite na red Adriatica Grupe da vidite detalje desno." },
+        morning: { title: "Jutro u jednom panelu", desc: "Pre nego što iko otvori mejl, Compass je razvrstao zajedničko sanduče, pripremio jednostavne odgovore i spremio kratak pregled za današnji sastanak u 11:00. Tim ga pročita i odobri ono što je spremno.", tip: "Pogledajte „Since you left” u panelu desno." },
+        dossier: { title: "Zašto Adriatica posustaje", desc: "Njihov rezultat aktivnosti pao je 9 poena od maja. Raščlanjivanje pokazuje zašto: manje događaja i niko u odborima.", tip: "Pogledajte Prisustvo događajima u raščlanjivanju rezultata." },
+        saveplan: { title: "Plan da ih zadržimo", desc: "Pad je otvorio plan zadržavanja: sastanak sa njihovim direktorom, uz odgovornu osobu i rok. Niko ne mora da pamti." },
+        notes: { title: "Posle razgovora", desc: "Marija je razgovarala sa direktorom Adriatice. Nalepi svoje grube beleške, a Compass napiše sažetak, ko je šta obećao i mejl.", tip: "Kliknite „Pretvori u zadatke”." },
+        match: { title: "Upoznavanje koje im treba", desc: "Adriatici treba energija za novu proizvodnu liniju, a NIS a.d. može da pomogne. AmCham pita obe strane pre nego što ih upozna.", tip: "Kliknite „Request Opt-in from NIS a.d.”, pa „Schedule Introduction”." },
+        compass: { title: "Compass, pomoćnik tima", desc: "Compass prati šta se dešava u članstvu i predlaže sledeći korak. Danas je na vrhu: javna rasprava o Zakonu o radu ističe za 6 dana, a AmCham još nije dao komentar.", tip: "Zelene oznake „On premises” označavaju posao koji nikada nije napustio AmCham." },
+        newsroom: { title: "Nacrti, spremni za odobrenje", desc: "Prevodi, objave za mreže, izveštaji sa događaja i saopštenja stižu kao nacrti. Neko iz tima proveri svaki i odobri ga. Ništa ne izlazi samo.", tip: "Istaknute reči su one za koje Compass traži da ih čovek proveri." },
         privacy: { title: "Šta tim vidi, a šta ne", desc: "Članovi mogu da vide tačno šta portal beleži, šta tim vidi i kako se koristi. Lični podaci ostaju na AmCham serveru." },
-        surveys: { title: "Šta su nam članovi rekli", desc: "Stotine pisanih odgovora iz anketa, grupisanih u teme po delatnostima, za nekoliko sati umesto nedelja. Prikazuje se samo zbirna slika; ničiji pojedinačni odgovori ne napuštaju AmCham.", note: "Skrolujte malo nadole, pa kliknite „Manufacturing” da vidite kako se teme menjaju." },
-        member_value: { title: "Strana člana", desc: "Ovo vidi Hemofarm: šta im je članstvo donelo ove godine i izveštaj koji mogu da proslede svom rukovodstvu.", note: "Kliknite „Generate Annual Value Statement”." },
-        member_intros: { title: "Traženje upoznavanja", desc: "Članovi traže da upoznaju jedni druge i prate svaki zahtev korak po korak. PwC je rekao da, pa Hemofarm samo bira termin.", note: "Kliknite „Izaberite termin”." },
-        member_email: { title: "Jedan koristan mejl mesečno", desc: "Članovi ne moraju da se prijavljuju da bi imali koristi. Jednom mesečno dobiju jedan mejl sa onim što im je važno: vesti iz delatnosti, njihovi odbori, događaji i upoznavanja.", note: "Zatvorite mejl, pa pokažite početnu stranu iza njega." },
-        member_seen: { title: "Ništa skriveno", desc: "Članovi vide isti rezultat aktivnosti koji vidi tim, beleške koje AmCham vodi i prekidače kojima odlučuju kako se koriste njihovi podaci.", note: "Skrolujte nadole i promenite jedan prekidač." },
-        end: { title: "Šta ovo znači za vas", desc: "To je ideja. Evo šta se menja, a odmah ispod, kako bismo počeli.", note: "Skrolujte do „Next steps” kada ste spremni za pitanja." },
-        end_full: { title: "Šta ovo znači za svaki tim", desc: "To je ideja. Evo šta se menja, a odmah ispod, kako bismo počeli.", note: "Skrolujte do „Next steps” kada ste spremni za pitanja." }
+        member_value: { title: "Strana člana", desc: "Ovo vidi Hemofarm: šta im je članstvo donelo ove godine i izveštaj koji mogu da proslede svom rukovodstvu.", tip: "Kliknite „Generate Annual Value Statement”." },
+        member_intros: { title: "Traženje upoznavanja", desc: "Članovi traže da upoznaju jedni druge i prate svaki zahtev korak po korak. PwC je rekao da, pa Hemofarm samo bira termin.", tip: "Kliknite „Izaberite termin”." },
+        member_seen: { title: "Ništa skriveno", desc: "Članovi vide isti rezultat aktivnosti koji vidi tim, beleške koje AmCham vodi i prekidače kojima odlučuju kako se koriste njihovi podaci." },
+        end: { title: "Kako radi AI", desc: "Svaka AI funkcija koju ste upravo videli prati ista pravila. Ova stranica ih objašnjava: kako se svaki zahtev usmerava i koje podatke sme da vidi koji model." }
       }
     },
 
@@ -2643,8 +2620,8 @@ nav_today: "Danas",
           "ai_eyebrow": "AI i vaši podaci",
           "ai_title": "Kako AI postupa sa vašim podacima",
           "ai_desc": "Svaki AI zahtev prvo prolazi kroz filter privatnosti. Sve što imenuje člana ostaje na modelu pod kontrolom AmCham-a; modeli u oblaku vide samo anonimizovan ili javni sadržaj, i ništa se ne koristi za treniranje AI-ja.",
-          "ai_more": "Ceo pristup, uključujući plan razvoja i pitanja koja će upravni odbor postaviti, nalazi se u predlogu.",
-          "ai_link": "Pročitajte predlog"
+          "ai_more": "Kako se zahtevi usmeravaju, koje podatke sme da vidi koji model i gde se AI pojavljuje u platformi.",
+          "ai_link": "Pogledajte kako radi AI"
         }
       },
     common: {
