@@ -2,7 +2,11 @@ import Anthropic from '@anthropic-ai/sdk';
 
 export interface Env {
   ANTHROPIC_API_KEY: string;
-  ALLOWED_ORIGIN: string;
+  // Comma-separated list of sites allowed to call Compass. An entry may use
+  // one leading wildcard label for preview links, e.g. https://*.amcham-demo.pages.dev
+  ALLOWED_ORIGINS?: string;
+  // Older single-origin setting, still honoured if ALLOWED_ORIGINS is unset.
+  ALLOWED_ORIGIN?: string;
   COMPASS_LIMITER: { limit: (opts: { key: string }) => Promise<{ success: boolean }> };
 }
 
@@ -26,8 +30,27 @@ function sanitizeHistory(raw: unknown): HistoryTurn[] {
     .map((h) => ({ role: h.role as 'user' | 'assistant', content: h.text.slice(0, MAX_HISTORY_CHARS) }));
 }
 
+function allowedOrigins(env: Env): string[] {
+  return (env.ALLOWED_ORIGINS || env.ALLOWED_ORIGIN || '')
+    .split(',')
+    .map((o) => o.trim().replace(/\/$/, ''))
+    .filter(Boolean);
+}
+
+function isAllowed(origin: string, env: Env): boolean {
+  return allowedOrigins(env).some((pattern) => {
+    if (!pattern.includes('*')) return pattern === origin;
+    // https://*.example.com matches https://<one label>.example.com only.
+    const [scheme, rest] = pattern.split('://');
+    const suffix = rest.replace(/^\*\./, '.');
+    if (!origin.startsWith(`${scheme}://`)) return false;
+    const host = origin.slice(scheme.length + 3);
+    return host.endsWith(suffix) && /^[a-z0-9-]+$/i.test(host.slice(0, -suffix.length));
+  });
+}
+
 function corsHeaders(origin: string | null, env: Env): Record<string, string> {
-  const allow = origin && origin === env.ALLOWED_ORIGIN ? origin : env.ALLOWED_ORIGIN;
+  const allow = origin && isAllowed(origin, env) ? origin : allowedOrigins(env)[0] || '';
   return {
     'Access-Control-Allow-Origin': allow,
     'Access-Control-Allow-Methods': 'POST, OPTIONS',
@@ -53,7 +76,7 @@ export default {
     if (request.method !== 'POST') {
       return jsonResponse({ error: 'Method not allowed' }, 405, env, origin);
     }
-    if (origin && origin !== env.ALLOWED_ORIGIN) {
+    if (origin && !isAllowed(origin, env)) {
       return jsonResponse({ error: 'Origin not allowed' }, 403, env, origin);
     }
 
