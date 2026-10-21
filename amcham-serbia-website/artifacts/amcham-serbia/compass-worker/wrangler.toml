@@ -3,8 +3,9 @@ main = "src/index.ts"
 compatibility_date = "2026-09-18"
 
 [vars]
-# Set to the real deployed site origin, e.g. "https://djongo92.github.io"
-ALLOWED_ORIGIN = "https://djongo92.github.io"
+# Sites allowed to call Compass, comma-separated. The GitHub Pages site, the
+# Cloudflare Pages site, and its per-branch preview links.
+ALLOWED_ORIGINS = "https://djongo92.github.io, https://amcham-demo.pages.dev, https://*.amcham-demo.pages.dev"
 
 [[ratelimits]]
 name = "COMPASS_LIMITER"
