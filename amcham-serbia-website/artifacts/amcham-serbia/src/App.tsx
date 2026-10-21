@@ -66,6 +66,7 @@ function Router() {
           <Route path="/news/:id" component={NewsDetail} />
           <Route path="/search" component={SearchPage} />
           <Route path="/status" component={StatusPage} />
+          <Route path="/ai" component={Proposal} />
           <Route path="/proposal" component={Proposal} />
           <Route path="/platform" component={PlatformHub} />
           <Route path="/platform/console" component={PlatformConsole} />

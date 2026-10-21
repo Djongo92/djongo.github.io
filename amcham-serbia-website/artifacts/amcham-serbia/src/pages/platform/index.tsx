@@ -26,9 +26,9 @@ export default function PlatformHub() {
           <p className="text-lg md:text-xl text-secondary-foreground/85 leading-relaxed max-w-2xl mb-8">{t('platform.hub.desc')}</p>
           <div className="flex flex-wrap items-center gap-4">
             <button onClick={startShowcase} className="px-6 py-3 rounded-full bg-primary text-primary-foreground font-bold text-sm shadow-lg hover:bg-primary/90 transition-all active:scale-95 inline-flex items-center gap-2">
-              <Presentation className="w-4 h-4" /> {t('showcase.cta_button', 'Start Showcase')}
+              <Presentation className="w-4 h-4" /> {t('showcase.cta_button', 'Take the guided tour')}
             </button>
-            <span className="text-sm text-secondary-foreground/80">{t('showcase.cta_body', "Take the guided walkthrough — a scripted tour through the platform's strongest moments.")}</span>
+            <span className="text-sm text-secondary-foreground/80">{t('showcase.cta_body', 'A few minutes through the website, the staff console and the member portal.')}</span>
           </div>
         </div>
       </section>

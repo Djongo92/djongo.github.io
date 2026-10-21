@@ -131,8 +131,8 @@ export function Header() {
                   <button role="menuitem" onClick={() => { setShowcaseOpen(false); startShowcase(); }} className="w-full flex items-start gap-3 rounded-lg p-3 hover:bg-muted transition-colors text-left border-t border-border mt-1">
                     <Presentation className="w-5 h-5 text-primary shrink-0 mt-0.5" />
                     <span>
-                      <span className="block text-sm font-bold text-foreground">{t('showcase.cta_button', 'Start Showcase')}</span>
-                      <span className="block text-xs text-muted-foreground">{t('nav.showcase_tour_desc', 'A scripted walk through the strongest moments')}</span>
+                      <span className="block text-sm font-bold text-foreground">{t('showcase.cta_button', 'Take the guided tour')}</span>
+                      <span className="block text-xs text-muted-foreground">{t('nav.showcase_tour_desc', 'A few minutes through the whole platform')}</span>
                     </span>
                   </button>
                 </motion.div>
