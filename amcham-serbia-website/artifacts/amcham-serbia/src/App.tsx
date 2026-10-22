@@ -31,6 +31,7 @@ import NewsDetail from '@/pages/news-detail';
 import SearchPage from '@/pages/search';
 import { PrivacyPage, CookiesPage } from '@/pages/legal';
 import NotFound from '@/pages/not-found';
+import BlueprintDiagnostic from '@/pages/blueprint/diagnostic';
 
 // Heavier pages load their code on first visit.
 const Impact = lazy(() => import('@/pages/impact'));
@@ -40,7 +41,6 @@ const PlatformConsole = lazy(() => import('@/pages/platform/console'));
 const PlatformPortal = lazy(() => import('@/pages/platform/portal'));
 const PlatformSeam = lazy(() => import('@/pages/platform/seam'));
 const BlueprintOverview = lazy(() => import('@/pages/blueprint/index'));
-const BlueprintDiagnostic = lazy(() => import('@/pages/blueprint/diagnostic'));
 const BlueprintRoadmap = lazy(() => import('@/pages/blueprint/roadmap'));
 const BlueprintDirection = lazy(() => import('@/pages/blueprint/direction'));
 const BlueprintPages = lazy(() => import('@/pages/blueprint/pages'));

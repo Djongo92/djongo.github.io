@@ -82,7 +82,7 @@ export default function EventDetail() {
                         {speaker.name.charAt(0)}
                       </div>
                       <div>
-                        <h4 className="font-bold text-foreground">{speaker.name}</h4>
+                        <h3 className="font-bold text-foreground">{speaker.name}</h3>
                         <p className="text-xs text-muted-foreground">{lang === 'sr' ? speaker.titleSr : speaker.title}, {speaker.company}</p>
                       </div>
                     </div>

@@ -1,6 +1,6 @@
-import { companies, type Company, type Sector, type Tier } from './companies';
+import { companies, committeeRosters, type Company, type Sector, type Tier } from './companies';
 
-export { companies };
+export { companies, committeeRosters };
 export type { Company, Sector, Tier };
 
 export const platformData = {
@@ -1613,16 +1613,6 @@ export const platformData = {
 // already authored per-company in scoreFactors above. Shared by the public
 // Advocacy page and the console's Committees view so both tell the same
 // story. Committee names/order match advocacy.tsx and mock.ts's policyWins.
-export const committeeRosters = [
-  { id: "digital-economy", name: "Digital Economy", nameSr: "Digitalna ekonomija", mandate: "Advocating for digital transformation, data protection, and AI regulation.", chairCompanyId: "msft", memberCompanyIds: ["ncr", "tln"], cadence: "Monthly", nextMeeting: "Nov 2, 2026" },
-  { id: "health-care", name: "Health Care", nameSr: "Zdravstvo", mandate: "Improving healthcare access and drug-pricing predictability.", chairCompanyId: "hmo", memberCompanyIds: [], cadence: "Quarterly", nextMeeting: "Nov 15, 2026" },
-  { id: "tax-finance", name: "Tax & Finance", nameSr: "Porezi i finansije", mandate: "Engaging on tax policy predictability and financial-sector regulation.", chairCompanyId: "mcb", memberCompanyIds: ["kpmg"], cadence: "Monthly", nextMeeting: "Oct 28, 2026" },
-  { id: "labor-hr", name: "Labor & HR", nameSr: "Rad i ljudski resursi", mandate: "Advocating for labor-market flexibility and workforce development.", chairCompanyId: "bky", memberCompanyIds: ["dlz"], cadence: "Bi-monthly", nextMeeting: "Nov 8, 2026" },
-  { id: "real-estate-construction", name: "Real Estate & Construction", nameSr: "Nekretnine i građevinarstvo", mandate: "Streamlining permitting and construction-sector regulation.", chairCompanyId: "dlz", memberCompanyIds: ["mtk"], cadence: "Quarterly", nextMeeting: "Dec 3, 2026" },
-  { id: "esg-environment", name: "ESG & Environment", nameSr: "ESG i životna sredina", mandate: "Advocating for sustainable energy policy, ESG compliance, and circular-economy integration.", chairCompanyId: "hmo", memberCompanyIds: ["nrb", "ccbc"], cadence: "Monthly", nextMeeting: "Oct 24, 2026" },
-  { id: "compliance-ethics", name: "Compliance & Ethics", nameSr: "Usklađenost i etika", mandate: "Promoting anti-corruption standards and regulatory compliance best practice.", chairCompanyId: "kar", memberCompanyIds: ["pwc"], cadence: "Quarterly", nextMeeting: "Nov 20, 2026" },
-  { id: "trade-customs", name: "Trade & Customs", nameSr: "Trgovina i carine", mandate: "Simplifying cross-border trade, customs procedures, and export facilitation.", chairCompanyId: "pmp", memberCompanyIds: ["ncr", "ccbc", "kar", "nkt"], cadence: "Monthly", nextMeeting: "Oct 30, 2026" }
-];
 
 // Resolves which company the member portal is currently being viewed as, and
 // that company's billing/home/glance data — the default company's own data

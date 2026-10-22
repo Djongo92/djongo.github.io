@@ -60,6 +60,7 @@ export default function Insights() {
         <div className="container mx-auto px-4 md:px-8 py-4 flex flex-col md:flex-row gap-4 justify-between items-center">
           <div className="flex gap-4 w-full md:w-auto">
             <select 
+              aria-label={t('insights.filter_format', 'Format')}
               value={typeFilter}
               onChange={(e) => updateFilters({ topic: e.target.value })}
               className="border border-border p-2 rounded-2xl bg-background focus:outline-none focus:border-primary text-sm flex-1 md:w-48"
@@ -68,6 +69,7 @@ export default function Insights() {
               {types.map(t => <option key={t} value={t}>{t}</option>)}
             </select>
             <select 
+              aria-label={t('insights.filter_year', 'Year')}
               value={yearFilter}
               onChange={(e) => updateFilters({ year: e.target.value })}
               className="border border-border p-2 rounded-sm bg-background focus:outline-none focus:border-primary text-sm flex-1 md:w-32"
@@ -119,9 +121,9 @@ export default function Insights() {
                     </span>
                     
                     <Link href={`/insights/${insight.id}`}>
-                      <h3 className="text-2xl font-serif font-bold mb-4 group-hover:text-primary transition-colors cursor-pointer">
+                      <h2 className="text-2xl font-serif font-bold mb-4 group-hover:text-primary transition-colors cursor-pointer">
                         {title}
-                      </h3>
+                      </h2>
                     </Link>
                     
                     <p className="text-muted-foreground text-sm line-clamp-3 mb-6">
