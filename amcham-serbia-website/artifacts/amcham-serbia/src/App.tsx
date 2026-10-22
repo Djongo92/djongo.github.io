@@ -1,4 +1,4 @@
-import { lazy, Suspense, type ReactNode } from 'react';
+import { Suspense, type ReactNode } from 'react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { ThemeProvider } from 'next-themes';
 import { ErrorBoundary } from '@/components/error-boundary';
@@ -13,6 +13,7 @@ import {
 import { MotionConfig } from 'framer-motion';
 
 import { I18nProvider } from '@/lib/i18n';
+import { lazyWithReload } from '@/lib/lazy-with-reload';
 import { Shell } from '@/components/layout/shell';
 import { ShowcaseProvider } from '@/components/showcase-tour';
 
@@ -34,16 +35,16 @@ import NotFound from '@/pages/not-found';
 import BlueprintDiagnostic from '@/pages/blueprint/diagnostic';
 
 // Heavier pages load their code on first visit.
-const Impact = lazy(() => import('@/pages/impact'));
-const Proposal = lazy(() => import('@/pages/proposal'));
-const PlatformHub = lazy(() => import('@/pages/platform/index'));
-const PlatformConsole = lazy(() => import('@/pages/platform/console'));
-const PlatformPortal = lazy(() => import('@/pages/platform/portal'));
-const PlatformSeam = lazy(() => import('@/pages/platform/seam'));
-const BlueprintOverview = lazy(() => import('@/pages/blueprint/index'));
-const BlueprintRoadmap = lazy(() => import('@/pages/blueprint/roadmap'));
-const BlueprintDirection = lazy(() => import('@/pages/blueprint/direction'));
-const BlueprintPages = lazy(() => import('@/pages/blueprint/pages'));
+const Impact = lazyWithReload(() => import('@/pages/impact'));
+const Proposal = lazyWithReload(() => import('@/pages/proposal'));
+const PlatformHub = lazyWithReload(() => import('@/pages/platform/index'));
+const PlatformConsole = lazyWithReload(() => import('@/pages/platform/console'));
+const PlatformPortal = lazyWithReload(() => import('@/pages/platform/portal'));
+const PlatformSeam = lazyWithReload(() => import('@/pages/platform/seam'));
+const BlueprintOverview = lazyWithReload(() => import('@/pages/blueprint/index'));
+const BlueprintRoadmap = lazyWithReload(() => import('@/pages/blueprint/roadmap'));
+const BlueprintDirection = lazyWithReload(() => import('@/pages/blueprint/direction'));
+const BlueprintPages = lazyWithReload(() => import('@/pages/blueprint/pages'));
 
 const queryClient = new QueryClient();
 

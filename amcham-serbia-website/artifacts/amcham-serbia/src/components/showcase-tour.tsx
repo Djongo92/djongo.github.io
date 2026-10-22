@@ -1,8 +1,9 @@
-import React, { createContext, lazy, Suspense, useContext, useEffect, useState } from 'react';
+import React, { createContext, Suspense, useContext, useEffect, useState } from 'react';
 import { useLocation } from 'wouter';
 import { AnimatePresence } from 'framer-motion';
 import { Presentation } from 'lucide-react';
 import { useI18n } from '@/lib/i18n';
+import { lazyWithReload } from '@/lib/lazy-with-reload';
 
 // The showcase is a self-guided walk through the platform for anyone who
 // opens the demo on their own. One route for everyone, written to the
@@ -11,7 +12,7 @@ import { useI18n } from '@/lib/i18n';
 
 // The overlay lives with the console code; load it only when a tour starts so
 // the public site doesn't carry the platform's data on first load.
-const TourOverlay = lazy(() => import('@/pages/platform/console/components/Overlays').then((m) => ({ default: m.TourOverlay })));
+const TourOverlay = lazyWithReload(() => import('@/pages/platform/console/components/Overlays').then((m) => ({ default: m.TourOverlay })));
 
 interface StepDef { id: string; path: string; title: string; desc: string; tip?: string }
 
@@ -62,14 +63,28 @@ function viewsFor(area: 'console' | 'portal'): string[] {
 }
 
 const FOCUS = { console: viewsFor('console'), portal: viewsFor('portal') };
+const STEP_KEY = 'amcham_tour_step';
 
 export function ShowcaseProvider({ children }: { children: React.ReactNode }) {
   const { t } = useI18n();
   const [, setLocation] = useLocation();
-  const [stepIndex, setStepIndex] = useState(-1);
+  // The current step is kept for this tab, so a reload (for example after a
+  // deploy) carries on from the same step instead of ending the tour.
+  const [stepIndex, setStepIndex] = useState(() => {
+    try {
+      const saved = Number(sessionStorage.getItem(STEP_KEY));
+      return Number.isInteger(saved) && saved >= 0 && saved < STEPS.length ? saved : -1;
+    } catch {
+      return -1;
+    }
+  });
   const active = stepIndex > -1;
 
   useEffect(() => {
+    try {
+      if (active) sessionStorage.setItem(STEP_KEY, String(stepIndex));
+      else sessionStorage.removeItem(STEP_KEY);
+    } catch { /* storage blocked: the tour just won't survive a reload */ }
     if (!active) return;
     setLocation(STEPS[stepIndex].path);
     window.scrollTo(0, 0);

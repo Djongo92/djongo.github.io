@@ -14,6 +14,7 @@ if (params.has('reset')) {
       .filter((k) => k.startsWith('amcham_') || k === 'theme')
       .forEach((k) => localStorage.removeItem(k));
     sessionStorage.removeItem('amcham_lang');
+    sessionStorage.removeItem('amcham_tour_step');
   } catch {
     // Storage can be unavailable (private mode); a reload is still a reset.
   }
