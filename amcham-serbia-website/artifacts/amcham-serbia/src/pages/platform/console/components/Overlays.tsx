@@ -227,6 +227,12 @@ export function GlossaryDrawer({ close, navigateTo }: { close: () => void, navig
     { title: t('platform.console.glossary_term3'), desc: t('platform.console.glossary_def3'), link: "flags" },
     { title: t('platform.console.glossary_term4'), desc: t('platform.console.glossary_def4'), link: "ritual" },
     { title: t('platform.console.glossary_term5'), desc: t('platform.console.glossary_def5'), link: "compass" },
+    { title: t('platform.console.glossary_term6'), desc: t('platform.console.glossary_def6'), link: "compass" },
+    { title: t('platform.console.glossary_term7'), desc: t('platform.console.glossary_def7'), link: "compass" },
+    { title: t('platform.console.glossary_term8'), desc: t('platform.console.glossary_def8'), link: "compass" },
+    { title: t('platform.console.glossary_term9'), desc: t('platform.console.glossary_def9'), link: "compass" },
+    { title: t('platform.console.glossary_term10'), desc: t('platform.console.glossary_def10'), link: "compass" },
+    { title: t('platform.console.glossary_term11'), desc: t('platform.console.glossary_def11'), link: "integrations" },
   ].filter(x => x.title.toLowerCase().includes(search.toLowerCase()) || x.desc.toLowerCase().includes(search.toLowerCase()));
 
   return (
