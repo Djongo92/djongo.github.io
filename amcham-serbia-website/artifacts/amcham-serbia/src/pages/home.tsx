@@ -15,11 +15,14 @@ export default function Home() {
 
   // Get active items
   const latestNews = mockNews.slice(0, 3);
-  const newsThumbnails = ['images/real/event.jpg', 'images/event-panel.jpg', 'images/office-meeting.jpg'];
+  const newsThumbnails = ['images/real/event.webp', 'images/event-panel.webp', 'images/office-meeting.webp'];
   const nextEvent = mockEvents.find(e => e.status === 'open' || e.status === 'request_pending') || mockEvents[0];
 
-  // Hero carousel — slow crossfade, pauses for prefers-reduced-motion
-  const heroImages = ['images/real/hero-2.jpg', 'images/real/hero-1.jpg', 'images/event-panel.jpg'];
+  // Hero carousel — slow crossfade, pauses for prefers-reduced-motion. Only
+  // the photos change; the headline and buttons never move. Phones get the
+  // smaller file where there is one.
+  const heroImages = ['images/real/hero-2.webp', 'images/real/hero-1.webp', 'images/event-panel.webp'];
+  const heroSmall: Record<string, string> = { 'images/real/hero-2.webp': 'images/real/hero-2-900.webp', 'images/event-panel.webp': 'images/event-panel-900.webp' };
   const [heroIndex, setHeroIndex] = useState(0);
   useEffect(() => {
     if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
@@ -38,20 +41,20 @@ export default function Home() {
   const y2 = useTransform(scrollYProgress2, [0, 1], isMobile ? ["0%", "0%"] : ["-15%", "15%"]);
 
   const patrons = [
-    'a1.webp', 'cocacola.png', 'oracle.png', 'otp.png', 
-    'raiffeisen.png', 'banca-intesa.png', 'unicredit.png', 
-    'msd.png', 'eaton.png', 'pmi.png', 'aigo.png', 
-    'medtronic.png', 'nlb.png', 'galenika.png'
+    'a1.webp', 'cocacola.webp', 'oracle.webp', 'otp.webp', 
+    'raiffeisen.webp', 'banca-intesa.webp', 'unicredit.webp', 
+    'msd.webp', 'eaton.webp', 'pmi.webp', 'aigo.webp', 
+    'medtronic.webp', 'nlb.webp', 'galenika.webp'
   ];
 
   const team = [
-    { id: 'vera', img: 'vera.jpg', name: t('team.vera.name'), role: t('team.vera.role'), bio: t('team.vera.bio') },
-    { id: 'amalija', img: 'amalija.jpg', name: t('team.amalija.name'), role: t('team.amalija.role'), bio: t('team.amalija.bio') },
-    { id: 'ana', img: 'ana.jpg', name: t('team.ana.name'), role: t('team.ana.role'), bio: t('team.ana.bio') },
-    { id: 'slobodan', img: 'slobodan.jpg', name: t('team.slobodan.name'), role: t('team.slobodan.role'), bio: t('team.slobodan.bio') },
+    { id: 'vera', img: 'vera.webp', name: t('team.vera.name'), role: t('team.vera.role'), bio: t('team.vera.bio') },
+    { id: 'amalija', img: 'amalija.webp', name: t('team.amalija.name'), role: t('team.amalija.role'), bio: t('team.amalija.bio') },
+    { id: 'ana', img: 'ana.webp', name: t('team.ana.name'), role: t('team.ana.role'), bio: t('team.ana.bio') },
+    { id: 'slobodan', img: 'slobodan.webp', name: t('team.slobodan.name'), role: t('team.slobodan.role'), bio: t('team.slobodan.bio') },
     { id: 'tina', img: 'tina.webp', name: t('team.tina.name'), role: t('team.tina.role'), bio: t('team.tina.bio') },
-    { id: 'branislav', img: 'branislav.jpg', name: t('team.branislav.name'), role: t('team.branislav.role'), bio: t('team.branislav.bio') },
-    { id: 'anita', img: 'anita.jpg', name: t('team.anita.name'), role: t('team.anita.role'), bio: t('team.anita.bio') }
+    { id: 'branislav', img: 'branislav.webp', name: t('team.branislav.name'), role: t('team.branislav.role'), bio: t('team.branislav.bio') },
+    { id: 'anita', img: 'anita.webp', name: t('team.anita.name'), role: t('team.anita.role'), bio: t('team.anita.bio') }
   ];
 
   return (
@@ -62,11 +65,14 @@ export default function Home() {
       <section className="relative w-full h-[80vh] min-h-[560px] max-h-[820px] flex items-center justify-center overflow-hidden bg-secondary">
         <div className="absolute inset-0 z-0">
           <Skeleton className="absolute inset-0 rounded-none" />
-          <AnimatePresence>
+          <AnimatePresence initial={false}>
             <motion.img
               key={heroIndex}
               src={`${import.meta.env.BASE_URL}${heroImages[heroIndex]}`}
-              alt="Business Moves Serbia"
+              srcSet={heroSmall[heroImages[heroIndex]] ? `${import.meta.env.BASE_URL}${heroSmall[heroImages[heroIndex]]} 900w, ${import.meta.env.BASE_URL}${heroImages[heroIndex]} 1920w` : undefined}
+              sizes="100vw"
+              fetchPriority={heroIndex === 0 ? 'high' : 'auto'}
+              alt=""
               initial={{ opacity: 0 }}
               animate={{ opacity: 0.6 }}
               exit={{ opacity: 0 }}
@@ -142,7 +148,7 @@ export default function Home() {
             <div className="lg:col-span-6 relative group">
               <div className="aspect-[4/3] relative rounded-2xl overflow-hidden shadow-xl">
                 <ImageWithSkeleton
-                  src={`${import.meta.env.BASE_URL}images/real/in-focus.jpeg`}
+                  src={`${import.meta.env.BASE_URL}images/real/in-focus.webp`}
                   alt="In Focus"
                   className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
                 />
@@ -175,7 +181,7 @@ export default function Home() {
             <div>
               <h2 className="text-3xl font-serif font-bold text-foreground mb-4">{t('home.amcham_news')}</h2>
             </div>
-            <Link href="/news" className="hidden md:flex items-center gap-2 text-sm font-bold text-primary hover:underline">
+            <Link href="/news" className="tap hidden md:flex items-center gap-2 text-sm font-bold text-primary hover:underline">
               {t('common.view_all')} <ChevronRight className="w-4 h-4"/>
             </Link>
           </div>
@@ -214,7 +220,7 @@ export default function Home() {
             <div>
               <h2 className="text-3xl font-serif font-bold text-foreground mb-4">{t('nav.events')}</h2>
             </div>
-            <Link href="/events" className="hidden md:flex items-center gap-2 text-sm font-bold text-primary hover:underline">
+            <Link href="/events" className="tap hidden md:flex items-center gap-2 text-sm font-bold text-primary hover:underline">
               {t('common.view_all')} <ChevronRight className="w-4 h-4"/>
             </Link>
           </div>
@@ -264,7 +270,7 @@ export default function Home() {
             <div className="order-1 lg:order-2">
               <div className="aspect-[4/3] relative rounded-2xl overflow-hidden shadow-md group">
                 <ImageWithSkeleton
-                  src={`${import.meta.env.BASE_URL}images/member-story-1.jpg`}
+                  src={`${import.meta.env.BASE_URL}images/member-story-1.webp`}
                   alt="Member Story"
                   className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
                 />
@@ -278,7 +284,7 @@ export default function Home() {
       <section ref={parallaxRef1} className="relative h-[60vh] min-h-[400px] overflow-hidden flex items-center justify-center">
         <motion.div style={{ y: y1 }} className="absolute inset-0 -top-[20%] h-[140%] z-0">
           <img 
-            src={`${import.meta.env.BASE_URL}images/real/hero-1.jpg`} 
+            src={`${import.meta.env.BASE_URL}images/real/hero-1.webp`} 
             alt="AmCham Serbia" 
             className="w-full h-full object-cover"
           />
@@ -301,7 +307,7 @@ export default function Home() {
       {/* 9. Meet the Executive Team */}
       <section className="py-24 bg-background overflow-hidden relative">
         <img 
-          src={`${import.meta.env.BASE_URL}images/real/morph-2.png`}
+          src={`${import.meta.env.BASE_URL}images/real/morph-2.webp`}
           alt=""
           className="absolute -right-32 bottom-0 w-[500px] opacity-10 pointer-events-none mix-blend-multiply"
         />
@@ -311,7 +317,7 @@ export default function Home() {
               <h2 className="text-3xl md:text-4xl font-serif font-bold text-foreground mb-4">{t('home.meet_team')}</h2>
               <p className="text-lg text-muted-foreground max-w-xl">Dedicated professionals working to advance the interests of our members and the Serbian economy.</p>
             </div>
-            <Link href="/about" className="flex items-center gap-2 text-sm font-bold text-primary hover:underline shrink-0">
+            <Link href="/about" className="tap flex items-center gap-2 text-sm font-bold text-primary hover:underline shrink-0">
               {t('common.view_all')} <ChevronRight className="w-4 h-4"/>
             </Link>
           </div>
@@ -342,7 +348,7 @@ export default function Home() {
       <section ref={parallaxRef2} className="relative py-32 overflow-hidden flex items-center justify-center">
         <motion.div style={{ y: y2 }} className="absolute inset-0 -top-[20%] h-[140%] z-0">
           <img 
-            src={`${import.meta.env.BASE_URL}images/real/join-us.jpg`} 
+            src={`${import.meta.env.BASE_URL}images/real/join-us.webp`} 
             alt="Join AmCham" 
             className="w-full h-full object-cover"
           />

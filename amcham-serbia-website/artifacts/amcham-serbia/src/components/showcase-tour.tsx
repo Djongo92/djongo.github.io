@@ -1,14 +1,17 @@
-import React, { createContext, useContext, useEffect, useState } from 'react';
+import React, { createContext, lazy, Suspense, useContext, useEffect, useState } from 'react';
 import { useLocation } from 'wouter';
 import { AnimatePresence } from 'framer-motion';
 import { Presentation } from 'lucide-react';
 import { useI18n } from '@/lib/i18n';
-import { TourOverlay } from '@/pages/platform/console/components/Overlays';
 
 // The showcase is a self-guided walk through the platform for anyone who
 // opens the demo on their own. One route for everyone, written to the
 // reader; a step can carry a short "Try it" hint pointing at something to
 // click. It ends on the page that explains how the AI works.
+
+// The overlay lives with the console code; load it only when a tour starts so
+// the public site doesn't carry the platform's data on first load.
+const TourOverlay = lazy(() => import('@/pages/platform/console/components/Overlays').then((m) => ({ default: m.TourOverlay })));
 
 interface StepDef { id: string; path: string; title: string; desc: string; tip?: string }
 
@@ -95,6 +98,7 @@ export function ShowcaseProvider({ children }: { children: React.ReactNode }) {
   return (
     <ShowcaseContext.Provider value={{ active, start, focus: active ? FOCUS : null }}>
       {children}
+      <Suspense fallback={null}>
       <AnimatePresence>
         {active && (
           <TourOverlay
@@ -119,6 +123,7 @@ export function ShowcaseProvider({ children }: { children: React.ReactNode }) {
           />
         )}
       </AnimatePresence>
+      </Suspense>
     </ShowcaseContext.Provider>
   );
 }

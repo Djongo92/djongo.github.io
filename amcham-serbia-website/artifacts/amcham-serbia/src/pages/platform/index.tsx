@@ -82,7 +82,7 @@ export default function PlatformHub() {
             <a
               href="?reset=1"
               title={t('platform.hub.reset_demo_hint', 'Forget language, theme and finished tours, then reload')}
-              className="inline-flex items-center gap-1.5 text-xs font-semibold text-muted-foreground hover:text-foreground transition-colors"
+              className="tap inline-flex items-center gap-1.5 text-xs font-semibold text-muted-foreground hover:text-foreground transition-colors"
             >
               <RotateCcw className="w-3.5 h-3.5" /> {t('platform.hub.reset_demo', 'Reset demo')}
             </a>

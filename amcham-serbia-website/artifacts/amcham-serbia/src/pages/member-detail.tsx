@@ -30,7 +30,7 @@ export default function MemberDetail() {
       
       <div className="container mx-auto px-4 md:px-8 relative -mt-24 md:-mt-32">
         
-        <Link href="/members" className="inline-flex items-center gap-2 text-sm font-semibold hover:text-secondary-foreground mb-6 text-secondary-foreground/80 transition-colors relative z-20">
+        <Link href="/members" className="tap inline-flex items-center gap-2 text-sm font-semibold hover:text-secondary-foreground mb-6 text-secondary-foreground/80 transition-colors relative z-20">
           <ArrowLeft className="w-4 h-4" /> {t('members.detail.back')}
         </Link>
         

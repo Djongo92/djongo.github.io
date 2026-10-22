@@ -168,9 +168,10 @@ export function Header() {
         </div>
 
         {/* Mobile Toggle & Mobile Search Icon */}
-        <div className="flex items-center gap-4 lg:hidden">
+        <div className="flex items-center gap-1 -mr-2 lg:hidden">
           <button 
-            className="z-50 text-foreground"
+            className="z-50 text-foreground w-11 h-11 flex items-center justify-center rounded-full"
+            aria-label={t('nav.search_label', 'Search')}
             onClick={() => {
               if (!isMobileMenuOpen) {
                 navigate('/search');
@@ -183,7 +184,9 @@ export function Header() {
           </button>
 
           <button 
-            className="z-50 text-foreground"
+            className="z-50 text-foreground w-11 h-11 flex items-center justify-center rounded-full"
+            aria-label={isMobileMenuOpen ? t('nav.menu_close', 'Close menu') : t('nav.menu_open', 'Open menu')}
+            aria-expanded={isMobileMenuOpen}
             onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
           >
             {isMobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}

@@ -2,7 +2,7 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>AmCham Serbia — The Leading Independent Business Association</title>
     <meta name="description" content="AmCham Serbia unites U.S., international, and local companies working to improve Serbia's business environment. Explore membership, events, advocacy, and research." />
     <meta name="robots" content="index, follow" />
@@ -16,10 +16,29 @@
     <link rel="icon" type="image/png" href="/brand/amcham-favicon.png" />
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;1,400;1,600&family=Plus+Jakarta+Sans:ital,wght@0,400;0,500;0,600;0,700;0,800;1,400;1,500&display=swap" rel="stylesheet">
+    <!-- Fonts load without holding up the first paint; text shows in the fallback face until they arrive. -->
+    <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;1,400;1,600&family=Plus+Jakarta+Sans:ital,wght@0,400;0,500;0,600;0,700;0,800;1,400;1,500&display=swap" onload="this.onload=null;this.rel='stylesheet'">
+    <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;1,400;1,600&family=Plus+Jakarta+Sans:ital,wght@0,400;0,500;0,600;0,700;0,800;1,400;1,500&display=swap"></noscript>
+    <link rel="preload" as="image" href="%BASE_URL%images/real/hero-2.webp" imagesrcset="%BASE_URL%images/real/hero-2-900.webp 900w, %BASE_URL%images/real/hero-2.webp 1920w" imagesizes="100vw" fetchpriority="high">
   </head>
   <body>
     <div id="root"></div>
+    <script>
+      // On the home page, draw the hero photo straight away so phones see it
+      // before the app has loaded; React replaces this on its first render.
+      (function () {
+        var base = '%BASE_URL%';
+        if (location.pathname !== base && location.pathname !== base + 'index.html') return;
+        document.getElementById('root').innerHTML =
+          '<div aria-hidden="true"><div class="h-20"></div>' +
+          '<div class="relative w-full h-[80vh] min-h-[560px] max-h-[820px] overflow-hidden bg-secondary">' +
+          '<img alt="" fetchpriority="high" sizes="100vw" class="absolute inset-0 w-full h-full object-cover opacity-60"' +
+          ' src="' + base + 'images/real/hero-2-900.webp"' +
+          ' srcset="' + base + 'images/real/hero-2-900.webp 900w, ' + base + 'images/real/hero-2.webp 1920w">' +
+          '<div class="absolute inset-0 bg-gradient-to-b from-secondary/85 via-secondary/60 to-secondary/90"></div>' +
+          '</div></div>';
+      })();
+    </script>
     <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>

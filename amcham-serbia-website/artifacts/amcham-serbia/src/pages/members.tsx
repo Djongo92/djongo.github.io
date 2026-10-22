@@ -82,6 +82,7 @@ export default function Members() {
 
           <div className="flex gap-4 w-full md:w-auto">
             <select 
+              aria-label={t('members.filter_category', 'Membership category')}
               value={categoryFilter}
               onChange={(e) => updateFilters({ category: e.target.value })}
               className="border border-border p-3 rounded-2xl bg-background focus:outline-none focus:border-primary flex-1 md:w-48 text-sm"
@@ -91,6 +92,7 @@ export default function Members() {
             </select>
 
             <select 
+              aria-label={t('members.filter_sector', 'Sector')}
               value={sectorFilter}
               onChange={(e) => updateFilters({ sector: e.target.value })}
               className="border border-border p-3 rounded-2xl bg-background focus:outline-none focus:border-primary flex-1 md:w-48 text-sm"
@@ -121,7 +123,7 @@ export default function Members() {
           {filteredMembers.length === 0 ? (
             <div className="text-center py-24 bg-card border border-dashed border-border rounded-sm">
               <Building2 className="w-12 h-12 text-muted-foreground mx-auto mb-4 opacity-50" />
-              <h3 className="text-xl font-bold font-serif mb-2">{t('members.no_results')}</h3>
+              <h2 className="text-xl font-bold font-serif mb-2">{t('members.no_results')}</h2>
               <p className="text-muted-foreground">{t('members.no_results_desc')}</p>
             </div>
           ) : (
@@ -139,7 +141,7 @@ export default function Members() {
                       </span>
                     </div>
 
-                    <h3 className="text-xl font-serif font-bold mb-1">{member.name}</h3>
+                    <h2 className="text-xl font-serif font-bold mb-1">{member.name}</h2>
                     <span className="text-xs text-primary font-bold uppercase tracking-widest mb-4 block">{sector}</span>
                     
                     <p className="text-sm text-muted-foreground mb-6 line-clamp-3 flex-1">
@@ -147,10 +149,10 @@ export default function Members() {
                     </p>
 
                     <div className="flex items-center justify-between mt-auto pt-4 border-t border-border">
-                      <Link href={`/members/${member.id}`} className="text-sm font-bold text-foreground hover:text-primary transition-colors">
+                      <Link href={`/members/${member.id}`} className="tap text-sm font-bold text-foreground hover:text-primary transition-colors">
                         {t('members.view_profile')}
                       </Link>
-                      <a href={member.website} target="_blank" rel="noopener noreferrer" className="text-muted-foreground hover:text-primary transition-colors" aria-label="Visit website">
+                      <a href={member.website} target="_blank" rel="noopener noreferrer" className="tap text-muted-foreground hover:text-primary transition-colors" aria-label="Visit website">
                         <ExternalLink className="w-4 h-4" />
                       </a>
                     </div>

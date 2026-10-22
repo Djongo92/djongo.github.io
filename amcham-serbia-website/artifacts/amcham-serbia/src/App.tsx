@@ -1,4 +1,4 @@
-import { type ReactNode } from 'react';
+import { lazy, Suspense, type ReactNode } from 'react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { ThemeProvider } from 'next-themes';
 import { ErrorBoundary } from '@/components/error-boundary';
@@ -26,21 +26,24 @@ import Insights from '@/pages/insights';
 import InsightDetail from '@/pages/insight-detail';
 import Advocacy from '@/pages/advocacy';
 import About from '@/pages/about';
-import Impact from '@/pages/impact';
 import News from '@/pages/news';
 import NewsDetail from '@/pages/news-detail';
 import SearchPage from '@/pages/search';
-import Proposal from '@/pages/proposal';
-import PlatformHub from '@/pages/platform/index';
-import PlatformConsole from '@/pages/platform/console';
-import PlatformPortal from '@/pages/platform/portal';
-import PlatformSeam from '@/pages/platform/seam';
+import { PrivacyPage, CookiesPage } from '@/pages/legal';
 import NotFound from '@/pages/not-found';
-import BlueprintOverview from '@/pages/blueprint/index';
-import BlueprintDiagnostic from '@/pages/blueprint/diagnostic';
-import BlueprintRoadmap from '@/pages/blueprint/roadmap';
-import BlueprintDirection from '@/pages/blueprint/direction';
-import BlueprintPages from '@/pages/blueprint/pages';
+
+// Heavier pages load their code on first visit.
+const Impact = lazy(() => import('@/pages/impact'));
+const Proposal = lazy(() => import('@/pages/proposal'));
+const PlatformHub = lazy(() => import('@/pages/platform/index'));
+const PlatformConsole = lazy(() => import('@/pages/platform/console'));
+const PlatformPortal = lazy(() => import('@/pages/platform/portal'));
+const PlatformSeam = lazy(() => import('@/pages/platform/seam'));
+const BlueprintOverview = lazy(() => import('@/pages/blueprint/index'));
+const BlueprintDiagnostic = lazy(() => import('@/pages/blueprint/diagnostic'));
+const BlueprintRoadmap = lazy(() => import('@/pages/blueprint/roadmap'));
+const BlueprintDirection = lazy(() => import('@/pages/blueprint/direction'));
+const BlueprintPages = lazy(() => import('@/pages/blueprint/pages'));
 
 const queryClient = new QueryClient();
 
@@ -48,6 +51,9 @@ function Router() {
   return (
     <Shell>
       <RoutedErrorBoundary>
+        {/* The public pages ship with the first load; the heavier ones (the
+            join form, the platform, the Blueprint) load their code on first visit. */}
+        <Suspense fallback={<div className="min-h-[60vh]" aria-busy="true" />}>
         <Switch>
           <Route path="/" component={Home} />
           <Route path="/membership" component={Membership} />
@@ -63,6 +69,8 @@ function Router() {
           <Route path="/news" component={News} />
           <Route path="/news/:id" component={NewsDetail} />
           <Route path="/search" component={SearchPage} />
+          <Route path="/privacy" component={PrivacyPage} />
+          <Route path="/cookies" component={CookiesPage} />
           <Route path="/ai" component={Proposal} />
           <Route path="/proposal" component={Proposal} />
           <Route path="/platform" component={PlatformHub} />
@@ -76,6 +84,7 @@ function Router() {
           <Route path="/blueprint/pages" component={BlueprintPages} />
           <Route component={NotFound} />
         </Switch>
+        </Suspense>
       </RoutedErrorBoundary>
     </Shell>
   );

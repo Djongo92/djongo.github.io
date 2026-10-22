@@ -130,11 +130,11 @@ export default function Insights() {
                   </div>
                   
                   <div className="bg-background px-8 py-4 border-t border-border flex justify-between items-center">
-                    <Link href={`/insights/${insight.id}`} className="text-sm font-bold hover:text-primary transition-colors">
+                    <Link href={`/insights/${insight.id}`} className="tap text-sm font-bold hover:text-primary transition-colors">
                       {t('insights.read_summary')}
                     </Link>
                     {insight.fileSize && (
-                      <button className="flex items-center gap-2 text-sm font-bold text-muted-foreground hover:text-primary transition-colors">
+                      <button className="tap flex items-center gap-2 text-sm font-bold text-muted-foreground hover:text-primary transition-colors">
                         <Download className="w-4 h-4" /> PDF ({insight.fileSize})
                       </button>
                     )}

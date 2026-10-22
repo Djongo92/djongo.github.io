@@ -49,7 +49,7 @@ export default function Impact() {
       <section className="bg-secondary text-secondary-foreground py-20 pb-32 relative overflow-hidden">
         <div className="absolute inset-0 bg-network-pattern opacity-10 pointer-events-none"></div>
         <div className="container mx-auto px-4 md:px-8 relative z-10">
-          <Link href="/about" className="text-sm font-bold text-accent hover:underline mb-6 inline-flex items-center gap-2">
+          <Link href="/about" className="tap text-sm font-bold text-accent hover:underline mb-6 inline-flex items-center gap-2">
             <ArrowLeft className="w-4 h-4" /> {t('impact.back_to_about')}
           </Link>
           <h1 className="text-4xl md:text-6xl font-serif font-bold mb-6">{t('impact.title')}</h1>

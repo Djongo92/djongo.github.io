@@ -28,7 +28,7 @@ export default function InsightDetail() {
       <section className="bg-secondary text-secondary-foreground pt-12 pb-24 relative overflow-hidden">
         <div className="absolute inset-0 z-0 pointer-events-none">
           <img 
-            src={`${import.meta.env.BASE_URL}images/research-documents.jpg`} 
+            src={`${import.meta.env.BASE_URL}images/research-documents.webp`} 
             alt="Research Background" 
             className="w-full h-full object-cover opacity-20 mix-blend-overlay"
           />
@@ -36,7 +36,7 @@ export default function InsightDetail() {
         </div>
         
         <div className="container mx-auto px-4 md:px-8 relative z-10">
-          <Link href="/insights" className="inline-flex items-center gap-2 text-sm font-semibold hover:text-secondary-foreground mb-12 text-muted-foreground transition-colors">
+          <Link href="/insights" className="tap inline-flex items-center gap-2 text-sm font-semibold hover:text-secondary-foreground mb-12 text-muted-foreground transition-colors">
             <ArrowLeft className="w-4 h-4" /> {t('insights.detail.back')}
           </Link>
           

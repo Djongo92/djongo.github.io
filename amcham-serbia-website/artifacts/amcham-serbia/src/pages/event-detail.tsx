@@ -30,7 +30,7 @@ export default function EventDetail() {
       <section className="bg-secondary text-secondary-foreground pt-12 pb-24 relative overflow-hidden">
         <div className="absolute inset-0 bg-network-pattern opacity-10 pointer-events-none"></div>
         <div className="container mx-auto px-4 md:px-8 relative z-10">
-          <Link href="/events" className="inline-flex items-center gap-2 text-sm font-semibold hover:text-secondary-foreground mb-12 text-muted-foreground transition-colors">
+          <Link href="/events" className="tap inline-flex items-center gap-2 text-sm font-semibold hover:text-secondary-foreground mb-12 text-muted-foreground transition-colors">
             <ArrowLeft className="w-4 h-4" /> {t('events.detail.back')}
           </Link>
           

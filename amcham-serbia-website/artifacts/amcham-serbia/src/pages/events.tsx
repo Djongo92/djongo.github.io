@@ -80,8 +80,9 @@ export default function Events() {
             </button>
           </div>
           <div className="flex items-center gap-2 w-full md:w-auto">
-            <span className="text-sm font-semibold text-muted-foreground whitespace-nowrap">{t('events.topic')}</span>
+            <label htmlFor="events-topic" className="text-sm font-semibold text-muted-foreground whitespace-nowrap">{t('events.topic')}</label>
             <select 
+              id="events-topic"
               value={topicFilter}
               onChange={(e) => updateFilters({ topic: e.target.value })}
               className="border border-border p-2 rounded-sm text-sm focus:outline-none focus:border-primary bg-background w-full md:w-auto"
@@ -101,7 +102,7 @@ export default function Events() {
           {filteredEvents.length === 0 ? (
             <div className="text-center py-24 border border-dashed border-border/50 rounded-sm bg-card">
               <Calendar className="w-12 h-12 text-muted-foreground mx-auto mb-4 opacity-50" />
-              <h3 className="text-xl font-bold font-serif mb-2">{t('events.no_results')}</h3>
+              <h2 className="text-xl font-bold font-serif mb-2">{t('events.no_results')}</h2>
               <p className="text-muted-foreground mb-6">{t('events.no_results_desc')}</p>
               {topicFilter !== 'all' && (
                 <button
@@ -136,7 +137,7 @@ export default function Events() {
                           {getStatusBadge(event.status)}
                           <span className="text-xs font-bold text-muted-foreground tracking-widest uppercase">{topic}</span>
                         </div>
-                        <h3 className="text-2xl font-serif font-bold mb-2 group-hover:text-primary transition-colors truncate">{title}</h3>
+                        <h2 className="text-2xl font-serif font-bold mb-2 group-hover:text-primary transition-colors truncate">{title}</h2>
                         <div className="flex flex-wrap items-center gap-4 text-sm text-muted-foreground">
                           <span className="flex items-center gap-1.5"><MapPin className="w-4 h-4"/> {event.venue}</span>
                           <span className="flex items-center gap-1.5"><Calendar className="w-4 h-4"/> {event.audience}</span>

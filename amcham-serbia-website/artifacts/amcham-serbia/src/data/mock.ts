@@ -1,4 +1,4 @@
-import { companies as platformCompanies } from './platform';
+import { companies as platformCompanies } from './companies';
 
 export interface Event {
   id: string;
