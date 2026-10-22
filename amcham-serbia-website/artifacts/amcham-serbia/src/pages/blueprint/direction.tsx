@@ -46,7 +46,7 @@ export default function BlueprintDirection() {
             </div>
           </div>
           <p className="mt-8 text-lg text-foreground max-w-4xl leading-relaxed bg-primary/5 p-6 border-l-4 border-primary">
-            <strong>Coolness = visual character:</strong> clear opening message, disciplined typography, real member stories, good local photography, well-presented evidence. It does not require more animation, an app, or an AI feature. The site must remain fully useful with motion off.
+            <strong>Modern means character, not decoration:</strong> a clear opening message, disciplined typography, real member stories, good local photography and well-presented evidence. Motion and AI earn their place only where they save members or staff time, and the site stays fully useful with motion turned off.
           </p>
         </div>
 

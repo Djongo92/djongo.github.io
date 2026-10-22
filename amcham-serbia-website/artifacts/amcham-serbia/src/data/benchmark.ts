@@ -1,4 +1,4 @@
-// AmCham network website benchmark, 22 October 2026: every full member of
+// AmCham network website benchmark, October 2026: every full member of
 // AmChams in Europe with a public site, scored on twelve checks
 // (2 meets, 1 partly, 0 doesn't, U couldn't check, N/A not applicable).
 // PSI = Google PageSpeed Insights, home page, Performance / Accessibility.
