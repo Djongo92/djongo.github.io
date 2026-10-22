@@ -195,6 +195,9 @@ en: {
       contact: "Contact",
       navigation: "Navigation",
       follow: "Follow Us",
+      explore: "Explore",
+      redesign: "The redesign",
+      tagline: "The leading independent business association in Serbia.",
     },
     home: {
       hero_title: "Business Moves Serbia",
@@ -1353,6 +1356,9 @@ sr: {
       contact: "Kontakt",
       navigation: "Navigacija",
       follow: "Pratite nas",
+      explore: "Istražite",
+      redesign: "Redizajn",
+      tagline: "Vodeće nezavisno poslovno udruženje u Srbiji.",
     },
     home: {
       hero_title: "Biznis pokreće Srbiju",
