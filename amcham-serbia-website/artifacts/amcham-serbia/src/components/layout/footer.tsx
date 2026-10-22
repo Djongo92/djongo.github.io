@@ -1,11 +1,19 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { Link } from 'wouter';
 import { useI18n } from '@/lib/i18n';
 import { openCookieSettings } from '@/components/cookie-consent';
 import { Linkedin, Twitter, Youtube } from 'lucide-react';
 
+// Set by the demo's sign-in screen (Cloudflare); absent elsewhere.
+function signedInEmail(): string | null {
+  const m = document.cookie.match(/(?:^|;\s*)amcham_demo_email=([^;]+)/);
+  try { return m ? decodeURIComponent(m[1]) : null; } catch { return null; }
+}
+
 export function Footer() {
   const { t } = useI18n();
+  const [email, setEmail] = useState<string | null>(null);
+  useEffect(() => setEmail(signedInEmail()), []);
 
   return (
     <footer className="bg-secondary text-secondary-foreground pt-16 pb-8 border-t-4 border-primary print:hidden">
@@ -71,6 +79,11 @@ export function Footer() {
             <Link href="/privacy" className="py-3 md:py-1 hover:text-secondary-foreground transition-colors">{t('footer.privacy')}</Link>
             <Link href="/cookies" className="py-3 md:py-1 hover:text-secondary-foreground transition-colors">{t('footer.cookies', 'Cookie policy')}</Link>
             <button onClick={openCookieSettings} className="py-3 md:py-1 hover:text-secondary-foreground transition-colors">{t('cookies.settings', 'Cookie settings')}</button>
+            {email && (
+              <span className="py-3 md:py-1">
+                {t('footer.signed_in_as', 'Signed in as')} {email} · <a href="/__auth/signout" className="underline underline-offset-2 hover:text-secondary-foreground">{t('footer.sign_out', 'Sign out')}</a>
+              </span>
+            )}
           </div>
         </div>
       </div>
