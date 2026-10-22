@@ -67,7 +67,7 @@ const LEARN = [
 ];
 
 const GAPS = [
-  { title: 'Is anything happening?', text: 'A member who opens the calendar finds an empty month, and the newest news is seven weeks old. This is the gap most particular to amcham.rs: 24 of 41 network sites show both a dated upcoming event and recent news. For members, the calendar is the most practical page on the site.' },
+  { title: 'Is anything happening?', text: 'A member who opens the calendar finds an empty month, and the newest news item is dated 2 September. This is the gap most particular to amcham.rs: 24 of 41 network sites show both a dated upcoming event and recent news. For members, the calendar is the most practical page on the site.' },
   { title: 'Privacy and cookies', text: 'There is no privacy notice to link to and no cookie choice yet. Both are quick to add, and visitors increasingly look for them. The redesign includes placeholder versions of each.' },
   { title: 'The phone', text: 'Pinch-zoom is blocked, which matters to anyone who needs larger text, and the pages are heavy. Both are common across the network: only 2 of 43 sites meet the speed standard.' },
   { title: 'The first screen', text: 'The opening slide says who AmCham Serbia is, but not whom it serves or why companies join, and the joining message is the 11th of 13 blocks. Only 8 of 41 network sites get the opening message right.' },
@@ -109,6 +109,9 @@ function NetworkBar({ meets, of }: { meets: number; of: number }) {
 
 const CHECK_NAMES = CHECKS.map((c) => `${c.id} ${c.name}`);
 
+// Best first; tied sites keep alphabetical order, unranked sites go last.
+const RANKED_ROWS = [...BENCHMARK_ROWS].sort((a, b) => (a.rank ?? Infinity) - (b.rank ?? Infinity) || a.name.localeCompare(b.name));
+
 export default function BlueprintDiagnostic() {
   const { t } = useI18n();
   const todayMet = CHECKS.filter((c) => c.today.score === '2').length;
@@ -120,7 +123,7 @@ export default function BlueprintDiagnostic() {
 
         {/* Summary */}
         <div className="max-w-3xl mb-16">
-          <p className="text-xs font-bold uppercase tracking-widest text-muted-foreground mb-3">Website benchmark · checked 22 October 2026</p>
+          <p className="text-xs font-bold uppercase tracking-widest text-muted-foreground mb-3">Website benchmark · October 2026</p>
           <h2 className="text-3xl md:text-4xl font-serif font-bold mb-6 text-balance">How amcham.rs measures up</h2>
           <div className="space-y-4 text-lg text-foreground/85 leading-relaxed">
             <p>amcham.rs has a lot going for it. Its Serbian version reads naturally, joining, events, members and publications are a click or two away, and the research archive goes back to 2015.</p>
@@ -271,7 +274,7 @@ export default function BlueprintDiagnostic() {
           <summary className="cursor-pointer list-none flex items-center justify-between gap-4 p-5 md:p-6 min-h-11">
             <span>
               <span className="block font-semibold text-foreground">Show all 43 network sites</span>
-              <span className="block text-sm text-muted-foreground">The full scoring table, as checked on 22 October 2026</span>
+              <span className="block text-sm text-muted-foreground">The full scoring table, in ranking order</span>
             </span>
             <ChevronDown className="w-5 h-5 text-muted-foreground transition-transform group-open:rotate-180 shrink-0" aria-hidden="true" />
           </summary>
@@ -287,7 +290,7 @@ export default function BlueprintDiagnostic() {
                 </tr>
               </thead>
               <tbody className="divide-y divide-border">
-                {BENCHMARK_ROWS.map((r) => {
+                {RANKED_ROWS.map((r) => {
                   const self = r.url === 'amcham.rs';
                   return (
                     <tr key={r.url} className={self ? 'bg-primary/5 font-semibold' : undefined}>
@@ -309,11 +312,11 @@ export default function BlueprintDiagnostic() {
         <section className="max-w-3xl">
           <h3 className="text-lg font-semibold mb-3">How this was done</h3>
           <ul className="space-y-2 text-sm text-muted-foreground leading-relaxed list-disc pl-5">
-            <li>The roster is the AmChams in Europe members page (44 full members, 4 observers), read on 22 October 2026. The 43 full members with a public site were scored; AmCham Russia is suspended and the observers are left out.</li>
-            <li>Every site was visited the same day and measured once in Google PageSpeed Insights (mobile and desktop). Single runs vary by a few points.</li>
+            <li>The roster is the AmChams in Europe members page (44 full members, 4 observers), read in October 2026. The 43 full members with a public site were scored; AmCham Russia is suspended and the observers are left out.</li>
+            <li>Every site was visited in a single day and measured once in Google PageSpeed Insights (mobile and desktop). Single runs vary by a few points.</li>
             <li>The standard draws on GOV.UK’s design principles, W3C’s WCAG 2.2, Google’s PageSpeed documentation, Nielsen Norman Group and Stanford’s web credibility guidelines.</li>
             <li>Calm design (C9) is read here as text and buttons that stay put. Network scores for it come from the original review, which counted any self-moving slider, so a few more network sites might pass under this reading.</li>
-            <li>The scores are one reviewer’s judgment from text and code checks, not user testing, and describe the sites as they were on 22 October 2026.</li>
+            <li>The scores are one reviewer’s judgment from text and code checks, not user testing, and describe the sites as they were on the day they were checked.</li>
           </ul>
         </section>
 
