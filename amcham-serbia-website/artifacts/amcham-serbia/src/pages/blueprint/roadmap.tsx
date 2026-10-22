@@ -1,5 +1,6 @@
 import React from 'react';
 import { BlueprintLayout } from '@/components/blueprint-layout';
+import { Link } from 'wouter';
 import { useI18n } from '@/lib/i18n';
 import { Target, Flag, PenTool, Rocket, LineChart } from 'lucide-react';
 
@@ -10,20 +11,20 @@ export default function BlueprintRoadmap() {
     {
       id: 1,
       icon: Target,
-      title: "Step 1 — Fix what is broken",
+      title: "Step 1 — Quick wins",
       timeline: "Weeks 1–2",
-      what: "Broken links, duplicated news, statistics trapped behind animations, out-of-date committee pages.",
-      why: "These are verified defects, not opinions. Fixing them costs little, builds trust in the process, and stops the current site actively undermining credibility while the redesign is prepared.",
-      unlocks: "A trustworthy baseline to measure the redesign against."
+      what: "Fill the events calendar, point the “new Board members” button to the right page, update the Digital Economy Committee page (it still says 2023–2025), and add a privacy notice with a cookie choice.",
+      why: "Small things that are quick to put right and make a visible difference straight away, while the redesign is prepared.",
+      unlocks: "A clean starting point to measure the redesign against."
     },
     {
       id: 2,
       icon: Flag,
-      title: "Step 2 — Agree the direction on evidence, not taste",
+      title: "Step 2 — Try the direction with members",
       timeline: "Weeks 3–4",
       what: "Five prototype pages (the ones on this site), tested with real members and prospective members on the five journeys.",
-      why: "Design debates at board level are settled by watching real users succeed or fail, not by preference. One round of testing now prevents months of revision later.",
-      unlocks: "A signed-off direction everyone has already seen working."
+      why: "Watching a few members try the pages settles most design questions quickly. One round of testing now saves months of revisions later.",
+      unlocks: "An agreed direction everyone has already seen working."
     },
     {
       id: 3,
@@ -31,7 +32,7 @@ export default function BlueprintRoadmap() {
       title: "Step 3 — Rebuild the core journeys",
       timeline: "Weeks 5–8",
       what: "Membership enquiry, events, directory, research, advocacy — the five templates, bilingual, with the content model that links them (an event connects to its committee, topic, and research).",
-      why: "These five journeys ARE the website for 90% of visitors. Depth elsewhere can wait; these cannot.",
+      why: "These five journeys are what most visitors come for. The rest of the site can follow; these come first.",
       unlocks: "The measurable core — enquiries, registrations, research reads."
     },
     {
@@ -40,17 +41,17 @@ export default function BlueprintRoadmap() {
       title: "Step 4 — Verify, train, launch",
       timeline: "Weeks 9–12",
       what: "Accessibility check, editor training, rehearsed launch with a rollback plan.",
-      why: "A site the team cannot confidently update decays within months. Launch is an operational event, not just a technical one.",
+      why: "A site stays good when the team can update it with confidence, so training and a calm launch matter as much as the build.",
       unlocks: "A site that stays good because the team owns it."
     },
     {
       id: 5,
       icon: LineChart,
-      title: "Step 5 — Measure, then decide what else",
+      title: "Step 5 — Measure, then switch on the platform",
       timeline: "30 & 90 days after launch",
-      what: <span>Review enquiry and registration numbers against the Step-1 baseline; only then consider extras (dashboards, personalisation, AI features). Note: The <a href="/platform" className="text-primary underline">Member Platform</a> is the concrete post-launch horizon.</span>,
-      why: "Features added before evidence tend to serve internal wishes, not visitors. The first 90 days of data tells us what is actually worth building next.",
-      unlocks: "A backlog driven by evidence, with every future feature able to point to the number it should move."
+      what: <span>Compare enquiries and registrations with the Step 1 starting point, and use the numbers to decide which <Link href="/platform" className="text-primary underline">platform</Link> features to switch on first, starting with the ones that save the team the most time.</span>,
+      why: "The first 90 days of real use show what members and staff need most, so each next step can point to the difference it should make.",
+      unlocks: "A clear order for what comes next, based on how the site is actually used."
     }
   ];
 
@@ -61,8 +62,7 @@ export default function BlueprintRoadmap() {
         <div className="max-w-3xl mb-16">
           <h2 className="text-3xl font-serif font-bold mb-6">The Roadmap</h2>
           <p className="text-lg text-muted-foreground leading-relaxed">
-            A redesign is not just a visual update; it is an operational shift. 
-            Here is the five-step plan where every phase argues for its own existence.
+            Five steps, each with a reason and what it makes possible.
           </p>
         </div>
 

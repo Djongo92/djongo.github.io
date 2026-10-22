@@ -239,7 +239,7 @@ const cookiesEn: LegalDoc = {
       table: {
         head: ['Name', 'What it does', 'How long'],
         rows: [
-          ['amcham_lang', 'Remembers English or Serbian', 'Until you clear it'],
+          ['amcham_lang', 'Remembers English or Serbian during your visit', 'Until you close the tab'],
           ['theme', 'Remembers light or dark mode', 'Until you clear it'],
           ['amcham_cookie_choice', 'Remembers your cookie choice', '12 months'],
         ],
@@ -300,7 +300,7 @@ const cookiesSr: LegalDoc = {
       table: {
         head: ['Naziv', 'Čemu služi', 'Trajanje'],
         rows: [
-          ['amcham_lang', 'Pamti srpski ili engleski', 'Dok ga ne obrišete'],
+          ['amcham_lang', 'Pamti srpski ili engleski tokom posete', 'Dok ne zatvorite karticu'],
           ['theme', 'Pamti svetli ili tamni režim', 'Dok ga ne obrišete'],
           ['amcham_cookie_choice', 'Pamti vaš izbor kolačića', '12 meseci'],
         ],

@@ -149,7 +149,7 @@ export default function BlueprintDiagnostic() {
         <section className="mb-20">
           <div className="max-w-3xl mb-8">
             <h3 className="text-2xl font-serif font-bold mb-4">Two yardsticks</h3>
-            <p className="text-foreground/85 leading-relaxed mb-4">The bar comes from outside the network: the UK government’s design principles (“start with user needs”, “do less”), Google’s PageSpeed measure, usability research, and the international accessibility guidelines (WCAG 2.2 AA), which are good practice for a private association rather than a legal duty.</p>
+            <p className="text-foreground/85 leading-relaxed mb-4">The bar comes from outside the network: the UK government’s design principles (“start with user needs”, “do less”), Google’s PageSpeed measure, usability research, and the international accessibility guidelines (WCAG 2.2 AA).</p>
             <p className="text-foreground/85 leading-relaxed">Other AmChams make a poor yardstick because they share the same problems. Even respected bodies outside the network are slow on phones: of four association sites measured, none scored above 59.</p>
           </div>
           <dl className="grid grid-cols-2 lg:grid-cols-4 gap-px bg-border rounded-2xl overflow-hidden border border-border">

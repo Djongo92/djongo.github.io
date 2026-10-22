@@ -13,6 +13,7 @@ if (params.has('reset')) {
     Object.keys(localStorage)
       .filter((k) => k.startsWith('amcham_') || k === 'theme')
       .forEach((k) => localStorage.removeItem(k));
+    sessionStorage.removeItem('amcham_lang');
   } catch {
     // Storage can be unavailable (private mode); a reload is still a reset.
   }

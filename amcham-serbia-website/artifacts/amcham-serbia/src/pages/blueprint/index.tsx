@@ -18,7 +18,7 @@ export default function BlueprintOverview() {
           </h2>
           <p className="text-xl text-muted-foreground leading-relaxed">
             The AmCham Serbia platform must be as effective as the organization it represents. 
-            This blueprint strips away the noise to show what works, what's hard, and the five steps to fix it.
+            This blueprint shows what works, what could work better, and five steps to get there.
           </p>
         </div>
 
@@ -29,13 +29,13 @@ export default function BlueprintOverview() {
             <div className="mb-6 w-12 h-12 bg-primary/10 flex items-center justify-center rounded-full text-primary">
               <LayoutDashboard className="w-6 h-6" />
             </div>
-            <h3 className="text-2xl font-serif font-bold mb-4">1. The Diagnostic</h3>
+            <h3 className="text-2xl font-serif font-bold mb-4">1. The analysis</h3>
             <p className="text-muted-foreground mb-8 leading-relaxed">
               What the site does well today, where it struggles to serve members, and the plain evidence of how we measure up.
             </p>
             <div className="mt-auto">
               <Link href="/blueprint/diagnostic" className="inline-flex items-center gap-2 text-primary font-bold hover:underline group-hover:gap-3 transition-all">
-                Read the diagnostic <ArrowRight className="w-4 h-4" />
+                Read the analysis <ArrowRight className="w-4 h-4" />
               </Link>
             </div>
           </div>
@@ -44,9 +44,9 @@ export default function BlueprintOverview() {
             <div className="mb-6 w-12 h-12 bg-accent/10 flex items-center justify-center rounded-full text-accent">
               <Compass className="w-6 h-6" />
             </div>
-            <h3 className="text-2xl font-serif font-bold mb-4">2. The Roadmap</h3>
+            <h3 className="text-2xl font-serif font-bold mb-4">2. The roadmap</h3>
             <p className="text-muted-foreground mb-8 leading-relaxed">
-              A five-step plan for the redesign, where every phase has a clear argument for why it exists and what it unlocks.
+              A five-step plan for the redesign, each step with its reason and what it makes possible.
             </p>
             <div className="mt-auto">
               <Link href="/blueprint/roadmap" className="inline-flex items-center gap-2 text-primary font-bold hover:underline group-hover:gap-3 transition-all">
@@ -64,15 +64,15 @@ export default function BlueprintOverview() {
             <Link href="/blueprint/direction" className="bg-background border border-border p-6 rounded-2xl hover:bg-muted transition-colors group flex items-start gap-4">
               <Layers className="w-6 h-6 text-primary shrink-0 mt-1" />
               <div>
-                <h4 className="font-bold mb-2 group-hover:text-primary transition-colors">Creative Direction</h4>
-                <p className="text-sm text-muted-foreground">The chosen visual blend, rationale, and living design tokens.</p>
+                <h4 className="font-bold mb-2 group-hover:text-primary transition-colors">The direction</h4>
+                <p className="text-sm text-muted-foreground">The look we chose and why, with the colours, type and buttons.</p>
               </div>
             </Link>
             <Link href="/blueprint/pages" className="bg-background border border-border p-6 rounded-2xl hover:bg-muted transition-colors group flex items-start gap-4">
               <CheckCircle2 className="w-6 h-6 text-primary shrink-0 mt-1" />
               <div>
-                <h4 className="font-bold mb-2 group-hover:text-primary transition-colors">Page Concepts</h4>
-                <p className="text-sm text-muted-foreground">Every page template annotated and linked to live interactive prototypes.</p>
+                <h4 className="font-bold mb-2 group-hover:text-primary transition-colors">Every page</h4>
+                <p className="text-sm text-muted-foreground">Every page template explained, with a link to the working page.</p>
               </div>
             </Link>
           </div>
