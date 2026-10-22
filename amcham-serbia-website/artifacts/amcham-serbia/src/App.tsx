@@ -14,7 +14,6 @@ import { MotionConfig } from 'framer-motion';
 
 import { I18nProvider } from '@/lib/i18n';
 import { Shell } from '@/components/layout/shell';
-import { GuidedTourProvider } from '@/components/guided-tour';
 import { ShowcaseProvider } from '@/components/showcase-tour';
 
 import Home from '@/pages/home';
@@ -31,7 +30,6 @@ import Impact from '@/pages/impact';
 import News from '@/pages/news';
 import NewsDetail from '@/pages/news-detail';
 import SearchPage from '@/pages/search';
-import StatusPage from '@/pages/status';
 import Proposal from '@/pages/proposal';
 import PlatformHub from '@/pages/platform/index';
 import PlatformConsole from '@/pages/platform/console';
@@ -65,7 +63,6 @@ function Router() {
           <Route path="/news" component={News} />
           <Route path="/news/:id" component={NewsDetail} />
           <Route path="/search" component={SearchPage} />
-          <Route path="/status" component={StatusPage} />
           <Route path="/ai" component={Proposal} />
           <Route path="/proposal" component={Proposal} />
           <Route path="/platform" component={PlatformHub} />
@@ -97,11 +94,9 @@ function App() {
           <I18nProvider>
             <MotionConfig reducedMotion="user">
               <WouterRouter base={import.meta.env.BASE_URL.replace(/\/$/, '')}>
-                <GuidedTourProvider>
-                  <ShowcaseProvider>
-                    <Router />
-                  </ShowcaseProvider>
-                </GuidedTourProvider>
+                <ShowcaseProvider>
+                  <Router />
+                </ShowcaseProvider>
               </WouterRouter>
             </MotionConfig>
             <Toaster />

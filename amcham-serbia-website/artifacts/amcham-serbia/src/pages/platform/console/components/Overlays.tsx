@@ -80,7 +80,6 @@ export function CommandPalette({ close, navigateTo }: { close: () => void, navig
     { id: 'outreach', label: t('platform.console.outreach') },
     { id: 'ask', label: t('platform.console.ask') },
     { id: 'matchmaking', label: t('platform.console.matchmaking') },
-    { id: 'intelligence', label: t('platform.console.nav.intelligence') },
     { id: 'flags', label: t('platform.console.flags') },
     { id: 'approvals', label: t('platform.console.approvals') },
     { id: 'cover', label: t('platform.console.cover') },
@@ -205,7 +204,7 @@ export function GlossaryDrawer({ close, navigateTo }: { close: () => void, navig
     { title: t('platform.console.glossary_term2'), desc: t('platform.console.glossary_def2'), link: "outreach" },
     { title: t('platform.console.glossary_term3'), desc: t('platform.console.glossary_def3'), link: "flags" },
     { title: t('platform.console.glossary_term4'), desc: t('platform.console.glossary_def4'), link: "ritual" },
-    { title: t('platform.console.glossary_term5'), desc: t('platform.console.glossary_def5'), link: "intelligence" },
+    { title: t('platform.console.glossary_term5'), desc: t('platform.console.glossary_def5'), link: "compass" },
   ].filter(x => x.title.toLowerCase().includes(search.toLowerCase()) || x.desc.toLowerCase().includes(search.toLowerCase()));
 
   return (

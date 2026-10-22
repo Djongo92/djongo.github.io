@@ -9,7 +9,7 @@ import {
   CheckSquare, Inbox, Repeat, ArrowRight,
   Search, X, Check, Eye, Download, ChevronLeft,
   Command, Menu, Phone, Activity, Globe, Mail, Plus, Book, Award, Landmark,
-  BarChart3, FileBarChart2, Bell, Keyboard, Network, Radar, UserCog, ChevronDown, Languages, Compass, Newspaper, CalendarDays, NotebookPen
+  BarChart3, FileBarChart2, Bell, Keyboard, Network, UserCog, ChevronDown, Languages, Compass, Newspaper, CalendarDays, NotebookPen
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Link } from 'wouter';
@@ -182,7 +182,6 @@ export default function Console() {
           item('matchmaking', Handshake, t('platform.console.matchmaking')),
           item('sponsorship', Award, t('platform.console.nav_sponsorship', 'Sponsorship')),
           item('committees', Landmark, t('platform.console.nav_committees', 'Committees')),
-          item('intelligence', Radar, t('platform.console.nav.intelligence')),
         ],
       },
     );

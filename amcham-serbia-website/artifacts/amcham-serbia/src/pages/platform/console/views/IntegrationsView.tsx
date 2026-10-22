@@ -18,7 +18,7 @@ const INITIAL: Integration[] = [
   { id: 'slack', name: 'Slack', desc: 'Posts new priorities and renewal-risk flags into #membership-team.', icon: MessageCircle, connected: true, lastSynced: '2 hours ago' },
   { id: 'places', name: 'Google Places', desc: 'Business profile presence checks for the directory.', icon: MapPin, connected: true, lastSynced: '1 day ago' },
   { id: 'mailchimp', name: 'Mailchimp', desc: 'Outreach queue sync for email campaign follow-ups.', icon: Mail, connected: false, lastSynced: '—' },
-  { id: 'ga', name: 'Google Analytics', desc: 'Member-site traffic signals feeding Market Signals scoring.', icon: BarChart3, connected: true, lastSynced: '38 minutes ago' },
+  { id: 'ga', name: 'Google Analytics', desc: 'Member portal and website visits, feeding the portal & email activity part of the score.', icon: BarChart3, connected: true, lastSynced: '38 minutes ago' },
 ];
 
 export function IntegrationsView({ showToast }: { showToast: (m: string) => void }) {

@@ -158,10 +158,12 @@ export function DossierView({ companyId, close, navigateTo, showToast }: { compa
                         <div className="ml-12 bg-card border border-border p-6 rounded-[32px] group-hover:shadow-md transition-all group-hover:border-border/80">
                           <div className="flex justify-between items-start mb-3">
                             <div className="flex flex-col">
-                              <span className="text-sm font-bold text-foreground capitalize">{item.source} Signal</span>
+                              <span className="text-sm font-bold text-foreground capitalize">{item.source === 'web' ? 'Public news' : `${item.source} signal`}</span>
                               <span className="text-[11px] font-bold uppercase tracking-widest text-muted-foreground">{item.date} · Status: {item.state}</span>
                             </div>
-                            {item.scoreImpact !== '0' && (
+                            {item.source === 'web' ? (
+                              <div className="text-[11px] font-bold px-3 py-1.5 rounded-full bg-muted text-muted-foreground">Context only · not in the score</div>
+                            ) : item.scoreImpact !== '0' && (
                               <div className={cn("text-[11px] font-bold px-3 py-1.5 rounded-full", item.sentiment === 'positive' ? 'bg-emerald-500/10 text-emerald-600' : item.sentiment === 'negative' ? 'bg-primary/10 text-primary' : 'bg-muted text-muted-foreground')}>
                                 {item.scoreImpact}
                               </div>
