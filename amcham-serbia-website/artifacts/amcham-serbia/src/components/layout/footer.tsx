@@ -69,9 +69,6 @@ export function Footer() {
           <div className="flex gap-6 items-center">
             <a href="#" className="hover:text-secondary-foreground transition-colors">{t('footer.privacy')}</a>
             <a href="#" className="hover:text-secondary-foreground transition-colors">{t('footer.terms')}</a>
-            <Link href="/status" className="hover:text-secondary-foreground transition-colors flex items-center gap-1.5">
-              <span className="w-1.5 h-1.5 rounded-full bg-emerald-400" /> Status
-            </Link>
           </div>
         </div>
       </div>

@@ -51,6 +51,7 @@ export interface DataClass {
 
 export const DATA_CLASSES: DataClass[] = [
   { name: 'Public content', examples: 'Website pages, events, news, published position papers, draft laws in public consultation', sensitivity: 'None', tier: 'public', rule: 'Any model may read it.' },
+  { name: 'Public news about members', examples: 'Press coverage, business-registry filings, job ads, company websites', sensitivity: 'None', tier: 'public', rule: 'Shown to staff as background for a conversation. Never changes a member’s engagement score.' },
   { name: 'Aggregates', examples: 'Survey totals, sector trends, event attendance counts', sensitivity: 'Low', tier: 'anonymised', rule: 'Shared only as totals, never row by row.' },
   { name: 'Personal data', examples: 'Contact names, emails, phone numbers, job titles', sensitivity: 'Personal', tier: 'on-prem', rule: 'Stays private; names are swapped for placeholders if a cloud model is ever used.' },
   { name: 'Commercial relationship', examples: 'Fees, renewal risk, complaints, staff notes on an account', sensitivity: 'High', tier: 'on-prem', rule: 'Private model only.' },
@@ -78,7 +79,7 @@ export const USE_CASES: UseCase[] = [
   { area: 'Website', title: 'Translation drafts', body: 'Every news item, event and paper drafted in the second language for a person to check, instead of translated from scratch.', tier: 'public', phase: 0 },
   { area: 'Advocacy', title: 'Legislation radar', body: 'Draft laws in public consultation and new entries in the Official Gazette, summarised every morning with the committees each one affects.', tier: 'public', phase: 1 },
   { area: 'Staff', title: 'Compass for the team', body: 'A morning brief of what needs attention, meeting briefs, follow-up drafts and CRM clean-up, inside the staff console.', tier: 'on-prem', phase: 1 },
-  { area: 'Staff', title: 'Meeting notes to actions', body: 'Notes from a call become a summary, the commitments made and the follow-ups due, filed against the account.', tier: 'on-prem', phase: 1 },
+  { area: 'Staff', title: 'Meetings, written up for you', body: 'Member calls and internal sessions become a summary, the decisions, action items with owners and dates, and calendar entries. Talking points are ready before each meeting. Recorded only with everyone’s consent; recordings stay on AmCham’s server.', tier: 'on-prem', phase: 1 },
   { area: 'Research', title: 'Survey open answers', body: 'Themes and sentiment from hundreds of written survey answers, by sector, in hours instead of weeks. Individual answers never leave the building.', tier: 'on-prem', phase: 2 },
   { area: 'Members', title: 'Introductions and personal digests', body: 'Suggested introductions between members and a digest tuned to each company’s sector and committees, for members who opt in.', tier: 'on-prem', phase: 2 },
 ];

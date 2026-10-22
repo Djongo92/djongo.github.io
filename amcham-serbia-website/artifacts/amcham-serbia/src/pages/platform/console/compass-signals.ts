@@ -270,13 +270,14 @@ export function buildSignals(): CompassSignal[] {
     {
       id: 'upgrade-zit', kind: 'upgrade', kindLabel: 'upgrade signals', category: 'membership',
       title: `${zit?.name} is outgrowing its ${zit?.tier} membership`,
-      summary: 'A second delivery office and three senior hires this quarter. Worth a Patron-tier conversation.',
+      summary: 'Registered for 4 events this quarter, opens nearly every newsletter, and asked about upgrading by email this morning. Worth a Patron-tier conversation.',
       evidence: [
-        { text: 'Opened a second delivery office for Western-European clients.', source: 'Company website' },
-        { text: 'Three senior hires announced in September.', source: 'LinkedIn' },
+        { text: 'Registered for 4 events this quarter.', source: 'Event registrations' },
+        { text: 'Opened 11 of the last 12 newsletters.', source: 'Email activity' },
         { text: 'Asked about upgrading by email this morning.', source: 'info@ inbox' },
+        { text: 'In the news: a second delivery office for Western-European clients. Context only, not in the score.', source: 'Public news' },
       ],
-      why: 'Growth signals plus a direct question from the member.',
+      why: 'Strong involvement with AmCham plus a direct question from the member.',
       confidence: 'High', audience: 'me', tier: 'on-prem', value: '€2.5k upgrade', companyId: 'zit', priority: 74,
       action: {
         kind: 'draft', label: 'Draft the reply', draftTitle: `Upgrade conversation with ${zit?.name}`,
@@ -601,12 +602,13 @@ export function buildSignals(): CompassSignal[] {
     {
       id: 'sig-sbb', kind: 'contact-change', kindLabel: 'contact changes', category: 'service',
       title: 'SBB’s main contact has gone',
-      summary: 'Two emails to the primary contact bounced this month, and LinkedIn lists a new Head of IT since September.',
+      summary: 'Three emails to the primary contact bounced this month, and nobody else at SBB has opened an AmCham email since. LinkedIn, for what it’s worth, shows a new Head of IT since September.',
       evidence: [
-        { text: 'Two bounces from the primary contact’s address.', source: 'Email bounces' },
-        { text: 'New Head of IT listed since September.', source: 'LinkedIn' },
+        { text: 'Three bounces from the primary contact’s address.', source: 'Email bounces' },
+        { text: 'No one else at SBB has opened an AmCham email in 30 days.', source: 'Email activity' },
+        { text: 'A new Head of IT has been on LinkedIn since September.', source: 'LinkedIn (public)' },
       ],
-      why: 'Bounced emails plus a visible job change mean the relationship has no owner on their side.',
+      why: 'Bounced emails and no other active contact mean the relationship has no owner on their side.',
       confidence: 'High', audience: 'me', tier: 'on-prem', due: 'Tomorrow', value: '€5k', companyId: 'sbb', priority: 86,
       action: { kind: 'draft', label: 'Draft an intro', draftTitle: 'Introduction to SBB’s new IT lead', draft: rehearsed("Draft an intro to SBB's new IT lead") },
     },

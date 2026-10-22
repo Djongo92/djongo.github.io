@@ -79,10 +79,10 @@ export const platformData = {
       streak: 4,
       items: [
         { id: "rit-1", companyId: "adr", tag: "RENEWAL RISK", text: "Score down 9 points since May. No C-suite event attendance this year.", action: "Needs call", urgency: "High", expectedValue: "€18k", confidence: "95%", source: "Platform Analytics", owner: "Marija J.", dueDate: "Today", channel: "Phone" },
-        { id: "rit-2", companyId: "stada", tag: "OPPORTUNITY", text: "Growing team in Vršac. Might be interested in Tech Committee.", action: "Suggest Intro", urgency: "Medium", expectedValue: "€2.5k upgrade", confidence: "70%", source: "LinkedIn Alert", owner: "Nikola K.", dueDate: "This Week", channel: "Email" },
+        { id: "rit-2", companyId: "stada", tag: "OPPORTUNITY", text: "Came to 3 Digital Economy events this year but isn't on the committee. A good moment to invite them.", action: "Invite to committee", urgency: "Medium", expectedValue: "€2.5k upgrade", confidence: "70%", source: "Event attendance", owner: "Nikola K.", dueDate: "This Week", channel: "Email" },
         { id: "rit-3", companyId: "sbb", tag: "CHURN WARNING", text: "Score at 55. Primary contact left company.", action: "Find new contact", urgency: "Critical", expectedValue: "€5k", confidence: "99%", source: "Bouncer / Email Bounce", owner: "Nikola K.", dueDate: "Tomorrow", channel: "LinkedIn" },
         { id: "rit-4", companyId: "tmm", tag: "CHURN WARNING", text: "Score down to 58 amid a permitting dispute. No attendance since the Q2 safety incident.", action: "Reconnect once new site manager is named", urgency: "High", expectedValue: "€5k", confidence: "88%", source: "Platform Analytics", owner: "Nikola K.", dueDate: "This Week", channel: "Phone" },
-        { id: "rit-5", companyId: "zit", tag: "OPPORTUNITY", text: "Opened a second delivery office for Western-Europe demand. Strong candidate for a Patron-tier upgrade conversation.", action: "Suggest Upgrade", urgency: "Low", expectedValue: "€2.5k upgrade", confidence: "65%", source: "Web Signal", owner: "Milica K.", dueDate: "Next Week", channel: "Email" }
+        { id: "rit-5", companyId: "zit", tag: "OPPORTUNITY", text: "Registered for 4 events this quarter and opens nearly every newsletter. Strong candidate for a Patron-tier upgrade conversation.", action: "Suggest Upgrade", urgency: "Low", expectedValue: "€2.5k upgrade", confidence: "65%", source: "Portal & email activity", owner: "Milica K.", dueDate: "Next Week", channel: "Email" }
       ]
     },
     retention: [
@@ -280,7 +280,7 @@ export const platformData = {
       { id: "sp4", companyId: "dlz", initiative: "Retail & Consumer Forum", stage: "proposed", value: "€6k", owner: "Ana Savić", notes: "Proposal sent; awaiting marketing budget approval." },
       { id: "sp5", companyId: "ncr", initiative: "Digital Banking Roundtable", stage: "proposed", value: "€5k", owner: "Marko Ristić", notes: "Follow-up call scheduled for next week." },
       { id: "sp6", companyId: "mcb", initiative: "AmCham Annual Gala", stage: "prospecting", value: "€15k", owner: "Ana Savić", notes: "Warm relationship from a board seat; not yet approached formally." },
-      { id: "sp7", companyId: "ccbc", initiative: "Sustainability Summit", stage: "prospecting", value: "€7k", owner: "Stefan Mitić", notes: "Identified via the business climate survey's ESG interest signal." },
+      { id: "sp7", companyId: "ccbc", initiative: "Sustainability Summit", stage: "prospecting", value: "€7k", owner: "Stefan Mitić", notes: "Attended both ESG events this year and named ESG a priority in the annual business climate survey." },
       { id: "sp8", companyId: "kpmg", initiative: "Tax Policy Briefing Series", stage: "declined", value: "€4k", owner: "Marko Ristić", notes: "Budget frozen this cycle; revisit in Q1." },
       { id: "sp9", companyId: "nph", initiative: "Health & Life Sciences Committee Briefing", stage: "proposed", value: "€5k", owner: "Nikola Krstić", notes: "Approached after their generics-distribution approval; awaiting confirmation." }
     ],
@@ -305,12 +305,12 @@ export const platformData = {
     },
     matchmaking: {
       pairs: [
-        { from: "sls", to: "nkt", rationale: "Nelt is expanding fleet; S-Leasing offers commercial vehicle financing.", overlapEvidence: "Both active in Transport sub-committee", conflicts: "None", fromApproved: true, toApproved: false, expiry: "2 days", outcomeState: "pending" },
-        { from: "stada", to: "ncr", rationale: "Both expanding R&D operations in Serbia.", overlapEvidence: "Both indicated 'Tech Talent' as a priority in the 2025 business climate survey", conflicts: "Competing for same talent pool", fromApproved: true, toApproved: true, expiry: "5 days", outcomeState: "scheduled" },
+        { from: "sls", to: "nkt", rationale: "S-Leasing posted in Opportunities that it is looking for logistics clients; Nelt runs one of the largest fleets among members.", overlapEvidence: "Both active in Transport sub-committee", conflicts: "None", fromApproved: true, toApproved: false, expiry: "2 days", outcomeState: "pending" },
+        { from: "stada", to: "ncr", rationale: "Both sit on the Digital Economy Committee and both spoke on tech-talent panels at AmCham events this year.", overlapEvidence: "Both indicated 'Tech Talent' as a priority in the 2025 business climate survey", conflicts: "Competing for same talent pool", fromApproved: true, toApproved: true, expiry: "5 days", outcomeState: "scheduled" },
         { from: "kar", to: "ibm", rationale: "Both serve multinational clients navigating IT compliance and data protection law.", overlapEvidence: "Both flagged 'regulatory compliance' as a top priority in recent staff notes", conflicts: "None", fromApproved: true, toApproved: false, expiry: "4 days", outcomeState: "pending" },
-        { from: "hmo", to: "pwc", rationale: "Hemofarm is exploring ESG audit partners; PwC offers dedicated ESG advisory.", overlapEvidence: "Both attended the Q3 ESG roundtable", conflicts: "None", fromApproved: true, toApproved: true, expiry: "3 days", outcomeState: "scheduled" },
-        { from: "mtk", to: "mcb", rationale: "Metalac is evaluating equipment financing for a manufacturing line upgrade.", overlapEvidence: "UniCredit's corporate desk flagged manufacturing equipment financing as a growth area", conflicts: "None", fromApproved: true, toApproved: false, expiry: "6 days", outcomeState: "pending" },
-        { from: "adr", to: "nrb", rationale: "Adriatica's new production line increases energy consumption; NIS offers corporate energy supply contracts.", overlapEvidence: "Both flagged energy and supply-chain priorities in recent signals", conflicts: "None", fromApproved: true, toApproved: false, expiry: "7 days", outcomeState: "pending" }
+        { from: "hmo", to: "pwc", rationale: "Hemofarm asked AmCham for an ESG audit partner after the Q3 roundtable; PwC offers dedicated ESG advisory.", overlapEvidence: "Both attended the Q3 ESG roundtable", conflicts: "None", fromApproved: true, toApproved: true, expiry: "3 days", outcomeState: "scheduled" },
+        { from: "mtk", to: "mcb", rationale: "Metalac posted an Opportunities request for equipment financing for a line upgrade.", overlapEvidence: "UniCredit answered two similar Opportunities posts this year", conflicts: "None", fromApproved: true, toApproved: false, expiry: "6 days", outcomeState: "pending" },
+        { from: "adr", to: "nrb", rationale: "Adriatica asked for this on its last call: the new production line needs a long-term energy supplier, and NIS a.d. offers corporate supply contracts.", overlapEvidence: "Requested by Adriatica; both attended the Energy Transition Roundtable series", conflicts: "None", fromApproved: true, toApproved: false, expiry: "7 days", outcomeState: "pending" }
       ],
       // Deals that made it past "scheduled" to a recorded outcome — the
       // running total the Growth pillar is built to publish ("€X in
@@ -334,7 +334,7 @@ export const platformData = {
           "Check on their transition to green energy."
         ],
         ask: "Upgrade to Board level participation.",
-        rationale: "They are expanding massively and need stronger policy leverage.",
+        rationale: "Engagement has slipped since May and the renewal is close; a direct conversation is overdue.",
         signals: [
           { text: "Expansion signal: new facility in Kragujevac (web, 6d ago)", type: "web" },
           { text: "Renewal in 12 days", type: "system" },
@@ -456,7 +456,7 @@ export const platformData = {
       },
       "ncr": {
         desiredOutcome: "Renew their sponsorship commitment for next year's calendar.",
-        talkingPoints: ["Open with their own news: Continued hiring surge at the Belgrade hub.", "They're sitting on the Digital Economy committee — ask what's working and what isn't.", "This is one of the strongest accounts in IT — worth a direct ask, not just a check-in."],
+        talkingPoints: ["Open with the relationship: consistent attendance across IT and Trade committees.", "They're sitting on the Digital Economy committee — ask what's working and what isn't.", "This is one of the strongest accounts in IT — worth a direct ask, not just a check-in.", "In the news, for context only: Continued hiring surge at the Belgrade hub."],
         ask: "Confirm sponsorship renewal for the next cycle.",
         rationale: "Score 91 (+5 trend) — one of the stronger accounts in the membership.",
         signals: [{ text: "Continued hiring surge at the Belgrade hub", type: "web" }, { text: "Consistent attendance across IT and Trade committees", type: "engagement" }, { text: "Score 91, +5 trend", type: "system" }],
@@ -469,7 +469,7 @@ export const platformData = {
       },
       "pmp": {
         desiredOutcome: "Renew their sponsorship commitment for next year's calendar.",
-        talkingPoints: ["Open with their own news: Stable market leadership, no negative press.", "They're chairing the Trade & Customs committee — ask what's working and what isn't.", "This is one of the strongest accounts in FMCG — worth a direct ask, not just a check-in."],
+        talkingPoints: ["Open with the relationship: near-perfect attendance across major events.", "They're chairing the Trade & Customs committee — ask what's working and what isn't.", "This is one of the strongest accounts in FMCG — worth a direct ask, not just a check-in.", "In the news, for context only: Stable market leadership, no negative press."],
         ask: "Confirm sponsorship renewal for the next cycle.",
         rationale: "Score 94 (+1 trend) — one of the stronger accounts in the membership.",
         signals: [{ text: "Stable market leadership, no negative press", type: "web" }, { text: "Near-perfect attendance across major events", type: "engagement" }, { text: "Score 94, +1 trend", type: "system" }],
@@ -482,7 +482,7 @@ export const platformData = {
       },
       "ccbc": {
         desiredOutcome: "Renew their sponsorship commitment for next year's calendar.",
-        talkingPoints: ["Open with their own news: Expanding bottling capacity signalled in press.", "They're sitting on the ESG & Environment committee — ask what's working and what isn't.", "This is one of the strongest accounts in FMCG — worth a direct ask, not just a check-in."],
+        talkingPoints: ["Open with the relationship: strong attendance, slight dip in Q3 regional events.", "They're sitting on the ESG & Environment committee — ask what's working and what isn't.", "This is one of the strongest accounts in FMCG — worth a direct ask, not just a check-in.", "In the news, for context only: Expanding bottling capacity signalled in press."],
         ask: "Confirm sponsorship renewal for the next cycle.",
         rationale: "Score 85 (+4 trend) — one of the stronger accounts in the membership.",
         signals: [{ text: "Expanding bottling capacity signalled in press", type: "web" }, { text: "Strong attendance, slight dip in Q3 regional events", type: "engagement" }, { text: "Score 85, +4 trend", type: "system" }],
@@ -508,7 +508,7 @@ export const platformData = {
       },
       "dlz": {
         desiredOutcome: "Renew their sponsorship commitment for next year's calendar.",
-        talkingPoints: ["Open with their own news: Rapid store network expansion covered in press.", "They're sitting on the Labor & HR committee — ask what's working and what isn't.", "This is one of the strongest accounts in Retail — worth a direct ask, not just a check-in."],
+        talkingPoints: ["Open with the relationship: attendance up sharply across all event types.", "They're sitting on the Labor & HR committee — ask what's working and what isn't.", "This is one of the strongest accounts in Retail — worth a direct ask, not just a check-in.", "In the news, for context only: Rapid store network expansion covered in press."],
         ask: "Confirm sponsorship renewal for the next cycle.",
         rationale: "Score 92 (+8 trend) — one of the stronger accounts in the membership.",
         signals: [{ text: "Rapid store network expansion covered in press", type: "web" }, { text: "Attendance up sharply across all event types", type: "engagement" }, { text: "Score 92, +8 trend", type: "system" }],
@@ -521,7 +521,7 @@ export const platformData = {
       },
       "msft": {
         desiredOutcome: "Renew their sponsorship commitment for next year's calendar.",
-        talkingPoints: ["Open with their own news: Stable hiring, no major signals.", "They're chairing the Digital Economy committee — ask what's working and what isn't.", "This is one of the strongest accounts in IT — worth a direct ask, not just a check-in."],
+        talkingPoints: ["Open with the relationship: slight attendance dip from senior team travel.", "They're chairing the Digital Economy committee — ask what's working and what isn't.", "This is one of the strongest accounts in IT — worth a direct ask, not just a check-in.", "In the news, for context only: Stable hiring, no major signals."],
         ask: "Confirm sponsorship renewal for the next cycle.",
         rationale: "Score 89 (-2 trend) — one of the stronger accounts in the membership.",
         signals: [{ text: "Stable hiring, no major signals", type: "web" }, { text: "Slight attendance dip from senior team travel", type: "engagement" }, { text: "Score 89, -2 trend", type: "system" }],
@@ -560,7 +560,7 @@ export const platformData = {
       },
       "mcb": {
         desiredOutcome: "Renew their sponsorship commitment for next year's calendar.",
-        talkingPoints: ["Open with their own news: Expanding corporate lending signalled in press.", "They're chairing the Tax & Finance committee — ask what's working and what isn't.", "This is one of the strongest accounts in Finance — worth a direct ask, not just a check-in."],
+        talkingPoints: ["Open with the relationship: attendance climbing steadily this year.", "They're chairing the Tax & Finance committee — ask what's working and what isn't.", "This is one of the strongest accounts in Finance — worth a direct ask, not just a check-in.", "In the news, for context only: Expanding corporate lending signalled in press."],
         ask: "Confirm sponsorship renewal for the next cycle.",
         rationale: "Score 81 (+6 trend) — one of the stronger accounts in the membership.",
         signals: [{ text: "Expanding corporate lending signalled in press", type: "web" }, { text: "Attendance climbing steadily this year", type: "engagement" }, { text: "Score 81, +6 trend", type: "system" }],
@@ -573,7 +573,7 @@ export const platformData = {
       },
       "ibm": {
         desiredOutcome: "Keep the relationship warm and confirm nothing has slipped since the last touchpoint.",
-        talkingPoints: ["Open with their own news: No major signals this quarter.", "Ask whether a committee seat would be worth their time this year.", "Nothing urgent here — the goal is simply staying visible."],
+        talkingPoints: ["Open with the relationship: attendance down from prior year.", "Ask whether a committee seat would be worth their time this year.", "Nothing urgent here — the goal is simply staying visible.", "In the news, for context only: No major signals this quarter."],
         ask: "No specific ask this cycle — relationship maintenance.",
         rationale: "Score 64 (-5 trend) — stable, healthy account.",
         signals: [{ text: "No major signals this quarter", type: "web" }, { text: "Attendance down from prior year", type: "engagement" }, { text: "Score 64, -5 trend", type: "system" }],
@@ -586,7 +586,7 @@ export const platformData = {
       },
       "bky": {
         desiredOutcome: "Keep the relationship warm and confirm nothing has slipped since the last touchpoint.",
-        talkingPoints: ["Open with their own news: Stable domestic market position.", "They're chairing the Labor & HR committee — ask what's working and what isn't.", "Nothing urgent here — the goal is simply staying visible."],
+        talkingPoints: ["Open with the relationship: solid attendance across FMCG-track events.", "They're chairing the Labor & HR committee — ask what's working and what isn't.", "Nothing urgent here — the goal is simply staying visible.", "In the news, for context only: Stable domestic market position."],
         ask: "No specific ask this cycle — relationship maintenance.",
         rationale: "Score 77 (+3 trend) — stable, healthy account.",
         signals: [{ text: "Stable domestic market position", type: "web" }, { text: "Solid attendance across FMCG-track events", type: "engagement" }, { text: "Score 77, +3 trend", type: "system" }],
@@ -612,7 +612,7 @@ export const platformData = {
       },
       "tln": {
         desiredOutcome: "Explore a deeper commitment — committee leadership or sponsorship — while engagement is at its peak.",
-        talkingPoints: ["Open with their own news: 5G rollout coverage driving visibility.", "They're sitting on the Digital Economy committee — ask what's working and what isn't.", "This is one of the strongest accounts in IT — worth a direct ask, not just a check-in."],
+        talkingPoints: ["Open with the relationship: attendance rising sharply this year.", "They're sitting on the Digital Economy committee — ask what's working and what isn't.", "This is one of the strongest accounts in IT — worth a direct ask, not just a check-in.", "In the news, for context only: 5G rollout coverage driving visibility."],
         ask: "Propose a committee leadership role or sponsorship slot.",
         rationale: "Score 86 (+7 trend) — one of the stronger accounts in the membership.",
         signals: [{ text: "5G rollout coverage driving visibility", type: "web" }, { text: "Attendance rising sharply this year", type: "engagement" }, { text: "Score 86, +7 trend", type: "system" }],
@@ -638,7 +638,7 @@ export const platformData = {
       },
       "bsw": {
         desiredOutcome: "Keep the relationship warm and confirm nothing has slipped since the last touchpoint.",
-        talkingPoints: ["Open with their own news: Won a regional highway-bridge supply contract.", "Ask whether a committee seat would be worth their time this year.", "Nothing urgent here — the goal is simply staying visible."],
+        talkingPoints: ["Open with the relationship: sent two engineers to the Infrastructure & Construction forum this quarter.", "Ask whether a committee seat would be worth their time this year.", "Nothing urgent here — the goal is simply staying visible.", "In the news, for context only: Won a regional highway-bridge supply contract."],
         ask: "No specific ask this cycle — relationship maintenance.",
         rationale: "Score 74 (-1 trend) — stable, healthy account.",
         signals: [{ text: "Won a regional highway-bridge supply contract", type: "web" }, { text: "Sent two engineers to the Infrastructure & Construction forum this quarter", type: "engagement" }, { text: "Score 74, -1 trend", type: "system" }],
@@ -677,7 +677,7 @@ export const platformData = {
       },
       "dcb": {
         desiredOutcome: "Explore a deeper commitment — committee leadership or sponsorship — while engagement is at its peak.",
-        talkingPoints: ["Open with their own news: Expanded working-capital lending line for SME exporters.", "Ask whether a committee seat would be worth their time this year.", "This is one of the strongest accounts in Banking — worth a direct ask, not just a check-in."],
+        talkingPoints: ["Open with the relationship: sent senior trade-finance staff to every Q3 event.", "Ask whether a committee seat would be worth their time this year.", "This is one of the strongest accounts in Banking — worth a direct ask, not just a check-in.", "In the news, for context only: Expanded working-capital lending line for SME exporters."],
         ask: "Propose a committee leadership role or sponsorship slot.",
         rationale: "Score 86 (+2 trend) — one of the stronger accounts in the membership.",
         signals: [{ text: "Expanded working-capital lending line for SME exporters", type: "web" }, { text: "Sent senior trade-finance staff to every Q3 event", type: "engagement" }, { text: "Score 86, +2 trend", type: "system" }],
@@ -690,7 +690,7 @@ export const platformData = {
       },
       "nvl": {
         desiredOutcome: "Keep the relationship warm and confirm nothing has slipped since the last touchpoint.",
-        talkingPoints: ["Open with their own news: Added a second river-port warehouse this year.", "Ask whether a committee seat would be worth their time this year.", "Nothing urgent here — the goal is simply staying visible."],
+        talkingPoints: ["Open with the relationship: attended the Danube corridor logistics briefing in force.", "Ask whether a committee seat would be worth their time this year.", "Nothing urgent here — the goal is simply staying visible.", "In the news, for context only: Added a second river-port warehouse this year."],
         ask: "No specific ask this cycle — relationship maintenance.",
         rationale: "Score 71 (+0 trend) — stable, healthy account.",
         signals: [{ text: "Added a second river-port warehouse this year", type: "web" }, { text: "Attended the Danube corridor logistics briefing in force", type: "engagement" }, { text: "Score 71, 0 trend", type: "system" }],
@@ -729,7 +729,7 @@ export const platformData = {
       },
       "slg": {
         desiredOutcome: "Keep the relationship warm and confirm nothing has slipped since the last touchpoint.",
-        talkingPoints: ["Open with their own news: Advised on two cross-border supply contracts this quarter.", "Ask whether a committee seat would be worth their time this year.", "Nothing urgent here — the goal is simply staying visible."],
+        talkingPoints: ["Open with the relationship: regular presence at the Legal & Regulatory Affairs sessions.", "Ask whether a committee seat would be worth their time this year.", "Nothing urgent here — the goal is simply staying visible.", "In the news, for context only: Advised on two cross-border supply contracts this quarter."],
         ask: "No specific ask this cycle — relationship maintenance.",
         rationale: "Score 72 (+1 trend) — stable, healthy account.",
         signals: [{ text: "Advised on two cross-border supply contracts this quarter", type: "web" }, { text: "Regular presence at the Legal & Regulatory Affairs sessions", type: "engagement" }, { text: "Score 72, +1 trend", type: "system" }],
@@ -742,7 +742,7 @@ export const platformData = {
       },
       "zit": {
         desiredOutcome: "Explore a deeper commitment — committee leadership or sponsorship — while engagement is at its peak.",
-        talkingPoints: ["Open with their own news: Opened a second delivery office to handle Western-Europe demand.", "Ask whether a committee seat would be worth their time this year.", "This is one of the strongest accounts in IT — worth a direct ask, not just a check-in."],
+        talkingPoints: ["Open with the relationship: sent a delegation to the nearshoring & talent panel.", "Ask whether a committee seat would be worth their time this year.", "This is one of the strongest accounts in IT — worth a direct ask, not just a check-in.", "In the news, for context only: Opened a second delivery office to handle Western-Europe demand."],
         ask: "Propose a committee leadership role or sponsorship slot.",
         rationale: "Score 83 (+2 trend) — one of the stronger accounts in the membership.",
         signals: [{ text: "Opened a second delivery office to handle Western-Europe demand", type: "web" }, { text: "Sent a delegation to the nearshoring & talent panel", type: "engagement" }, { text: "Score 83, +2 trend", type: "system" }],
@@ -781,7 +781,7 @@ export const platformData = {
       },
       "pnf": {
         desiredOutcome: "Keep the relationship warm and confirm nothing has slipped since the last touchpoint.",
-        talkingPoints: ["Open with their own news: Added two new EU retail-chain listings this quarter.", "Ask whether a committee seat would be worth their time this year.", "Nothing urgent here — the goal is simply staying visible."],
+        talkingPoints: ["Open with the relationship: strong turnout at FMCG and export-compliance events.", "Ask whether a committee seat would be worth their time this year.", "Nothing urgent here — the goal is simply staying visible.", "In the news, for context only: Added two new EU retail-chain listings this quarter."],
         ask: "No specific ask this cycle — relationship maintenance.",
         rationale: "Score 79 (-1 trend) — stable, healthy account.",
         signals: [{ text: "Added two new EU retail-chain listings this quarter", type: "web" }, { text: "Strong turnout at FMCG and export-compliance events", type: "engagement" }, { text: "Score 79, -1 trend", type: "system" }],
@@ -820,7 +820,7 @@ export const platformData = {
       },
       "fgw": {
         desiredOutcome: "Keep the relationship warm and confirm nothing has slipped since the last touchpoint.",
-        talkingPoints: ["Open with their own news: New EU import license opened three additional markets.", "Ask whether a committee seat would be worth their time this year.", "Nothing urgent here — the goal is simply staying visible."],
+        talkingPoints: ["Open with the relationship: attended the export-readiness workshop and the FMCG mixer.", "Ask whether a committee seat would be worth their time this year.", "Nothing urgent here — the goal is simply staying visible.", "In the news, for context only: New EU import license opened three additional markets."],
         ask: "No specific ask this cycle — relationship maintenance.",
         rationale: "Score 75 (+1 trend) — stable, healthy account.",
         signals: [{ text: "New EU import license opened three additional markets", type: "web" }, { text: "Attended the export-readiness workshop and the FMCG mixer", type: "engagement" }, { text: "Score 75, +1 trend", type: "system" }],
@@ -846,7 +846,7 @@ export const platformData = {
       },
       "bfa": {
         desiredOutcome: "Keep the relationship warm and confirm nothing has slipped since the last touchpoint.",
-        talkingPoints: ["Open with their own news: Advised on a mid-market cross-border transaction this quarter.", "Ask whether a committee seat would be worth their time this year.", "Nothing urgent here — the goal is simply staying visible."],
+        talkingPoints: ["Open with the relationship: consistent attendance at the Banking & Finance briefings.", "Ask whether a committee seat would be worth their time this year.", "Nothing urgent here — the goal is simply staying visible.", "In the news, for context only: Advised on a mid-market cross-border transaction this quarter."],
         ask: "No specific ask this cycle — relationship maintenance.",
         rationale: "Score 70 (-1 trend) — stable, healthy account.",
         signals: [{ text: "Advised on a mid-market cross-border transaction this quarter", type: "web" }, { text: "Consistent attendance at the Banking & Finance briefings", type: "engagement" }, { text: "Score 70, -1 trend", type: "system" }],
@@ -859,7 +859,7 @@ export const platformData = {
       },
       "nph": {
         desiredOutcome: "Renew their sponsorship commitment for next year's calendar.",
-        talkingPoints: ["Open with their own news: Received approval to distribute two additional generics regionally.", "Thank them for last year's sponsorship and gauge appetite for the next cycle.", "This is one of the strongest accounts in Pharma — worth a direct ask, not just a check-in."],
+        talkingPoints: ["Open with the relationship: sent regulatory-affairs staff to every Pharma & Health session.", "Thank them for last year's sponsorship and gauge appetite for the next cycle.", "This is one of the strongest accounts in Pharma — worth a direct ask, not just a check-in.", "In the news, for context only: Received approval to distribute two additional generics regionally."],
         ask: "Confirm sponsorship renewal for the next cycle.",
         rationale: "Score 81 (+0 trend) — one of the stronger accounts in the membership.",
         signals: [{ text: "Received approval to distribute two additional generics regionally", type: "web" }, { text: "Sent regulatory-affairs staff to every Pharma & Health session", type: "engagement" }, { text: "Score 81, 0 trend", type: "system" }],
@@ -925,7 +925,7 @@ export const platformData = {
           factors: [
             { name: "Event Attendance", weight: 30, value: 12, max: 30, signals: [{ text: "Missed 2 major events in Q2", source: "engagement", date: "Jun 2026" }] },
             { name: "Committee Activity", weight: 20, value: 5, max: 20, signals: [{ text: "No active committee members", source: "engagement", date: "Ongoing" }] },
-            { name: "Market Signals", weight: 20, value: 18, max: 20, signals: [{ text: "€15M production line", source: "web", date: "6d ago" }] },
+            { name: "Portal & Email Activity", weight: 20, value: 18, max: 20, signals: [{ text: "Opens almost every AmCham email; logs in to the portal weekly", source: "engagement", date: "This month" }] },
             { name: "Staff Assessment", weight: 30, value: 27, max: 30, signals: [{ text: "Strong alignment on ESG", source: "staff", date: "15d ago" }] }
           ]
         },
@@ -936,7 +936,7 @@ export const platformData = {
           factors: [
             { name: "Event Attendance", weight: 30, value: 27, max: 30, signals: [{ text: "Attended every major event this year", source: "engagement", date: "Ongoing" }] },
             { name: "Committee Activity", weight: 20, value: 18, max: 20, signals: [{ text: "Active in ESG and Health committees", source: "engagement", date: "Ongoing" }] },
-            { name: "Market Signals", weight: 20, value: 19, max: 20, signals: [{ text: "Continued regional expansion, strong press presence", source: "web", date: "10d ago" }] },
+            { name: "Portal & Email Activity", weight: 20, value: 19, max: 20, signals: [{ text: "Opens almost every AmCham email; logs in to the portal weekly", source: "engagement", date: "This month" }] },
             { name: "Staff Assessment", weight: 30, value: 24, max: 30, signals: [{ text: "Highly engaged executive sponsor", source: "staff", date: "5d ago" }] }
           ]
         },
@@ -947,7 +947,7 @@ export const platformData = {
           factors: [
             { name: "Event Attendance", weight: 30, value: 15, max: 30, signals: [{ text: "Missed all Q3 events following primary contact's departure", source: "engagement", date: "Q3 2026" }] },
             { name: "Committee Activity", weight: 20, value: 5, max: 20, signals: [{ text: "No active committee members currently", source: "engagement", date: "Ongoing" }] },
-            { name: "Market Signals", weight: 20, value: 8, max: 20, signals: [{ text: "CTO departed for a competitor", source: "web", date: "2d ago" }] },
+            { name: "Portal & Email Activity", weight: 20, value: 8, max: 20, signals: [{ text: "Opens few AmCham emails; last portal login over a month ago", source: "engagement", date: "This month" }] },
             { name: "Staff Assessment", weight: 30, value: 27, max: 30, signals: [{ text: "Strong historical relationship; actively working to identify a new sponsor", source: "staff", date: "1d ago" }] }
           ]
         },
@@ -958,7 +958,7 @@ export const platformData = {
           factors: [
             { name: "Event Attendance", weight: 30, value: 8, max: 30, signals: [{ text: "Zero event registrations in 2026", source: "engagement", date: "YTD" }] },
             { name: "Committee Activity", weight: 20, value: 4, max: 20, signals: [{ text: "Not active in Finance Committee despite invitation", source: "engagement", date: "Ongoing" }] },
-            { name: "Market Signals", weight: 20, value: 10, max: 20, signals: [{ text: "Pulse survey: 'Need more targeted matchmaking'", source: "feedback", date: "1w ago" }] },
+            { name: "Portal & Email Activity", weight: 20, value: 10, max: 20, signals: [{ text: "Opens about half of AmCham emails; logs in about once a month", source: "engagement", date: "This month" }] },
             { name: "Staff Assessment", weight: 30, value: 23, max: 30, signals: [{ text: "New marketing lead engaged; budget confirmed for Q4", source: "staff", date: "3d ago" }] }
           ]
         },
@@ -969,7 +969,7 @@ export const platformData = {
           factors: [
             { name: "Event Attendance", weight: 30, value: 24, max: 30, signals: [{ text: "Consistent attendance across Legal & Trade committees", source: "engagement", date: "Ongoing" }] },
             { name: "Committee Activity", weight: 20, value: 17, max: 20, signals: [{ text: "Active member of two policy committees", source: "engagement", date: "Ongoing" }] },
-            { name: "Market Signals", weight: 20, value: 17, max: 20, signals: [{ text: "Expanding cross-border practice, strong regional press", source: "web", date: "9d ago" }] },
+            { name: "Portal & Email Activity", weight: 20, value: 17, max: 20, signals: [{ text: "Opens almost every AmCham email; logs in to the portal weekly", source: "engagement", date: "This month" }] },
             { name: "Staff Assessment", weight: 30, value: 24, max: 30, signals: [{ text: "Reliable primary contact, quick to respond", source: "staff", date: "5d ago" }] }
           ]
         },
@@ -980,7 +980,7 @@ export const platformData = {
           factors: [
             { name: "Event Attendance", weight: 30, value: 18, max: 30, signals: [{ text: "Attended 2 of 4 major events this year", source: "engagement", date: "YTD" }] },
             { name: "Committee Activity", weight: 20, value: 10, max: 20, signals: [{ text: "Limited committee engagement this quarter", source: "engagement", date: "Q3 2026" }] },
-            { name: "Market Signals", weight: 20, value: 14, max: 20, signals: [{ text: "Stable market position, no major signals", source: "web", date: "3w ago" }] },
+            { name: "Portal & Email Activity", weight: 20, value: 14, max: 20, signals: [{ text: "Opens most AmCham emails; logs in to the portal a few times a month", source: "engagement", date: "This month" }] },
             { name: "Staff Assessment", weight: 30, value: 26, max: 30, signals: [{ text: "Long-standing relationship, responsive to outreach", source: "staff", date: "1m ago" }] }
           ]
         },
@@ -991,7 +991,7 @@ export const platformData = {
           factors: [
             { name: "Event Attendance", weight: 30, value: 9, max: 30, signals: [{ text: "Did not join Tech Committee despite mandate", source: "engagement", date: "Ongoing" }] },
             { name: "Committee Activity", weight: 20, value: 4, max: 20, signals: [{ text: "No committee participation", source: "engagement", date: "Ongoing" }] },
-            { name: "Market Signals", weight: 20, value: 13, max: 20, signals: [{ text: "Growing local team, potential upgrade signal", source: "web", date: "6d ago" }] },
+            { name: "Portal & Email Activity", weight: 20, value: 13, max: 20, signals: [{ text: "Opens most AmCham emails; logs in to the portal a few times a month", source: "engagement", date: "This month" }] },
             { name: "Staff Assessment", weight: 30, value: 22, max: 30, signals: [{ text: "Positive relationship with regional IT lead", source: "staff", date: "3w ago" }] }
           ]
         },
@@ -1002,7 +1002,7 @@ export const platformData = {
           factors: [
             { name: "Event Attendance", weight: 30, value: 27, max: 30, signals: [{ text: "Consistent attendance across IT and Trade committees", source: "engagement", date: "Ongoing" }] },
             { name: "Committee Activity", weight: 20, value: 18, max: 20, signals: [{ text: "Active sponsor of two working groups", source: "engagement", date: "Ongoing" }] },
-            { name: "Market Signals", weight: 20, value: 19, max: 20, signals: [{ text: "Continued hiring surge at the Belgrade hub", source: "web", date: "8d ago" }] },
+            { name: "Portal & Email Activity", weight: 20, value: 19, max: 20, signals: [{ text: "Opens almost every AmCham email; logs in to the portal weekly", source: "engagement", date: "This month" }] },
             { name: "Staff Assessment", weight: 30, value: 27, max: 30, signals: [{ text: "Highly responsive account contact", source: "staff", date: "2w ago" }] }
           ]
         },
@@ -1013,7 +1013,7 @@ export const platformData = {
           factors: [
             { name: "Event Attendance", weight: 30, value: 28, max: 30, signals: [{ text: "Near-perfect attendance across major events", source: "engagement", date: "Ongoing" }] },
             { name: "Committee Activity", weight: 20, value: 19, max: 20, signals: [{ text: "Chairs the Trade Facilitation working group", source: "engagement", date: "Ongoing" }] },
-            { name: "Market Signals", weight: 20, value: 19, max: 20, signals: [{ text: "Stable market leadership, no negative press", source: "web", date: "3w ago" }] },
+            { name: "Portal & Email Activity", weight: 20, value: 19, max: 20, signals: [{ text: "Opens almost every AmCham email; logs in to the portal weekly", source: "engagement", date: "This month" }] },
             { name: "Staff Assessment", weight: 30, value: 28, max: 30, signals: [{ text: "Long-tenured relationship, highly engaged", source: "staff", date: "1m ago" }] }
           ]
         },
@@ -1024,7 +1024,7 @@ export const platformData = {
           factors: [
             { name: "Event Attendance", weight: 30, value: 25, max: 30, signals: [{ text: "Strong attendance, slight dip in Q3 regional events", source: "engagement", date: "Q3 2026" }] },
             { name: "Committee Activity", weight: 20, value: 16, max: 20, signals: [{ text: "Active in FMCG and Trade committees", source: "engagement", date: "Ongoing" }] },
-            { name: "Market Signals", weight: 20, value: 17, max: 20, signals: [{ text: "Expanding bottling capacity signalled in press", source: "web", date: "12d ago" }] },
+            { name: "Portal & Email Activity", weight: 20, value: 17, max: 20, signals: [{ text: "Opens almost every AmCham email; logs in to the portal weekly", source: "engagement", date: "This month" }] },
             { name: "Staff Assessment", weight: 30, value: 27, max: 30, signals: [{ text: "Reliable, proactive account contact", source: "staff", date: "10d ago" }] }
           ]
         },
@@ -1035,7 +1035,7 @@ export const platformData = {
           factors: [
             { name: "Event Attendance", weight: 30, value: 20, max: 30, signals: [{ text: "Attendance softened this quarter", source: "engagement", date: "Q3 2026" }] },
             { name: "Committee Activity", weight: 20, value: 12, max: 20, signals: [{ text: "One active committee seat, down from two", source: "engagement", date: "Ongoing" }] },
-            { name: "Market Signals", weight: 20, value: 16, max: 20, signals: [{ text: "Energy sector regulatory uncertainty noted", source: "web", date: "2w ago" }] },
+            { name: "Portal & Email Activity", weight: 20, value: 16, max: 20, signals: [{ text: "Opens most AmCham emails; logs in to the portal a few times a month", source: "engagement", date: "This month" }] },
             { name: "Staff Assessment", weight: 30, value: 28, max: 30, signals: [{ text: "Long relationship; renewal conversation underway", source: "staff", date: "5d ago" }] }
           ]
         },
@@ -1046,7 +1046,7 @@ export const platformData = {
           factors: [
             { name: "Event Attendance", weight: 30, value: 28, max: 30, signals: [{ text: "Attendance up sharply across all event types", source: "engagement", date: "Ongoing" }] },
             { name: "Committee Activity", weight: 20, value: 18, max: 20, signals: [{ text: "Newly active in two committees", source: "engagement", date: "1m ago" }] },
-            { name: "Market Signals", weight: 20, value: 19, max: 20, signals: [{ text: "Rapid store network expansion covered in press", source: "web", date: "5d ago" }] },
+            { name: "Portal & Email Activity", weight: 20, value: 19, max: 20, signals: [{ text: "Opens almost every AmCham email; logs in to the portal weekly", source: "engagement", date: "This month" }] },
             { name: "Staff Assessment", weight: 30, value: 27, max: 30, signals: [{ text: "Executive sponsor highly engaged this year", source: "staff", date: "4d ago" }] }
           ]
         },
@@ -1057,7 +1057,7 @@ export const platformData = {
           factors: [
             { name: "Event Attendance", weight: 30, value: 26, max: 30, signals: [{ text: "Slight attendance dip from senior team travel", source: "engagement", date: "Q3 2026" }] },
             { name: "Committee Activity", weight: 20, value: 17, max: 20, signals: [{ text: "Active in Tech Committee leadership", source: "engagement", date: "Ongoing" }] },
-            { name: "Market Signals", weight: 20, value: 18, max: 20, signals: [{ text: "Stable hiring, no major signals", source: "web", date: "1m ago" }] },
+            { name: "Portal & Email Activity", weight: 20, value: 18, max: 20, signals: [{ text: "Opens almost every AmCham email; logs in to the portal weekly", source: "engagement", date: "This month" }] },
             { name: "Staff Assessment", weight: 30, value: 28, max: 30, signals: [{ text: "Consistently responsive engineering-hub contact", source: "staff", date: "1w ago" }] }
           ]
         },
@@ -1068,7 +1068,7 @@ export const platformData = {
           factors: [
             { name: "Event Attendance", weight: 30, value: 19, max: 30, signals: [{ text: "Moderate attendance, mostly junior staff", source: "engagement", date: "Ongoing" }] },
             { name: "Committee Activity", weight: 20, value: 12, max: 20, signals: [{ text: "One committee seat, inconsistent attendance", source: "engagement", date: "Q3 2026" }] },
-            { name: "Market Signals", weight: 20, value: 14, max: 20, signals: [{ text: "Stable market position", source: "web", date: "3w ago" }] },
+            { name: "Portal & Email Activity", weight: 20, value: 14, max: 20, signals: [{ text: "Opens most AmCham emails; logs in to the portal a few times a month", source: "engagement", date: "This month" }] },
             { name: "Staff Assessment", weight: 30, value: 26, max: 30, signals: [{ text: "Responsive contact; renewal terms still under discussion", source: "staff", date: "2w ago" }] }
           ]
         },
@@ -1079,7 +1079,7 @@ export const platformData = {
           factors: [
             { name: "Event Attendance", weight: 30, value: 23, max: 30, signals: [{ text: "Steady attendance across logistics-focused events", source: "engagement", date: "Ongoing" }] },
             { name: "Committee Activity", weight: 20, value: 14, max: 20, signals: [{ text: "Active in Transport sub-committee", source: "engagement", date: "Ongoing" }] },
-            { name: "Market Signals", weight: 20, value: 16, max: 20, signals: [{ text: "Regional distribution network growing", source: "web", date: "9d ago" }] },
+            { name: "Portal & Email Activity", weight: 20, value: 16, max: 20, signals: [{ text: "Opens most AmCham emails; logs in to the portal a few times a month", source: "engagement", date: "This month" }] },
             { name: "Staff Assessment", weight: 30, value: 26, max: 30, signals: [{ text: "Cooperative account relationship ahead of renewal", source: "staff", date: "6d ago" }] }
           ]
         },
@@ -1090,7 +1090,7 @@ export const platformData = {
           factors: [
             { name: "Event Attendance", weight: 30, value: 24, max: 30, signals: [{ text: "Attendance climbing steadily this year", source: "engagement", date: "Ongoing" }] },
             { name: "Committee Activity", weight: 20, value: 15, max: 20, signals: [{ text: "Newly active in Finance Committee", source: "engagement", date: "6w ago" }] },
-            { name: "Market Signals", weight: 20, value: 17, max: 20, signals: [{ text: "Expanding corporate lending signalled in press", source: "web", date: "11d ago" }] },
+            { name: "Portal & Email Activity", weight: 20, value: 17, max: 20, signals: [{ text: "Opens almost every AmCham email; logs in to the portal weekly", source: "engagement", date: "This month" }] },
             { name: "Staff Assessment", weight: 30, value: 25, max: 30, signals: [{ text: "Engaged relationship manager, quick to respond", source: "staff", date: "1w ago" }] }
           ]
         },
@@ -1101,7 +1101,7 @@ export const platformData = {
           factors: [
             { name: "Event Attendance", weight: 30, value: 17, max: 30, signals: [{ text: "Attendance down from prior year", source: "engagement", date: "Q3 2026" }] },
             { name: "Committee Activity", weight: 20, value: 10, max: 20, signals: [{ text: "Reduced committee participation", source: "engagement", date: "Ongoing" }] },
-            { name: "Market Signals", weight: 20, value: 13, max: 20, signals: [{ text: "No major signals this quarter", source: "web", date: "1m ago" }] },
+            { name: "Portal & Email Activity", weight: 20, value: 13, max: 20, signals: [{ text: "Opens most AmCham emails; logs in to the portal a few times a month", source: "engagement", date: "This month" }] },
             { name: "Staff Assessment", weight: 30, value: 24, max: 30, signals: [{ text: "Contact remains responsive despite lower activity", source: "staff", date: "3w ago" }] }
           ]
         },
@@ -1112,7 +1112,7 @@ export const platformData = {
           factors: [
             { name: "Event Attendance", weight: 30, value: 22, max: 30, signals: [{ text: "Solid attendance across FMCG-track events", source: "engagement", date: "Ongoing" }] },
             { name: "Committee Activity", weight: 20, value: 14, max: 20, signals: [{ text: "One active committee seat", source: "engagement", date: "Ongoing" }] },
-            { name: "Market Signals", weight: 20, value: 16, max: 20, signals: [{ text: "Stable domestic market position", source: "web", date: "3w ago" }] },
+            { name: "Portal & Email Activity", weight: 20, value: 16, max: 20, signals: [{ text: "Opens most AmCham emails; logs in to the portal a few times a month", source: "engagement", date: "This month" }] },
             { name: "Staff Assessment", weight: 30, value: 25, max: 30, signals: [{ text: "Consistent, positive relationship", source: "staff", date: "2w ago" }] }
           ]
         },
@@ -1123,7 +1123,7 @@ export const platformData = {
           factors: [
             { name: "Event Attendance", weight: 30, value: 20, max: 30, signals: [{ text: "Flat attendance year over year", source: "engagement", date: "Ongoing" }] },
             { name: "Committee Activity", weight: 20, value: 12, max: 20, signals: [{ text: "Limited committee engagement", source: "engagement", date: "Q3 2026" }] },
-            { name: "Market Signals", weight: 20, value: 15, max: 20, signals: [{ text: "Stable export demand for the cookware line", source: "web", date: "3w ago" }] },
+            { name: "Portal & Email Activity", weight: 20, value: 15, max: 20, signals: [{ text: "Opens most AmCham emails; logs in to the portal a few times a month", source: "engagement", date: "This month" }] },
             { name: "Staff Assessment", weight: 30, value: 26, max: 30, signals: [{ text: "Reliable, long-standing contact", source: "staff", date: "2w ago" }] }
           ]
         },
@@ -1134,7 +1134,7 @@ export const platformData = {
           factors: [
             { name: "Event Attendance", weight: 30, value: 26, max: 30, signals: [{ text: "Attendance rising sharply this year", source: "engagement", date: "Ongoing" }] },
             { name: "Committee Activity", weight: 20, value: 16, max: 20, signals: [{ text: "Newly active in Tech Committee", source: "engagement", date: "1m ago" }] },
-            { name: "Market Signals", weight: 20, value: 18, max: 20, signals: [{ text: "5G rollout coverage driving visibility", source: "web", date: "4d ago" }] },
+            { name: "Portal & Email Activity", weight: 20, value: 18, max: 20, signals: [{ text: "Opens almost every AmCham email; logs in to the portal weekly", source: "engagement", date: "This month" }] },
             { name: "Staff Assessment", weight: 30, value: 26, max: 30, signals: [{ text: "Highly engaged since new digital lead joined", source: "staff", date: "1w ago" }] }
           ]
         },
@@ -1145,7 +1145,7 @@ export const platformData = {
           factors: [
             { name: "Event Attendance", weight: 30, value: 24, max: 30, signals: [{ text: "Sent two engineers to the Infrastructure & Construction forum this quarter", source: "engagement", date: "Q3 2026" }] },
             { name: "Committee Activity", weight: 20, value: 13, max: 20, signals: [{ text: "Newly joined the Infrastructure committee as a working member", source: "engagement", date: "1m ago" }] },
-            { name: "Market Signals", weight: 20, value: 14, max: 20, signals: [{ text: "Won a regional highway-bridge supply contract", source: "web", date: "9d ago" }] },
+            { name: "Portal & Email Activity", weight: 20, value: 14, max: 20, signals: [{ text: "Opens most AmCham emails; logs in to the portal a few times a month", source: "engagement", date: "This month" }] },
             { name: "Staff Assessment", weight: 30, value: 23, max: 30, signals: [{ text: "Responsive plant-operations contact, quick to confirm event attendance", source: "staff", date: "1w ago" }] }
           ]
         },
@@ -1156,7 +1156,7 @@ export const platformData = {
           factors: [
             { name: "Event Attendance", weight: 30, value: 22, max: 30, signals: [{ text: "Attended the Energy Transition roundtable, skipped the summer mixer", source: "engagement", date: "Q3 2026" }] },
             { name: "Committee Activity", weight: 20, value: 13, max: 20, signals: [{ text: "Long-standing seat on the Energy committee, steady but not expanding", source: "engagement", date: "Ongoing" }] },
-            { name: "Market Signals", weight: 20, value: 17, max: 20, signals: [{ text: "Announced a new solar co-generation pilot in Vojvodina", source: "web", date: "12d ago" }] },
+            { name: "Portal & Email Activity", weight: 20, value: 17, max: 20, signals: [{ text: "Opens almost every AmCham email; logs in to the portal weekly", source: "engagement", date: "This month" }] },
             { name: "Staff Assessment", weight: 30, value: 28, max: 30, signals: [{ text: "Renewal terms in discussion; relationship remains warm", source: "staff", date: "2w ago" }] }
           ]
         },
@@ -1167,7 +1167,7 @@ export const platformData = {
           factors: [
             { name: "Event Attendance", weight: 30, value: 16, max: 30, signals: [{ text: "Missed both retail-sector briefings since the category lead left", source: "engagement", date: "Q3 2026" }] },
             { name: "Committee Activity", weight: 20, value: 8, max: 20, signals: [{ text: "No representative on the Retail & Consumer committee this cycle", source: "engagement", date: "Ongoing" }] },
-            { name: "Market Signals", weight: 20, value: 16, max: 20, signals: [{ text: "Store-count growth has stalled south of Kruševac", source: "web", date: "3w ago" }] },
+            { name: "Portal & Email Activity", weight: 20, value: 16, max: 20, signals: [{ text: "Opens most AmCham emails; logs in to the portal a few times a month", source: "engagement", date: "This month" }] },
             { name: "Staff Assessment", weight: 30, value: 28, max: 30, signals: [{ text: "New finance contact still getting oriented; first proper call scheduled", source: "staff", date: "6d ago" }] }
           ]
         },
@@ -1178,7 +1178,7 @@ export const platformData = {
           factors: [
             { name: "Event Attendance", weight: 30, value: 26, max: 30, signals: [{ text: "Sent senior trade-finance staff to every Q3 event", source: "engagement", date: "Q3 2026" }] },
             { name: "Committee Activity", weight: 20, value: 15, max: 20, signals: [{ text: "Chairs the Banking & Finance sub-committee", source: "engagement", date: "Ongoing" }] },
-            { name: "Market Signals", weight: 20, value: 18, max: 20, signals: [{ text: "Expanded working-capital lending line for SME exporters", source: "web", date: "5d ago" }] },
+            { name: "Portal & Email Activity", weight: 20, value: 18, max: 20, signals: [{ text: "Opens almost every AmCham email; logs in to the portal weekly", source: "engagement", date: "This month" }] },
             { name: "Staff Assessment", weight: 30, value: 27, max: 30, signals: [{ text: "Relationship manager consistently proactive on scheduling", source: "staff", date: "6d ago" }] }
           ]
         },
@@ -1189,7 +1189,7 @@ export const platformData = {
           factors: [
             { name: "Event Attendance", weight: 30, value: 23, max: 30, signals: [{ text: "Attended the Danube corridor logistics briefing in force", source: "engagement", date: "1m ago" }] },
             { name: "Committee Activity", weight: 20, value: 12, max: 20, signals: [{ text: "First-time participant in the Transport working group", source: "engagement", date: "6w ago" }] },
-            { name: "Market Signals", weight: 20, value: 14, max: 20, signals: [{ text: "Added a second river-port warehouse this year", source: "web", date: "3w ago" }] },
+            { name: "Portal & Email Activity", weight: 20, value: 14, max: 20, signals: [{ text: "Opens most AmCham emails; logs in to the portal a few times a month", source: "engagement", date: "This month" }] },
             { name: "Staff Assessment", weight: 30, value: 22, max: 30, signals: [{ text: "Operations lead responsive within a day on outreach", source: "staff", date: "6d ago" }] }
           ]
         },
@@ -1200,7 +1200,7 @@ export const platformData = {
           factors: [
             { name: "Event Attendance", weight: 30, value: 22, max: 30, signals: [{ text: "Steady attendance at agribusiness and export-focused events", source: "engagement", date: "Ongoing" }] },
             { name: "Committee Activity", weight: 20, value: 12, max: 20, signals: [{ text: "Active in the FMCG committee's export subgroup", source: "engagement", date: "Ongoing" }] },
-            { name: "Market Signals", weight: 20, value: 16, max: 20, signals: [{ text: "Grain export volumes up on last season's harvest", source: "web", date: "2w ago" }] },
+            { name: "Portal & Email Activity", weight: 20, value: 16, max: 20, signals: [{ text: "Opens most AmCham emails; logs in to the portal a few times a month", source: "engagement", date: "This month" }] },
             { name: "Staff Assessment", weight: 30, value: 27, max: 30, signals: [{ text: "Renewal conversation underway; contact remains engaged", source: "staff", date: "2w ago" }] }
           ]
         },
@@ -1211,7 +1211,7 @@ export const platformData = {
           factors: [
             { name: "Event Attendance", weight: 30, value: 19, max: 30, signals: [{ text: "Attendance thinned out after their senior partner's parental leave", source: "engagement", date: "Q3 2026" }] },
             { name: "Committee Activity", weight: 20, value: 10, max: 20, signals: [{ text: "One associate still seated on the SME Advisory committee", source: "engagement", date: "Ongoing" }] },
-            { name: "Market Signals", weight: 20, value: 13, max: 20, signals: [{ text: "Landed a manufacturing-sector engagement in Niš", source: "web", date: "1m ago" }] },
+            { name: "Portal & Email Activity", weight: 20, value: 13, max: 20, signals: [{ text: "Opens most AmCham emails; logs in to the portal a few times a month", source: "engagement", date: "This month" }] },
             { name: "Staff Assessment", weight: 30, value: 23, max: 30, signals: [{ text: "Billing contact responsive; renewal terms nearly settled", source: "staff", date: "2w ago" }] }
           ]
         },
@@ -1222,7 +1222,7 @@ export const platformData = {
           factors: [
             { name: "Event Attendance", weight: 30, value: 23, max: 30, signals: [{ text: "Regular presence at the Legal & Regulatory Affairs sessions", source: "engagement", date: "Ongoing" }] },
             { name: "Committee Activity", weight: 20, value: 12, max: 20, signals: [{ text: "Active voice in the automotive-supply-chain working group", source: "engagement", date: "Ongoing" }] },
-            { name: "Market Signals", weight: 20, value: 14, max: 20, signals: [{ text: "Advised on two cross-border supply contracts this quarter", source: "web", date: "Q3 2026" }] },
+            { name: "Portal & Email Activity", weight: 20, value: 14, max: 20, signals: [{ text: "Opens most AmCham emails; logs in to the portal a few times a month", source: "engagement", date: "This month" }] },
             { name: "Staff Assessment", weight: 30, value: 23, max: 30, signals: [{ text: "Managing partner engaged, quick to confirm attendance", source: "staff", date: "6d ago" }] }
           ]
         },
@@ -1233,7 +1233,7 @@ export const platformData = {
           factors: [
             { name: "Event Attendance", weight: 30, value: 26, max: 30, signals: [{ text: "Sent a delegation to the nearshoring & talent panel", source: "engagement", date: "3w ago" }] },
             { name: "Committee Activity", weight: 20, value: 15, max: 20, signals: [{ text: "Newly active in the Digital Economy committee", source: "engagement", date: "1m ago" }] },
-            { name: "Market Signals", weight: 20, value: 17, max: 20, signals: [{ text: "Opened a second delivery office to handle Western-Europe demand", source: "web", date: "10d ago" }] },
+            { name: "Portal & Email Activity", weight: 20, value: 17, max: 20, signals: [{ text: "Opens almost every AmCham email; logs in to the portal weekly", source: "engagement", date: "This month" }] },
             { name: "Staff Assessment", weight: 30, value: 25, max: 30, signals: [{ text: "Founder personally engaged with AmCham outreach", source: "staff", date: "6d ago" }] }
           ]
         },
@@ -1244,7 +1244,7 @@ export const platformData = {
           factors: [
             { name: "Event Attendance", weight: 30, value: 13, max: 30, signals: [{ text: "No attendance recorded since the site-safety incident in Q2", source: "engagement", date: "Q2 2026" }] },
             { name: "Committee Activity", weight: 20, value: 6, max: 20, signals: [{ text: "Dropped off the Energy & Extractives committee roster", source: "engagement", date: "Ongoing" }] },
-            { name: "Market Signals", weight: 20, value: 13, max: 20, signals: [{ text: "Copper output down amid a permitting dispute", source: "web", date: "1m ago" }] },
+            { name: "Portal & Email Activity", weight: 20, value: 13, max: 20, signals: [{ text: "Opens most AmCham emails; logs in to the portal a few times a month", source: "engagement", date: "This month" }] },
             { name: "Staff Assessment", weight: 30, value: 26, max: 30, signals: [{ text: "Regional contact still willing to talk; awaiting a new site manager", source: "staff", date: "38d ago" }] }
           ]
         },
@@ -1255,7 +1255,7 @@ export const platformData = {
           factors: [
             { name: "Event Attendance", weight: 30, value: 20, max: 30, signals: [{ text: "Modest attendance, mostly dispatch-level staff", source: "engagement", date: "Ongoing" }] },
             { name: "Committee Activity", weight: 20, value: 11, max: 20, signals: [{ text: "One seat on the Transport committee, low activity", source: "engagement", date: "Q3 2026" }] },
-            { name: "Market Signals", weight: 20, value: 14, max: 20, signals: [{ text: "Freight volumes flat along the southern rail corridor", source: "web", date: "3w ago" }] },
+            { name: "Portal & Email Activity", weight: 20, value: 14, max: 20, signals: [{ text: "Opens most AmCham emails; logs in to the portal a few times a month", source: "engagement", date: "This month" }] },
             { name: "Staff Assessment", weight: 30, value: 24, max: 30, signals: [{ text: "Owner-operator responsive; renewal expected to proceed", source: "staff", date: "2w ago" }] }
           ]
         },
@@ -1266,7 +1266,7 @@ export const platformData = {
           factors: [
             { name: "Event Attendance", weight: 30, value: 25, max: 30, signals: [{ text: "Strong turnout at FMCG and export-compliance events", source: "engagement", date: "Ongoing" }] },
             { name: "Committee Activity", weight: 20, value: 14, max: 20, signals: [{ text: "Active in the FMCG committee's EU market-access track", source: "engagement", date: "Ongoing" }] },
-            { name: "Market Signals", weight: 20, value: 16, max: 20, signals: [{ text: "Added two new EU retail-chain listings this quarter", source: "web", date: "Q3 2026" }] },
+            { name: "Portal & Email Activity", weight: 20, value: 16, max: 20, signals: [{ text: "Opens most AmCham emails; logs in to the portal a few times a month", source: "engagement", date: "This month" }] },
             { name: "Staff Assessment", weight: 30, value: 24, max: 30, signals: [{ text: "Export manager proactive, flags opportunities early", source: "staff", date: "6d ago" }] }
           ]
         },
@@ -1277,7 +1277,7 @@ export const platformData = {
           factors: [
             { name: "Event Attendance", weight: 30, value: 16, max: 30, signals: [{ text: "Attended its first AmCham event within a month of joining", source: "engagement", date: "3w ago" }] },
             { name: "Committee Activity", weight: 20, value: 8, max: 20, signals: [{ text: "Expressed interest in the Digital Economy committee, not yet seated", source: "engagement", date: "Ongoing" }] },
-            { name: "Market Signals", weight: 20, value: 14, max: 20, signals: [{ text: "Recently closed a seed round to fund regional expansion", source: "web", date: "1m ago" }] },
+            { name: "Portal & Email Activity", weight: 20, value: 14, max: 20, signals: [{ text: "Opens most AmCham emails; logs in to the portal a few times a month", source: "engagement", date: "This month" }] },
             { name: "Staff Assessment", weight: 30, value: 23, max: 30, signals: [{ text: "Founder highly engaged during onboarding calls", source: "staff", date: "3d ago" }] }
           ]
         },
@@ -1288,7 +1288,7 @@ export const platformData = {
           factors: [
             { name: "Event Attendance", weight: 30, value: 19, max: 30, signals: [{ text: "Seasonal attendance pattern, quiet outside peak season", source: "engagement", date: "Ongoing" }] },
             { name: "Committee Activity", weight: 20, value: 10, max: 20, signals: [{ text: "Occasional participant in the Tourism & Services roundtable", source: "engagement", date: "Q3 2026" }] },
-            { name: "Market Signals", weight: 20, value: 13, max: 20, signals: [{ text: "Resort occupancy steady year over year", source: "web", date: "1m ago" }] },
+            { name: "Portal & Email Activity", weight: 20, value: 13, max: 20, signals: [{ text: "Opens most AmCham emails; logs in to the portal a few times a month", source: "engagement", date: "This month" }] },
             { name: "Staff Assessment", weight: 30, value: 24, max: 30, signals: [{ text: "General manager responsive but slow to confirm renewal", source: "staff", date: "2w ago" }] }
           ]
         },
@@ -1299,7 +1299,7 @@ export const platformData = {
           factors: [
             { name: "Event Attendance", weight: 30, value: 24, max: 30, signals: [{ text: "Attended the export-readiness workshop and the FMCG mixer", source: "engagement", date: "3w ago" }] },
             { name: "Committee Activity", weight: 20, value: 13, max: 20, signals: [{ text: "Active in the FMCG committee's boutique-exporter cohort", source: "engagement", date: "Ongoing" }] },
-            { name: "Market Signals", weight: 20, value: 15, max: 20, signals: [{ text: "New EU import license opened three additional markets", source: "web", date: "2w ago" }] },
+            { name: "Portal & Email Activity", weight: 20, value: 15, max: 20, signals: [{ text: "Opens most AmCham emails; logs in to the portal a few times a month", source: "engagement", date: "This month" }] },
             { name: "Staff Assessment", weight: 30, value: 23, max: 30, signals: [{ text: "Owner personally engaged, enthusiastic about member events", source: "staff", date: "6d ago" }] }
           ]
         },
@@ -1310,7 +1310,7 @@ export const platformData = {
           factors: [
             { name: "Event Attendance", weight: 30, value: 14, max: 30, signals: [{ text: "Attendance dropped off after two stalled public tenders", source: "engagement", date: "Q3 2026" }] },
             { name: "Committee Activity", weight: 20, value: 7, max: 20, signals: [{ text: "No longer represented on the Infrastructure committee", source: "engagement", date: "Ongoing" }] },
-            { name: "Market Signals", weight: 20, value: 15, max: 20, signals: [{ text: "Order book has thinned amid a slowdown in public contracts", source: "web", date: "1m ago" }] },
+            { name: "Portal & Email Activity", weight: 20, value: 15, max: 20, signals: [{ text: "Opens most AmCham emails; logs in to the portal a few times a month", source: "engagement", date: "This month" }] },
             { name: "Staff Assessment", weight: 30, value: 27, max: 30, signals: [{ text: "Long-tenured contact still responsive despite the account's drift", source: "staff", date: "38d ago" }] }
           ]
         },
@@ -1321,7 +1321,7 @@ export const platformData = {
           factors: [
             { name: "Event Attendance", weight: 30, value: 23, max: 30, signals: [{ text: "Consistent attendance at the Banking & Finance briefings", source: "engagement", date: "Ongoing" }] },
             { name: "Committee Activity", weight: 20, value: 12, max: 20, signals: [{ text: "Active associate member of the Finance committee", source: "engagement", date: "Ongoing" }] },
-            { name: "Market Signals", weight: 20, value: 13, max: 20, signals: [{ text: "Advised on a mid-market cross-border transaction this quarter", source: "web", date: "Q3 2026" }] },
+            { name: "Portal & Email Activity", weight: 20, value: 13, max: 20, signals: [{ text: "Opens most AmCham emails; logs in to the portal a few times a month", source: "engagement", date: "This month" }] },
             { name: "Staff Assessment", weight: 30, value: 22, max: 30, signals: [{ text: "Managing director engaged, responds within days", source: "staff", date: "6d ago" }] }
           ]
         },
@@ -1332,7 +1332,7 @@ export const platformData = {
           factors: [
             { name: "Event Attendance", weight: 30, value: 25, max: 30, signals: [{ text: "Sent regulatory-affairs staff to every Pharma & Health session", source: "engagement", date: "Ongoing" }] },
             { name: "Committee Activity", weight: 20, value: 15, max: 20, signals: [{ text: "Active in the Health & Life Sciences committee", source: "engagement", date: "Ongoing" }] },
-            { name: "Market Signals", weight: 20, value: 16, max: 20, signals: [{ text: "Received approval to distribute two additional generics regionally", source: "web", date: "9d ago" }] },
+            { name: "Portal & Email Activity", weight: 20, value: 16, max: 20, signals: [{ text: "Opens most AmCham emails; logs in to the portal a few times a month", source: "engagement", date: "This month" }] },
             { name: "Staff Assessment", weight: 30, value: 25, max: 30, signals: [{ text: "Quality-affairs contact reliable and quick to respond", source: "staff", date: "6d ago" }] }
           ]
         },
@@ -1343,7 +1343,7 @@ export const platformData = {
           factors: [
             { name: "Event Attendance", weight: 30, value: 21, max: 30, signals: [{ text: "Attends the Energy committee's quarterly briefings reliably", source: "engagement", date: "Ongoing" }] },
             { name: "Committee Activity", weight: 20, value: 12, max: 20, signals: [{ text: "Steady, unchanged seat on the Energy & Extractives committee", source: "engagement", date: "Ongoing" }] },
-            { name: "Market Signals", weight: 20, value: 16, max: 20, signals: [{ text: "Basin output stable; no new capacity announced this year", source: "web", date: "1m ago" }] },
+            { name: "Portal & Email Activity", weight: 20, value: 16, max: 20, signals: [{ text: "Opens most AmCham emails; logs in to the portal a few times a month", source: "engagement", date: "This month" }] },
             { name: "Staff Assessment", weight: 30, value: 27, max: 30, signals: [{ text: "Plant director responsive; renewal expected to be routine", source: "staff", date: "2w ago" }] }
           ]
         },
@@ -1354,7 +1354,7 @@ export const platformData = {
           factors: [
             { name: "Event Attendance", weight: 30, value: 14, max: 30, signals: [{ text: "Attended its welcome briefing and one river-tourism mixer", source: "engagement", date: "3w ago" }] },
             { name: "Committee Activity", weight: 20, value: 6, max: 20, signals: [{ text: "Not yet placed on a committee; still in its first year", source: "engagement", date: "Ongoing" }] },
-            { name: "Market Signals", weight: 20, value: 13, max: 20, signals: [{ text: "Opened a second marina berth ahead of the summer season", source: "web", date: "1m ago" }] },
+            { name: "Portal & Email Activity", weight: 20, value: 13, max: 20, signals: [{ text: "Opens most AmCham emails; logs in to the portal a few times a month", source: "engagement", date: "This month" }] },
             { name: "Staff Assessment", weight: 30, value: 22, max: 30, signals: [{ text: "New owner enthusiastic but still learning the membership benefits", source: "staff", date: "3d ago" }] }
           ]
         }

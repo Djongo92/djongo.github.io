@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useLocation } from 'wouter';
-import { Search, Menu, X, Globe, ChevronDown, LayoutDashboard, Map, Presentation } from 'lucide-react';
+import { Search, Menu, X, Globe, ChevronDown, LayoutDashboard, Presentation } from 'lucide-react';
 import { useI18n } from '@/lib/i18n';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ThemeToggle } from '@/components/ui/theme-toggle';
@@ -15,11 +15,10 @@ export function Header() {
   const showcaseRef = React.useRef<HTMLDivElement>(null);
   const { start: startShowcase } = useShowcase();
 
-  // The demo surfaces (platform mock, redesign blueprint, guided walkthrough)
-  // live under one menu so they don't crowd the real site navigation.
+  // The platform demo and its guided tour live under one menu so they don't
+  // crowd the real site navigation. The Blueprint is linked from the footer.
   const showcaseLinks = [
     { href: '/platform', icon: LayoutDashboard, label: t('nav.showcase_platform', 'Member Platform'), desc: t('nav.showcase_platform_desc', 'Staff console and member portal') },
-    { href: '/blueprint', icon: Map, label: t('nav.blueprint'), desc: t('nav.showcase_blueprint_desc', 'Why the site is built this way, and the roadmap') },
   ];
 
   useEffect(() => {
@@ -106,7 +105,7 @@ export function Header() {
               className="text-sm font-bold text-primary bg-primary/5 hover:bg-primary/10 px-3 py-1.5 rounded-sm transition-colors flex items-center gap-2 whitespace-nowrap"
             >
               <span className="w-2 h-2 rounded-full bg-primary animate-pulse shrink-0"></span>
-              {t('nav.showcase', 'Showcase')}
+              {t('nav.showcase', 'Platform')}
               <ChevronDown className={`w-3.5 h-3.5 transition-transform ${showcaseOpen ? 'rotate-180' : ''}`} />
             </button>
             <AnimatePresence>

@@ -63,7 +63,7 @@ export default function SeenView({ t, showToast, member }: any) {
             <span className="text-5xl font-serif font-light tabular-nums text-foreground">{factors?.total ?? member?.score}</span>
             <span className="text-muted-foreground mb-1.5">/ 100</span>
           </div>
-          <p className="text-xs text-muted-foreground">{k('engagement_note', 'A measure of how much your company uses its membership. It is never compared with other members.')}</p>
+          <p className="text-xs text-muted-foreground">{k('engagement_note', 'Built only from what your company does with AmCham: events, committees, introductions, portal and email. It is never compared with other members, and news about your company never changes it.')}</p>
           {factors?.factors && (
             <div className="space-y-3">
               {factors.factors.map((f: any) => (
@@ -87,7 +87,7 @@ export default function SeenView({ t, showToast, member }: any) {
         <section className="rounded-2xl border border-border bg-card p-6 space-y-4">
           <h3 className="flex items-center gap-2 font-semibold text-foreground"><Ban className="w-4 h-4" />{k('never', 'What we never keep')}</h3>
           <ul className="space-y-2 text-sm text-foreground">
-            {[k('never1', 'Your individual survey answers (only combined results)'), k('never2', 'Anything about employees’ private lives'), k('never3', 'Your company’s financial data, unless you send it to us'), k('never4', 'Rankings of your company against other members')].map(x => (
+            {[k('never1', 'Your individual survey answers (only combined results)'), k('never2', 'Anything about employees’ private lives'), k('never3', 'Your company’s financial data, unless you send it to us'), k('never4', 'Rankings of your company against other members'), k('never5', 'Scores of your business performance: news about your company is background, never part of your number')].map(x => (
               <li key={x} className="flex gap-2"><ShieldCheck className="w-4 h-4 text-emerald-600 shrink-0 mt-0.5" />{x}</li>
             ))}
           </ul>

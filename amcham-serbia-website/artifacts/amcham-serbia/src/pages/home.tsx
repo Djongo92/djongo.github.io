@@ -5,13 +5,13 @@ import { SEO } from '@/components/seo';
 import { ArrowRight, ChevronRight, Newspaper, ArrowUpRight, Compass } from 'lucide-react';
 import { mockEvents, mockNews } from '@/data/mock';
 import { useScroll, useTransform, useInView, motion, AnimatePresence } from 'framer-motion';
-import { useGuidedTour } from '@/components/guided-tour';
+import { useShowcase } from '@/components/showcase-tour';
 import { Skeleton } from '@/components/ui/skeleton';
 import { ImageWithSkeleton } from '@/components/ui/image-with-skeleton';
 
 export default function Home() {
   const { t, lang } = useI18n();
-  const { start: startTour } = useGuidedTour();
+  const { start: startTour } = useShowcase();
 
   // Get active items
   const latestNews = mockNews.slice(0, 3);
@@ -89,7 +89,7 @@ export default function Home() {
               {t('home.explore_membership')} <ArrowRight className="w-5 h-5" />
             </Link>
             <button onClick={startTour} className="bg-white/10 backdrop-blur-md border border-white/30 text-white px-8 py-4 rounded-sm font-semibold hover:bg-white/20 transition-all flex items-center justify-center gap-2">
-              <Compass className="w-5 h-5" /> {t('guided_tour.cta')}
+              <Compass className="w-5 h-5" /> {t('showcase.cta_button', 'Take the guided tour')}
             </button>
           </div>
         </div>
@@ -366,16 +366,6 @@ export default function Home() {
               <span className="text-xs font-bold uppercase tracking-widest text-primary mb-2 block">{t('home.behind.eyebrow')}</span>
               <p className="text-foreground/80 leading-relaxed max-w-2xl">{t('home.behind.text')}</p>
             </div>
-            <dl className="flex gap-8 shrink-0">
-              <div>
-                <dt className="text-[11px] font-bold uppercase tracking-widest text-muted-foreground">{t('home.behind.findability')}</dt>
-                <dd className="font-serif font-bold text-2xl text-foreground tabular-nums">8 <span className="text-muted-foreground text-base">→</span> 11<span className="text-sm text-muted-foreground">/12</span></dd>
-              </div>
-              <div>
-                <dt className="text-[11px] font-bold uppercase tracking-widest text-muted-foreground">{t('home.behind.visual')}</dt>
-                <dd className="font-serif font-bold text-2xl text-foreground tabular-nums">4 <span className="text-muted-foreground text-base">→</span> 5<span className="text-sm text-muted-foreground">/6</span></dd>
-              </div>
-            </dl>
             <div className="flex flex-wrap gap-3 shrink-0">
               <Link href="/blueprint/diagnostic" className="inline-flex items-center gap-2 bg-foreground text-background px-5 py-2.5 rounded-full text-sm font-semibold hover:opacity-90 transition-opacity">
                 {t('home.behind.diagnostic')} <ArrowRight className="w-4 h-4" />
