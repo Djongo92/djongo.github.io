@@ -1,8 +1,8 @@
-import React, { useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { useI18n } from '@/lib/i18n';
 import { platformData } from '@/data/platform';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Search, Command, X, Book, ArrowRight, Compass, UserMinus, Keyboard } from 'lucide-react';
+import { Search, Command, X, Book, ArrowRight, Compass, UserMinus, Keyboard, ChevronDown, ChevronUp } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { runFixtureQuery } from '../views/ask';
 import { AI_NAME } from '@/components/ui/ai-badge';
@@ -10,7 +10,7 @@ import { AI_NAME } from '@/components/ui/ai-badge';
 export function TourOverlay({ step, setStep, endTour, steps, labels, onBack, badge, align = 'center' }: {
   step: number, setStep: (s:number)=>void, endTour: ()=>void,
   steps: { title: string, desc: string, note?: string }[],
-  labels: { skip: string, next: string, done: string, back?: string, note?: string },
+  labels: { skip: string, next: string, done: string, back?: string, note?: string, fold?: string, unfold?: string },
   onBack?: () => void,
   badge?: { icon: React.ComponentType<{ className?: string }>, label: string },
   // 'left' keeps the card in the bottom-left corner so it covers less of the page being shown.
@@ -19,10 +19,32 @@ export function TourOverlay({ step, setStep, endTour, steps, labels, onBack, bad
   // An optional short hint for the reader, such as what to click.
   const note = steps[step]?.note;
   const total = steps.length;
+  // On phones the card covers half the screen, so it can fold down to a slim
+  // bar to show the page underneath. Each new step opens it again.
+  const [folded, setFolded] = useState(false);
+  useEffect(() => setFolded(false), [step]);
+  const next = () => { if (step === total - 1) endTour(); else setStep(step + 1); };
+
+  if (folded) {
+    return (
+      <div className="fixed inset-x-0 bottom-0 z-[100] px-3 pointer-events-none" style={{ paddingBottom: 'max(0.75rem, env(safe-area-inset-bottom))' }}>
+        <div className="ink bg-foreground text-background rounded-2xl shadow-2xl pointer-events-auto border border-foreground/10 flex items-center gap-2 pl-2 pr-2 py-2 font-sans">
+          <button onClick={() => setFolded(false)} aria-label={labels.unfold || 'Show the tour card'} className="flex items-center gap-2 min-w-0 flex-1 min-h-11 px-2 rounded-xl text-left">
+            <ChevronUp className="w-4 h-4 shrink-0 text-accent" aria-hidden="true" />
+            <span className="text-xs font-bold text-background/60 shrink-0 tabular-nums">{step + 1}/{total}</span>
+            <span className="text-sm font-medium truncate">{steps[step].title}</span>
+          </button>
+          <button onClick={next} className="shrink-0 min-h-11 px-4 rounded-full bg-accent text-foreground font-bold text-sm">
+            {step === total - 1 ? labels.done : labels.next}
+          </button>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className={cn("fixed inset-0 z-[100] pointer-events-none flex items-end px-4", align === 'left' ? "justify-center sm:justify-start pb-4 sm:pb-6" : "justify-center pb-10")}>
-      <motion.div initial={{ opacity: 0, y: 50, scale: 0.95 }} animate={{ opacity: 1, y: 0, scale: 1 }} exit={{ opacity: 0, y: 20, scale: 0.95 }} transition={{ type: "spring", stiffness: 400, damping: 30 }} className={cn("w-full ink bg-foreground text-background rounded-3xl shadow-2xl pointer-events-auto border border-foreground/10 relative overflow-hidden font-sans", align === 'left' ? "max-w-sm p-6" : "max-w-md p-8")}>
+      <motion.div initial={{ opacity: 0, y: 50, scale: 0.95 }} animate={{ opacity: 1, y: 0, scale: 1 }} exit={{ opacity: 0, y: 20, scale: 0.95 }} transition={{ type: "spring", stiffness: 400, damping: 30 }} className={cn("w-full ink bg-foreground text-background rounded-3xl shadow-2xl pointer-events-auto border border-foreground/10 relative overflow-hidden font-sans", align === 'left' ? "max-w-sm p-5 sm:p-6" : "max-w-md p-6 sm:p-8")}>
         <svg className="absolute top-0 right-0 w-32 h-32 opacity-10 pointer-events-none" viewBox="0 0 100 100">
            <circle cx="80" cy="20" r="40" fill="currentColor" />
         </svg>
@@ -31,17 +53,20 @@ export function TourOverlay({ step, setStep, endTour, steps, labels, onBack, bad
             <badge.icon className="w-3.5 h-3.5" /> {badge.label}
           </div>
         )}
-        <div className="flex justify-between items-center mb-6">
-          <div className="flex gap-1.5">
+        <div className="flex justify-between items-center mb-4 sm:mb-6">
+          <div className="flex gap-1 sm:gap-1.5">
             {Array.from({length: total}).map((_, i) => (
-              <div key={i} className={cn("h-1.5 rounded-full transition-all", i === step ? "w-6 bg-accent" : "w-1.5 bg-background/20")}></div>
+              <div key={i} className={cn("h-1.5 rounded-full transition-all", i === step ? "w-5 sm:w-6 bg-accent" : "w-1.5 bg-background/20")}></div>
             ))}
           </div>
-          <div className="flex items-center gap-4">
+          <div className="flex items-center gap-3 sm:gap-4 shrink-0">
             {onBack && step > 0 && (
-              <button onClick={onBack} className="text-[11px] font-bold uppercase tracking-widest text-background/70 hover:text-background transition-colors">{labels.back || 'Back'}</button>
+              <button onClick={onBack} className="text-[11px] font-bold uppercase tracking-widest whitespace-nowrap text-background/70 hover:text-background transition-colors">{labels.back || 'Back'}</button>
             )}
-            <button onClick={endTour} className="text-[11px] font-bold uppercase tracking-widest text-background/70 hover:text-background transition-colors">{labels.skip}</button>
+            <button onClick={endTour} className="text-[11px] font-bold uppercase tracking-widest whitespace-nowrap text-background/70 hover:text-background transition-colors">{labels.skip}</button>
+            <button onClick={() => setFolded(true)} aria-label={labels.fold || 'Fold the tour card'} className="sm:hidden -m-2 w-10 h-10 flex items-center justify-center rounded-full text-background/70 hover:text-background">
+              <ChevronDown className="w-4 h-4" aria-hidden="true" />
+            </button>
           </div>
         </div>
         <h3 className={cn("font-serif font-light mb-3", align === 'left' ? "text-2xl" : "text-3xl")}>{steps[step].title}</h3>
@@ -56,10 +81,7 @@ export function TourOverlay({ step, setStep, endTour, steps, labels, onBack, bad
           <div className="flex items-center gap-2">
             <div className="text-xs font-bold text-background/60">{step + 1} / {total}</div>
           </div>
-          <button onClick={() => {
-            if (step === total - 1) endTour();
-            else setStep(step + 1);
-          }} className="px-6 py-2.5 rounded-full bg-accent text-foreground font-bold text-sm shadow-md hover:shadow-lg transition-transform active:scale-95">
+          <button onClick={next} className="px-6 py-2.5 rounded-full bg-accent text-foreground font-bold text-sm shadow-md hover:shadow-lg transition-transform active:scale-95">
             {step === total - 1 ? labels.done : labels.next} <ArrowRight className="inline w-4 h-4 ml-1" />
           </button>
         </div>

@@ -119,6 +119,8 @@ export function ShowcaseProvider({ children }: { children: React.ReactNode }) {
               done: t('platform.console.tour_done'),
               back: t('showcase.back', 'Back'),
               note: t('showcase.tip_label', 'Try it'),
+              fold: t('showcase.fold', 'Fold the tour card'),
+              unfold: t('showcase.unfold', 'Show the tour card'),
             }}
           />
         )}

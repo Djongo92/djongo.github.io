@@ -65,7 +65,7 @@ export default function Impact() {
             {stats.map((stat, i) => (
               <div key={i} className="bg-card border border-border p-6 md:p-8 rounded-2xl shadow-xl">
                 <stat.icon className="w-6 h-6 text-primary mb-4" />
-                <div className="text-3xl md:text-4xl font-serif font-bold text-secondary mb-2">{stat.val}</div>
+                <div className="text-3xl md:text-4xl font-serif font-bold text-foreground mb-2">{stat.val}</div>
                 <div className="text-xs font-bold uppercase tracking-widest text-muted-foreground">{stat.label}</div>
               </div>
             ))}

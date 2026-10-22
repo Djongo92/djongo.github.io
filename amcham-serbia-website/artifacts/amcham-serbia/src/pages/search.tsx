@@ -154,7 +154,7 @@ export default function SearchPage() {
                   <div key={key}>
                     <h3 className="font-serif font-bold text-xl mb-4 border-b border-border pb-2 flex items-center justify-between">
                       {items[0].typeLabel} 
-                      <span className="text-sm font-sans bg-secondary/10 text-secondary px-2 py-0.5 rounded-sm">{items.length}</span>
+                      <span className="text-sm font-sans bg-foreground/10 text-foreground px-2 py-0.5 rounded-sm">{items.length}</span>
                     </h3>
                     <div className="space-y-4">
                       {items.map((item, i) => {

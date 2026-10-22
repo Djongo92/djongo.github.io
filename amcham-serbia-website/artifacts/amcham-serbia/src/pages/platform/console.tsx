@@ -51,7 +51,14 @@ export default function Console() {
   // ?brief=open starts with Compass's Today panel open, for the walkthrough's morning-brief step.
   const [compassOpen, setCompassOpen] = useState(() => new URLSearchParams(window.location.search).get('brief') === 'open');
   const briefParam = searchParams.get('brief');
-  useEffect(() => { if (briefParam === 'open') setCompassOpen(true); }, [briefParam]);
+  // Leaving a ?brief=open link (the tour's next step) closes the panel again,
+  // so it doesn't sit over the screens that follow; on a phone it fills the screen.
+  const prevBrief = useRef(briefParam);
+  useEffect(() => {
+    if (briefParam === 'open') setCompassOpen(true);
+    else if (prevBrief.current === 'open') setCompassOpen(false);
+    prevBrief.current = briefParam;
+  }, [briefParam]);
   const [notifications, setNotifications] = useState([
     { id: 'n1', text: 'Your Q3 Board Summary is ready to review', read: false, time: '2h ago' },
     { id: 'n2', text: '3 renewals move into the 90-day window this week', read: false, time: '5h ago' },
