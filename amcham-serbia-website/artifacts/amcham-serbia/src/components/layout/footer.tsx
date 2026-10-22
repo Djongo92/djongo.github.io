@@ -24,31 +24,21 @@ export function Footer() {
   return (
     <footer className="bg-secondary text-secondary-foreground pt-16 pb-8 border-t-4 border-primary print:hidden">
       <div className="container mx-auto px-4 md:px-8">
-        {/* Brand and contact, then two link lists: AmCham's own pages, and the
-            pages about this redesign. On phones the two lists sit side by side. */}
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-x-8 gap-y-12 mb-12">
+        {/* The logo, then four columns: contact, AmCham's own pages, the pages
+            about this redesign, and social links. On smaller screens the short
+            columns (contact, social) pair up first, then the two link lists. */}
+        <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-x-8 gap-y-12 mb-12">
 
-          <div className="col-span-2 md:col-span-1 flex flex-col gap-6">
+          <div className="col-span-2 md:col-span-4 lg:col-span-1 flex flex-col gap-6">
             <img 
               src={`${import.meta.env.BASE_URL}brand/amcham-logo-white.png`} 
               alt="AmCham Serbia" 
               className="h-12 w-auto object-contain self-start"
             />
             <p className="text-sm text-muted-foreground max-w-xs font-serif italic">{t('footer.tagline', 'The leading independent business association in Serbia.')}</p>
-            <div className="flex gap-3" aria-label={t('footer.follow')} role="group">
-              <a href="https://www.linkedin.com/company/2668493/" target="_blank" rel="noopener noreferrer" aria-label="LinkedIn" className="w-11 h-11 rounded-full bg-secondary-foreground/5 flex items-center justify-center hover:bg-primary transition-colors text-secondary-foreground">
-                <Linkedin className="w-5 h-5" />
-              </a>
-              <a href="https://twitter.com/amchamserbia" target="_blank" rel="noopener noreferrer" aria-label="Twitter" className="w-11 h-11 rounded-full bg-secondary-foreground/5 flex items-center justify-center hover:bg-primary transition-colors text-secondary-foreground">
-                <Twitter className="w-5 h-5" />
-              </a>
-              <a href="https://www.youtube.com/user/AmChamSerbia" target="_blank" rel="noopener noreferrer" aria-label="YouTube" className="w-11 h-11 rounded-full bg-secondary-foreground/5 flex items-center justify-center hover:bg-primary transition-colors text-secondary-foreground">
-                <Youtube className="w-5 h-5" />
-              </a>
-            </div>
           </div>
 
-          <div className="col-span-2 md:col-span-1">
+          <div>
             <h2 className={HEADING}>{t('footer.contact')}</h2>
             <address className="not-italic flex flex-col gap-3 text-sm text-muted-foreground">
               <p>{t('footer.address')}</p>
@@ -57,7 +47,7 @@ export function Footer() {
             </address>
           </div>
 
-          <nav aria-label={t('footer.explore', 'Explore')}>
+          <nav aria-label={t('footer.explore', 'Explore')} className="order-2 lg:order-none">
             <h2 className={HEADING}>{t('footer.explore', 'Explore')}</h2>
             <div className={LIST}>
               <Link href="/membership" className={LINK}>{t('nav.membership')}</Link>
@@ -71,7 +61,7 @@ export function Footer() {
             </div>
           </nav>
 
-          <nav aria-label={t('footer.redesign', 'The redesign')}>
+          <nav aria-label={t('footer.redesign', 'The redesign')} className="order-2 lg:order-none">
             <h2 className={HEADING}>{t('footer.redesign', 'The redesign')}</h2>
             <div className={LIST}>
               <Link href="/platform" className="text-[#ff7a7c] hover:text-secondary-foreground font-bold transition-colors">{t('platform.nav')}</Link>
@@ -81,6 +71,21 @@ export function Footer() {
               <Link href="/blueprint" className={LINK}>{t('nav.blueprint')}</Link>
             </div>
           </nav>
+
+          <div className="order-1 lg:order-none">
+            <h2 className={HEADING}>{t('footer.follow')}</h2>
+            <div className="flex flex-wrap gap-3">
+              <a href="https://www.linkedin.com/company/2668493/" target="_blank" rel="noopener noreferrer" aria-label="LinkedIn" className="w-11 h-11 rounded-full bg-secondary-foreground/5 flex items-center justify-center hover:bg-primary transition-colors text-secondary-foreground">
+                <Linkedin className="w-5 h-5" />
+              </a>
+              <a href="https://twitter.com/amchamserbia" target="_blank" rel="noopener noreferrer" aria-label="Twitter" className="w-11 h-11 rounded-full bg-secondary-foreground/5 flex items-center justify-center hover:bg-primary transition-colors text-secondary-foreground">
+                <Twitter className="w-5 h-5" />
+              </a>
+              <a href="https://www.youtube.com/user/AmChamSerbia" target="_blank" rel="noopener noreferrer" aria-label="YouTube" className="w-11 h-11 rounded-full bg-secondary-foreground/5 flex items-center justify-center hover:bg-primary transition-colors text-secondary-foreground">
+                <Youtube className="w-5 h-5" />
+              </a>
+            </div>
+          </div>
 
         </div>
 
