@@ -12,10 +12,10 @@ export default function BlueprintDirection() {
         
         {/* Creative Direction */}
         <div className="mb-16">
-          <h2 className="text-3xl font-serif font-bold mb-8">The Creative Direction</h2>
+          <h2 className="text-3xl font-serif font-bold mb-8">The direction</h2>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             <div className="bg-secondary text-secondary-foreground border-2 border-primary p-8 rounded-2xl shadow-xl relative overflow-hidden">
-              <div className="absolute top-0 right-0 bg-primary text-primary-foreground text-xs font-bold px-3 py-1 rounded-bl-sm">Chosen Lead</div>
+              <div className="absolute top-0 right-0 bg-primary text-primary-foreground text-xs font-bold px-3 py-1 rounded-bl-sm">The direction we chose</div>
               <BookOpen className="w-8 h-8 text-primary mb-6" />
               <h3 className="text-xl font-bold mb-3">Editorial authority</h3>
               <p className="text-sm text-secondary-foreground/80 mb-6">Restrained navy / warm white / red; large headlines; generous spacing; real local photography; identity from people, language and evidence.</p>
@@ -89,19 +89,19 @@ export default function BlueprintDirection() {
               <div className="bg-background border border-border p-6 rounded-2xl">
                 <Maximize className="w-6 h-6 text-primary mb-4" />
                 <h4 className="font-bold mb-2">Responsive & Motion</h4>
-                <p className="text-sm text-muted-foreground">Build from 320px minimum. Transitions ~150–250ms. Respect prefers-reduced-motion. No zero-to-total counters.</p>
+                <p className="text-sm text-muted-foreground">Build from 320px minimum. Transitions ~150–250ms. Respect prefers-reduced-motion. No numbers that count up from zero.</p>
               </div>
             </div>
           </div>
         </div>
 
-        {/* Living Design Tokens */}
+        {/* Colours, type and buttons */}
         <div className="mb-16">
-          <h2 className="text-3xl font-serif font-bold mb-8">Living Design Tokens</h2>
+          <h2 className="text-3xl font-serif font-bold mb-8">Colours, type and buttons</h2>
           
           <div className="bg-card border border-border p-8 md:p-12 shadow-sm rounded-2xl">
 
-            <h3 className="text-lg font-bold mb-6 border-b border-border pb-2">1. Color Palette</h3>
+            <h3 className="text-lg font-bold mb-6 border-b border-border pb-2">Colours</h3>
             <div className="grid grid-cols-2 md:grid-cols-5 gap-4 mb-12">
               <div className="space-y-2">
                 <div className="h-24 rounded-sm border border-border/50 bg-[#0B1221] shadow-inner"></div>
@@ -140,7 +140,7 @@ export default function BlueprintDirection() {
               </div>
             </div>
 
-            <h3 className="text-lg font-bold mb-6 border-b border-border pb-2">2. Typography</h3>
+            <h3 className="text-lg font-bold mb-6 border-b border-border pb-2">Type</h3>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-12 mb-12">
               <div>
                 <p className="text-sm font-bold text-muted-foreground uppercase tracking-widest mb-4">Display / Headings</p>
@@ -164,7 +164,7 @@ export default function BlueprintDirection() {
               </div>
             </div>
 
-            <h3 className="text-lg font-bold mb-6 border-b border-border pb-2">3. Interactive Components</h3>
+            <h3 className="text-lg font-bold mb-6 border-b border-border pb-2">Buttons and fields</h3>
             <div className="flex flex-wrap gap-8 items-end">
               <div className="space-y-3">
                 <p className="text-xs font-bold text-muted-foreground uppercase">Primary Action</p>

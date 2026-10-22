@@ -453,18 +453,19 @@ en: {
     },
     blueprint: {
       title: "Design Blueprint",
-      subtitle: "Commissioning roadmap and creative direction for the AmCham Serbia platform.",
-      english_note: "Note: The deep technical content and working tables in this document are maintained in English as the source of truth for international agency partners.",
-      pages_title: "Every Page, Annotated",
-      pages_subtitle: "The site has these templates. The five marked with a badge are the critical test journeys everything is measured against; the rest follow the same standards.",
+      badge: "Behind the design",
+      subtitle: "How this redesign was thought through: what we looked at, the direction we chose, and how it could roll out.",
+      english_note: "This section is in English for now.",
+      pages_title: "Every page, explained",
+      pages_subtitle: "The site is built from these templates. The five marked are the main journeys everything is checked against; the rest follow the same standards.",
       nav: {
         overview: "Overview",
-        diagnostic: "Diagnostic",
+        diagnostic: "Analysis",
         direction: "Direction",
         pages: "Pages",
         roadmap: "Roadmap"
       },
-      home_banner: "Reviewing this redesign? Open the full delivery blueprint →"
+      home_banner: "Reviewing this redesign? Open the blueprint →"
     },
 
     showcase: {
@@ -1593,18 +1594,19 @@ sr: {
     },
     blueprint: {
       title: "Nacrt dizajna",
-      subtitle: "Plan naručivanja i kreativni pravac za platformu AmCham Srbija.",
-      english_note: "Napomena: Duboki tehnički sadržaj i radne tabele u ovom dokumentu održavaju se na engleskom jeziku kao izvor istine za međunarodne agencijske partnere.",
-      pages_title: "Koncepti stranica",
-      pages_subtitle: "Sajt sadrži ove šablone. Pet označenih značkom su kritična testna putovanja prema kojima se sve meri; ostali prate iste standarde.",
+      badge: "Iza dizajna",
+      subtitle: "Kako je ovaj redizajn osmišljen: šta smo pogledali, koji smo pravac izabrali i kako bi mogao da se uvede.",
+      english_note: "Ovaj deo je za sada na engleskom.",
+      pages_title: "Sve stranice, objašnjene",
+      pages_subtitle: "Sajt je izgrađen od ovih šablona. Pet označenih su glavna putovanja prema kojima se sve proverava; ostali prate iste standarde.",
       nav: {
         overview: "Pregled",
-        diagnostic: "Dijagnostika",
+        diagnostic: "Analiza",
         direction: "Pravac",
         pages: "Stranice",
         roadmap: "Plan puta"
       },
-      home_banner: "Pregledate ovaj redizajn? Otvorite puni nacrt isporuke →"
+      home_banner: "Pregledate ovaj redizajn? Otvorite nacrt →"
     },
 
     showcase: {
@@ -2678,16 +2680,21 @@ const I18nContext = createContext<I18nContextType | undefined>(undefined);
 export function I18nProvider({ children }: { children: React.ReactNode }) {
   const [lang, setLangState] = useState<Language>('en');
 
+  // Every visit starts in English; a switch to Serbian holds for the rest of
+  // the visit (this tab) only. The old long-lived setting is cleared.
   useEffect(() => {
-    const saved = localStorage.getItem('amcham_lang') as Language;
-    if (saved && (saved === 'en' || saved === 'sr')) {
-      setLangState(saved);
+    try {
+      localStorage.removeItem('amcham_lang');
+      const saved = sessionStorage.getItem('amcham_lang');
+      if (saved === 'en' || saved === 'sr') setLangState(saved);
+    } catch {
+      // Storage unavailable: stay in English.
     }
   }, []);
 
   const setLang = (newLang: Language) => {
     setLangState(newLang);
-    localStorage.setItem('amcham_lang', newLang);
+    try { sessionStorage.setItem('amcham_lang', newLang); } catch { /* this visit only */ }
   };
 
   const t = (path: string, fallback?: string): string => {

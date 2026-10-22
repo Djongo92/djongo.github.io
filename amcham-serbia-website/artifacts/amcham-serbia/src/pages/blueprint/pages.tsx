@@ -12,13 +12,13 @@ export default function BlueprintPages() {
       id: "T1",
       name: "Homepage",
       path: "/",
-      description: "One proposition and restrained network motif; primary membership action + secondary events action; three intent routes (connect / participate / understand); current research, events and advocacy as dated, maintained cards; no carousel."
+      description: "One clear message; a main membership button and a second one for events; three routes in (connect / take part / understand); current research, events and advocacy as dated cards; the headline stays put while the photos change."
     },
     {
       id: "T2",
       name: "Membership",
       path: "/membership",
-      description: "Preparation checklist (eligibility, categories, fee basis, approval); \"Discuss membership\" short enquiry distinct from full application; benefits as actions with examples and restrictions; three-step explanation with owner-confirmed timings."
+      description: "Preparation checklist (eligibility, categories, fee basis, approval); \"Discuss membership\" short enquiry distinct from full application; benefits as actions with examples and restrictions; three-step explanation with timings the membership team has confirmed."
     },
     {
       id: "T3",
@@ -69,7 +69,7 @@ export default function BlueprintPages() {
       id: "S5",
       name: "About",
       path: "/about",
-      description: "Mission, governance, and the real executive team with names and roles; contact routes obvious; this page answers 'who runs this place'."
+      description: "Mission, governance, and the real executive team with names and roles; contact routes obvious; it shows who leads AmCham Serbia and how to reach them."
     },
     {
       id: "S6",
@@ -81,7 +81,7 @@ export default function BlueprintPages() {
       id: "S7",
       name: "News detail",
       path: "/news/news-01",
-      description: "Absolute date, topic tag, related items; press-release hygiene."
+      description: "Full date, topic tag and related items; dates and contacts on every press release."
     }
   ];
 
@@ -144,7 +144,7 @@ export default function BlueprintPages() {
         <div className="max-w-3xl mb-12 border-t border-border pt-16">
           <h2 className="text-3xl font-serif font-bold mb-6">Supporting Pages</h2>
           <p className="text-lg text-muted-foreground leading-relaxed">
-            These pages support the core journeys, completing the informational architecture of the site. They are built to the exact same standard of clarity and accessibility.
+            These pages support the core journeys and complete the site’s structure. They are built to the same standard of clarity and accessibility.
           </p>
         </div>
 
