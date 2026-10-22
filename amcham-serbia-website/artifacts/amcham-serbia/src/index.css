@@ -162,7 +162,9 @@
   --popover-foreground: 40 20% 96%;
   --popover-border: 221 30% 18%;
   
-  --primary: 359 86% 52%; /* #EB1E23 */
+  /* Same deeper red as light mode so white text on red buttons passes AA;
+     red text gets a lighter tint below so it reads on the navy ground. */
+  --primary: 359 82% 47%; /* #DA1619 */
   --primary-foreground: 0 0% 100%;
   
   /* Navy bands stay navy in dark mode (lifted off the page) rather than
@@ -241,6 +243,15 @@
 /* Red text on a pale-red chip needs a deeper red to stay readable (AA). */
 .bg-primary\/10.text-primary { color: hsl(359 85% 38%); }
 .dark .bg-primary\/10.text-primary { color: hsl(359 90% 72%); }
+/* Dark mode: red text on navy needs a lighter red to stay readable (AA).
+   Ink panels keep a light ground, so they keep the standard red. */
+.dark .text-primary:not(.ink .text-primary) { color: hsl(359 95% 68%); }
+
+/* Red text inside a navy band (but not on a card sitting on it) uses the
+   lighter red, as in dark mode, so it stays readable (AA). */
+.bg-secondary .text-primary:not(.bg-secondary .bg-card *, .bg-secondary .bg-background *) {
+  color: hsl(359 95% 68%);
+}
 
 /* Muted text inside the navy bands was navy-grey on navy: unreadable on a
    projector. Within a secondary band (but not inside a card sitting on it),

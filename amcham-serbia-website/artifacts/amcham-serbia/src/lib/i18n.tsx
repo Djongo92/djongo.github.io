@@ -471,6 +471,8 @@ en: {
     showcase: {
       badge: "Guided tour",
       back: "Back",
+      fold: "Fold the tour card",
+      unfold: "Show the tour card",
       cta_label: "New here?",
       cta_body: "A few minutes through the website, the staff console and the member portal.",
       cta_button: "Take the guided tour"
@@ -1612,6 +1614,8 @@ sr: {
     showcase: {
       badge: "Vođeni obilazak",
       back: "Nazad",
+      fold: "Skupi karticu obilaska",
+      unfold: "Prikaži karticu obilaska",
       cta_label: "Prvi put ovde?",
       cta_body: "Nekoliko minuta kroz sajt, konzolu za tim i portal za članove.",
       cta_button: "Pokrenite vođeni obilazak",

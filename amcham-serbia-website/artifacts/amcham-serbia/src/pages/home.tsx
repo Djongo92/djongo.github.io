@@ -260,7 +260,7 @@ export default function Home() {
                 {t('home.spotlight_quote')}
               </p>
               <div className="flex items-center gap-4">
-                <div className="w-12 h-12 rounded-full bg-secondary/10 flex items-center justify-center text-secondary font-bold font-serif">M</div>
+                <div className="w-12 h-12 rounded-full bg-foreground/10 flex items-center justify-center text-foreground font-bold font-serif">M</div>
                 <div>
                   <p className="font-bold font-serif text-lg">Milan Jovanović</p>
                   <p className="text-sm text-muted-foreground">Managing Director, Automotive Sector</p>
