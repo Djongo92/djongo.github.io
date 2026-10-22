@@ -29,35 +29,30 @@ jobs:
       - run: pnpm install --frozen-lockfile
 
       # Marketing site at the root, web app at /app/, plain static files —
-      # everything dynamic is Supabase. SITE_BASE is the project-site subpath
-      # (see the AmCham note below for why Pages serves this repo there).
+      # everything dynamic is Supabase. SITE_BASE is the project-site subpath:
+      # this repo's name doesn't exactly match the `<owner>.github.io`
+      # user-site pattern (owner is Djongo92), so Pages serves it as a
+      # project site under /djongo.github.io/.
       - name: Build site
         env:
           SITE_BASE: /djongo.github.io/
         run: node scripts/build-site.mjs
 
-      # AmCham Serbia demo — built separately (its own pnpm workspace) and
-      # published alongside the main site at /amcham-preview/.
-      #
-      # BASE_PATH includes /djongo.github.io/: this repo's name doesn't
-      # exactly match the special `<owner>.github.io` user-site pattern
-      # (owner is Djongo92, repo is djongo.github.io), so Pages serves it
-      # as a project site at that subpath rather than at the bare domain —
-      # confirmed via the deploy job's own "Evaluated environment url".
-      - name: Install AmCham demo dependencies
-        working-directory: amcham-serbia-website
-        run: pnpm install --frozen-lockfile
-      - name: Build AmCham demo
-        working-directory: amcham-serbia-website/artifacts/amcham-serbia
-        env:
-          PORT: "5000"
-          BASE_PATH: /djongo.github.io/amcham-preview/
-        run: pnpm run build
-      - name: Copy AmCham demo into Pages output
+      # The AmCham Serbia demo now lives on Cloudflare Pages
+      # (amcham-demo.pages.dev, password-protected). The old /amcham-preview/
+      # address only forwards there, so existing links keep working.
+      - name: Forward the old AmCham demo address
         run: |
           mkdir -p site-dist/amcham-preview
-          cp -r amcham-serbia-website/artifacts/amcham-serbia/dist/public/* site-dist/amcham-preview/
-          rm -f site-dist/amcham-preview/preview-platform.html site-dist/amcham-preview/robots.txt
+          cat > site-dist/amcham-preview/index.html <<'HTML'
+          <!doctype html>
+          <meta charset="utf-8">
+          <meta name="robots" content="noindex">
+          <title>AmCham Serbia demo has moved</title>
+          <meta http-equiv="refresh" content="0; url=https://amcham-demo.pages.dev/">
+          <link rel="canonical" href="https://amcham-demo.pages.dev/">
+          <p>The demo has moved to <a href="https://amcham-demo.pages.dev/">amcham-demo.pages.dev</a>.</p>
+          HTML
 
       - uses: actions/configure-pages@v5
       - uses: actions/upload-pages-artifact@v3

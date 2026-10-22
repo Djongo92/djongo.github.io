@@ -18,7 +18,7 @@ artifacts/
   legalos-marketing/    Marketing site (Vite + Tailwind v4), served at /
   legalos-mobile/       Expo mobile app (source only; not deployed from here)
 scripts/build-site.mjs  Builds marketing + app into one static site (site-dist/)
-amcham-serbia-website/  Separate AmCham demo, published at /amcham-preview/
+amcham-serbia-website/  Separate AmCham demo, hosted on Cloudflare Pages (amcham-demo.pages.dev)
 docs/                   Project notes and screenshots
 ```
 
@@ -42,8 +42,8 @@ Everything dynamic runs on Supabase (Postgres + edge functions), so the site
 is plain static files:
 
 - **GitHub Pages** — `.github/workflows/deploy-pages.yml` builds on every push
-  to `main` (`SITE_BASE=/djongo.github.io/`) and publishes the marketing site,
-  the app at `/app/`, and the AmCham demo at `/amcham-preview/`.
+  to `main` (`SITE_BASE=/djongo.github.io/`) and publishes the marketing site
+  at the root and the app at `/app/`; `/amcham-preview/` only forwards to the AmCham demo on Cloudflare Pages.
 - **Vercel** (optional, root domain) — `vercel.json` runs the same build with
   `SITE_BASE=/`.
 
