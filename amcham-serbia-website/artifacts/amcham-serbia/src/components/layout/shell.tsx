@@ -3,6 +3,7 @@ import { useLocation } from 'wouter';
 import { Header } from './header';
 import { Footer } from './footer';
 import { ChatBubble } from './chat-bubble';
+import { CookieConsent } from '@/components/cookie-consent';
 import { AnimatePresence, motion } from 'framer-motion';
 
 export function Shell({ children }: { children: React.ReactNode }) {
@@ -23,7 +24,8 @@ export function Shell({ children }: { children: React.ReactNode }) {
     <div className="min-h-[100dvh] flex flex-col bg-background selection:bg-primary/20 selection:text-primary">
       <Header />
       <main className="flex-1 w-full relative">
-        <AnimatePresence mode="wait">
+        {/* No fade on the first page load, so content paints straight away. */}
+        <AnimatePresence mode="wait" initial={false}>
           <motion.div
             key={location}
             initial={{ opacity: 0, y: 10 }}
@@ -38,6 +40,7 @@ export function Shell({ children }: { children: React.ReactNode }) {
       </main>
       <Footer />
       <ChatBubble />
+      <CookieConsent />
     </div>
   );
 }

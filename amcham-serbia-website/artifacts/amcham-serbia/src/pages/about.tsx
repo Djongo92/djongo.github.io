@@ -9,13 +9,13 @@ export default function About() {
   const { t } = useI18n();
 
   const team = [
-    { id: 'vera', img: 'vera.jpg', name: t('team.vera.name'), role: t('team.vera.role'), bio: t('team.vera.bio') },
-    { id: 'amalija', img: 'amalija.jpg', name: t('team.amalija.name'), role: t('team.amalija.role'), bio: t('team.amalija.bio') },
-    { id: 'ana', img: 'ana.jpg', name: t('team.ana.name'), role: t('team.ana.role'), bio: t('team.ana.bio') },
-    { id: 'slobodan', img: 'slobodan.jpg', name: t('team.slobodan.name'), role: t('team.slobodan.role'), bio: t('team.slobodan.bio') },
+    { id: 'vera', img: 'vera.webp', name: t('team.vera.name'), role: t('team.vera.role'), bio: t('team.vera.bio') },
+    { id: 'amalija', img: 'amalija.webp', name: t('team.amalija.name'), role: t('team.amalija.role'), bio: t('team.amalija.bio') },
+    { id: 'ana', img: 'ana.webp', name: t('team.ana.name'), role: t('team.ana.role'), bio: t('team.ana.bio') },
+    { id: 'slobodan', img: 'slobodan.webp', name: t('team.slobodan.name'), role: t('team.slobodan.role'), bio: t('team.slobodan.bio') },
     { id: 'tina', img: 'tina.webp', name: t('team.tina.name'), role: t('team.tina.role'), bio: t('team.tina.bio') },
-    { id: 'branislav', img: 'branislav.jpg', name: t('team.branislav.name'), role: t('team.branislav.role'), bio: t('team.branislav.bio') },
-    { id: 'anita', img: 'anita.jpg', name: t('team.anita.name'), role: t('team.anita.role'), bio: t('team.anita.bio') }
+    { id: 'branislav', img: 'branislav.webp', name: t('team.branislav.name'), role: t('team.branislav.role'), bio: t('team.branislav.bio') },
+    { id: 'anita', img: 'anita.webp', name: t('team.anita.name'), role: t('team.anita.role'), bio: t('team.anita.bio') }
   ];
 
   return (
@@ -175,7 +175,7 @@ export default function About() {
                     </div>
                     <div>
                       <h4 className="font-bold text-xs uppercase tracking-widest text-secondary-foreground/70 mb-2">Email</h4>
-                      <a href={`mailto:${t('footer.email')}`} className="text-secondary-foreground text-sm font-medium hover:text-primary transition-colors">{t('footer.email')}</a>
+                      <a href={`mailto:${t('footer.email')}`} className="tap text-secondary-foreground text-sm font-medium hover:text-primary transition-colors">{t('footer.email')}</a>
                     </div>
                   </div>
                 </div>
@@ -190,14 +190,14 @@ export default function About() {
                 <p className="text-sm text-muted-foreground leading-relaxed mb-6">{t('about.press_desc')}</p>
                 <div className="flex items-center gap-4 mb-6">
                   <div className="w-12 h-12 shrink-0 relative rounded-full overflow-hidden bg-muted">
-                    <ImageWithSkeleton src={`${import.meta.env.BASE_URL}images/team/ana.jpg`} alt={t('team.ana.name')} className="w-full h-full object-cover" />
+                    <ImageWithSkeleton src={`${import.meta.env.BASE_URL}images/team/ana.webp`} alt={t('team.ana.name')} className="w-full h-full object-cover" />
                   </div>
                   <div>
                     <div className="font-bold text-sm text-foreground">{t('team.ana.name')}</div>
                     <div className="text-xs text-muted-foreground">{t('about.press_contact_role')}</div>
                   </div>
                 </div>
-                <a href="mailto:press@amcham.rs" className="inline-flex items-center gap-2 text-sm font-bold text-primary hover:underline mb-4">
+                <a href="mailto:press@amcham.rs" className="tap inline-flex items-center gap-2 text-sm font-bold text-primary hover:underline mb-4">
                   <Mail className="w-4 h-4" /> press@amcham.rs
                 </a>
                 <p className="text-xs text-muted-foreground border-t border-border pt-4">{t('about.press_note')}</p>

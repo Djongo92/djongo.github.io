@@ -51,8 +51,9 @@ export default function News() {
       <section className="bg-background border-b border-border sticky top-20 z-40 shadow-sm">
         <div className="container mx-auto px-4 md:px-8 py-4 flex flex-col md:flex-row gap-4 justify-end items-center">
           <div className="flex items-center gap-2 w-full md:w-auto">
-            <span className="text-sm font-semibold text-muted-foreground">{t('events.topic')}</span>
+            <label htmlFor="news-topic" className="text-sm font-semibold text-muted-foreground">{t('events.topic')}</label>
             <select 
+              id="news-topic"
               value={topicFilter}
               onChange={(e) => updateFilters({ topic: e.target.value })}
               className="border border-border p-2 rounded-sm text-sm focus:outline-none focus:border-primary bg-background"
@@ -72,7 +73,7 @@ export default function News() {
           {filteredNews.length === 0 ? (
             <div className="text-center py-24 border border-dashed border-border/50 rounded-sm bg-card">
               <Newspaper className="w-12 h-12 text-muted-foreground mx-auto mb-4 opacity-50" />
-              <h3 className="text-xl font-bold font-serif mb-2">{t('news.no_results')}</h3>
+              <h2 className="text-xl font-bold font-serif mb-2">{t('news.no_results')}</h2>
               <p className="text-muted-foreground mb-6">{t('news.no_results_desc')}</p>
               {topicFilter !== 'all' && (
                 <button
@@ -103,9 +104,9 @@ export default function News() {
                       </div>
                       
                       <Link href={`/news/${news.id}`}>
-                        <h3 className="text-xl font-serif font-bold mb-4 group-hover:text-primary transition-colors cursor-pointer line-clamp-3">
+                        <h2 className="text-xl font-serif font-bold mb-4 group-hover:text-primary transition-colors cursor-pointer line-clamp-3">
                           {title}
-                        </h3>
+                        </h2>
                       </Link>
                       
                       <p className="text-muted-foreground text-sm line-clamp-4 flex-1">
@@ -114,7 +115,7 @@ export default function News() {
                     </div>
                     
                     <div className="px-6 md:px-8 py-4 border-t border-border bg-background/50">
-                      <Link href={`/news/${news.id}`} className="text-sm font-bold text-foreground hover:text-primary transition-colors flex items-center gap-1 w-max">
+                      <Link href={`/news/${news.id}`} className="tap text-sm font-bold text-foreground hover:text-primary transition-colors flex items-center gap-1 w-max">
                         {t('common.read_more')} <ArrowRight className="w-4 h-4" />
                       </Link>
                     </div>

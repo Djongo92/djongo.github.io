@@ -77,7 +77,9 @@
   --popover-border: 40 10% 88%;
   
   /* AmCham Red as primary */
-  --primary: 359 86% 52%; /* #EB1E23 */
+  /* A shade deeper than the logo red (#EB1E23) so white text on red buttons
+     and red links on the off-white ground both pass WCAG AA contrast. */
+  --primary: 359 82% 47%; /* #DA1619 */
   --primary-foreground: 0 0% 100%;
   
   /* Navy as secondary */
@@ -222,6 +224,23 @@
   --background: 40 20% 96%;
   box-shadow: inset 0 0 0 1px hsl(221 30% 24%);
 }
+
+/* iOS zooms the page when a field under 16px gets focus; keep form text at
+   16px on phones so typing doesn't jolt the layout. */
+@media (max-width: 639px) {
+  input, select, textarea { font-size: 16px; }
+}
+
+/* A comfortable tap area on touch screens for small standalone links,
+   drawn as an invisible layer around the link so the layout doesn't move. */
+@media (pointer: coarse) {
+  .tap:not(.absolute):not(.fixed) { position: relative; }
+  .tap::after { content: ""; position: absolute; inset: -12px -6px; }
+}
+
+/* Red text on a pale-red chip needs a deeper red to stay readable (AA). */
+.bg-primary\/10.text-primary { color: hsl(359 85% 38%); }
+.dark .bg-primary\/10.text-primary { color: hsl(359 90% 72%); }
 
 /* Muted text inside the navy bands was navy-grey on navy: unreadable on a
    projector. Within a secondary band (but not inside a card sitting on it),

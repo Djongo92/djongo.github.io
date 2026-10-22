@@ -4,7 +4,7 @@ import { SEO } from '@/components/seo';
 import { Shield, TrendingUp, Users, Scale, Laptop, HeartPulse, Sprout, Building2, Globe, FileText, Briefcase, CheckCircle2, Crown } from 'lucide-react';
 import { Link } from 'wouter';
 import { policyWins } from '@/data/mock';
-import { committeeRosters, platformData } from '@/data/platform';
+import { committeeRosters, companies } from '@/data/companies';
 
 const COMMITTEE_ICONS: Record<string, any> = {
   "Digital Economy": Laptop,
@@ -21,8 +21,8 @@ export default function Advocacy() {
   const { t, lang } = useI18n();
 
   const committees = committeeRosters.map(c => {
-    const chair = platformData.allMembers.find(m => m.id === c.chairCompanyId);
-    const memberNames = c.memberCompanyIds.map(id => platformData.allMembers.find(m => m.id === id)?.name).filter(Boolean) as string[];
+    const chair = companies.find(m => m.id === c.chairCompanyId);
+    const memberNames = c.memberCompanyIds.map(id => companies.find(m => m.id === id)?.name).filter(Boolean) as string[];
     return { name: c.name, nameSr: c.nameSr, icon: COMMITTEE_ICONS[c.name] || Globe, chairName: chair?.name, memberNames, size: 1 + c.memberCompanyIds.length };
   });
 
@@ -128,7 +128,7 @@ export default function Advocacy() {
                       <Crown className="w-3 h-3 text-primary" /> {t('advocacy.chaired_by')} {committee.chairName}
                     </div>
                     {committee.memberNames.length > 0 && (
-                      <p className="text-xs text-muted-foreground/80 leading-relaxed">{committee.memberNames.join(', ')}</p>
+                      <p className="text-xs text-muted-foreground leading-relaxed">{committee.memberNames.join(', ')}</p>
                     )}
                     <div className="mt-auto pt-4 w-full flex justify-between items-center text-sm border-t border-border/50">
                       <span className="text-muted-foreground">{committee.size} {t('advocacy.member_companies')}</span>

@@ -5,7 +5,7 @@ import { useI18n } from '@/lib/i18n';
 import { SEO } from '@/components/seo';
 import { ArrowLeft, Calendar, Tag } from 'lucide-react';
 
-const NEWS_IMAGES = ['images/real/event.jpg', 'images/event-panel.jpg', 'images/office-meeting.jpg'];
+const NEWS_IMAGES = ['images/real/event.webp', 'images/event-panel.webp', 'images/office-meeting.webp'];
 
 export default function NewsDetail() {
   const [, params] = useRoute('/news/:id');
@@ -31,7 +31,7 @@ export default function NewsDetail() {
       {/* Header */}
       <section className="bg-secondary text-secondary-foreground pt-12 pb-24">
         <div className="container mx-auto px-4 md:px-8">
-          <Link href="/news" className="inline-flex items-center gap-2 text-sm font-semibold hover:text-secondary-foreground mb-12 text-secondary-foreground/80 transition-colors">
+          <Link href="/news" className="tap inline-flex items-center gap-2 text-sm font-semibold hover:text-secondary-foreground mb-12 text-secondary-foreground/80 transition-colors">
             <ArrowLeft className="w-4 h-4" /> {t('news.back')}
           </Link>
           
