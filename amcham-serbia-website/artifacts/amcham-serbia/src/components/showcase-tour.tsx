@@ -29,7 +29,7 @@ const STEPS: StepDef[] = [
   { id: 'member_value', path: '/platform/portal?view=score&role=member&member=hmo&tour=off', title: 'The member’s side', desc: 'This is what Hemofarm sees: what their membership did for them this year, and a statement they can forward to their own management.', tip: 'Click “Generate Annual Value Statement”.' },
   { id: 'member_intros', path: '/platform/portal?view=intros&role=member&member=hmo&tour=off', title: 'Asking for an introduction', desc: 'Members ask to meet each other and follow each request step by step. PwC said yes, so Hemofarm just picks a time.', tip: 'Click “Pick a time”.' },
   { id: 'member_seen', path: '/platform/portal?view=seen&role=member&member=hmo&tour=off', title: 'Nothing hidden', desc: 'Members see the same engagement number staff see, the notes AmCham keeps, and switches to decide how their data is used.' },
-  { id: 'end', path: '/ai', title: 'How the AI works', desc: 'Every AI feature you just saw follows the same rules. This page explains them: how each request is routed, and which data each model is allowed to see.' },
+  { id: 'end', path: '/ai', title: 'How the AI works', desc: 'Every AI feature you just saw follows the same rules. This page explains them in plain words, and answers the questions people ask most, such as what a “private model” is.', tip: 'Open “Questions” in the bar at the top of the page.' },
 ];
 
 interface ShowcaseContextValue {

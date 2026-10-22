@@ -26,6 +26,8 @@ export interface CompassSignal {
   summary: string;
   evidence: { text: string; source: string }[];
   why: string;
+  /** Plain-language answer to "how can Compass know this?", shown on request. */
+  howWeKnow?: string;
   confidence: 'High' | 'Medium';
   audience: 'me' | 'team';
   tier: TierId;
@@ -125,6 +127,7 @@ export function buildSignals(): CompassSignal[] {
         { text: 'No AmCham comment logged against this consultation.', source: 'Advocacy tracker' },
       ],
       why: 'A public consultation that matches a committee’s priorities is closing within 7 days with no AmCham response.',
+      howWeKnow: 'The government publishes draft laws for public comment on the eUprava portal, with a closing date. The platform checks that public list each morning, matches drafts to the topics each committee follows, and looks in AmCham’s own advocacy log for a comment. Nothing is guessed: no comment in the log means none was filed through the platform.',
       confidence: 'High', audience: 'team', tier: 'public', due: '6 days', priority: 98,
       action: {
         kind: 'draft', label: 'Draft the committee comment', draftTitle: 'Comment outline for the Labor & HR Committee',
@@ -244,6 +247,7 @@ export function buildSignals(): CompassSignal[] {
         { text: 'Title sponsor of the Energy Transition Roundtable on 14 October.', source: 'Sponsorship pipeline' },
       ],
       why: 'Every renewal gets a value statement 60 days ahead, so the conversation starts from what the member received.',
+      howWeKnow: 'Everything in the summary comes from AmCham’s own records: event check-ins, introductions logged by staff, committee work and the sponsorship list. Compass adds it up; a person reviews it before it is sent.',
       confidence: 'High', audience: 'me', tier: 'on-prem', due: 'This week', value: pm?.fee, companyId: 'pmp', priority: 88,
       action: {
         kind: 'draft', label: 'Open the statement', draftTitle: `Value statement for ${pm?.name}`,
@@ -278,6 +282,7 @@ export function buildSignals(): CompassSignal[] {
         { text: 'In the news: a second delivery office for Western-European clients. Context only, not in the score.', source: 'Public news' },
       ],
       why: 'Strong involvement with AmCham plus a direct question from the member.',
+      howWeKnow: 'Registrations and newsletter opens come from the event system and the email tool AmCham already uses; the upgrade question is an email in the shared info@ inbox. The news item is shown for context only and doesn’t change the score.',
       confidence: 'High', audience: 'me', tier: 'on-prem', value: '€2.5k upgrade', companyId: 'zit', priority: 74,
       action: {
         kind: 'draft', label: 'Draft the reply', draftTitle: `Upgrade conversation with ${zit?.name}`,
@@ -394,6 +399,7 @@ export function buildSignals(): CompassSignal[] {
         { text: 'Registered for the Energy Transition Roundtable; they’ve also asked to send someone else.', source: 'Events + info@ inbox' },
       ],
       why: 'Members with two recent no-shows get a personal reminder before the next event.',
+      howWeKnow: 'Attendance comes from event check-in: someone who registered but didn’t check in counts as a no-show. The request to send someone else arrived as an email in the shared info@ inbox.',
       confidence: 'Medium', audience: 'me', tier: 'on-prem', due: 'Tue', companyId: 'kpmg', priority: 45,
       action: {
         kind: 'draft', label: 'Draft a reminder', draftTitle: 'Reminder to KPMG',
@@ -602,13 +608,14 @@ export function buildSignals(): CompassSignal[] {
     {
       id: 'sig-sbb', kind: 'contact-change', kindLabel: 'contact changes', category: 'service',
       title: 'SBB’s main contact has gone',
-      summary: 'Three emails to the primary contact bounced this month, and nobody else at SBB has opened an AmCham email since. LinkedIn, for what it’s worth, shows a new Head of IT since September.',
+      summary: 'Three emails to the primary contact couldn’t be delivered this month, and nobody else at SBB has opened an AmCham email since. LinkedIn, for what it’s worth, shows a new Head of IT since September.',
       evidence: [
-        { text: 'Three bounces from the primary contact’s address.', source: 'Email bounces' },
+        { text: 'Three “undeliverable” notices for the primary contact’s address.', source: 'Email delivery records' },
         { text: 'No one else at SBB has opened an AmCham email in 30 days.', source: 'Email activity' },
         { text: 'A new Head of IT has been on LinkedIn since September.', source: 'LinkedIn (public)' },
       ],
-      why: 'Bounced emails and no other active contact mean the relationship has no owner on their side.',
+      why: 'Emails that can’t be delivered and no other active contact mean the relationship has no owner on their side.',
+      howWeKnow: 'When an email can’t be delivered, the recipient’s mail server automatically sends back an “undeliverable” notice saying why, for example that the mailbox no longer exists. AmCham’s email tool already records these notices. Compass reads that delivery record, not anyone’s inbox, and suggests updating the contact.',
       confidence: 'High', audience: 'me', tier: 'on-prem', due: 'Tomorrow', value: '€5k', companyId: 'sbb', priority: 86,
       action: { kind: 'draft', label: 'Draft an intro', draftTitle: 'Introduction to SBB’s new IT lead', draft: rehearsed("Draft an intro to SBB's new IT lead") },
     },

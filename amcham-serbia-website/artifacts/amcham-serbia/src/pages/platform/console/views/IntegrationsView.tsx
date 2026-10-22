@@ -13,7 +13,7 @@ interface Integration {
 }
 
 const INITIAL: Integration[] = [
-  { id: 'linkedin', name: 'LinkedIn', desc: 'Company page follower counts and post engagement for Social Presence scoring.', icon: Linkedin, connected: true, lastSynced: '4 hours ago' },
+  { id: 'linkedin', name: 'LinkedIn', desc: 'Public company-page updates, shown to staff as background only. Never part of a member’s score.', icon: Linkedin, connected: true, lastSynced: '4 hours ago' },
   { id: 'gcal', name: 'Google Calendar', desc: 'Syncs committee meetings and events into your staff calendar.', icon: Calendar, connected: true, lastSynced: '11 minutes ago' },
   { id: 'slack', name: 'Slack', desc: 'Posts new priorities and renewal-risk flags into #membership-team.', icon: MessageCircle, connected: true, lastSynced: '2 hours ago' },
   { id: 'places', name: 'Google Places', desc: 'Business profile presence checks for the directory.', icon: MapPin, connected: true, lastSynced: '1 day ago' },

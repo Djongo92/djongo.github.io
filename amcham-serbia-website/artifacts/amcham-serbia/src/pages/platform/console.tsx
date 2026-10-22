@@ -410,7 +410,7 @@ export default function Console() {
                 )}
               </AnimatePresence>
             </div>
-            <button onClick={() => setGlossaryOpen(true)} className="w-10 h-10 rounded-full border border-border bg-background shadow-sm flex items-center justify-center text-muted-foreground hover:bg-muted transition-colors" title={t('platform.console.glossary')}>
+            <button onClick={() => setGlossaryOpen(true)} className="w-10 h-10 rounded-full border border-border bg-background shadow-sm flex items-center justify-center text-muted-foreground hover:bg-muted transition-colors" title={t('platform.console.glossary')} aria-label={t('platform.console.glossary')}>
               <Book className="w-4 h-4" />
             </button>
             <div

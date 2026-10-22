@@ -11,7 +11,7 @@ export function CleanupPanel({ showToast }: { showToast: (m: string) => void }) 
   const k = (key: string, fb: string) => t(`platform.console.cleanup.${key}`, fb);
   const fixes = [
     { id: 'f1', what: k('f1', 'Two records for the same person at S-Leasing'), before: 'J. Petrović · jpetrovic@s-leasing.rs\nJelena Petrović · +381 11 …', after: 'Jelena Petrović · jpetrovic@s-leasing.rs · +381 11 …', why: k('f1_why', 'Same email domain and phone number') },
-    { id: 'f2', what: k('f2', 'SBB’s main contact has left'), before: 'Primary contact · emails bouncing since 2 Oct', after: k('f2_after', 'Mark as left · ask the account manager to confirm the new Head of IT'), why: k('f2_why', 'Three bounced emails this month') },
+    { id: 'f2', what: k('f2', 'SBB’s main contact has left'), before: 'Primary contact · emails undeliverable since 2 Oct', after: k('f2_after', 'Mark as left · ask the account manager to confirm the new Head of IT'), why: k('f2_why', 'Three bounced emails this month') },
     { id: 'f3', what: k('f3', 'Missing phone number for NCR Atleos'), before: 'Ivana Marić · no phone', after: 'Ivana Marić · +381 11 … (from her email signature)', why: k('f3_why', 'Found in a reply to info@') },
     { id: 'f4', what: k('f4', 'Job title out of date at Hemofarm'), before: 'Marko R. · Communications Manager', after: 'Marko R. · Head of Government Affairs', why: k('f4_why', 'His new email signature') },
   ];

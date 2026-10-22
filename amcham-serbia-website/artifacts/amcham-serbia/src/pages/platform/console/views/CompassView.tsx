@@ -239,6 +239,16 @@ function SignalDetail({ signal, navigateTo, showToast, onAdvance, onClose }: {
         <div><span className="font-bold text-foreground">{t('compass_hub.why', 'Why you’re seeing this')}: </span><span className="text-muted-foreground">{signal.why}</span></div>
       </div>
 
+      {signal.howWeKnow && (
+        <details className="group rounded-xl border border-border px-3.5 py-2.5 text-xs leading-relaxed">
+          <summary className="cursor-pointer list-none flex items-center gap-2 font-bold text-foreground min-h-8">
+            <ChevronDown className="w-3.5 h-3.5 text-muted-foreground transition-transform group-open:rotate-180" aria-hidden="true" />
+            {t('compass_hub.how_we_know', 'How do we know?')}
+          </summary>
+          <p className="mt-2 text-muted-foreground">{signal.howWeKnow}</p>
+        </details>
+      )}
+
       {a.kind === 'draft' && <DraftPanel signal={signal} onDone={onAdvance} showToast={showToast} />}
       {a.kind === 'triage' && <TriagePanel signal={signal} onDone={onAdvance} showToast={showToast} />}
       {a.kind === 'reassign' && <ReassignPanel signal={signal} onDone={onAdvance} showToast={showToast} />}
