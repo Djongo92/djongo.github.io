@@ -196,10 +196,8 @@ en: {
       spotlight_title: "Shaping the Future of Manufacturing in Serbia",
       spotlight_quote: "\"Being part of AmCham has provided us with an unparalleled platform to advocate for a predictable business environment. It's not just about networking; it's about shaping policy together.\"",
       behind: {
-        eyebrow: "Behind this redesign",
-        text: "We benchmarked the old amcham.rs against 47 peer AmCham sites, then rebuilt it around five member journeys: join, attend, find a member, find research, reach a committee.",
-        diagnostic: "Read the diagnostic",
-        blueprint: "Delivery blueprint"
+        text: "How this site was designed",
+        diagnostic: "Read the analysis"
       },
       stats: {
         members: "Member Companies",
@@ -1309,10 +1307,8 @@ sr: {
       spotlight_title: "Oblikovanje budućnosti proizvodnje u Srbiji",
       spotlight_quote: "\"Biti deo AmCham-a pružilo nam je neuporedivu platformu za zalaganje za predvidljivo poslovno okruženje. Ne radi se samo o umrežavanju; radi se o zajedničkom kreiranju politika.\"",
       behind: {
-        eyebrow: "Iza ovog redizajna",
-        text: "Uporedili smo stari amcham.rs sa 47 partnerskih AmCham sajtova, a zatim ga obnovili oko pet ključnih koraka za članove: učlanjenje, događaji, pronalaženje člana, istraživanja i kontakt sa odborom.",
-        diagnostic: "Pročitajte dijagnostiku",
-        blueprint: "Nacrt isporuke"
+        text: "Kako je ovaj sajt osmišljen",
+        diagnostic: "Pročitajte analizu"
       },
       stats: {
         members: "Kompanija članica",
