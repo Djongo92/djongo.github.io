@@ -4,7 +4,7 @@ import { useI18n } from '@/lib/i18n';
 import { SEO } from '@/components/seo';
 import { ArrowRight, ChevronRight, Newspaper, ArrowUpRight, Compass } from 'lucide-react';
 import { mockEvents, mockNews } from '@/data/mock';
-import { useScroll, useTransform, useInView, motion, AnimatePresence } from 'framer-motion';
+import { useScroll, useTransform, motion, AnimatePresence } from 'framer-motion';
 import { useShowcase } from '@/components/showcase-tour';
 import { Skeleton } from '@/components/ui/skeleton';
 import { ImageWithSkeleton } from '@/components/ui/image-with-skeleton';
@@ -106,7 +106,7 @@ export default function Home() {
               { label: t('home.stats.investments'), val: t('home.stats.investments_val') }
             ].map((stat, i) => (
               <div key={i} className="flex flex-col items-center md:items-start text-center md:text-left">
-                <span className="text-4xl lg:text-5xl font-serif font-bold text-foreground mb-2 tabular-nums"><CountUp value={stat.val} /></span>
+                <span className="text-4xl lg:text-5xl font-serif font-bold text-foreground mb-2 tabular-nums">{stat.val}</span>
                 <span className="text-sm font-bold uppercase tracking-widest text-muted-foreground">{stat.label}</span>
               </div>
             ))}
@@ -358,52 +358,16 @@ export default function Home() {
         </div>
       </section>
 
-      {/* 11. Behind the redesign: a quiet note for reviewers, not visitors */}
-      <section className="py-10 bg-muted/40 border-t border-border">
-        <div className="container mx-auto px-4 md:px-8">
-          <div className="flex flex-col lg:flex-row lg:items-center gap-6 lg:gap-10">
-            <div className="flex-1 min-w-0">
-              <span className="text-xs font-bold uppercase tracking-widest text-primary mb-2 block">{t('home.behind.eyebrow')}</span>
-              <p className="text-foreground/80 leading-relaxed max-w-2xl">{t('home.behind.text')}</p>
-            </div>
-            <div className="flex flex-wrap gap-3 shrink-0">
-              <Link href="/blueprint/diagnostic" className="inline-flex items-center gap-2 bg-foreground text-background px-5 py-2.5 rounded-full text-sm font-semibold hover:opacity-90 transition-opacity">
-                {t('home.behind.diagnostic')} <ArrowRight className="w-4 h-4" />
-              </Link>
-              <Link href="/blueprint" className="inline-flex items-center gap-2 border border-border px-5 py-2.5 rounded-full text-sm font-semibold text-foreground hover:bg-background transition-colors">
-                {t('home.behind.blueprint')}
-              </Link>
-            </div>
-          </div>
+      {/* 11. A quiet pointer to the design analysis */}
+      <section className="py-8 bg-muted/40 border-t border-border">
+        <div className="container mx-auto px-4 md:px-8 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+          <p className="text-foreground/80 font-medium">{t('home.behind.text', 'How this site was designed')}</p>
+          <Link href="/blueprint/diagnostic" className="self-start sm:self-auto inline-flex items-center gap-2 bg-foreground text-background px-5 py-2.5 rounded-full text-sm font-semibold hover:opacity-90 transition-opacity">
+            {t('home.behind.diagnostic', 'Read the analysis')} <ArrowRight className="w-4 h-4" />
+          </Link>
         </div>
       </section>
 
     </div>
   );
-}
-
-// Counts a stat like "€21.2bn", "119,000" or "260+" up from zero once it scrolls
-// into view, keeping its prefix, suffix, decimals and thousands separators.
-function CountUp({ value }: { value: string }) {
-  const ref = useRef<HTMLSpanElement>(null);
-  const inView = useInView(ref, { once: true });
-  const m = value.match(/^([^\d]*)([\d.,]+)(.*)$/);
-  const [shown, setShown] = useState(m ? 0 : NaN);
-  const target = m ? parseFloat(m[2].replace(/,/g, '')) : NaN;
-  const decimals = m && m[2].includes('.') ? m[2].split('.')[1].length : 0;
-  useEffect(() => {
-    if (!inView || isNaN(target)) return;
-    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) { setShown(target); return; }
-    let raf = 0; const t0 = performance.now(), dur = 1400;
-    const tick = (now: number) => {
-      const p = Math.min(1, (now - t0) / dur), eased = 1 - Math.pow(1 - p, 3);
-      setShown(target * eased);
-      if (p < 1) raf = requestAnimationFrame(tick);
-    };
-    raf = requestAnimationFrame(tick);
-    return () => cancelAnimationFrame(raf);
-  }, [inView, target]);
-  if (!m) return <span>{value}</span>;
-  const num = shown.toLocaleString('en-US', { minimumFractionDigits: decimals, maximumFractionDigits: decimals, useGrouping: m[2].includes(',') });
-  return <span ref={ref}>{m[1]}{num}{m[3]}</span>;
 }
