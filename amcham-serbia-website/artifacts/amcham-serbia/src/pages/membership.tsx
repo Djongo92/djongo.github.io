@@ -1,9 +1,10 @@
-import React, { lazy, Suspense } from 'react';
+import React, { Suspense } from 'react';
+import { lazyWithReload } from '@/lib/lazy-with-reload';
 import { useI18n } from '@/lib/i18n';
 import { SEO } from '@/components/seo';
 import { CheckCircle2, Quote } from 'lucide-react';
 
-const MembershipForm = lazy(() => import('./membership-form'));
+const MembershipForm = lazyWithReload(() => import('./membership-form'));
 
 export default function Membership() {
   const { t } = useI18n();
