@@ -242,3 +242,6 @@ verify_jwt = false
 
 [functions.workshop-slide-visual]
 verify_jwt = false
+
+[functions.team-gtm]
+verify_jwt = false

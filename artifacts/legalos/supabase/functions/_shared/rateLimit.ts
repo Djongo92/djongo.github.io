@@ -353,7 +353,7 @@ export async function checkBenchmarkRateLimit(
 export async function checkPublicFormRateLimit(
   // deno-lint-ignore no-explicit-any
   serviceClient: SupabaseClient<any, any, any>,
-  form: "showcase-access" | "demo-request" | "report-lead",
+  form: "showcase-access" | "demo-request" | "report-lead" | "team-gtm",
   ip: string,
   limit: number,
   windowMs: number,

@@ -1007,6 +1007,7 @@ export default function App() {
           <div className="flex items-center justify-center gap-6 mb-6 text-xs text-muted-foreground tabular-nums font-medium">
             <a href={site("/benchmarks/")} data-testid="link-benchmarks" className="hover:text-white transition-colors">Benchmarks</a>
             <a href={site("/guidebook/")} data-testid="link-guidebook" className="hover:text-white transition-colors">Playbook</a>
+            <a href={site("/app/team/go-to-market")} data-testid="link-team" rel="nofollow" className="hover:text-white transition-colors">Team</a>
             <span className="w-px h-3 bg-white/10" />
             <a href="#/privacy" data-testid="link-privacy" className="hover:text-white transition-colors">Privacy Policy</a>
             <span className="w-px h-3 bg-white/10" />
