@@ -15,6 +15,7 @@ import OpsRateLimits from "./pages/OpsRateLimits.tsx";
 import JoinFirm from "./pages/JoinFirm.tsx";
 import PartnerReview from "./pages/PartnerReview.tsx";
 import RoastShare from "./pages/RoastShare.tsx";
+import TeamGtm from "./pages/TeamGtm.tsx";
 
 const queryClient = new QueryClient();
 
@@ -53,6 +54,7 @@ const App = () => {
           <Route path="/partner-review/:linkId" element={<PartnerReview />} />
           {/* Public read-only Roast My Deck share link (task #136). */}
           <Route path="/roast-share/:linkId" element={<RoastShare />} />
+          <Route path="/team/go-to-market" element={<TeamGtm />} />
           <Route path="/ops/directory-queue" element={<OpsDirectoryQueue />} />
           <Route path="/ops/rate-limits" element={<OpsRateLimits />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
