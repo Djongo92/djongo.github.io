@@ -42,6 +42,7 @@ const EXPECTED = {
   // Footer / static destinations.
   "link-benchmarks": "/benchmarks/",
   "link-guidebook": "/guidebook/",
+  "link-team": "/app/team/go-to-market",
   "link-privacy": "#/privacy",
   "link-terms": "#/terms",
   "link-dpa": "#/dpa",
