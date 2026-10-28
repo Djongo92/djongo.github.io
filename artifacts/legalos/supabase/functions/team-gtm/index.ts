@@ -54,7 +54,23 @@ Deno.serve(async (req) => {
       return json({ error: "Couldn't load the plan." }, 500);
     }
     if (!data) return json({ error: "No plan has been published yet." }, 404);
-    return json({ plan: data.content, updatedAt: data.updated_at });
+    // The hit list can be stored either inside the plan document or as
+    // separate rows (id "hit-1", "hit-2", ...), each holding an array. The
+    // rows are merged in id order so a large list can be loaded in pieces.
+    const plan = { ...(data.content as Record<string, unknown>) };
+    if (!Array.isArray(plan.hitList) || plan.hitList.length === 0) {
+      const { data: parts, error: partsError } = await serviceClient
+        .from("gtm_plan").select("id, content").like("id", "hit-%");
+      if (partsError) {
+        console.error("team-gtm hit-list read error:", partsError.message);
+        return json({ error: "Couldn't load the plan." }, 500);
+      }
+      const ordered = (parts ?? [])
+        .filter((r: { id: string; content: unknown }) => Array.isArray(r.content))
+        .sort((a: { id: string }, b: { id: string }) => Number(a.id.slice(4)) - Number(b.id.slice(4)));
+      plan.hitList = ordered.flatMap((r: { content: unknown }) => r.content as unknown[]);
+    }
+    return json({ plan, updatedAt: data.updated_at });
   }
 
   return json({ error: "Unknown action." }, 400);
