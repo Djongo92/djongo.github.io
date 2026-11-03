@@ -362,7 +362,9 @@ async function measureAndPersist(
   };
   const { sampleSize, confidenceScore } = computeAuditConfidence([
     social.raw.followersStats, social.raw.postsStats, social.raw.erStats,
-    thoughtLeadership.raw.postsStats, thoughtLeadership.raw.newsStats,
+    // v3 split Thought Leadership's own-output comparison into articles and
+    // own news; the old blended postsStats no longer exists on v3 results.
+    thoughtLeadership.raw.articlesStats, thoughtLeadership.raw.ownNewsStats, thoughtLeadership.raw.newsStats,
     reputationRaw.chambers?.qualityStats, reputationRaw.legal500?.qualityStats, reputationRaw.iflr1000?.qualityStats,
   ]);
   const now = new Date();
