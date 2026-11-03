@@ -88,7 +88,7 @@ touching the lockfile (`npx pnpm@10 install`), or pnpm 11 rewrites
 pnpm install
 pnpm run typecheck                               # all packages
 pnpm --filter @workspace/uvid run test           # vitest: web + pure edge formulas
-pnpm --filter @workspace/uvid run test:deno      # Deno tests for esm.sh/Deno-env modules (needs deno)
+pnpm --filter @workspace/uvid run test:deno      # every Deno.test file, auto-discovered (needs deno 2.x)
 pnpm --filter @workspace/uvid run dev            # http://localhost:21341/app/
 SITE_BASE=/ node scripts/build-site.mjs          # exactly what ships → site-dist/
 ```
@@ -96,8 +96,17 @@ SITE_BASE=/ node scripts/build-site.mjs          # exactly what ships → site-d
 Live-project checks (need credentials, hit production): `check:schema-drift`,
 `probe:functions`, `smoke:*` — see `artifacts/legalos/package.json`.
 
-After any change: typecheck + vitest must pass before committing. Run the
-Deno tests too if you touched a module they cover.
+After any change: typecheck + vitest must pass before committing; run the
+Deno tests too if you touched edge code (they also type-check the edge
+modules, which nothing else does). CI (`.github/workflows/ci.yml`) runs all
+of it plus the mobile tests and the site build on every PR, and both deploy
+workflows run it first — a red check means nothing deploys.
+
+Edge-function tests: a file that calls `Deno.test(` runs under Deno, any
+other `*.test.ts` under `supabase/functions` runs under vitest (esm.sh
+supabase-js is aliased to the npm package there). Both sets are derived from
+file contents by `scripts/denoTestFiles.mjs` — there is no list to update.
+Write expected scores from `methodology.ts` constants, not literals.
 
 ## Architecture rules
 
@@ -165,9 +174,12 @@ fields as real rows.
   from `config.toml` is deployed with `verify_jwt = true` and breaks** (cron
   and publishable-key callers get 401). Add the entry in the same change as
   the function. Checklist: `supabase/functions/README.md`.
+- After deploying, CI runs `probe:functions` (POSTs `{}` to every function
+  the client calls; consumes a few units of the anonymous demo quota).
 - **Migrations are not deployed by CI.** Apply via the Management API and
   record the version in `supabase_migrations.schema_migrations`;
-  `check:schema-drift` fails until both are done.
+  `check:schema-drift` fails until both are done. CI runs it as a separate,
+  non-gating check (needs the `SUPABASE_ACCESS_TOKEN` Actions secret).
 - Client-side, `KNOWN_UNDEPLOYED` in `src/lib/edgeFunctionAvailability.ts`
   must match reality; `probe:functions` enforces it.
 
@@ -187,10 +199,8 @@ provider's account balance before touching code.
 - Chapter audio ("Listen" / voice notes) is a "coming soon" placeholder.
 - Only Serbia is configured; there's no repeatable new-market process yet.
 - URLs still point at `legalos.rs` until the uvid domain is registered.
-- CI runs no tests: deploy workflows build/deploy without vitest, Deno tests,
-  or schema-drift checks.
-- `test:deno` lists its files by hand — a new `*.test.ts` there is skipped
-  until added.
+- Migrations are still applied by hand; the schema-drift check reports but
+  doesn't block deploys.
 - Largest components worth splitting: `dashboard/CommandCenter.tsx`,
   `battlePlanPdf.ts`, `MarketVisibilityScore.tsx`, `pages/Index.tsx`.
 

@@ -1,0 +1,85 @@
+name: CI
+
+# Runs on every pull request, and is called by both deploy workflows so
+# nothing reaches GitHub Pages or the live Supabase project without passing
+# the same checks.
+on:
+  pull_request:
+  workflow_call:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  # One run per PR (a new push cancels the stale run). Called runs inherit
+  # the caller's workflow name, so deploys never cancel each other here.
+  group: ci-${{ github.workflow }}-${{ github.event.pull_request.number || github.sha }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+jobs:
+  checks:
+    name: Typecheck, tests, build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 10
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+      - uses: denoland/setup-deno@v2
+        with:
+          deno-version: v2.9.6
+      - run: pnpm install --frozen-lockfile
+
+      - name: Typecheck (all packages)
+        run: pnpm run typecheck
+
+      - name: Web app + edge-function unit tests (vitest)
+        run: pnpm --filter @workspace/uvid run test
+
+      - name: Edge-function Deno tests (type-checked)
+        # Discovers every Deno.test file under supabase/functions; also
+        # type-checks the edge modules they import, which nothing else does.
+        run: pnpm --filter @workspace/uvid run test:deno
+
+      - name: Mobile tests (score parity with web)
+        run: pnpm --filter @workspace/uvid-mobile run test
+
+      - name: Generated guidebook pages are up to date
+        run: pnpm --filter @workspace/uvid run check:guidebook-pages
+
+      - name: Build site
+        # Marketing's prebuild also runs its own data/cohort/palette checks.
+        env:
+          SITE_BASE: /
+        run: node scripts/build-site.mjs
+
+  schema-drift:
+    name: Schema drift vs live database
+    # Read-only check that every migration in the repo is applied and
+    # recorded in production. Needs SUPABASE_ACCESS_TOKEN, which fork PRs
+    # don't get — skipped there rather than failing. Not a deploy gate yet:
+    # see CLAUDE.md "Deploy" for how migrations are applied.
+    runs-on: ubuntu-latest
+    env:
+      SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
+    steps:
+      - uses: actions/checkout@v4
+        if: env.SUPABASE_ACCESS_TOKEN != ''
+      - uses: actions/setup-node@v4
+        if: env.SUPABASE_ACCESS_TOKEN != ''
+        with:
+          node-version: 22
+      - name: Check schema drift
+        if: env.SUPABASE_ACCESS_TOKEN != ''
+        working-directory: artifacts/legalos
+        run: |
+          set -a; . ./.env; set +a
+          node tests/schema-drift-check.mjs
+      - name: Skipped (no SUPABASE_ACCESS_TOKEN)
+        if: env.SUPABASE_ACCESS_TOKEN == ''
+        run: echo "SUPABASE_ACCESS_TOKEN not available to this run; schema drift not checked."
