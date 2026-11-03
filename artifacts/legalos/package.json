@@ -30,7 +30,7 @@
     "check:schema-drift": "node tests/schema-drift-check.mjs",
     "check:press-health": "node tests/press-outlet-health-check.mjs",
     "check:cron-alerts": "node tests/cron-alert-check.mjs",
-  "test:deno": "deno test --allow-env supabase/functions/_shared/runVisibilityAudit.test.ts supabase/functions/_shared/peerStatsProvenance.test.ts supabase/functions/_shared/performanceScore.test.ts supabase/functions/_shared/psiFetchWithFallback.test.ts supabase/functions/_shared/peerStats.test.ts supabase/functions/_shared/cronAlert.test.ts supabase/functions/_shared/dashboardAuditSelection.test.ts supabase/functions/firm-signals-refresh/psiSignalRefresh.test.ts supabase/functions/firm-signals-refresh/sweepRunner.test.ts supabase/functions/press-outlets-health/outletHealth.test.ts supabase/functions/firm-invite/redeem.test.ts"
+    "test:deno": "node scripts/run-deno-tests.mjs"
   },
   "devDependencies": {
     "@hookform/resolvers": "^3.10.0",
@@ -107,6 +107,7 @@
     "tailwind-merge": "catalog:",
     "tailwindcss": "^3.4.17",
     "tailwindcss-animate": "^1.0.7",
+    "tsx": "catalog:",
     "vaul": "^0.9.9",
     "vite": "catalog:",
     "vitest": "^4.1.10",

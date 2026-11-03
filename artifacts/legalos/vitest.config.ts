@@ -1,6 +1,7 @@
 import path from "path";
-import { defineConfig } from "vitest/config";
+import { configDefaults, defineConfig } from "vitest/config";
 import react from "@vitejs/plugin-react";
+import { denoTestFiles } from "./scripts/denoTestFiles.mjs";
 
 export default defineConfig({
   plugins: [react()],
@@ -11,30 +12,26 @@ export default defineConfig({
     include: [
       "src/**/*.test.{ts,tsx}",
       "tests/**/*.test.ts",
-      "supabase/functions/_shared/**/*.test.ts",
-      "supabase/functions/firm-signals-refresh/**/*.test.ts",
-      "supabase/functions/workflow-items-manage/**/*.test.ts",
+      // Every edge-function test; the native Deno ones are excluded below.
+      "supabase/functions/**/*.test.ts",
     ],
     exclude: [
-      // These test files transitively import from https://esm.sh/ URLs (Deno/supabase-js),
-      // which the Node.js ESM loader cannot resolve. They are tested in the Deno environment.
-      "supabase/functions/_shared/reputationScore.test.ts",
-      "supabase/functions/_shared/runVisibilityAudit.test.ts",
-      "supabase/functions/_shared/peerStatsProvenance.test.ts",
-      "supabase/functions/_shared/directoryStandingIndex.test.ts",
-      "supabase/functions/_shared/peerStats.test.ts",
-      "supabase/functions/_shared/performanceScore.test.ts",
-      "supabase/functions/_shared/psiFetchWithFallback.test.ts",
-      "supabase/functions/_shared/dashboardAuditSelection.test.ts",
-      // cronAlert reads Deno.env / uses Deno.test — Deno-only (test:deno).
-      "supabase/functions/_shared/cronAlert.test.ts",
-      "supabase/functions/firm-signals-refresh/psiSignalRefresh.test.ts",
-      "supabase/functions/firm-signals-refresh/sweepRunner.test.ts",
+      ...configDefaults.exclude,
+      // Native Deno.test files (std assert from deno.land, Deno globals) run
+      // under `test:deno`, not vitest. Derived from file contents — never list
+      // a vitest-style test here: esm.sh supabase-js is aliased below so it
+      // can run under vitest, and excluding it leaves it with no runner.
+      ...denoTestFiles(),
     ],
   },
   resolve: {
-    alias: {
-      "@": path.resolve(__dirname, "src"),
-    },
+    alias: [
+      { find: "@", replacement: path.resolve(__dirname, "src") },
+      // Edge modules import supabase-js from esm.sh (Deno). Node's ESM loader
+      // can't fetch https: URLs, so map any pinned version to the npm package
+      // the app already ships — this lets pure-logic tests of those modules
+      // run under vitest instead of being excluded with no runner at all.
+      { find: /^https:\/\/esm\.sh\/@supabase\/supabase-js@[^/]+$/, replacement: "@supabase/supabase-js" },
+    ],
   },
 });

@@ -16,6 +16,15 @@
 // for firm_signals/url_cache, googleapis for PSI), so the whole matrix is
 // exercised with a fetch router — no module mocking needed.
 import { assert, assertEquals } from "https://deno.land/std@0.224.0/assert/mod.ts";
+import { PERFORMANCE_WEIGHTS as W, round2 } from "./methodology.ts";
+
+// Expected scores derive from methodology.ts, the same formula
+// performanceFormula.ts applies (speed / accessibility / technical-SEO
+// weights × the 0–1 category averages), so a re-weighting moves these with it.
+// These used to be v1 literals (10/5/5) and went stale unnoticed while no
+// runner executed this file.
+const expectedScore = (perf: number, access: number, seo: number) =>
+  round2(W.speed * perf + W.accessibility * access + W.technicalSeo * seo);
 
 // Env must be set before the module graph loads: cache.ts snapshots
 // SUPABASE_URL / SUPABASE_SERVICE_ROLE_KEY at import time.
@@ -96,8 +105,8 @@ Deno.test({ name: "an is_unverifiable firm_signals row is advisory: falls throug
 
   assert(psiAttempts.length > 0, "live PSI must be attempted despite the negative row");
   assertEquals(result.provenance, "api");
-  // 10*(70/100) + 5*(70/100) + 5*(70/100) = 14
-  assertEquals(result.score, 14);
+  // desktop/mobile averages: perf 70, accessibility 70, SEO 70
+  assertEquals(result.score, expectedScore(0.7, 0.7, 0.7));
   assert(!("source" in result.raw), "live result, not a firm_signals payload");
 });
 
@@ -117,8 +126,7 @@ Deno.test({ name: "desktop succeeds while mobile is blocked: scored from desktop
   assertEquals(result.raw.mobile, { performance: 90, accessibility: 80, seo: 70 });
   assertEquals((result.raw.hosts as Record<string, string>).desktop, "https://desktoponly.example");
   assertEquals((result.raw.hosts as Record<string, string>).mobile, undefined);
-  // 10*0.9 + 5*0.8 + 5*0.7 = 16.5
-  assertEquals(result.score, 16.5);
+  assertEquals(result.score, expectedScore(0.9, 0.8, 0.7));
 });
 
 Deno.test({ name: "www-only host: scored from the www variant with the actual hosts recorded in raw", sanitizeOps: false, sanitizeResources: false }, async () => {
@@ -143,8 +151,8 @@ Deno.test({ name: "www-only host: scored from the www variant with the actual ho
   ]);
   assert(!("mobileFromDesktop" in result.raw));
   assert(!("desktopFromMobile" in result.raw));
-  // 10*0.7 + 5*0.8 + 5*0.8 = 15
-  assertEquals(result.score, 15);
+  // averages: perf 70, accessibility 80, SEO 80
+  assertEquals(result.score, expectedScore(0.7, 0.8, 0.8));
 });
 
 Deno.test({ name: "all four attempts (2 hosts × 2 strategies) fail: provenance missing, score 0", sanitizeOps: false, sanitizeResources: false }, async () => {
