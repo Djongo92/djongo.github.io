@@ -107,6 +107,7 @@
     "tailwind-merge": "catalog:",
     "tailwindcss": "^3.4.17",
     "tailwindcss-animate": "^1.0.7",
+    "tsx": "catalog:",
     "vaul": "^0.9.9",
     "vite": "catalog:",
     "vitest": "^4.1.10",
