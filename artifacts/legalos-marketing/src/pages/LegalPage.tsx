@@ -58,7 +58,7 @@ const TERMS_SECTIONS = [
   },
   {
     h: '7. Paid services',
-    p: 'Some parts of the service are paid, as indicated at checkout. Prices are shown in EUR before purchase; VAT or other applicable taxes are calculated and collected at checkout by our payment processor, Stripe. Unless a purchase is expressly described as a subscription, it is one-time and does not renew. You may request a refund within 14 days of purchase by emailing support@uvid.com; refunds are not available for deliverables already generated at your request (for example, a completed full audit or report). If a payment fails or is reversed, paid access may be suspended until resolved.',
+    p: 'Some parts of the service are paid, as indicated at checkout. Prices are shown in EUR before purchase; VAT or other applicable taxes are shown before you confirm a purchase. Unless a purchase is expressly described as a subscription, it is one-time and does not renew. You may request a refund within 14 days of purchase by emailing support@uvid.com; refunds are not available for deliverables already generated at your request (for example, a completed full audit or report). If a payment fails or is reversed, paid access may be suspended until resolved.',
   },
   {
     h: '8. Governing law',
@@ -77,7 +77,7 @@ const DPA_SECTIONS = [
   },
   {
     h: '3. Subprocessors',
-    p: 'We use a small set of subprocessors to operate the service: Supabase (database and authentication), Stripe (payment processing — card details never touch our servers), PostHog EU (product analytics, EU-hosted), Google APIs (public page measurement and place data), and AI model providers accessed via the Replit AI integrations gateway (for the copy and analysis tools you invoke). Each is bound by its own data processing terms; we engage only subprocessors that offer GDPR-appropriate safeguards.',
+    p: 'We use a small set of subprocessors to operate the service: Supabase (database and authentication), PostHog EU (product analytics, EU-hosted), Google APIs (public page measurement and place data), and Anthropic (AI models, for the copy and analysis tools you invoke). Each is bound by its own data processing terms; we engage only subprocessors that offer GDPR-appropriate safeguards.',
   },
   {
     h: '4. Security measures',
@@ -122,7 +122,7 @@ export function LegalPage({ kind }: LegalPageProps) {
           {TITLES[kind]}
         </h1>
         <p className="text-sm text-muted-foreground mb-16 tabular-nums font-medium">
-          Effective date: August 15, 2026
+          Effective date: November 12, 2026
         </p>
 
         <div className="space-y-12">
