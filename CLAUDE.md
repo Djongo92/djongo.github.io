@@ -180,6 +180,14 @@ fields as real rows.
   record the version in `supabase_migrations.schema_migrations`;
   `check:schema-drift` fails until both are done. CI runs it as a separate,
   non-gating check (needs the `SUPABASE_ACCESS_TOKEN` Actions secret).
+- **Monitoring:** `.github/workflows/monitor.yml` runs daily: site, app
+  shell and database answer, and `check:cron-alerts` finds nothing new in
+  `public.cron_alerts` from the last 25h. That table holds scheduled-job
+  failures and browser errors (job `web-client`, sent by
+  `src/lib/errorReporting.ts` → `client-error-report`). A red run is emailed
+  by GitHub. The app is wrapped in `AppErrorBoundary`; lazily loaded
+  sections use `lazyWithReload` (one reload when a deploy renamed the
+  chunk) — use it for any new `lazy()` import.
 - Client-side, `KNOWN_UNDEPLOYED` in `src/lib/edgeFunctionAvailability.ts`
   must match reality; `probe:functions` enforces it.
 
@@ -199,6 +207,9 @@ provider's account balance before touching code.
 - Chapter audio ("Listen" / voice notes) is a "coming soon" placeholder.
 - Only Serbia is configured; there's no repeatable new-market process yet.
 - URLs still point at `legalos.rs` until the uvid domain is registered.
+- Production runs on the **free Supabase plan** (the daily monitor also
+  keeps it from being paused): no restorable backups or point-in-time
+  recovery. Upgrading is the owner's call.
 - Migrations are still applied by hand; the schema-drift check reports but
   doesn't block deploys.
 - Largest components worth splitting: `dashboard/CommandCenter.tsx`,

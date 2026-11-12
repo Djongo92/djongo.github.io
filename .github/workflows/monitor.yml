@@ -1,0 +1,58 @@
+# Daily production check. A red run means something in production needs a
+# look; GitHub emails a failed scheduled run to whoever last changed this
+# schedule, so no extra alerting service is needed.
+#
+#   uptime  — the site and the app shell answer, and the database answers
+#             (this read also keeps the free-tier Supabase project from
+#             being paused after a week without activity).
+#   alerts  — any scheduled-job failure or browser error recorded in
+#             public.cron_alerts in the last 25h (tests/cron-alert-check.mjs).
+#
+# The Supabase URL and publishable key below are public by design (they ship
+# in the web bundle). The alerts job needs the SUPABASE_ACCESS_TOKEN secret.
+name: Monitor production
+
+on:
+  schedule:
+    - cron: "17 6 * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  uptime:
+    runs-on: ubuntu-latest
+    env:
+      SITE: https://djongo92.github.io/djongo.github.io
+    steps:
+      - name: Database answers
+        run: |
+          code=$(curl -s -o /dev/null -w "%{http_code}" --max-time 30 \
+            "https://qeopoiumlnzqwaqzwqcj.supabase.co/rest/v1/market_visibility_audits?select=id&limit=1" \
+            -H "apikey: sb_publishable_nac_qVEnBUZy9qFDd3sgHw_HYa-Tnd-")
+          echo "Supabase REST: HTTP $code"
+          test "$code" = "200"
+      - name: Marketing site answers
+        run: |
+          code=$(curl -s -o /dev/null -w "%{http_code}" --max-time 30 -L "$SITE/")
+          echo "Site: HTTP $code"
+          test "$code" = "200"
+      - name: App shell answers
+        run: |
+          body=$(curl -sf --max-time 30 -L "$SITE/app/")
+          echo "$body" | grep -q 'id="root"' || { echo "App shell missing the root element"; exit 1; }
+          echo "App shell OK"
+
+  alerts:
+    runs-on: ubuntu-latest
+    env:
+      SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: No new job failures or browser errors
+        working-directory: artifacts/legalos
+        run: node tests/cron-alert-check.mjs

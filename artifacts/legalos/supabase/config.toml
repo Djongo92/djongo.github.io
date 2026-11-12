@@ -263,3 +263,8 @@ verify_jwt = false
 # bearer token); create/list/revoke go through requireAccess in the function.
 [functions.roast-share-link]
 verify_jwt = false
+
+# Browser error reports from the web app: public by design (a crash can
+# happen before sign-in), bounded by dedupe + an hourly cap in the function.
+[functions.client-error-report]
+verify_jwt = false

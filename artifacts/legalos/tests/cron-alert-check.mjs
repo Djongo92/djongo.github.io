@@ -1,12 +1,14 @@
 #!/usr/bin/env node
-// Task #219 — monitoring check: surfaces any cron failure alerts logged in the
-// last 25 hours (one cron cycle plus an hour of slack). Exits non-zero when
-// unresolved alerts exist so the Replit validation workflow turns red and
-// someone looks at them. Exits 0 when the table is empty or all recent alerts
-// are outside the window.
+// Monitoring check: surfaces every alert logged in public.cron_alerts in the
+// last 25 hours (one daily cycle plus an hour of slack) and exits non-zero
+// when there are any, so the scheduled Monitor workflow
+// (.github/workflows/monitor.yml) turns red and GitHub emails the owner.
+// The table holds two kinds of alert:
+//   - scheduled-job failures (withCronAlert / sendCronAlert → cron-alert-inbox)
+//   - browser errors from the web app (job "web-client", via client-error-report)
 //
 // Run: pnpm --filter @workspace/uvid run check:cron-alerts
-// Env: SUPABASE_ACCESS_TOKEN (in Replit Secrets), VITE_SUPABASE_URL (public).
+// Env: SUPABASE_ACCESS_TOKEN (GitHub Actions secret).
 
 const MGMT_API = "https://api.supabase.com/v1/projects";
 const PROJECT_REF = "qeopoiumlnzqwaqzwqcj";
@@ -52,13 +54,23 @@ async function main() {
     process.exit(0);
   }
 
-  console.error(`\ncron-alert-check: ${rows.length} cron failure alert(s) in the last ${WINDOW_HOURS}h:\n`);
-  for (const row of rows) {
-    const ts = new Date(row.received_at).toISOString();
-    console.error(`  [${ts}] ${row.job}: ${row.message}`);
-    if (row.detail) console.error(`    detail: ${row.detail}`);
+  const isClient = (row) => row.job === "web-client";
+  const groups = [
+    ["Scheduled job failures", rows.filter((r) => !isClient(r))],
+    ["Browser errors (web app)", rows.filter(isClient)],
+  ];
+  console.error(`\ncron-alert-check: ${rows.length} alert(s) in the last ${WINDOW_HOURS}h\n`);
+  for (const [title, list] of groups) {
+    if (list.length === 0) continue;
+    console.error(`${title} (${list.length}):`);
+    for (const row of list) {
+      const ts = new Date(row.received_at).toISOString();
+      console.error(`  [${ts}] ${row.job}: ${row.message}`);
+      if (row.detail) console.error(`    detail: ${row.detail}`);
+    }
+    console.error("");
   }
-  console.error(`\nInvestigate the failing job(s) and resolve the root cause.`);
+  console.error(`Investigate and fix the root cause. Browser errors carry the route and build (release) they came from.`);
   process.exit(1);
 }
 

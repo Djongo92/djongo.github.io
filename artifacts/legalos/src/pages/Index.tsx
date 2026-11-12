@@ -1,4 +1,5 @@
-import { useState, useEffect, useCallback, useMemo, lazy, Suspense, type JSX } from "react";
+import { useState, useEffect, useCallback, useMemo, Suspense, type JSX } from "react";
+import { lazyWithReload } from "@/lib/lazyWithReload";
 import { useNavigate } from "react-router-dom";
 import SignInGate from "@/components/SignInGate";
 import TableOfContents from "@/components/TableOfContents";
@@ -58,25 +59,25 @@ import { setAuditPrefill } from "@/lib/auditPrefill";
 
 // Pulls in recharts — lazy-load so it's only fetched when the Dashboard
 // or Analytics section is actually visited, not on every page load.
-const CommandCenter = lazy(() => import("@/components/dashboard/CommandCenter"));
-const Analytics = lazy(() => import("@/components/analytics/Analytics"));
-const SettingsPage = lazy(() => import("@/components/settings/SettingsPage"));
+const CommandCenter = lazyWithReload(() => import("@/components/dashboard/CommandCenter"));
+const Analytics = lazyWithReload(() => import("@/components/analytics/Analytics"));
+const SettingsPage = lazyWithReload(() => import("@/components/settings/SettingsPage"));
 // ProgressDashboard pulls in the whole original tools grid (RoadmapGenerator,
 // ScoreWebsite, RoastHomepage, CompetitorAnalysis, MarketVisibilityScore,
 // AskTheBook) plus BattlePlan/jsPDF — same reasoning as the above three.
-const ProgressDashboard = lazy(() => import("@/components/ProgressDashboard"));
+const ProgressDashboard = lazyWithReload(() => import("@/components/ProgressDashboard"));
 // The Battle Plan's own page — lazy for the same reason as the sections
 // above (it pulls in the workflow board and, on export, jsPDF).
-const BattlePlanPage = lazy(() => import("@/components/battleplan/BattlePlanPage"));
+const BattlePlanPage = lazyWithReload(() => import("@/components/battleplan/BattlePlanPage"));
 // The Workshop's eleven tools (each its own sub-component) and these three
 // opt-in modals were previously eagerly imported here, meaning every
 // visitor — including an anonymous SignInGate view that never
 // authenticates — downloaded them as part of the main bundle. None of the
 // four are needed until a signed-in user explicitly opens them.
-const Workshop = lazy(() => import("@/components/Workshop"));
-const FirmMaturityScore = lazy(() => import("@/components/FirmMaturityScore"));
-const CompetitorTracker = lazy(() => import("@/components/CompetitorTracker"));
-const WorkshopHistoryModal = lazy(() => import("@/components/WorkshopHistoryModal"));
+const Workshop = lazyWithReload(() => import("@/components/Workshop"));
+const FirmMaturityScore = lazyWithReload(() => import("@/components/FirmMaturityScore"));
+const CompetitorTracker = lazyWithReload(() => import("@/components/CompetitorTracker"));
+const WorkshopHistoryModal = lazyWithReload(() => import("@/components/WorkshopHistoryModal"));
 
 const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL as string;
 
