@@ -14,7 +14,9 @@ name: Monitor production
 
 on:
   schedule:
-    - cron: "17 6 * * *"
+    # 07:47 UTC: after every scheduled job (03:00–07:00), while pg_net still
+    # holds their HTTP responses (~6h).
+    - cron: "47 7 * * *"
   workflow_dispatch:
 
 permissions:
