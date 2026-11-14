@@ -2,6 +2,10 @@ import { createRoot } from "react-dom/client";
 import App from "./App.tsx";
 import { primeDemoFromLocation, revokeUngrantedDemo } from "./lib/demoMode.ts";
 import "./index.css";
+import { installGlobalErrorReporting } from "./lib/errorReporting.ts";
+
+// First, so errors thrown while booting are reported too.
+installGlobalErrorReporting();
 
 // Close out any showcase session whose grant has expired with its tab, before
 // the fixtures it left behind can be read as a live one.

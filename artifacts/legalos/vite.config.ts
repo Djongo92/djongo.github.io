@@ -9,6 +9,11 @@ const basePath = process.env.BASE_PATH ?? '/app/';
 
 export default defineConfig({
   base: basePath,
+  define: {
+    // Short commit id of the build, attached to browser error reports so a
+    // report can be matched to the code that produced it.
+    __APP_RELEASE__: JSON.stringify((process.env.GITHUB_SHA ?? 'local').slice(0, 7)),
+  },
   plugins: [
     react(),
     runtimeErrorOverlay(),
