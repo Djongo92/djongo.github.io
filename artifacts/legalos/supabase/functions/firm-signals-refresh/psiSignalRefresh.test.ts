@@ -12,6 +12,7 @@
 // googleapis for PSI, PostgREST for the firm_signals upsert (the upserted
 // row body is captured and asserted on directly).
 import { assert, assertEquals } from "https://deno.land/std@0.224.0/assert/mod.ts";
+import { PERFORMANCE_WEIGHTS as W, round2 } from "../_shared/methodology.ts";
 
 // Env must be set before the module graph loads: firmSignals.ts snapshots
 // SUPABASE_URL / SUPABASE_SERVICE_ROLE_KEY at import time.
@@ -84,8 +85,9 @@ Deno.test({ name: "desktop succeeds while mobile is blocked: ok, mobileFromDeskt
   assertEquals(payload.hosts, { desktop: "https://desktoponly.example" });
   // mobile categories substituted from desktop
   assertEquals(payload.mobile, { performance: 90, accessibility: 80, seo: 70 });
-  // 10*0.9 + 5*0.8 + 5*0.7 = 16.5
-  assertEquals(payload.score, 16.5);
+  // Same weights performanceFormula.ts applies (methodology.ts), desktop
+  // values substituted for the blocked mobile run.
+  assertEquals(payload.score, round2(W.speed * 0.9 + W.accessibility * 0.8 + W.technicalSeo * 0.7));
 });
 
 Deno.test({ name: "www-only host: both strategies recorded from the www variant, no fallback flags", sanitizeOps: false, sanitizeResources: false }, async () => {

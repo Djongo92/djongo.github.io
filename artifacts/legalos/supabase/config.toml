@@ -245,3 +245,21 @@ verify_jwt = false
 
 [functions.team-gtm]
 verify_jwt = false
+
+# Cron-invoked: pg_cron sends only x-cron-secret (no JWT), and each function
+# checks it against CRON_SECRET itself. Without these entries the CI deploy
+# (supabase functions deploy, which reads this file) falls back to
+# verify_jwt = true and the gateway rejects every cron call with 401.
+[functions.weekly-score-digest]
+verify_jwt = false
+
+[functions.cron-alert-inbox]
+verify_jwt = false
+
+[functions.press-outlets-health]
+verify_jwt = false
+
+# Public share-link page: "view" is public by design (the link id is the
+# bearer token); create/list/revoke go through requireAccess in the function.
+[functions.roast-share-link]
+verify_jwt = false
