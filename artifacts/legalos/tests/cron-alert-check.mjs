@@ -49,6 +49,29 @@ async function main() {
     process.exit(1);
   }
 
+  // Scheduled calls the gateway rejected or that never answered don't reach
+  // withCronAlert, so read pg_net's own record of each cron HTTP call too.
+  // pg_net keeps responses for ~6h, which is why monitor.yml runs at 07:47
+  // UTC: after every nightly/Monday job (03:00–07:00).
+  let netRows = [];
+  try {
+    const r = await runSql(
+      `SELECT id, status_code, timed_out, error_msg, created FROM net._http_response ` +
+      `WHERE created >= '${since}' AND (status_code IS NULL OR status_code >= 400) ORDER BY created DESC`
+    );
+    if (Array.isArray(r)) netRows = r;
+  } catch (e) {
+    console.error(`cron-alert-check: could not read net._http_response: ${e.message}`);
+  }
+  for (const n of netRows) {
+    rows.push({
+      job: "cron-http-call",
+      message: n.timed_out ? "timed out" : n.status_code == null ? "no response" : `HTTP ${n.status_code}`,
+      detail: n.error_msg ?? null,
+      received_at: n.created,
+    });
+  }
+
   if (rows.length === 0) {
     console.log(`cron-alert-check: ✓ no cron failure alerts in the last ${WINDOW_HOURS}h`);
     process.exit(0);
@@ -56,7 +79,8 @@ async function main() {
 
   const isClient = (row) => row.job === "web-client";
   const groups = [
-    ["Scheduled job failures", rows.filter((r) => !isClient(r))],
+    ["Scheduled job failures", rows.filter((r) => !isClient(r) && r.job !== "cron-http-call")],
+    ["Cron HTTP calls without a good answer", rows.filter((r) => r.job === "cron-http-call")],
     ["Browser errors (web app)", rows.filter(isClient)],
   ];
   console.error(`\ncron-alert-check: ${rows.length} alert(s) in the last ${WINDOW_HOURS}h\n`);

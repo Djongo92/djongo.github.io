@@ -178,7 +178,10 @@ fields as real rows.
   the client calls; consumes a few units of the anonymous demo quota).
 - **Migrations are not deployed by CI.** Apply via the Management API and
   record the version in `supabase_migrations.schema_migrations`;
-  `check:schema-drift` fails until both are done. CI runs it as a separate,
+  `check:schema-drift` fails until both are done. Record the **file's**
+  version (the timestamp in its name): tools that apply a migration for you
+  (e.g. an MCP `apply_migration`) stamp it with the apply time instead, and
+  the ledger then disagrees with the repo. CI runs it as a separate,
   non-gating check (needs the `SUPABASE_ACCESS_TOKEN` Actions secret).
 - **Monitoring:** `.github/workflows/monitor.yml` runs daily: site, app
   shell and database answer, and `check:cron-alerts` finds nothing new in
@@ -207,6 +210,17 @@ provider's account balance before touching code.
 - Chapter audio ("Listen" / voice notes) is a "coming soon" placeholder.
 - Only Serbia is configured; there's no repeatable new-market process yet.
 - URLs still point at `legalos.rs` until the uvid domain is registered.
+- Scheduled jobs (pg_cron → `internal_trigger_*` → `internal_invoke_cron_function`)
+  read `cron_secret` from Vault, which must equal the `CRON_SECRET` function
+  secret. `firm-signals-refresh` is deliberately unscheduled until
+  `PAGESPEED_API_KEY` and `GOOGLE_PLACES_API_KEY` exist.
+- Secrets missing in production (2026-11-14): `PAGESPEED_API_KEY`,
+  `GOOGLE_PLACES_API_KEY`, every SEO-provider key, `VOYAGE_API_KEY`, and the
+  three legacy passwords. Without the first three a new audit can't measure
+  Website Experience, Google profile or Search Authority.
+- `press-outlets-health` fails: SeeNews and eKapija answer 503 to the edge
+  runtime (likely bot protection), so those outlets aren't counted.
+- `workshop-deck-image` is deployed but not in the repo.
 - Production runs on the **free Supabase plan** (the daily monitor also
   keeps it from being paused): no restorable backups or point-in-time
   recovery. Upgrading is the owner's call.
