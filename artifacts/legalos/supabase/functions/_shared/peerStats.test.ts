@@ -132,6 +132,18 @@ Deno.test("excludes categories carrying a substitution flag from peer aggregates
   assert(stats.p90Threshold < 95); // the flagged 99/95 never entered the pool
 });
 
+Deno.test("peerStatsFor keeps partial press counts out of the pool, but only for newsCount", async () => {
+  const tlRow = (newsCount: number, articlesCount: number, pressPartial?: boolean) => ({
+    raw_metrics: { thoughtLeadership: { newsCount, articlesCount, ...(pressPartial ? { pressPartial } : {}) } },
+  });
+  const rows = [tlRow(12, 10), tlRow(10, 8), tlRow(8, 6), tlRow(6, 4), tlRow(0, 30, true), tlRow(1, 20, true)];
+  const news = await peerStatsFor(makeMockClient(rows), "serbia", "regional", "thoughtLeadership", "newsCount", 5, "firm-under-test.com");
+  assertEquals(news.sampleSize, 5); // 4 complete lookups + own value
+  // The same partial rows still count for a metric their flag doesn't cover.
+  const articles = await peerStatsFor(makeMockClient(rows), "serbia", "regional", "thoughtLeadership", "articlesCount", 5, "firm-under-test.com");
+  assertEquals(articles.sampleSize, 7);
+});
+
 Deno.test("metricValueOf reads plain numbers, unwraps PeerStats records, rejects junk", () => {
   assertEquals(metricValueOf({ followers: 42 }, "followers"), 42);
   assertEquals(metricValueOf({ rank: { value: 293, sampleSize: 1 } }, "rank"), 293);

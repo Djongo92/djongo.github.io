@@ -150,3 +150,23 @@ export function filterPressMentions(
 
   return mentions;
 }
+
+/**
+ * Which press sources answered for one lookup. Sources are named
+ * "google-news:<edition gl>" or by regional outlet id. A source that
+ * answered with no results counts as checked; one that errored or answered
+ * non-2xx (Google News answers 503 to the edge runtime) is unavailable.
+ */
+export interface PressCoverage {
+  checked: string[];
+  unavailable: string[];
+}
+
+/**
+ * True when part of the press search didn't run, so the mention count is a
+ * floor, not a measurement. Such counts stay in the firm's own raw_metrics,
+ * marked, but are kept out of peer benchmarks (see peerStats.ts).
+ */
+export function isPressPartial(coverage: PressCoverage | null | undefined): boolean {
+  return !!coverage && coverage.unavailable.length > 0;
+}

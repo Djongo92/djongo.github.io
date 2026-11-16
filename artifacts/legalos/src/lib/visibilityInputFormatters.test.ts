@@ -88,6 +88,22 @@ describe("Thought Leadership explanation evidence", () => {
     expect(PROVENANCE_META.ai_classified.description).toContain("read your site's content");
   });
 
+  it("flags a press count from an incomplete search, naming the sources that didn't answer", () => {
+    const line = formatThoughtLeadershipInputs({
+      thoughtLeadership: {
+        newsCount: 1,
+        pressMentions: [{ title: "Firm advises on deal", source: "bizlife.rs" }],
+        pressCoverage: { checked: ["bizlife", "danas"], unavailable: ["google-news:US", "google-news:RS", "seenews"] },
+        pressPartial: true,
+      },
+    });
+    expect(line).toContain("1 press mention independently verified in the press sources checked");
+    expect(line).toContain("press search incomplete: Google News and SeeNews didn't answer");
+    expect(formatThoughtLeadershipInputs({
+      thoughtLeadership: { newsCount: 2, pressCoverage: { checked: ["bizlife"], unavailable: [] }, pressPartial: false },
+    })).not.toContain("incomplete");
+  });
+
   it("does not invent an input summary when a category was not measured", () => {
     expect(formatThoughtLeadershipInputs({})).toBeNull();
   });
