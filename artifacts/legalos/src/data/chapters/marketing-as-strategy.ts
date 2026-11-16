@@ -22,7 +22,7 @@ export const marketingAsStrategy: Chapter = {
       title: "The One-Page Marketing Strategy",
       body: `Fits on one page. Reviewed quarterly, rewritten annually.
 
-OBJECTIVE: The business goal marketing serves this year (e.g., \"three new retained clients in [practice]\"). One objective, not five.
+OBJECTIVE: The business goal marketing serves this year (e.g., "three new retained clients in [practice]"). One objective, not five.
 AUDIENCE: The specific buyer (role, industry, situation) — from the positioning statement.
 POSITION: The line-three differentiator from the positioning statement.
 CHANNELS: The 2–3 channels that reach the audience (e.g., LinkedIn + one flagship newsletter + two industry events). Every channel has an owner and a cadence.

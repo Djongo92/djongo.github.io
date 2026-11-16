@@ -2,7 +2,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { ArrowRight, KeyRound, Loader2, Mail } from "lucide-react";
 import BootVeil from "@/components/BootVeil";
-import { isDemoMode, primeDemoMode } from "@/lib/demoMode";
+import { primeDemoMode } from "@/lib/demoMode";
 import { codeFromSearch, hasShowcaseGrant, publicFunctionHeaders, verifyShowcaseCode } from "@/lib/demoAccess";
 import { MARKETING_HOME } from "@/lib/marketingSite";
 

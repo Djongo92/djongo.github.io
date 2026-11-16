@@ -29,8 +29,6 @@ const {
   verifyShowcaseCode,
 } = await import("@/lib/demoAccess");
 
-const DEMO_KEY = "legalos_demo_mode";
-
 let assign: ReturnType<typeof vi.fn>;
 let reload: ReturnType<typeof vi.fn>;
 

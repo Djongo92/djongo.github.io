@@ -96,7 +96,6 @@ export function useMilestoneCelebration(
     if (currentPercentile != null && currentPercentile > baseline.bestPercentile) {
       saveBaseline(domain, { ...baseline, bestPercentile: currentPercentile });
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [domain, previousScore, currentScore, currentPercentile]);
 
   const dismiss = () => {

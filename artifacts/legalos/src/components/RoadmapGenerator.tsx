@@ -2,7 +2,7 @@ import { useState } from "react";
 import { edgeHeaders } from "@/lib/edgeAuth";
 import { motion, AnimatePresence } from "framer-motion";
 import { Map, Loader2, X, Download, Sparkles, ChevronRight } from "lucide-react";
-import { chapters } from "@/data/chapters";
+import { chapters, type ActionItem } from "@/data/chapters";
 import { useFirmContext } from "@/hooks/useFirmContext";
 import { saveRoadmap } from "@/hooks/useBattlePlanCache";
 import { useAutoOpenTool } from "@/lib/progressToolLaunch";
@@ -11,7 +11,6 @@ import { toast } from "sonner";
 import { styleMemoryIdentity } from "@/lib/styleFeedback";
 
 const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL;
-const SUPABASE_KEY = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY;
 
 interface RoadmapAction { title: string; why: string; chapterRef: string }
 interface RoadmapPhase { label: string; focus: string; actions: RoadmapAction[] }
@@ -35,7 +34,7 @@ const RoadmapGenerator = ({ readChapters, bookmarks, isImplemented, onRequestPer
     setLoading(true);
     setRoadmap(null);
     try {
-      const allActions: any[] = [];
+      const allActions: Array<ActionItem & { chapterId: string; chapterTitle: string; chapterNumber: number }> = [];
       const implementedActions: string[] = [];
       chapters.forEach((c) => {
         c.actionItems?.forEach((a, i) => {

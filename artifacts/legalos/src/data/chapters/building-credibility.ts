@@ -33,7 +33,7 @@ THE WEBSITE
 
 THOUGHT LEADERSHIP
 [ ] A named-author article published within the last 30 days
-[ ] The niche is narrow enough that a GC would say \"that's their topic\"
+[ ] The niche is narrow enough that a GC would say "that's their topic"
 [ ] Every article ends in a next step
 
 7–9: credible — protect the cadence. 4–6: credible in places; fix the empty pillar first. 0–3: every claim you make is unsubstantiated; start with messaging, it's free.`

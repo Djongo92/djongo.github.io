@@ -2,7 +2,7 @@ import { useEffect, useRef, useState, type JSX } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { ArrowLeft, Hammer, Copy, Loader2, Filter, ArrowRight, Sparkles, Wand2 } from "lucide-react";
 import {
-  SwipeIcon, CopywriterIcon, RewriteIcon, AutopsyIcon, AuditIcon,
+  SwipeIcon, CopywriterIcon, RewriteIcon, AutopsyIcon,
   HeadlinesIcon, TeardownIcon, PitchDeckIcon, BioIcon, CalendarIcon, DeckRoastIcon,
   ArticleIcon, PressPitchIcon, LinkedInPlanIcon, CaseStudyIcon, SubmissionIcon, PageDraftIcon,
 } from "./workshop/icons";
@@ -14,8 +14,6 @@ import { useFirmContext } from "@/hooks/useFirmContext";
 import { useAuth } from "@/hooks/useAuth";
 import { streamSSE } from "@/lib/streamSSE";
 import { toast } from "sonner";
-import CopyAutopsy from "./workshop/CopyAutopsy";
-import PracticePageAudit from "./workshop/PracticePageAudit";
 import HeadlineLab from "./workshop/HeadlineLab";
 import CompetitorTeardown from "./workshop/CompetitorTeardown";
 import PitchDeck from "./workshop/PitchDeck";
@@ -37,7 +35,6 @@ import ScoreGain from "./workshop/ScoreGain";
 import Diagnose, { type DiagnoseMode } from "./workshop/Diagnose";
 
 const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL;
-const SUPABASE_KEY = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY;
 
 interface Props {
   onBack: () => void;
@@ -397,7 +394,6 @@ const Copywriter = () => {
       if (resp.status === 402) { toast.error("AI credits exhausted."); return; }
       if (!resp.ok) throw new Error("Stream failed");
       await streamSSE(resp, (full) => setOutput(full));
-      const finalOut = (typeof window !== "undefined" ? "" : ""); // placeholder; we record below using output state
     } catch (e) {
       console.error(e);
       toast.error("Couldn't generate copy.");

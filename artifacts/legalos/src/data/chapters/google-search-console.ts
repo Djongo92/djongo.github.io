@@ -22,7 +22,7 @@ export const googleSearchConsole: Chapter = {
       title: "The Monthly GSC Review — 30 Minutes",
       body: `1. Performance report → sort by Queries, impressions descending.
 2. Flag every query with high impressions and a click-through rate under 2% — your snippet is losing the click (rewrite the title tag and meta description first).
-3. Filter by Pages for your five most-visited pages; note the exact phrasing clients use (\"remote work rules in Poland\", not \"cross-border labor compliance\") — that language goes into your headlines.
+3. Filter by Pages for your five most-visited pages; note the exact phrasing clients use ("remote work rules in Poland", not "cross-border labor compliance") — that language goes into your headlines.
 4. List every query ranking in positions 7–20 with meaningful impressions — the near-miss list.
 5. Pick the three near-misses closest to your practice focus; each gets one focused article answering the query in plain English.
 6. Log positions for last month's picks. Movement into the top 5 is the proof loop; no movement after 90 days means the article needs depth, not patience.

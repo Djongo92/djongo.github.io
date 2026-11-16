@@ -5,7 +5,7 @@
 // layout is pixel-identical at every size (stage, thumbnail, export).
 import { useEffect, useRef, useState } from "react";
 import { paletteFor, type DeckTheme, type DeckPalette } from "@/lib/deckTheme";
-import { resolveColor, FREE_W, FREE_H, isSafeImage, LINE_HEIGHT, type FreeItem, type FreeDesign } from "@/lib/freeSlide";
+import { resolveColor, FREE_W, FREE_H, isSafeImage, LINE_HEIGHT, type FreeItem } from "@/lib/freeSlide";
 import { stripStepPrefix, splitLead, type ParsedSlide } from "./pitchDeckParser";
 import {
   DOM_SCALE, COVER_IMAGE, COVER_TEXT_MAX, SECTION_IMAGE, SECTION_TEXT_MAX,

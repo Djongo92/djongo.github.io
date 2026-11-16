@@ -85,6 +85,8 @@ const PartnerReview = () => {
     }
   };
 
+  // load() reads only linkId and values derived from it.
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => { load(); }, [linkId]);
 
   const handleComment = async (itemId: string) => {

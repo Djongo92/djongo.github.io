@@ -38,6 +38,9 @@ jobs:
       - name: Typecheck (all packages)
         run: pnpm run typecheck
 
+      - name: Lint web app (hooks misuse, unused code, explicit any)
+        run: pnpm --filter @workspace/uvid run lint
+
       - name: Web app + edge-function unit tests (vitest)
         run: pnpm --filter @workspace/uvid run test
 
@@ -57,6 +60,13 @@ jobs:
         env:
           SITE_BASE: /
         run: node scripts/build-site.mjs
+
+      - name: Browser check of the built site (offline, Supabase stubbed)
+        # Every entry page renders in Chromium without errors, deep links
+        # survive a refresh, public pages don't load the dashboard chunk.
+        run: |
+          pnpm --filter @workspace/uvid exec playwright-core install --with-deps chromium-headless-shell
+          pnpm --filter @workspace/uvid run test:e2e
 
   schema-drift:
     name: Schema drift vs live database

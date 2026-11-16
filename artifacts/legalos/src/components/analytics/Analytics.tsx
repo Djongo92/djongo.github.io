@@ -4,7 +4,7 @@ import { BarChart3, CheckCircle2, XCircle, Newspaper, FileText as FileTextIcon, 
 import type {
   AuditRow, HistoryRow, ThoughtLeadershipItem,
   PerformanceRaw, SocialRaw, ThoughtLeadershipRaw, ReputationRaw,
-} from "@/components/dashboard/CommandCenter";
+} from "@/components/dashboard/auditTypes";
 import { CATEGORY_META, CATEGORY_ORDER, CATEGORY_COLOR_CLASSES, type CategoryKey } from "@/lib/visibilityCategories";
 import { CATEGORY_TREND_METRIC } from "@/lib/visibilityInputFormatters";
 import { findWeakestCategoryTool } from "@/lib/categoryToolMap";
@@ -373,11 +373,16 @@ const Analytics = ({ audits, history, snapshots = [], onOpenDashboard, onCorrect
   );
 };
 
+/** What recharts passes a custom tooltip. */
+type ChartTooltipProps = { active?: boolean; payload?: Array<{ payload?: unknown }>; label?: string | number };
+/** What recharts passes a custom dot renderer. */
+type ChartDotProps = { cx?: number; cy?: number; payload?: { confidenceScore?: number | null } };
+
 /** Custom recharts tooltip for the per-category trend — adds the raw metric
  *  and that snapshot's confidence alongside the normalized score point, so
  *  hovering a dip answers "was this a real drop, or a thin peer sample?"
  *  without leaving the chart. */
-const CategoryTrendTooltip = ({ active, payload, label }: any) => {
+const CategoryTrendTooltip = ({ active, payload, label }: ChartTooltipProps) => {
   if (!active || !payload?.length) return null;
   const point = payload[0]?.payload as { score: number; rawMetric: string | null; confidenceScore: number | null; sampleSize: number | null } | undefined;
   if (!point) return null;
@@ -403,7 +408,7 @@ const CategoryTrendTooltip = ({ active, payload, label }: any) => {
 /** Dot renderer for the same chart — a hollow amber ring flags a point
  *  recorded when this audit's peer-normalized metrics were thin-sampled
  *  (confidenceScore < 1), without changing the line itself. */
-const CategoryTrendDot = (props: any) => {
+const CategoryTrendDot = (props: ChartDotProps) => {
   const { cx, cy, payload } = props;
   if (cx == null || cy == null) return null;
   const lowConfidence = payload?.confidenceScore != null && payload.confidenceScore < 1;

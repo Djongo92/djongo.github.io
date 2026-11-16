@@ -11,7 +11,7 @@ import { AUDIT_LOADING_TIPS } from "@/lib/auditLoadingTips";
 vi.mock("framer-motion", () => ({
   AnimatePresence: ({ children }: { children: React.ReactNode }) => <>{children}</>,
   motion: {
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars, @typescript-eslint/no-explicit-any -- framer-motion test double
     div: ({ children, initial, animate, exit, transition, ...rest }: any) => (
       <div {...rest}>{children}</div>
     ),

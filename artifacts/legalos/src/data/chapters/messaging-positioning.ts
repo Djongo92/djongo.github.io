@@ -21,7 +21,7 @@ export const messagingPositioning: Chapter = {
       title: "The Positioning Statement — Five Lines",
       body: `Fill in every line. If a line could describe a competitor, it isn't finished.
 
-1. We exist for: [the specific client — industry, size, situation. \"Mid-market manufacturers facing their first cross-border dispute,\" not \"businesses\"]
+1. We exist for: [the specific client — industry, size, situation. "Mid-market manufacturers facing their first cross-border dispute," not "businesses"]
 2. Who come to us when: [the triggering moment — the event that makes them call]
 3. We are the firm that: [the one thing you do differently — approach, model, or focus]
 4. Which means: [the outcome the client gets, in their terms]
@@ -33,17 +33,17 @@ Test: read line 3 aloud with a competitor's name. If it still sounds true, sharp
       type: "checklist",
       title: "The Banned-Phrases Starter List",
       body: `Banned on sight — each claims everything and communicates nothing:
-[ ] \"Leading law firm\"
-[ ] \"Trusted advisor(s)\"
-[ ] \"Your reliable partner\"
-[ ] \"First-class / world-class services\"
-[ ] \"Full-service\"
-[ ] \"Tailored solutions\" (unqualified — tailored to what?)
-[ ] \"Client-focused approach\"
-[ ] \"Excellence\" as a standalone claim
+[ ] "Leading law firm"
+[ ] "Trusted advisor(s)"
+[ ] "Your reliable partner"
+[ ] "First-class / world-class services"
+[ ] "Full-service"
+[ ] "Tailored solutions" (unqualified — tailored to what?)
+[ ] "Client-focused approach"
+[ ] "Excellence" as a standalone claim
 [ ] Stock handshake / skyline photography
 
-Replacement rule: every banned phrase must be swapped for something verifiable — a number, a named matter type, a deadline you keep, a client situation you recognize. \"Responsive\" becomes \"calls returned within four working hours.\"`
+Replacement rule: every banned phrase must be swapped for something verifiable — a number, a named matter type, a deadline you keep, a client situation you recognize. "Responsive" becomes "calls returned within four working hours."`
     }
   ],
   content: [

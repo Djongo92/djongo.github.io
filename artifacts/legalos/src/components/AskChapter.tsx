@@ -12,7 +12,6 @@ import { styleMemoryIdentity } from "@/lib/styleFeedback";
 interface Msg { role: "user" | "assistant"; content: string }
 
 const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL;
-const SUPABASE_KEY = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY;
 
 const SUGGESTED = [
   "How does this apply to a small firm?",

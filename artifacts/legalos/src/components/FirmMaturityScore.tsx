@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { edgeHeaders } from "@/lib/edgeAuth";
 import { motion, AnimatePresence } from "framer-motion";
-import { Sparkles, ChevronRight, RefreshCw, Loader2 } from "lucide-react";
+import { Sparkles, RefreshCw, Loader2 } from "lucide-react";
 import ReactMarkdown from "react-markdown";
 import { useFirmContext } from "@/hooks/useFirmContext";
 import { streamSSE } from "@/lib/streamSSE";
@@ -12,7 +12,6 @@ import ModalShell from "@/components/ui/modal-shell";
 import { styleMemoryIdentity } from "@/lib/styleFeedback";
 
 const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL;
-const SUPABASE_KEY = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY;
 
 const DIMENSIONS = [
   { key: "website", label: "Website & digital home", q: "Our website converts visitors into qualified leads." },

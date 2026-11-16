@@ -25,7 +25,7 @@ describe("mobile guidebook parity", () => {
 
   it("projects all 21 chapters with their rubric materials folded in", () => {
     const projected = projectMobileChapters(chapters);
-    expect((projected.match(/^    id: '/gm) ?? []).length).toBe(chapters.length);
+    expect((projected.match(/^ {4}id: '/gm) ?? []).length).toBe(chapters.length);
     expect(projected).toContain("Materials — ");
     expect(projected).toContain("Proof it worked");
   });

@@ -1,14 +1,9 @@
-import type { JSX } from "react";
 import { motion, useScroll, useTransform } from "framer-motion";
 import { useRef } from "react";
 import { Chapter } from "@/data/chapters";
 import ChapterIcon from "./ChapterIcon";
 
-// Each chapter gets a unique abstract SVG pattern
-const heroPatterns: Record<string, { gradient: string; shapes: JSX.Element }> = {};
-
 const getPattern = (chapterId: string, chapterNumber: number) => {
-  const hue = (chapterNumber * 25 + 20) % 360;
   const patterns = [
     // Geometric circles
     <g key="p" opacity="0.15">

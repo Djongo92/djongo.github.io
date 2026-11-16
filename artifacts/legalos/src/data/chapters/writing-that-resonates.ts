@@ -21,10 +21,10 @@ export const writingThatResonates: Chapter = {
       title: "The House Style — Eight Rules",
       body: `1. Lead with why it matters to the reader — the stakes come before the statute.
 2. One idea per sentence. If a sentence needs a map, split it.
-3. Write in the client's vocabulary, not the profession's (\"selling your company\", not \"divestiture processes\").
+3. Write in the client's vocabulary, not the profession's ("selling your company", not "divestiture processes").
 4. Every section ends with something the reader can do, decide, or watch for.
 5. Short paragraphs — three lines is a paragraph, six is a wall.
-6. Name the actor. \"The court ruled\" not \"it was ruled.\"
+6. Name the actor. "The court ruled" not "it was ruled."
 7. Concrete beats comprehensive: one worked example outweighs three caveats.
 8. Read it aloud. Anywhere you run out of breath, the reader runs out of patience.
 

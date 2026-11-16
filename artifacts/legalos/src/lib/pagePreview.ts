@@ -34,7 +34,9 @@ export function sanitizeHtml(html: string): string {
   doc.body.querySelectorAll("*").forEach((el) => {
     for (const attr of Array.from(el.attributes)) {
       const name = attr.name.toLowerCase();
-      const value = attr.value.trim().toLowerCase().replace(/[\s\u0000-\u001f]/g, "");
+      // Control characters are stripped on purpose (they hide "javascript:").
+    // eslint-disable-next-line no-control-regex
+    const value = attr.value.trim().toLowerCase().replace(/[\s\u0000-\u001f]/g, "");
       if (name.startsWith("on") || name === "style" || name === "srcdoc") el.removeAttribute(attr.name);
       else if ((name === "href" || name === "src" || name === "xlink:href") && /^(javascript|data|vbscript):/.test(value)) el.removeAttribute(attr.name);
     }

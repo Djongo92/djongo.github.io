@@ -10,7 +10,7 @@ import { Plus, X, Trash2, Link2, TrendingUp, TrendingDown } from "lucide-react";
 import { useCampaigns, type CampaignStatus, type Campaign } from "@/hooks/useCampaigns";
 import { useWorkshopHistory } from "@/hooks/useWorkshopHistory";
 import { computeCampaignDelta } from "@/lib/campaignScoreDelta";
-import type { HistoryRow } from "@/components/dashboard/CommandCenter";
+import type { HistoryRow } from "@/components/dashboard/auditTypes";
 
 interface Props {
   market: string;

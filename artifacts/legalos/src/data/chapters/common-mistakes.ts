@@ -28,7 +28,7 @@ export const commonMistakes: Chapter = {
 [ ] 6. Every testimonial is named — anonymous praise reads as invented praise [5 min to check]
 [ ] 7. Maps widget loads and points at the right office [5 min]
 [ ] 8. No hamburger menu on desktop — full navigation visible on large screens [check; template fix if failing]
-[ ] 9. No \"Published by Admin\" or stray dates on About / Team / Practice pages [10 min]
+[ ] 9. No "Published by Admin" or stray dates on About / Team / Practice pages [10 min]
 [ ] 10. Hover states make buttons clearer, never invisible [5 min spot-check]
 
 Any zero found two months running isn't a mistake — it's a process gap. Assign the page an owner.`

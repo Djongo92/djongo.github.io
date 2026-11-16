@@ -21,8 +21,8 @@ export const pricingPackaging: Chapter = {
       type: "template",
       title: "The Packaged Offer One-Pager",
       body: `[NAME THE OFFER — the client's job-to-be-done, not the legal category]
-\"Series-Ready\" — the funding round legal package
-not \"Corporate / VC services\"
+"Series-Ready" — the funding round legal package
+not "Corporate / VC services"
 
 [THE SITUATION — 2 sentences]
 Who it's for and the moment it matters.
@@ -49,7 +49,7 @@ A packaged offer doesn't discount your work — it makes buying it feel as profe
       title: "The Fee Conversation — Raised First",
       body: `From the partner, in the first substantive call, before the client asks:
 
-\"Before we go further, let me tell you how the money works, because nobody enjoys asking. For a matter like yours we [charge a fixed fee of X / work at hourly rates that typically total between X and Y]. The two things that move it are [variable 1] and [variable 2] — and both are largely within your control: [one sentence each on how]. You'll see the full scope in writing before anything starts, and if it changes, you'll hear it from me before you see it on an invoice.\"
+"Before we go further, let me tell you how the money works, because nobody enjoys asking. For a matter like yours we [charge a fixed fee of X / work at hourly rates that typically total between X and Y]. The two things that move it are [variable 1] and [variable 2] — and both are largely within your control: [one sentence each on how]. You'll see the full scope in writing before anything starts, and if it changes, you'll hear it from me before you see it on an invoice."
 
 Three commitments inside that paragraph: legibility (they know the shape of the cost), control (they know what moves it), and no surprises (changes are conversations, not invoice line items). That paragraph wins more engagements than any credential slide.`
     }

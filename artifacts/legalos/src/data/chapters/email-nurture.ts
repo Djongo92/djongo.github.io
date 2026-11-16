@@ -22,16 +22,16 @@ export const emailNurture: Chapter = {
       title: "The Welcome Sequence — 3 Emails",
       body: `Every new subscriber gets these over ten days. Written from a named partner, plain text style — no banner, no brochure.
 
-EMAIL 1 (immediately): \"You joined because of [the guide/article they downloaded]. Here it is again [link] — and here's the one idea in it most firms miss: [two sentences]. Next week I'll send how we see clients actually apply it. — [Partner name]\"
-EMAIL 2 (day 4): The application email — one short anonymized case where the idea changed an outcome. End with a question: \"What's the situation on your desk right now? Replies come straight to me.\"
-EMAIL 3 (day 10): The orientation — what the monthly briefing covers, when it arrives, and the standing invitation: \"Thirty minutes, no pitch, whenever [the topic] lands on your desk.\"
+EMAIL 1 (immediately): "You joined because of [the guide/article they downloaded]. Here it is again [link] — and here's the one idea in it most firms miss: [two sentences]. Next week I'll send how we see clients actually apply it. — [Partner name]"
+EMAIL 2 (day 4): The application email — one short anonymized case where the idea changed an outcome. End with a question: "What's the situation on your desk right now? Replies come straight to me."
+EMAIL 3 (day 10): The orientation — what the monthly briefing covers, when it arrives, and the standing invitation: "Thirty minutes, no pitch, whenever [the topic] lands on your desk."
 
 Then they join the flagship cadence. No sequence email sells the firm; each sells the next email.`
     },
     {
       type: "template",
       title: "The Flagship Monthly Briefing — Format",
-      body: `Subject: [The insight, stated plainly — \"The clause that's stalling CEE deals this quarter\"]
+      body: `Subject: [The insight, stated plainly — "The clause that's stalling CEE deals this quarter"]
 
 1. THE INSIGHT (150 words) — one development, what it means for the reader's business, what to do about it. Written to be forwardable.
 2. THE TOOL (50 words + link) — one practical artifact: a checklist, a template, a two-question self-test. Useful even to people who never hire you.

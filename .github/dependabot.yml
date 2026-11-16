@@ -1,0 +1,37 @@
+# Weekly dependency updates, grouped so they arrive as a few PRs rather than
+# dozens. CI (typecheck, lint, tests, site build) runs on each one; merge
+# when green. Major versions come as their own PRs since they can need code
+# changes.
+version: 2
+updates:
+  - package-ecosystem: npm
+    directory: /
+    schedule:
+      interval: weekly
+      day: monday
+    # Same idea as minimumReleaseAge in pnpm-workspace.yaml: don't propose a
+    # version until it has been public for a while.
+    cooldown:
+      default-days: 3
+    open-pull-requests-limit: 5
+    ignore:
+      # Pinned to what Expo SDK 57 requires (see pnpm-workspace.yaml catalog).
+      # Upgrade together with the Expo SDK, by hand.
+      - dependency-name: react
+      - dependency-name: react-dom
+      - dependency-name: expo
+      - dependency-name: "expo-*"
+      - dependency-name: react-native
+      - dependency-name: "react-native-*"
+      - dependency-name: "@expo/*"
+    groups:
+      minor-and-patch:
+        update-types: [minor, patch]
+
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: monthly
+    groups:
+      actions:
+        patterns: ["*"]

@@ -158,5 +158,5 @@ export function useCommandCenterInsights({
     }
 
     return insights.slice(0, 5);
-  }, [categories, siteHealthIssues, maturity, implementationScore, readChaptersCount, totalChapters]);
+  }, [categories, siteHealthIssues, maturity, implementationScore, readChaptersCount, totalChapters, gbpListed]);
 }

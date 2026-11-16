@@ -87,16 +87,18 @@ touching the lockfile (`npx pnpm@10 install`), or pnpm 11 rewrites
 ```bash
 pnpm install
 pnpm run typecheck                               # all packages
+pnpm --filter @workspace/uvid run lint           # ESLint: hooks, unused code, explicit any
 pnpm --filter @workspace/uvid run test           # vitest: web + pure edge formulas
 pnpm --filter @workspace/uvid run test:deno      # every Deno.test file, auto-discovered (needs deno 2.x)
 pnpm --filter @workspace/uvid run dev            # http://localhost:21341/app/
 SITE_BASE=/ node scripts/build-site.mjs          # exactly what ships → site-dist/
+pnpm --filter @workspace/uvid run test:e2e       # site-dist in Chromium, Supabase stubbed (CHROMIUM_PATH to use a local Chrome)
 ```
 
 Live-project checks (need credentials, hit production): `check:schema-drift`,
 `probe:functions`, `smoke:*` — see `artifacts/legalos/package.json`.
 
-After any change: typecheck + vitest must pass before committing; run the
+After any change: typecheck, `lint` (ESLint, zero warnings) and vitest must pass before committing; run the
 Deno tests too if you touched edge code (they also type-check the edge
 modules, which nothing else does). CI (`.github/workflows/ci.yml`) runs all
 of it plus the mobile tests and the site build on every PR, and both deploy
@@ -190,7 +192,8 @@ fields as real rows.
   `src/lib/errorReporting.ts` → `client-error-report`). A red run is emailed
   by GitHub. The app is wrapped in `AppErrorBoundary`; lazily loaded
   sections use `lazyWithReload` (one reload when a deploy renamed the
-  chunk) — use it for any new `lazy()` import.
+  chunk) — use it for any new `lazy()` import. Every page in `App.tsx` is
+  loaded this way, so a public link doesn't download the dashboard.
 - Client-side, `KNOWN_UNDEPLOYED` in `src/lib/edgeFunctionAvailability.ts`
   must match reality; `probe:functions` enforces it.
 
@@ -211,8 +214,9 @@ provider's account balance before touching code.
 - Only Serbia is configured; there's no repeatable new-market process yet.
 - URLs still point at `legalos.rs` until the uvid domain is registered.
 - Scheduled jobs (pg_cron → `internal_trigger_*` → `internal_invoke_cron_function`)
-  read `cron_secret` from Vault, which must equal the `CRON_SECRET` function
-  secret. `firm-signals-refresh` is deliberately unscheduled until
+  read `cron_secret` and `project_url` (the project's base URL) from Vault;
+  `cron_secret` must equal the `CRON_SECRET` function secret. Missing either,
+  the run is skipped with a warning. `firm-signals-refresh` is deliberately unscheduled until
   `PAGESPEED_API_KEY` and `GOOGLE_PLACES_API_KEY` exist.
 - Secrets missing in production (2026-11-14): `PAGESPEED_API_KEY`,
   `GOOGLE_PLACES_API_KEY`, every SEO-provider key, `VOYAGE_API_KEY`, and the

@@ -23,12 +23,12 @@ export const referralsAlumni: Chapter = {
       body: `For clients, other professionals (accountants, bankers, consultants), and past GCs who send work your way.
 
 The touch is value-first, never a reminder invoice:
-\"Saw [regulatory development / market event] and thought of your situation at [company] — one paragraph on what it means for you: [insight]. No action needed; flag it if it lands.\"
+"Saw [regulatory development / market event] and thought of your situation at [company] — one paragraph on what it means for you: [insight]. No action needed; flag it if it lands."
 
 Quarterly rhythm per referrer: one value touch, one thank-you (prompt, specific, private) for any referral sent, one personal note (promotion, deal, their firm's news). Twice a year: a face-to-face — coffee, event invitation, site visit.
 
 The ask, used sparingly (once a year at most):
-\"If someone in your network mentions [the problem you solve], we'd be glad to be the call you make. Here's the two-line description of what we do that makes referring us easy: [lines].\"`
+"If someone in your network mentions [the problem you solve], we'd be glad to be the call you make. Here's the two-line description of what we do that makes referring us easy: [lines]."`
     },
     {
       type: "checklist",
@@ -38,7 +38,7 @@ The ask, used sparingly (once a year at most):
 [ ] A quarterly alumni bulletin — firm developments written for insiders, not a client newsletter forwarded
 [ ] Congratulations on every move: promotion, in-house transition, new venture — personal note from their former supervising partner
 [ ] One alumni event per year — substantive content plus the partners they'll refer to
-[ ] A \"welcome back\" path — alumni returning laterally is the cheapest senior hire in the profession
+[ ] A "welcome back" path — alumni returning laterally is the cheapest senior hire in the profession
 [ ] Alumni who land in-house get the GC treatment from day one (see What GCs Really Want)
 
 Cost: a few hours a quarter. Return: the profession's most trusted referral channel.`

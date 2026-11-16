@@ -13,7 +13,7 @@ import { useScoreGoals } from "@/hooks/useScoreGoals";
 import { PRACTICE_AREAS, FIRM_SIZES, GOALS, MARKETS } from "@/components/PersonalizeOnboarding";
 import { CATEGORY_META, CATEGORY_ORDER } from "@/lib/visibilityCategories";
 import { downloadExportBundle, clearAllLocalData, importDataBundle } from "@/lib/dataManagement";
-import type { AuditRow } from "@/components/dashboard/CommandCenter";
+import type { AuditRow } from "@/components/dashboard/auditTypes";
 import { INVITABLE_ROLES, ROLE_PERMISSIONS, roleLabel, isAdminRole, type FirmRole } from "@/lib/roles";
 import FirmProfileSettings from "@/components/settings/FirmProfileSettings";
 

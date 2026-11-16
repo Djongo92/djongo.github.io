@@ -3,7 +3,7 @@
 // workshop history) without needing weeks of real usage first. Every value
 // here is clearly synthetic (a fictional firm, invented copy) — never real
 // customer or firm data.
-import type { AuditRow, HistoryRow } from "@/components/dashboard/CommandCenter";
+import type { AuditRow, HistoryRow } from "@/components/dashboard/auditTypes";
 import type { WorkshopRun } from "@/hooks/useWorkshopHistory";
 import type {
   RoastCache, CompetitorCache, RoadmapCache, MaturityCache, HeadlineWinnerCache, BioCache, VisibilityScoreCache,

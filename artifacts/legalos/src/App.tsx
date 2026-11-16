@@ -5,18 +5,31 @@ import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { useReadingTheme } from "@/hooks/useReadingTheme";
 import { AppErrorBoundary } from "@/components/AppErrorBoundary";
-import Index from "./pages/Index.tsx";
-import NotFound from "./pages/NotFound.tsx";
-import Share from "./pages/Share.tsx";
-import MarketIndex from "./pages/MarketIndex.tsx";
-import Teaser from "./pages/Teaser.tsx";
-import ShowcaseGate from "./pages/ShowcaseGate.tsx";
-import OpsDirectoryQueue from "./pages/OpsDirectoryQueue.tsx";
-import OpsRateLimits from "./pages/OpsRateLimits.tsx";
-import JoinFirm from "./pages/JoinFirm.tsx";
-import PartnerReview from "./pages/PartnerReview.tsx";
-import RoastShare from "./pages/RoastShare.tsx";
-import TeamGtm from "./pages/TeamGtm.tsx";
+import { lazyWithReload } from "@/lib/lazyWithReload";
+import { Suspense } from "react";
+
+// Every page is its own chunk: a visitor opening a public link (Visibility
+// Index, teaser, a share link) downloads that page, not the whole dashboard.
+const Index = lazyWithReload(() => import("./pages/Index.tsx"));
+const NotFound = lazyWithReload(() => import("./pages/NotFound.tsx"));
+const Share = lazyWithReload(() => import("./pages/Share.tsx"));
+const MarketIndex = lazyWithReload(() => import("./pages/MarketIndex.tsx"));
+const Teaser = lazyWithReload(() => import("./pages/Teaser.tsx"));
+const ShowcaseGate = lazyWithReload(() => import("./pages/ShowcaseGate.tsx"));
+const OpsDirectoryQueue = lazyWithReload(() => import("./pages/OpsDirectoryQueue.tsx"));
+const OpsRateLimits = lazyWithReload(() => import("./pages/OpsRateLimits.tsx"));
+const JoinFirm = lazyWithReload(() => import("./pages/JoinFirm.tsx"));
+const PartnerReview = lazyWithReload(() => import("./pages/PartnerReview.tsx"));
+const RoastShare = lazyWithReload(() => import("./pages/RoastShare.tsx"));
+const TeamGtm = lazyWithReload(() => import("./pages/TeamGtm.tsx"));
+
+// Shown for the moment a page's chunk is downloading. Same background as the
+// app so the switch doesn't flash.
+const PageLoading = () => (
+  <div className="flex min-h-screen items-center justify-center bg-background" aria-busy="true">
+    <div className="h-6 w-6 animate-spin rounded-full border-2 border-muted-foreground/30 border-t-primary" />
+  </div>
+);
 
 const queryClient = new QueryClient();
 
@@ -43,6 +56,7 @@ const App = () => {
           query-param navigation, and a reload of that URL misses Vite's
           /app/ base — an error page in place of the app. */}
       <BrowserRouter basename={import.meta.env.BASE_URL}>
+        <Suspense fallback={<PageLoading />}>
         <Routes>
           <Route path="/" element={<Index />} />
           <Route path="/share/:id" element={<Share />} />
@@ -62,6 +76,7 @@ const App = () => {
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>
+        </Suspense>
       </BrowserRouter>
     </TooltipProvider>
   </QueryClientProvider>

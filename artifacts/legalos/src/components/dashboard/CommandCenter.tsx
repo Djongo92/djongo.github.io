@@ -1,17 +1,20 @@
 import { useMemo, useState, type JSX } from "react";
 import { motion } from "framer-motion";
-import { toast } from "sonner";
 import { motionReveal } from "@/lib/motion";
 import { ResponsiveContainer, LineChart, Line, XAxis, YAxis, Tooltip } from "recharts";
 import {
   ArrowRight, ShieldCheck, TrendingUp, TrendingDown, Sparkles, Hammer, AlertTriangle, CheckCircle2,
-  Gauge, BookOpen, FileText, Share2, BarChart3, SlidersHorizontal, X, Copy, Check,
+  Gauge, FileText, Share2, BarChart3, SlidersHorizontal,
 } from "lucide-react";
 import {
   SwipeIcon, CopywriterIcon, RewriteIcon, AutopsyIcon, AuditIcon,
   HeadlinesIcon, TeardownIcon, PitchDeckIcon, BioIcon, CalendarIcon,
 } from "@/components/workshop/icons";
 import { NetworkInsights } from "./NetworkInsights";
+import ShareCardDialog from "./ShareCardDialog";
+import OngoingEndeavors from "./OngoingEndeavors";
+import { TotalTrendDot, TotalTrendTooltip } from "./TotalTrendChartParts";
+import type { AuditRow, HistoryRow } from "./auditTypes";
 import { useCommandCenterInsights, type InsightAction } from "@/hooks/useCommandCenterInsights";
 import { useWorkshopHistory } from "@/hooks/useWorkshopHistory";
 import { useBattlePlanCache } from "@/hooks/useBattlePlanCache";
@@ -27,8 +30,6 @@ import ScoreBurst from "@/components/visibility/ScoreBurst";
 import MilestoneCelebration from "@/components/visibility/MilestoneCelebration";
 import { useMilestoneCelebration } from "@/hooks/useMilestoneCelebration";
 import MondayBrief from "@/components/dashboard/MondayBrief";
-import ClientWinLog from "@/components/dashboard/ClientWinLog";
-import Campaigns from "@/components/dashboard/Campaigns";
 import PeerPositionBar from "@/components/visibility/PeerPositionBar";
 import PeerScatterMap from "@/components/visibility/PeerScatterMap";
 import MarketVisibilityScore from "@/components/MarketVisibilityScore";
@@ -37,15 +38,14 @@ import WhatIfSimulator from "@/components/visibility/WhatIfSimulator";
 import type { WorkshopToolId } from "@/lib/handoff";
 import { historyScore500 } from "@/lib/measuredScore";
 import { scoredAgoLabel, isStale, AUDIT_STALE_AFTER_DAYS } from "@/lib/scoreFreshness";
-import { computeMeasuredTotals, measuredScoreLabel, categoryScoreCell, toScale500 } from "@/lib/measuredScore";
+import { computeMeasuredTotals, categoryScoreCell, toScale500 } from "@/lib/measuredScore";
 import { computeWeekRange, formatWeekRangeLabel } from "@/lib/mondayBriefWeek";
 import { computeCategoryDeltas } from "@/lib/categoryDeltas";
 import { useAuth } from "@/hooks/useAuth";
 import { useFirmTeam } from "@/hooks/useFirmTeam";
 import { can } from "@/lib/roles";
 import { enableDemoMode } from "@/lib/demoMode";
-import { downloadScoreCard, buildScoreCardUrl } from "@/lib/visibilityScoreCard";
-import type { PeerStats } from "../../../supabase/functions/_shared/percentileFormula";
+import { buildScoreCardUrl } from "@/lib/visibilityScoreCard";
 import { TOTAL_MAX } from "../../../supabase/functions/_shared/methodology";
 
 const CATEGORY_LABELS = CATEGORY_META;
@@ -77,192 +77,6 @@ const QUICK_ACTIONS: { toolId: WorkshopToolId; label: string; icon: (p: { size?:
   { toolId: "calendar", label: "Plan the calendar", icon: CalendarIcon },
 ];
 
-export interface ThoughtLeadershipItem {
-  title: string;
-  date: string;
-  type: "blog" | "news" | "other";
-  hasNamedByline: boolean;
-}
-
-export interface DirectorySubScore {
-  points: number;
-  count: number;
-  avgRank: number | null;
-  qualityStats?: PeerStats | null;
-}
-
-export interface SiteHealthRaw {
-  hasContactForm: boolean;
-  copyrightYear: number | null;
-  copyrightStale: boolean;
-  brokenLinks: string[];
-  checkedLinks: number;
-}
-
-export interface PerformanceRaw {
-  desktop?: { performance: number; accessibility: number; seo: number };
-  mobile?: { performance: number; accessibility: number; seo: number };
-  perfAvg?: number;
-  accessAvg?: number;
-  seoAvg?: number;
-}
-
-export interface SocialRaw {
-  followers?: number;
-  posts30d?: number;
-  engagementRate?: number | null;
-  platforms?: { linkedin: boolean; instagram: boolean; twitter: boolean; facebook: boolean };
-  platformCount?: number;
-  /** Full six-value peer comparison (raw value, peer median, 90th-percentile
-   *  threshold, highest observed, sample size, comparison date) this score
-   *  was benchmarked against — persisted so a client can re-run the formula
-   *  (e.g. a what-if simulator) without a live query, and so it's auditable. */
-  followersStats?: PeerStats;
-  postsStats?: PeerStats;
-  erStats?: PeerStats | null;
-}
-
-export interface PressMention {
-  title: string;
-  source: string;
-  link: string;
-  date: string;
-}
-
-export interface ThoughtLeadershipRaw {
-  /** All own output (articles + own news). */
-  postsCount?: number;
-  /** Own analysis/insight pieces on the firm's site. */
-  articlesCount?: number;
-  /** Own announcements (deals, hires, awards) on the firm's site. */
-  ownNewsCount?: number;
-  /** Independent press mentions (own domain excluded). */
-  newsCount?: number;
-  /** Fraction 0-1, not a percentage. */
-  bylinePct?: number;
-  /** Months of the content window with any own output, and the window's length in months. */
-  activeMonths?: number;
-  windowMonths?: number;
-  measuredAt?: string;
-  items?: ThoughtLeadershipItem[];
-  pressMentions?: PressMention[];
-  /** Full six-value peer comparisons — see SocialRaw's comment. */
-  articlesStats?: PeerStats;
-  ownNewsStats?: PeerStats;
-  /** Pre-v3 audits: one blended own-output comparison. */
-  postsStats?: PeerStats;
-  newsStats?: PeerStats;
-}
-
-export interface ReputationRaw {
-  gbpListed?: boolean;
-  /** 0–10 sub-score from Google Business Profile (Places API or self-reported fallback). */
-  gbpScore?: number;
-  /** "google_places_api" when scored from live Places data; "self_reported" when
-   *  falling back to the intake boolean. Drives the Verified / Self-reported badge. */
-  gbpSource?: "google_places_api" | "self_reported";
-  /** Populated when gbpSource is "google_places_api". */
-  gbpRating?: number | null;
-  gbpReviewCount?: number | null;
-  gbpOperational?: boolean | null;
-  gbpScoreBreakdown?: {
-    operationalPts: number;
-    ratingPts: number;
-    reviewPts: number;
-    completenessPts: number;
-  } | null;
-  matchedFirmName?: string;
-  matchedFirmDomain?: string | null;
-  /** market_directory_data.last_verified_at for the matched row — reviewed
-   *  quarterly, not refreshed automatically. Present only when a directory
-   *  match was found (undefined while directory match is still pending). */
-  directoryLastVerifiedAt?: string | null;
-  chambers?: DirectorySubScore;
-  legal500?: DirectorySubScore;
-  iflr1000?: DirectorySubScore;
-  chambersRankedTables?: Record<string, number> | null;
-  legal500RankedTables?: Record<string, number> | null;
-  iflr1000RankedTables?: Record<string, number> | null;
-}
-
-export interface AuditRow {
-  id: string;
-  audited_domain: string;
-  display_name: string | null;
-  market: string;
-  peer_group: string;
-  performance_score: number;
-  social_score: number;
-  seo_authority_score: number;
-  thought_leadership_score: number;
-  reputation_score: number;
-  total_score: number;
-  provenance: Record<string, string>;
-  raw_metrics?: {
-    siteHealth?: SiteHealthRaw | null;
-    performance?: PerformanceRaw;
-    social?: SocialRaw;
-    seoAuthority?: Record<string, unknown>;
-    thoughtLeadership?: ThoughtLeadershipRaw;
-    reputation?: ReputationRaw;
-  };
-  updated_at: string;
-  percentile?: number | null;
-  peer_count?: number;
-  /** Data-integrity metadata (CLAUDE.md §3) — which formula version scored
-   *  this, what data window it drew from, and how much to trust the number. */
-  methodology_version?: number;
-  data_window_start?: string | null;
-  data_window_end?: string | null;
-  sample_size?: number | null;
-  confidence_score?: number | null;
-  review_status?: "unreviewed" | "reviewed" | "flagged";
-  reviewed_by?: string | null;
-  manual_override?: boolean;
-  manual_override_reason?: string | null;
-  /** §7 — optional peer-group refinement, self-reported at intake. Only
-   *  firm_size narrows the live Social/Thought Leadership peer comparison
-   *  today; the rest are captured for future use. */
-  firm_size?: string | null;
-  office_count?: string | null;
-  service_model?: string | null;
-  specialization?: string | null;
-  market_tier?: string | null;
-  /** The signed-in score uses the published census row when it has equal or
-   * greater category coverage than the account's private row. */
-  dashboard_source?: "private" | "public_census";
-  private_audit_id?: string;
-  public_audit_id?: string | null;
-  public_audit_available?: boolean;
-}
-
-export interface HistoryRow {
-  audited_domain: string;
-  market: string;
-  total_score: number;
-  performance_score?: number;
-  social_score?: number;
-  seo_authority_score?: number;
-  thought_leadership_score?: number;
-  reputation_score?: number;
-  recorded_at: string;
-  /** Frozen at scoring time — never recomputed against today's peer group
-   *  when this snapshot is redisplayed later (see percentileFormula.ts's
-   *  PeerStats and runVisibilityAudit.ts). Same shape as AuditRow's
-   *  raw_metrics/provenance, since both tables are written from the same
-   *  scoring run. Optional because rows recorded before this metadata
-   *  existed have neither. */
-  raw_metrics?: AuditRow["raw_metrics"];
-  provenance?: AuditRow["provenance"];
-  /** Rolled-up per-audit confidence for THIS historical snapshot, not the
-   *  current audit's — lets the history chart flag a thin-peer-group point
-   *  without recomputing anything live. */
-  confidence_score?: number | null;
-  sample_size?: number | null;
-  /** Which methodology scored this snapshot — pre-v3 totals were out of 200. */
-  methodology_version?: number | null;
-}
-
 interface CommandCenterProps {
   audits: AuditRow[];
   history: HistoryRow[];
@@ -276,60 +90,6 @@ interface CommandCenterProps {
   onOpenAnalytics: () => void;
 }
 
-/** Custom recharts tooltip for the headline "Score over time" chart — adds
- *  that snapshot's rolled-up confidence so a dip can be read as "your own
- *  score changed" vs. "this point came from a thin peer sample" without
- *  leaving the dashboard. Mirrors Analytics.tsx's CategoryTrendTooltip. */
-const TotalTrendTooltip = ({ active, payload, label }: any) => {
-  if (!active || !payload?.length) return null;
-  const point = payload[0]?.payload as { score500: number; confidenceScore: number | null; sampleSize: number | null } | undefined;
-  if (!point) return null;
-  const lowConfidence = point.confidenceScore != null && point.confidenceScore < 1;
-  return (
-    <div
-      className="text-xs font-body rounded-sm px-3 py-2"
-      style={{ background: "hsl(var(--card))", border: "1px solid hsl(var(--border))" }}
-    >
-      <p className="text-muted-foreground mb-1">{label}</p>
-      <p className="text-foreground font-medium">{point.score500} / 500</p>
-      {point.confidenceScore != null && (
-        <p className={`mt-0.5 ${lowConfidence ? "text-amber-500" : "text-muted-foreground"}`}>
-          {Math.round(point.confidenceScore * 100)}% confidence
-          {point.sampleSize != null ? ` · smallest sample ${point.sampleSize} firms` : ""}
-        </p>
-      )}
-    </div>
-  );
-};
-
-/** Hollow amber ring flags a point recorded when that audit's peer-normalized
- *  metrics were thin-sampled (confidenceScore < 1) — same treatment as
- *  Analytics.tsx's CategoryTrendDot. */
-const TotalTrendDot = (props: any) => {
-  const { cx, cy, payload } = props;
-  if (cx == null || cy == null) return null;
-  const lowConfidence = payload?.confidenceScore != null && payload.confidenceScore < 1;
-  return (
-    <circle
-      cx={cx}
-      cy={cy}
-      r={3}
-      fill={lowConfidence ? "hsl(var(--card))" : "rgb(16 185 129)"}
-      stroke={lowConfidence ? "rgb(245 158 11)" : "rgb(16 185 129)"}
-      strokeWidth={lowConfidence ? 2 : 1}
-    />
-  );
-};
-
-const timeAgo = (ts: number): string => {
-  const mins = Math.round((Date.now() - ts) / 60000);
-  if (mins < 60) return `${mins}m ago`;
-  const hours = Math.round(mins / 60);
-  if (hours < 24) return `${hours}h ago`;
-  const days = Math.round(hours / 24);
-  return `${days}d ago`;
-};
-
 const CommandCenter = ({
   audits, history, readChaptersCount, totalChapters, implementationScore,
   onOpenWorkshop, onOpenWorkshopTool, onOpenGuidebook, onOpenMaturity, onOpenAnalytics,
@@ -338,7 +98,6 @@ const CommandCenter = ({
   const [whatIfOpen, setWhatIfOpen] = useState(false);
   const [sharePreviewOpen, setSharePreviewOpen] = useState(false);
   const [shareCardUrl, setShareCardUrl] = useState<string | null>(null);
-  const [copiedLink, setCopiedLink] = useState(false);
   const primary = audits[0];
   const { runs } = useWorkshopHistory();
   const { maturity, roast, headline, bio, roadmap, competitor, visibilityScore } = useBattlePlanCache();
@@ -975,177 +734,28 @@ const CommandCenter = ({
           )}
         </div>
 
-        {/* Right column — Ongoing Endeavors. Deliberately quieter than the
-            left column's analysis (softer border/background): secondary
-            reference info, not the thing you came here to look at. */}
-        <div className="space-y-6">
-          <div className="bg-card/40 border border-border/30 rounded-sm p-4">
-            <h2 className="font-display text-base text-foreground mb-4">Ongoing Endeavors</h2>
-
-            <div className="space-y-4">
-              <div className="flex items-center justify-between text-sm font-body">
-                <span className="flex items-center gap-2 text-secondary-foreground/80">
-                  <BookOpen className="w-3.5 h-3.5 text-primary" /> Guidebook
-                </span>
-                <button onClick={onOpenGuidebook} className="text-primary hover:text-gold-light text-xs">
-                  {readChaptersCount}/{totalChapters} read
-                </button>
-              </div>
-
-              <div className="flex items-center justify-between text-sm font-body">
-                <span className="flex items-center gap-2 text-secondary-foreground/80">
-                  <Gauge className="w-3.5 h-3.5 text-primary" /> Firm Maturity
-                </span>
-                <button onClick={onOpenMaturity} className="text-primary hover:text-gold-light text-xs">
-                  {maturity ? `${maturity.score}% scored` : "Not run yet"}
-                </button>
-              </div>
-
-              <div className="flex items-center justify-between text-sm font-body">
-                <span className="flex items-center gap-2 text-secondary-foreground/80">
-                  <FileText className="w-3.5 h-3.5 text-primary" /> Battle Plan
-                </span>
-                <span className="text-xs text-muted-foreground">{battlePlanFilled}/7 sections ready</span>
-              </div>
-            </div>
-          </div>
-
-          <Campaigns market={primary.market} auditedDomain={primary.audited_domain} history={history} />
-
-          <ClientWinLog market={primary.market} auditedDomain={primary.audited_domain} />
-
-          <div className="bg-card/40 border border-border/30 rounded-sm p-4">
-            <h2 className="font-display text-base text-foreground mb-4">Recent Workshop Activity</h2>
-            {runs.length === 0 ? (
-              <p className="text-xs text-muted-foreground font-body">
-                Nothing run yet — the Workshop's eleven tools are one click away.
-              </p>
-            ) : (
-              <div className="space-y-3">
-                {runs.slice(0, 5).map((run) => (
-                  <button
-                    key={run.id}
-                    onClick={() => onOpenWorkshopTool(run.toolId)}
-                    className="w-full text-left group"
-                  >
-                    <div className="flex items-center justify-between mb-0.5">
-                      <span className="text-xs font-body text-muted-foreground">{run.toolLabel}</span>
-                      <span className="text-[10px] font-body text-muted-foreground">{timeAgo(run.createdAt)}</span>
-                    </div>
-                    <p className="text-sm font-body text-foreground group-hover:text-primary transition-colors truncate">
-                      {run.title}
-                    </p>
-                    {run.preview && (
-                      <p className="text-xs font-body text-secondary-foreground/60 truncate">{run.preview}</p>
-                    )}
-                  </button>
-                ))}
-              </div>
-            )}
-          </div>
-
-          {siteHealthIssues.length > 0 && (
-            <div className="bg-card border border-amber-500/30 rounded-sm p-5">
-              <div className="flex items-center gap-2 mb-3">
-                <AlertTriangle className="w-4 h-4 text-amber-500" />
-                <span className="eyebrow text-[10px] text-amber-500">Site health</span>
-              </div>
-              <ul className="space-y-1.5">
-                {siteHealthIssues.map((issue) => (
-                  <li key={issue} className="text-xs text-secondary-foreground/80 font-body">{issue}</li>
-                ))}
-              </ul>
-            </div>
-          )}
-        </div>
+        <OngoingEndeavors
+          readChaptersCount={readChaptersCount}
+          totalChapters={totalChapters}
+          maturityScore={maturity ? maturity.score : null}
+          battlePlanFilled={battlePlanFilled}
+          runs={runs}
+          siteHealthIssues={siteHealthIssues}
+          audit={primary}
+          history={history}
+          onOpenGuidebook={onOpenGuidebook}
+          onOpenMaturity={onOpenMaturity}
+          onOpenWorkshopTool={onOpenWorkshopTool}
+        />
       </div>
 
-      {/* Share card preview dialog */}
-      {sharePreviewOpen && shareCardUrl && (
-        <div
-          className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4"
-          onClick={() => setSharePreviewOpen(false)}
-        >
-          <motion.div
-            initial={{ opacity: 0, scale: 0.95 }}
-            animate={{ opacity: 1, scale: 1 }}
-            transition={motionReveal}
-            className="bg-card border border-border rounded-sm p-5 max-w-lg w-full"
-            onClick={(e) => e.stopPropagation()}
-          >
-            <div className="flex items-center justify-between mb-4">
-              <span className="text-sm font-display text-foreground">Score card preview</span>
-              <button onClick={() => setSharePreviewOpen(false)} className="text-muted-foreground hover:text-foreground transition-colors">
-                <X className="w-4 h-4" />
-              </button>
-            </div>
-            <img src={shareCardUrl} alt="Visibility score card" className="w-full rounded-sm mb-5 border border-border/30" />
-            <div className="space-y-3">
-              {/* Social share row */}
-              <div className="grid grid-cols-3 gap-2">
-                <button
-                  onClick={() => {
-                    const score = Math.round(primary.total_score);
-                    const firm = primary.display_name || primary.audited_domain;
-                    const url = `${window.location.origin}/app/`;
-                    const scoreLine = measured ? measuredScoreLabel(score, measured) : `${toScale500(score, TOTAL_MAX)} / 500`;
-                    const text = `${firm} scored ${scoreLine} on the Market Visibility Score — real, externally-verified data on legal market presence.`;
-                    window.open(`https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(url)}&summary=${encodeURIComponent(text)}`, "_blank", "width=600,height=500");
-                  }}
-                  className="flex flex-col items-center justify-center gap-1 bg-[#0A66C2] hover:bg-[#0958A8] text-white py-2.5 text-[11px] font-body rounded-sm transition-colors"
-                >
-                  <svg viewBox="0 0 24 24" className="w-3.5 h-3.5 fill-current flex-shrink-0"><path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433a2.062 2.062 0 01-2.063-2.065 2.064 2.064 0 112.063 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/></svg>
-                  LinkedIn
-                </button>
-                <button
-                  onClick={() => {
-                    const score = Math.round(primary.total_score);
-                    const firm = primary.display_name || primary.audited_domain;
-                    const url = `${window.location.origin}/app/`;
-                    const scoreLine = measured ? measuredScoreLabel(score, measured) : `${toScale500(score, TOTAL_MAX)} / 500`;
-                    const text = `${firm} scored ${scoreLine} on the Market Visibility Score — real, externally-verified legal market data.\n\n${url}`;
-                    window.open(`https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}`, "_blank", "width=600,height=500");
-                  }}
-                  className="flex flex-col items-center justify-center gap-1 bg-zinc-900 hover:bg-zinc-800 text-white py-2.5 text-[11px] font-body rounded-sm transition-colors border border-zinc-700"
-                >
-                  <svg viewBox="0 0 24 24" className="w-3.5 h-3.5 fill-current flex-shrink-0"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-4.714-6.231-5.401 6.231H2.744l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
-                  X / Twitter
-                </button>
-                <button
-                  onClick={async () => {
-                    try {
-                      await navigator.clipboard.writeText(`${window.location.origin}/app/`);
-                      setCopiedLink(true);
-                      setTimeout(() => setCopiedLink(false), 2000);
-                    } catch (e) {
-                      toast.error(e instanceof Error ? e.message : "Couldn't copy the link");
-                    }
-                  }}
-                  className="flex flex-col items-center justify-center gap-1 bg-card border border-border hover:border-primary/40 py-2.5 text-[11px] font-body rounded-sm text-muted-foreground hover:text-primary transition-colors"
-                >
-                  {copiedLink ? <Check className="w-3.5 h-3.5 flex-shrink-0" /> : <Copy className="w-3.5 h-3.5 flex-shrink-0" />}
-                  {copiedLink ? "Copied!" : "Copy link"}
-                </button>
-              </div>
-              {/* Download + dismiss */}
-              <div className="flex gap-3">
-                <button
-                  onClick={() => { downloadScoreCard(primary); setSharePreviewOpen(false); }}
-                  className="flex-1 bg-primary text-primary-foreground px-4 py-2 text-sm font-body rounded-sm hover:bg-gold-light transition-colors font-medium"
-                >
-                  Download PNG
-                </button>
-                <button
-                  onClick={() => setSharePreviewOpen(false)}
-                  className="px-4 py-2 text-sm font-body text-muted-foreground hover:text-foreground border border-border rounded-sm transition-colors"
-                >
-                  Cancel
-                </button>
-              </div>
-            </div>
-          </motion.div>
-        </div>
-      )}
+      <ShareCardDialog
+        open={sharePreviewOpen}
+        imageUrl={shareCardUrl}
+        audit={primary}
+        measured={measured}
+        onClose={() => setSharePreviewOpen(false)}
+      />
       <WhatIfSimulator open={whatIfOpen} onClose={() => setWhatIfOpen(false)} audit={primary} />
       <MilestoneCelebration
         open={!!milestone}

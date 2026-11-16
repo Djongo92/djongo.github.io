@@ -8,7 +8,7 @@
 // campaign's content output would plausibly explain (Performance), so this
 // deliberately only ever surfaces those two, never a vague "total score
 // went up" claim that invites a causal reading it can't support.
-import type { HistoryRow } from "@/components/dashboard/CommandCenter";
+import type { HistoryRow } from "@/components/dashboard/auditTypes";
 import type { Campaign } from "@/hooks/useCampaigns";
 
 export interface CampaignDelta {

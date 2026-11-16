@@ -66,7 +66,6 @@ export function useBattlePlanMilestones(slots: Slots): { badge: BattlePlanBadge 
 
     const unseen = candidates.find((c) => !seen.has(c.id));
     if (unseen) setBadge(unseen);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [slots.roast, slots.competitor, slots.roadmap, slots.maturity, slots.headline, slots.bio, slots.visibilityScore]);
 
   const dismiss = () => {

@@ -29,16 +29,16 @@ export const intakeConversion: Chapter = {
 5. Have you worked with a firm on this before? (First-time buyers need education; switchers need reassurance)
 6. How did you hear about us? (By name — this feeds the referral system)
 
-Close every intake with: who does what by when. \"You'll have a short note from [partner] by Thursday with how we'd approach it and what it costs.\" Then keep the promise.`
+Close every intake with: who does what by when. "You'll have a short note from [partner] by Thursday with how we'd approach it and what it costs." Then keep the promise.`
     },
     {
       type: "template",
       title: "The Follow-Up Sequence — 3 Touches",
       body: `For consults that don't convert on the spot. Value-first, no pressure.
 
-TOUCH 1 (next day): Thank-you + the one thing discussed that mattered most + a relevant article or guide. \"You mentioned [issue] — this is how we've seen it handled.\"
+TOUCH 1 (next day): Thank-you + the one thing discussed that mattered most + a relevant article or guide. "You mentioned [issue] — this is how we've seen it handled."
 TOUCH 2 (one week): A short scoping note — how we'd approach their matter, in three bullets, with a fee range or model. Clarity is the differentiator.
-TOUCH 3 (three weeks): The graceful close — \"If the timing's moved, no note needed; if it's still live, I'm happy to hold thirty minutes this month.\" Then stop.
+TOUCH 3 (three weeks): The graceful close — "If the timing's moved, no note needed; if it's still live, I'm happy to hold thirty minutes this month." Then stop.
 
 Rule: three touches, then into the nurture list (see Email Nurture). Persistence past three reads as desperation — and desperation is the one message that converts in the wrong direction.`
     }

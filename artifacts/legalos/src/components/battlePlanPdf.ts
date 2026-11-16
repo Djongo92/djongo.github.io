@@ -4,6 +4,11 @@
 // bundle for every visitor.
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
+
+/** Where the last autoTable() call ended. jspdf-autotable sets this on the
+ *  document at runtime but doesn't add it to jsPDF's type. */
+export const lastAutoTableY = (doc: jsPDF): number =>
+  (doc as unknown as { lastAutoTable: { finalY: number } }).lastAutoTable.finalY;
 import type { useBattlePlanCache } from "@/hooks/useBattlePlanCache";
 import { SERIF_REGULAR, SERIF_BOLD, SERIF_ITALIC, SANS_REGULAR, SANS_BOLD, SANS_ITALIC } from "./pdfFonts";
 import { CATEGORY_META, CATEGORY_ORDER, CATEGORY_MAX_500, PROVENANCE_META, categoryScoreLabel500, type CategoryKey, type Provenance } from "@/lib/visibilityCategories";
@@ -287,7 +292,7 @@ export function buildPdf({ roast, competitor, roadmap, maturity, headline, bio, 
       theme: "grid",
       styles: { font: SANS, lineColor: RULE, lineWidth: 0.5 },
     });
-    cursor = (doc as any).lastAutoTable.finalY + 16;
+    cursor = lastAutoTableY(doc) + 16;
 
     // Gaps to close
     if (competitor.gaps.length > 0) {
@@ -304,7 +309,7 @@ export function buildPdf({ roast, competitor, roadmap, maturity, headline, bio, 
         theme: "grid",
         styles: { font: SANS, lineColor: RULE, lineWidth: 0.5 },
       });
-      cursor = (doc as any).lastAutoTable.finalY + 16;
+      cursor = lastAutoTableY(doc) + 16;
     }
 
     // Opportunities
@@ -351,7 +356,7 @@ export function buildPdf({ roast, competitor, roadmap, maturity, headline, bio, 
       doc.text(focusLines, margin + 10, cursor + 28);
       cursor += barH + 8;
 
-      phase.actions.forEach((a, i) => {
+      phase.actions.forEach((a) => {
         cursor = ensureSpace(doc, cursor, 60);
         doc.setFillColor(...GOLD);
         doc.circle(margin + 8, cursor + 5, 3, "F");
@@ -410,7 +415,7 @@ export function buildPdf({ roast, competitor, roadmap, maturity, headline, bio, 
       theme: "grid",
       styles: { font: SANS, lineColor: RULE, lineWidth: 0.5 },
     });
-    cursor = (doc as any).lastAutoTable.finalY + 16;
+    cursor = lastAutoTableY(doc) + 16;
 
     // 30-day plan (strip markdown to plain)
     if (maturity.plan) {
@@ -528,7 +533,7 @@ export function buildPdf({ roast, competitor, roadmap, maturity, headline, bio, 
       theme: "grid",
       styles: { font: SANS, lineColor: RULE, lineWidth: 0.5 },
     });
-    cursor = (doc as any).lastAutoTable.finalY + 16;
+    cursor = lastAutoTableY(doc) + 16;
 
     // How this score was calculated — every figure above traced back to
     // its formula and this firm's actual measured inputs, so the number
@@ -782,7 +787,7 @@ function drawCallout(doc: jsPDF, label: string, body: string, y: number, width: 
 
 function drawNumberedItem(doc: jsPDF, n: number, text: string, y: number, width: number, margin: number): number {
   const lines = doc.splitTextToSize(text, width - 28);
-  let cursor = ensureSpace(doc, y, lines.length * 13 + 12);
+  const cursor = ensureSpace(doc, y, lines.length * 13 + 12);
   doc.setFont(SERIF, "bold");
   doc.setFontSize(16);
   doc.setTextColor(...GOLD);
@@ -796,7 +801,7 @@ function drawNumberedItem(doc: jsPDF, n: number, text: string, y: number, width:
 
 function drawBullet(doc: jsPDF, text: string, y: number, width: number, margin: number): number {
   const lines = doc.splitTextToSize(text, width - 16);
-  let cursor = ensureSpace(doc, y, lines.length * 13 + 6);
+  const cursor = ensureSpace(doc, y, lines.length * 13 + 6);
   doc.setFillColor(...GOLD);
   doc.circle(margin + 4, cursor + 8, 1.8, "F");
   doc.setFont(SANS, "normal");

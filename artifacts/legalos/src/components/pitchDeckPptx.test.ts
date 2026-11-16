@@ -45,7 +45,7 @@ const SAMPLE = `## Slide 1 — Title / First Impression
 **Speaker notes:** Proof slide.
 `;
 
-async function buildZip(slideCount?: never) {
+async function buildZip() {
   const slides = parsePitchDeckMarkdown(SAMPLE);
   const pptx = assemblePitchDeckPptx({ slides, audience: "GC", opportunity: "EU expansion" });
   const buf = await pptx.write({ outputType: "arraybuffer" });
