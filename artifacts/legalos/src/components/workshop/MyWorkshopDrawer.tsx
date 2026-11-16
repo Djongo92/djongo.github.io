@@ -2,7 +2,7 @@ import { useMemo, useState } from "react";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import { History, Search, Trash2, ArrowRight, Inbox } from "lucide-react";
 import { useWorkshopHistory } from "@/hooks/useWorkshopHistory";
-import { sendTo, type WorkshopToolId } from "@/lib/handoff";
+import { sendTo } from "@/lib/handoff";
 import { toast } from "sonner";
 
 const since = (ts: number) => {

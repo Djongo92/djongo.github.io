@@ -1,7 +1,6 @@
 import { motion } from "framer-motion";
 import { chapters } from "@/data/chapters";
 import { BookOpen, Bookmark, CheckCircle2, Target, FileText, ArrowLeft, Download, Sparkles, Gauge, Hammer } from "lucide-react";
-import { toast } from "sonner";
 import { getReadingTime } from "@/lib/readingTime";
 import RoadmapGenerator from "./RoadmapGenerator";
 import ScoreWebsite from "./ScoreWebsite";

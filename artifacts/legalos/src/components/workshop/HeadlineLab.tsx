@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Loader2, Trophy, Copy, Swords, Sparkles, Crown } from "lucide-react";
+import { Loader2, Copy, Swords, Sparkles, Crown } from "lucide-react";
 import { LoadingTips } from "@/components/LoadingTips";
 import { toast } from "sonner";
 import { useFirmContext } from "@/hooks/useFirmContext";

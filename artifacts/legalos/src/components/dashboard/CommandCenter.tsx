@@ -276,11 +276,16 @@ interface CommandCenterProps {
   onOpenAnalytics: () => void;
 }
 
+/** What recharts passes a custom tooltip. */
+type ChartTooltipProps = { active?: boolean; payload?: Array<{ payload?: unknown }>; label?: string | number };
+/** What recharts passes a custom dot renderer. */
+type ChartDotProps = { cx?: number; cy?: number; payload?: { confidenceScore?: number | null } };
+
 /** Custom recharts tooltip for the headline "Score over time" chart — adds
  *  that snapshot's rolled-up confidence so a dip can be read as "your own
  *  score changed" vs. "this point came from a thin peer sample" without
  *  leaving the dashboard. Mirrors Analytics.tsx's CategoryTrendTooltip. */
-const TotalTrendTooltip = ({ active, payload, label }: any) => {
+const TotalTrendTooltip = ({ active, payload, label }: ChartTooltipProps) => {
   if (!active || !payload?.length) return null;
   const point = payload[0]?.payload as { score500: number; confidenceScore: number | null; sampleSize: number | null } | undefined;
   if (!point) return null;
@@ -305,7 +310,7 @@ const TotalTrendTooltip = ({ active, payload, label }: any) => {
 /** Hollow amber ring flags a point recorded when that audit's peer-normalized
  *  metrics were thin-sampled (confidenceScore < 1) — same treatment as
  *  Analytics.tsx's CategoryTrendDot. */
-const TotalTrendDot = (props: any) => {
+const TotalTrendDot = (props: ChartDotProps) => {
   const { cx, cy, payload } = props;
   if (cx == null || cy == null) return null;
   const lowConfidence = payload?.confidenceScore != null && payload.confidenceScore < 1;

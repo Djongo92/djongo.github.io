@@ -23,7 +23,7 @@ import { CATEGORY_META } from "@/lib/visibilityCategories";
 import { computeMeasuredTotals, measuredScoreLabel, measuredExcludedNote, toScale500, type CategoryTotals } from "@/lib/measuredScore";
 import type { AuditRow } from "@/components/dashboard/CommandCenter";
 import { calculatePerformanceScore } from "../../../supabase/functions/_shared/performanceFormula";
-import { calculateSocialScore, MAX_FOLLOWERS, MAX_POSTS_30D, MAX_ENGAGEMENT_RATE } from "../../../supabase/functions/_shared/socialFormula";
+import { calculateSocialScore } from "../../../supabase/functions/_shared/socialFormula";
 import { calculateThoughtLeadershipScore } from "../../../supabase/functions/_shared/thoughtLeadershipFormula";
 import { p90Ratio } from "../../../supabase/functions/_shared/percentileFormula";
 import { TOTAL_MAX } from "../../../supabase/functions/_shared/methodology";

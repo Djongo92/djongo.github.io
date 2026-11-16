@@ -1,6 +1,6 @@
 import { motion, AnimatePresence } from "framer-motion";
 import { Chapter } from "@/data/chapters";
-import { ArrowLeft, ChevronLeft, ChevronRight, Bookmark, Share2, Printer, Download, Clock, BookOpen, Headphones } from "lucide-react";
+import { ArrowLeft, ChevronLeft, ChevronRight, Bookmark, Share2, Printer, Download, Clock, Headphones } from "lucide-react";
 import { Layout, Type } from "lucide-react";
 import { SegmentedControl } from "./ui/segmented-control";
 import ReadingProgress from "./ReadingProgress";

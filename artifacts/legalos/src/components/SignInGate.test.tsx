@@ -67,7 +67,7 @@ vi.mock("framer-motion", async (importOriginal) => {
   const React = await import("react");
   const passThrough =
     (_tag: string) =>
-    ({ children, ...rest }: React.HTMLAttributes<HTMLElement> & { children?: React.ReactNode }) =>
+    ({ children }: React.HTMLAttributes<HTMLElement> & { children?: React.ReactNode }) =>
       React.createElement(React.Fragment, null, children ?? null);
   return {
     ...actual,

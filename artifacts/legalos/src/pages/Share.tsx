@@ -8,7 +8,7 @@ interface Artifact {
   kind: string;
   title: string;
   source_url: string | null;
-  payload: any;
+  payload: unknown;
   created_at: string;
   expires_at: string | null;
 }

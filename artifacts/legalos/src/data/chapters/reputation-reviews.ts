@@ -22,7 +22,7 @@ export const reputationReviews: Chapter = {
       title: "The Review Ask — Matter Closing",
       body: `Timing: within 48 hours of a successful close, from the partner who ran the matter — never from marketing.
 
-\"It's been a pleasure getting this across the line with you. We ask one thing of every client at this point: if the work earned it, would you leave us a short Google review? Two sentences about what we handled and how it went means more to a firm our size than any award — and it takes about two minutes. Here's the direct link: [link]\"
+"It's been a pleasure getting this across the line with you. We ask one thing of every client at this point: if the work earned it, would you leave us a short Google review? Two sentences about what we handled and how it went means more to a firm our size than any award — and it takes about two minutes. Here's the direct link: [link]"
 
 Rules: ask every client, not just the enthusiasts. Never script the content. Never incentivize. If the answer suggests hesitation, that's a service signal — follow up privately, not with a second ask.`
     },

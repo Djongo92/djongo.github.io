@@ -31,7 +31,10 @@ const SectionNav = ({ chapter }: SectionNavProps) => {
     window.addEventListener("scroll", handleScroll, { passive: true });
     handleScroll();
     return () => window.removeEventListener("scroll", handleScroll);
-  }, [headings.length]);
+    // Re-attach per chapter: a chapter with the same number of headings
+    // used to keep the previous chapter's handler.
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- headings derives from chapter
+  }, [chapter]);
 
   if (headings.length < 2) return null;
 

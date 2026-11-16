@@ -4,6 +4,9 @@
 // the live Dashboard's category explainer popover, so both surfaces show
 // the exact same evidence rather than two independently-written summaries
 // that could drift apart.
+/* eslint-disable @typescript-eslint/no-explicit-any --
+   These read raw_metrics JSON as stored, across methodology versions whose
+   shapes differ; every access is optional-chained and null-checked. */
 import type { CategoryKey } from "./visibilityCategories";
 import { gbpPoints, REPUTATION_WEIGHTS } from "../../supabase/functions/_shared/methodology";
 

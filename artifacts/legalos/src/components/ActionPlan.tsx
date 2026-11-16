@@ -48,7 +48,7 @@ const ActionPlan = ({ chapterId, items, isImplemented, onToggle, score }: Action
       <div className="divide-y divide-border/30">
         {items.map((item, index) => {
           const implemented = isImplemented(chapterId, index);
-          const { icon: PriorityIcon, label, className } = priorityConfig[item.priority];
+          const { label, className } = priorityConfig[item.priority];
 
           return (
             <button

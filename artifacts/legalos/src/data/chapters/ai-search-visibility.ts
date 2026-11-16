@@ -23,11 +23,11 @@ export const aiSearchVisibility: Chapter = {
       body: `Once a month, ask each major AI assistant (ChatGPT, Perplexity, Gemini) the five questions your clients actually ask. Record the answers in a spreadsheet — dated.
 
 The five questions (adapt to your practice):
-1. \"Which law firms in [city/country] specialize in [your niche]?\"
-2. \"What should a [client type] know about [your regulatory area]?\"
-3. \"How much does [your typical matter] usually cost in [market]?\"
-4. \"What changed in [your area] law this year?\"
-5. \"Who are recognized experts on [your niche] in [market]?\"
+1. "Which law firms in [city/country] specialize in [your niche]?"
+2. "What should a [client type] know about [your regulatory area]?"
+3. "How much does [your typical matter] usually cost in [market]?"
+4. "What changed in [your area] law this year?"
+5. "Who are recognized experts on [your niche] in [market]?"
 
 Log: was the firm named? Was a firm page or article cited? Who was named instead — and what did they publish that you haven't?
 

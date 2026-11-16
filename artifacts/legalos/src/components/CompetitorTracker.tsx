@@ -6,7 +6,7 @@ import { useFirmProfile } from "@/hooks/useFirmProfile";
 import type { AuditRow } from "@/components/dashboard/CommandCenter";
 import ModalShell from "@/components/ui/modal-shell";
 import { computeMeasuredTotals, measuredScoreLabel, type CategoryTotals } from "@/lib/measuredScore";
-import { CATEGORY_ORDER, CATEGORY_META } from "@/lib/visibilityCategories";
+import { CATEGORY_ORDER } from "@/lib/visibilityCategories";
 
 interface Props {
   open: boolean;

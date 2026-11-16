@@ -20,22 +20,22 @@ export const practiceAreaPages: Chapter = {
       type: "template",
       title: "The Client-First Practice Page Skeleton",
       body: `[H1: The client's situation, in their words]
-\"Facing pressure from investors on ESG disclosures?\" — not \"Corporate Law.\"
+"Facing pressure from investors on ESG disclosures?" — not "Corporate Law."
 
 [Opening: 2–3 sentences naming the challenge and its cost of inaction]
 
 [How it resolves: the outcome, not the service list]
-\"You close the round with disclosures investors sign off on.\"
+"You close the round with disclosures investors sign off on."
 
 [Proof: 2–3 recent matters with outcomes — anonymized where required]
-\"Advised a regional manufacturer through its first CSRD cycle — zero qualified findings.\"
+"Advised a regional manufacturer through its first CSRD cycle — zero qualified findings."
 
 [The people: named experts with one line each on what they've actually done]
 
 [Keep it current: latest article or regulatory development in this area]
 
 [Next step: one clear, low-commitment action]
-\"A 30-minute scoping call — what the new rules mean for your next filing.\"`
+"A 30-minute scoping call — what the new rules mean for your next filing."`
     }
   ],
   content: [

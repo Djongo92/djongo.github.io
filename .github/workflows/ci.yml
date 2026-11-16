@@ -38,6 +38,9 @@ jobs:
       - name: Typecheck (all packages)
         run: pnpm run typecheck
 
+      - name: Lint web app (hooks misuse, unused code, explicit any)
+        run: pnpm --filter @workspace/uvid run lint
+
       - name: Web app + edge-function unit tests (vitest)
         run: pnpm --filter @workspace/uvid run test
 

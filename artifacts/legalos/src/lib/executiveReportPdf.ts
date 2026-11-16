@@ -6,7 +6,7 @@
 // subset instead of duplicating the font data.
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
-import { registerFonts } from "@/components/battlePlanPdf";
+import { lastAutoTableY, registerFonts } from "@/components/battlePlanPdf";
 import { CATEGORY_META, CATEGORY_ORDER } from "@/lib/visibilityCategories";
 import type { ExecutiveReportData } from "@/lib/executiveReportData";
 import { computeTrendSummary } from "@/lib/executiveReportData";
@@ -101,8 +101,7 @@ export function buildExecutiveReportPdf(data: ExecutiveReportData) {
     theme: "grid",
   });
 
-  // deno-lint-ignore no-explicit-any
-  y = (doc as any).lastAutoTable.finalY + 24;
+  y = lastAutoTableY(doc) + 24;
 
   const trend = computeTrendSummary(data.history);
   if (trend) {
