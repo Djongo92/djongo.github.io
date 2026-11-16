@@ -20,7 +20,15 @@ import { computeMeasuredTotals } from "@/lib/measuredScore";
 import ShareCardDialog, { shareHeadline } from "./ShareCardDialog";
 import OngoingEndeavors, { timeAgo } from "./OngoingEndeavors";
 
-const measured = computeMeasuredTotals(DEMO_AUDIT.categories as Parameters<typeof computeMeasuredTotals>[0]);
+// Built the way CommandCenter builds it from an audit row.
+const a = DEMO_AUDIT;
+const measured = computeMeasuredTotals({
+  performance: { score: a.performance_score, provenance: a.provenance?.performance ?? "missing" },
+  social: { score: a.social_score, provenance: a.provenance?.social ?? "missing" },
+  seoAuthority: { score: a.seo_authority_score, provenance: a.provenance?.seoAuthority ?? "missing" },
+  thoughtLeadership: { score: a.thought_leadership_score, provenance: a.provenance?.thoughtLeadership ?? "missing" },
+  reputation: { score: a.reputation_score, provenance: a.provenance?.reputation ?? "missing" },
+});
 
 describe("ShareCardDialog", () => {
   beforeEach(() => downloadScoreCard.mockReset());
