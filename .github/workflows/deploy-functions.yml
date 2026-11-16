@@ -29,8 +29,8 @@ jobs:
       SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
       PROJECT_REF: qeopoiumlnzqwaqzwqcj
     steps:
-      - uses: actions/checkout@v4
-      - uses: supabase/setup-cli@v1
+      - uses: actions/checkout@v7
+      - uses: supabase/setup-cli@v3
         with:
           # Pinned: "latest" let a CLI release change deploy behaviour with no
           # change in this repo. Bump deliberately.
@@ -39,7 +39,7 @@ jobs:
         # verify_jwt per function comes from supabase/config.toml — every
         # function needs an entry (tests/edgeFunctionsConfig.test.ts enforces it).
         run: supabase functions deploy --project-ref "$PROJECT_REF" --use-api
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@v7
         with:
           node-version: 22
       - name: Probe deployed functions
