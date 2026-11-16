@@ -44,7 +44,12 @@
 import { chromium } from "playwright-core";
 import { execSync } from "node:child_process";
 
-const BASE = process.env.SMOKE_BASE_URL ?? "http://localhost:80";
+const BASE = (process.env.SMOKE_BASE_URL ?? "http://localhost:80").replace(/\/+$/, "");
+// The site can live under a sub-path (GitHub Pages: /djongo.github.io). Links
+// read from the page carry that prefix; strip it so they're matched and
+// visited relative to BASE.
+const BASE_PATH = new URL(`${BASE}/`).pathname.replace(/\/$/, "");
+const relative = (href) => (BASE_PATH && href.startsWith(BASE_PATH) ? href.slice(BASE_PATH.length) || "/" : href);
 // Never print the code — parse the first CODE:Label pair from the secret.
 const demoCode = (process.env.DEMO_ACCESS_CODES ?? "").split(",")[0]?.split(":")[0]?.trim();
 
@@ -67,7 +72,8 @@ for (const path of ["/", "/app/"]) {
   }
 }
 
-const execPath = execSync("which chromium").toString().trim();
+// CHROMIUM_PATH points at any local Chrome/Chromium (e.g. on macOS).
+const execPath = process.env.CHROMIUM_PATH ?? execSync("which chromium").toString().trim();
 const browser = await chromium.launch({ executablePath: execPath, args: ["--no-sandbox"] });
 
 const NOISE = (s) => /favicon|\.map|React Router Future Flag/i.test(s);
@@ -81,6 +87,12 @@ const NOISE = (s) => /favicon|\.map|React Router Future Flag/i.test(s);
 const EXPECTED_REJECTION = (s) =>
   /Failed to load resource: the server responded with a status of 4\d\d/i.test(s) ||
   /404 Error: User attempted to access non-existent route/i.test(s);
+
+const isDocumentUrl = (resourceUrl, pageUrl) =>
+  !!resourceUrl && resourceUrl.split("#")[0] === pageUrl.split("#")[0];
+
+// Note: Playwright's isVisible() doesn't wait, whatever timeout it's given;
+// checks that must wait for a lazily loaded page use waitFor().
 
 /** Run one scenario in a fresh context; network/console hygiene is asserted automatically.
  *  allowRejections downgrades expected-4xx console noise to NOTEs — only for
@@ -108,6 +120,10 @@ async function scenario(name, fn, { allowRejections = false, allow429 = false, e
   const isExternal = (url) => !!externalErrorPattern && !!url && externalErrorPattern.test(url);
   page.on("console", (m) => {
     if (m.type() !== "error" || NOISE(m.text())) return;
+    // GitHub Pages serves an /app/ deep link through 404.html: the page
+    // renders, but the document itself comes back 404 and Chrome logs it.
+    // Hosting behavior, not a product error; resource 404s still count.
+    if (/status of 404/.test(m.text()) && isDocumentUrl(m.location()?.url, page.url())) { expectedRejections++; return; }
     if ((allowRejections && EXPECTED_REJECTION(m.text())) ||
         (allow429 && /status of 429/.test(m.text()))) { expectedRejections++; return; }
     if (/status of 5\d\d/i.test(m.text()) && isExternal(m.location()?.url)) {
@@ -150,7 +166,7 @@ await scenario("marketing-home", async (page) => {
   const resp = await page.goto(`${BASE}/`, { waitUntil: "networkidle", timeout: 45000 });
   report("marketing-home", resp && resp.status() < 400, `HTTP ${resp?.status()}, title "${await page.title()}"`);
   const links = await page.$$eval('a[href*="/app"]', (as) => as.map((a) => a.getAttribute("href")));
-  ctaDestinations = [...new Set(links)];
+  ctaDestinations = [...new Set(links.map(relative))];
   console.log(`  ${links.length} app-bound CTA(s), ${ctaDestinations.length} distinct destination(s): ${ctaDestinations.join(", ")}`);
   report("marketing-ctas", ctaDestinations.length >= 4, `${ctaDestinations.length} distinct destinations enumerated`);
 });
@@ -170,17 +186,16 @@ const surfaceChecks = [
     // The exact regression this guards: a rankings CTA landing on the sign-in
     // gate. The gate has plenty of body text (a length check would pass on
     // it) — assert the index page's own h1, which the gate does not have.
-    return page.locator("h1", { hasText: /visibility index/i }).first()
-      .isVisible({ timeout: 15000 }).catch(() => false);
+    return page.locator("h1", { hasText: /visibility index/i }).first().waitFor({ state: "visible", timeout: 15000 }).then(() => true).catch(() => false);
   } },
   { match: /\/app\/demo/, name: "demo-gate", check: async (page) =>
-    page.locator("text=Access code").first().isVisible({ timeout: 15000 }).catch(() => false) },
+    page.locator("text=Access code").first().waitFor({ state: "visible", timeout: 15000 }).then(() => true).catch(() => false) },
   { match: /#signin/, name: "signin-form", check: async (page) =>
-    page.locator('input[type="email"]').first().isVisible({ timeout: 15000 }).catch(() => false) },
+    page.locator('input[type="email"]').first().waitFor({ state: "visible", timeout: 15000 }).then(() => true).catch(() => false) },
   { match: /\/app\/teaser/, name: "teaser", check: async (page) =>
-    page.locator('input[placeholder="yourlawfirm.com"]').first().isVisible({ timeout: 15000 }).catch(() => false) },
+    page.locator('input[placeholder="yourlawfirm.com"]').first().waitFor({ state: "visible", timeout: 15000 }).then(() => true).catch(() => false) },
   { match: /^\/app\/?$/, name: "app-gate", check: async (page) =>
-    page.locator("text=real visibility score").first().isVisible({ timeout: 15000 }).catch(() => false) },
+    page.locator("text=real visibility score").first().waitFor({ state: "visible", timeout: 15000 }).then(() => true).catch(() => false) },
 ];
 
 for (const href of ctaDestinations) {
@@ -252,7 +267,7 @@ if (process.env.SMOKE_FULL_TEASER !== "1") {
     await cta.first().click();
     await page.waitForURL(/\/app\/#signin$/, { timeout: 15000 }).catch(() => null);
     const onSignin = /\/app\/#signin$/.test(page.url());
-    const emailVisible = await page.locator('input[type="email"]').first().isVisible({ timeout: 15000 }).catch(() => false);
+    const emailVisible = await page.locator('input[type="email"]').first().waitFor({ state: "visible", timeout: 15000 }).then(() => true).catch(() => false);
     report("handoff-signin-form", onSignin && emailVisible, `after CTA: url=${page.url()} (/#signin: ${onSignin}), email form visible: ${emailVisible}`);
     // The prefill contract: setAuditPrefill before navigate, consumed by the
     // post-signup audit intake (MarketVisibilityScore) — this is what stops
@@ -288,7 +303,7 @@ await scenario("teaser-external-error-skip", async (page, ctl) => {
 // ── 4. Demo gate: wrong code rejected ───────────────────────────────────────
 await scenario("demo-wrong-code", async (page) => {
   await page.goto(`${BASE}/app/demo`, { waitUntil: "networkidle", timeout: 45000 });
-  const gateVisible = await page.locator("text=Access code").first().isVisible({ timeout: 15000 }).catch(() => false);
+  const gateVisible = await page.locator("text=Access code").first().waitFor({ state: "visible", timeout: 15000 }).then(() => true).catch(() => false);
   report("demo-gate", gateVisible, `access-code gate renders: ${gateVisible}`);
   await page.locator('input[placeholder="Enter your code"]').fill("definitely-wrong-code-smoke");
   await page.keyboard.press("Enter");
@@ -316,7 +331,7 @@ if (!demoCode) {
     }
     report("demo-entry", entered, `valid code enters the demo (dashboard mounted: ${entered})`);
     if (!entered) return;
-    const tourOffered = await page.locator("text=Take the 2-min tour").first().isVisible({ timeout: 15000 }).catch(() => false);
+    const tourOffered = await page.locator("text=Take the 2-min tour").first().waitFor({ state: "visible", timeout: 15000 }).then(() => true).catch(() => false);
     report("demo-tour-first-visit", tourOffered, `guided tour offered on first demo visit: ${tourOffered}`);
     if (!tourOffered) return;
     // Dismiss via the real control — "Just explore" fires onDecline, which
