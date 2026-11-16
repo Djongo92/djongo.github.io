@@ -222,8 +222,14 @@ provider's account balance before touching code.
   `GOOGLE_PLACES_API_KEY`, every SEO-provider key, `VOYAGE_API_KEY`, and the
   three legacy passwords. Without the first three a new audit can't measure
   Website Experience, Google profile or Search Authority.
-- `press-outlets-health` fails: SeeNews and eKapija answer 503 to the edge
-  runtime (likely bot protection), so those outlets aren't counted.
+- Google News answers 503 to the edge runtime, so the press search (Thought
+  Leadership's 30-point press sub-score) only reaches the outlets queried
+  directly (Bizlife, Nova Ekonomija, Danas); SeeNews and eKapija go through
+  Google News too, which is why `press-outlets-health` fails. Audits record
+  which sources answered (`raw_metrics.thoughtLeadership.pressCoverage`);
+  with any missing, `pressPartial` is set, the dashboard says the count may
+  be low, and the count stays out of peer benchmarks. A replacement source
+  is the owner's call. Marketing copy still names Google News as a source.
 - `workshop-deck-image` is deployed but not in the repo.
 - Production runs on the **free Supabase plan** (the daily monitor also
   keeps it from being paused): no restorable backups or point-in-time

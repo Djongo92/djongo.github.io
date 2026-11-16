@@ -63,6 +63,16 @@ export function formatSeoInputs(raw: any): string | null {
   return parts.length ? parts.join(" · ") : null;
 }
 
+/** "Google News and SeeNews" from source ids like "google-news:US", "seenews". */
+function pressSourceList(ids: unknown): string {
+  const names = (Array.isArray(ids) ? ids : []).map((id) =>
+    String(id).startsWith("google-news") ? "Google News" : ({ seenews: "SeeNews", ekapija: "eKapija", bizlife: "Bizlife", novaekonomija: "Nova Ekonomija", danas: "Danas" } as Record<string, string>)[String(id)] ?? String(id),
+  );
+  const unique = [...new Set(names)];
+  if (unique.length === 0) return "some sources";
+  return unique.length === 1 ? unique[0] : `${unique.slice(0, -1).join(", ")} and ${unique[unique.length - 1]}`;
+}
+
 export function formatThoughtLeadershipInputs(raw: any): string | null {
   const t = raw?.thoughtLeadership;
   if (!t) return null;
@@ -78,11 +88,17 @@ export function formatThoughtLeadershipInputs(raw: any): string | null {
   if (t.activeMonths != null && t.windowMonths) parts.push(`published in ${t.activeMonths} of the last ${t.windowMonths} months`);
 
   const mentions: { title: string; source: string }[] = Array.isArray(t.pressMentions) ? t.pressMentions : [];
+  // Older audits came from a Google News-only search; newer ones also query
+  // regional outlets directly, and record which sources answered.
+  const via = t.pressCoverage ? "in the press sources checked" : "via Google News";
   if (mentions.length > 0) {
     const cited = mentions.slice(0, 2).map((m) => `"${m.title}" (${m.source})`).join("; ");
-    parts.push(`${mentions.length} press mention${mentions.length === 1 ? "" : "s"} independently verified via Google News — ${cited}${mentions.length > 2 ? "; …" : ""}`);
+    parts.push(`${mentions.length} press mention${mentions.length === 1 ? "" : "s"} independently verified ${via} — ${cited}${mentions.length > 2 ? "; …" : ""}`);
   } else if (t.newsCount != null) {
-    parts.push(`${t.newsCount} press mention${t.newsCount === 1 ? "" : "s"} found via Google News`);
+    parts.push(`${t.newsCount} press mention${t.newsCount === 1 ? "" : "s"} found ${via}`);
+  }
+  if (t.pressPartial) {
+    parts.push(`press search incomplete: ${pressSourceList(t.pressCoverage?.unavailable)} didn't answer, so the press count may be low`);
   }
   const ps = t.articlesStats ?? t.postsStats;
   if (ps) {

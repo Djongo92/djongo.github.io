@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { decodeXmlEntities, extractDomain, parseRssItems, filterPressMentions, titleMentionsFirm, type RawRssItem } from "./pressMentionsFormula";
+import { decodeXmlEntities, extractDomain, parseRssItems, filterPressMentions, titleMentionsFirm, isPressPartial, type RawRssItem } from "./pressMentionsFormula";
 
 const NOW = new Date("2026-07-22T00:00:00Z").getTime();
 const daysAgo = (n: number) => new Date(NOW - n * 24 * 60 * 60 * 1000).toUTCString();
@@ -167,5 +167,13 @@ describe("filterPressMentions with firmNames", () => {
     ];
     const out = filterPressMentions(items, { windowDays: 90, targetDomain: "jpm.law", now, firmNames: ["JPM & Partners"] });
     expect(out.map((m) => m.title)).toEqual(["JPM & Partners advises on bond issue"]);
+  });
+});
+
+describe("isPressPartial", () => {
+  it("is partial only when a source didn't answer", () => {
+    expect(isPressPartial({ checked: ["google-news:US", "bizlife"], unavailable: [] })).toBe(false);
+    expect(isPressPartial({ checked: ["bizlife"], unavailable: ["google-news:US"] })).toBe(true);
+    expect(isPressPartial(null)).toBe(false);
   });
 });

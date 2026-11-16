@@ -63,6 +63,9 @@ async function fetchPeerValues(
     // honesty (keep-and-mark) but must never enter peer aggregates — the peer
     // pool only ever sees real measurements.
     if (category?.mobileFromDesktop === true || category?.desktopFromMobile === true) continue;
+    // Same policy for a press count from a lookup where some sources didn't
+    // answer (thoughtLeadershipScore.ts): a floor, not a measurement.
+    if (metric === "newsCount" && category?.pressPartial === true) continue;
     const v = metricValueOf(category, metric);
     if (v !== null) values.push(v);
   }

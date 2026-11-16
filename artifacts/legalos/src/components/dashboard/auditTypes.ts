@@ -78,6 +78,11 @@ export interface ThoughtLeadershipRaw {
   /** Pre-v3 audits: one blended own-output comparison. */
   postsStats?: PeerStats;
   newsStats?: PeerStats;
+  /** Which press sources answered. Absent on audits from before it was recorded. */
+  pressCoverage?: { checked: string[]; unavailable: string[] };
+  /** Some press sources didn't answer: newsCount is a floor, and it's kept
+   *  out of peer benchmarks. */
+  pressPartial?: boolean;
 }
 
 export interface ReputationRaw {

@@ -32,7 +32,7 @@ import { peerStatsFor } from "./peerStats.ts";
 import { p90Ratio, type PeerStats } from "./percentileFormula.ts";
 import { filterToWindow, aggregateContentItems, calculateThoughtLeadershipScore, extractArticleLinks, upsertContentItem, contentItemKey, type ContentItem } from "./thoughtLeadershipFormula.ts";
 import { findPressMentions } from "./pressMentions.ts";
-import type { PressMention } from "./pressMentionsFormula.ts";
+import { isPressPartial, type PressCoverage, type PressMention } from "./pressMentionsFormula.ts";
 import { callClaudeTool } from "./anthropic.ts";
 import type { FirmSize } from "./peerDimensions.ts";
 
@@ -61,6 +61,8 @@ export interface ThoughtLeadershipResult {
     postsCount: number; newsCount: number; bylinePct: number; items: ContentItem[]; pressMentions: PressMention[];
     articlesCount?: number; ownNewsCount?: number; activeMonths?: number; windowMonths?: number; measuredAt?: string;
     articlesStats?: PeerStats; ownNewsStats?: PeerStats; newsStats?: PeerStats;
+    /** Which press sources answered; pressPartial when any didn't. */
+    pressCoverage?: PressCoverage; pressPartial?: boolean;
   };
   provenance: "ai_classified" | "missing";
 }
@@ -258,11 +260,16 @@ export async function computeThoughtLeadershipScore(
   // Falls back to the page title (best-effort) if no firm name was given;
   // an empty query short-circuits to no mentions rather than a noisy guess.
   const searchName = (displayName ?? "").trim() || pageTitle;
-  const pressMentions = await findPressMentions(searchName, normalizedUrl, windowDays, marketConfig?.newsEdition).catch((e) => {
+  const press = await findPressMentions(searchName, normalizedUrl, windowDays, marketConfig?.newsEdition).catch((e) => {
     console.error("[visibility-audit-thought-leadership] press mention lookup failed:", e);
-    return [];
+    return null;
   });
+  const pressMentions = press?.mentions ?? [];
   const newsCount = pressMentions.length;
+  // Some press sources didn't answer (or the lookup threw): the count is a
+  // floor. Kept and marked; peerStats.ts keeps it out of peer benchmarks.
+  const pressCoverage = press?.coverage ?? { checked: [], unavailable: ["lookup"] };
+  const pressPartial = isPressPartial(pressCoverage);
 
   const [articlesStats, ownNewsStats, newsStats] = await Promise.all([
     peerStatsFor(serviceClient, market, peerGroup, "thoughtLeadership", "articlesCount", articlesCount, auditedDomain, firmSize),
@@ -288,6 +295,7 @@ export async function computeThoughtLeadershipScore(
       postsCount, articlesCount, ownNewsCount, newsCount, bylinePct, activeMonths, windowMonths,
       measuredAt: new Date().toISOString(),
       items: inWindow, pressMentions, articlesStats, ownNewsStats, newsStats,
+      pressCoverage, pressPartial,
     },
     provenance: "ai_classified",
   };
