@@ -4,7 +4,7 @@
 // jsPDF is dynamically imported so it's never in Analytics' initial chunk.
 import type { CategoryKey, CategoryMeta } from "@/lib/visibilityCategories";
 import { categoryScoreLabel500 } from "@/lib/visibilityCategories";
-import type { PerformanceRaw, SocialRaw, ThoughtLeadershipRaw, ReputationRaw } from "@/components/dashboard/CommandCenter";
+import type { PerformanceRaw, SocialRaw, ThoughtLeadershipRaw, ReputationRaw } from "@/components/dashboard/auditTypes";
 import { practiceAreaLabel } from "@/lib/practiceAreas";
 
 interface ExportParams {

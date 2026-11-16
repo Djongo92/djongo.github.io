@@ -9,7 +9,7 @@
 import { useMemo, useState } from "react";
 import { FileText, Download, Loader2, X, Presentation, FileSpreadsheet, FileType2 } from "lucide-react";
 import { toast } from "sonner";
-import type { AuditRow, HistoryRow } from "@/components/dashboard/CommandCenter";
+import type { AuditRow, HistoryRow } from "@/components/dashboard/auditTypes";
 import { useStrategyBrief } from "@/hooks/useStrategyBrief";
 import { useExecutiveReportSchedule } from "@/hooks/useExecutiveReportSchedule";
 import type { ExecutiveReportData } from "@/lib/executiveReportData";

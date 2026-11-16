@@ -4,7 +4,7 @@ import { BarChart3, CheckCircle2, XCircle, Newspaper, FileText as FileTextIcon, 
 import type {
   AuditRow, HistoryRow, ThoughtLeadershipItem,
   PerformanceRaw, SocialRaw, ThoughtLeadershipRaw, ReputationRaw,
-} from "@/components/dashboard/CommandCenter";
+} from "@/components/dashboard/auditTypes";
 import { CATEGORY_META, CATEGORY_ORDER, CATEGORY_COLOR_CLASSES, type CategoryKey } from "@/lib/visibilityCategories";
 import { CATEGORY_TREND_METRIC } from "@/lib/visibilityInputFormatters";
 import { findWeakestCategoryTool } from "@/lib/categoryToolMap";

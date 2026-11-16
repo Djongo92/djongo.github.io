@@ -3,7 +3,7 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { CATEGORY_META, PROVENANCE_META, type CategoryKey, type Provenance } from "@/lib/visibilityCategories";
 import { CATEGORY_INPUT_FORMATTERS } from "@/lib/visibilityInputFormatters";
 import { isStale, DIRECTORY_STALE_AFTER_DAYS } from "@/lib/scoreFreshness";
-import type { ReputationRaw } from "@/components/dashboard/CommandCenter";
+import type { ReputationRaw } from "@/components/dashboard/auditTypes";
 import { gbpPoints, REPUTATION_WEIGHTS } from "../../../supabase/functions/_shared/methodology";
 
 // Shared "what am I looking at" layer for the Market Visibility Score —

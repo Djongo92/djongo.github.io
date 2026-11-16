@@ -48,7 +48,7 @@ import { DashboardSkeleton, AnalyticsSkeleton, SettingsSkeleton, ProgressSkeleto
 import type { WorkshopToolId } from "@/lib/handoff";
 import { launchProgressTool } from "@/lib/progressToolLaunch";
 import type { StepKey as BattlePlanStepKey } from "@/components/battleplan/battlePlanModel";
-import type { AuditRow, HistoryRow } from "@/components/dashboard/CommandCenter";
+import type { AuditRow, HistoryRow } from "@/components/dashboard/auditTypes";
 import { findWeakestCategoryTool } from "@/lib/categoryToolMap";
 import { readArrival, type Arrival } from "@/lib/arrival";
 import { waitForElement } from "@/lib/waitForElement";

@@ -21,7 +21,7 @@ import { Slider } from "@/components/ui/slider";
 import { Checkbox } from "@/components/ui/checkbox";
 import { CATEGORY_META } from "@/lib/visibilityCategories";
 import { computeMeasuredTotals, measuredScoreLabel, measuredExcludedNote, toScale500, type CategoryTotals } from "@/lib/measuredScore";
-import type { AuditRow } from "@/components/dashboard/CommandCenter";
+import type { AuditRow } from "@/components/dashboard/auditTypes";
 import { calculatePerformanceScore } from "../../../supabase/functions/_shared/performanceFormula";
 import { calculateSocialScore } from "../../../supabase/functions/_shared/socialFormula";
 import { calculateThoughtLeadershipScore } from "../../../supabase/functions/_shared/thoughtLeadershipFormula";

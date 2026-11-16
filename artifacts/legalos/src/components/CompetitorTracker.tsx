@@ -3,7 +3,7 @@ import { X, Users, Plus, Loader2, TrendingUp, TrendingDown } from "lucide-react"
 import { supabase } from "@/integrations/supabase/client";
 import { useTrackedCompetitors } from "@/hooks/useTrackedCompetitors";
 import { useFirmProfile } from "@/hooks/useFirmProfile";
-import type { AuditRow } from "@/components/dashboard/CommandCenter";
+import type { AuditRow } from "@/components/dashboard/auditTypes";
 import ModalShell from "@/components/ui/modal-shell";
 import { computeMeasuredTotals, measuredScoreLabel, type CategoryTotals } from "@/lib/measuredScore";
 import { CATEGORY_ORDER } from "@/lib/visibilityCategories";
