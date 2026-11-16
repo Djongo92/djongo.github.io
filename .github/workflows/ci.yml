@@ -61,6 +61,13 @@ jobs:
           SITE_BASE: /
         run: node scripts/build-site.mjs
 
+      - name: Browser check of the built site (offline, Supabase stubbed)
+        # Every entry page renders in Chromium without errors, deep links
+        # survive a refresh, public pages don't load the dashboard chunk.
+        run: |
+          pnpm --filter @workspace/uvid exec playwright-core install --with-deps chromium-headless-shell
+          pnpm --filter @workspace/uvid run test:e2e
+
   schema-drift:
     name: Schema drift vs live database
     # Read-only check that every migration in the repo is applied and

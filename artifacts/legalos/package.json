@@ -9,6 +9,7 @@
     "serve": "vite preview --config vite.config.ts --host 0.0.0.0",
     "typecheck": "tsc -p tsconfig.json --noEmit",
     "lint": "eslint src --max-warnings 0",
+    "test:e2e": "node tests/e2e-offline.mjs ../../site-dist",
     "test": "vitest run --config vitest.config.ts",
     "generate:mobile-chapters": "tsx scripts/generate-mobile-chapters.mjs",
     "generate:guidebook-pages": "tsx scripts/generate-guidebook-pages.mjs",

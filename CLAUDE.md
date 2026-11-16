@@ -92,6 +92,7 @@ pnpm --filter @workspace/uvid run test           # vitest: web + pure edge formu
 pnpm --filter @workspace/uvid run test:deno      # every Deno.test file, auto-discovered (needs deno 2.x)
 pnpm --filter @workspace/uvid run dev            # http://localhost:21341/app/
 SITE_BASE=/ node scripts/build-site.mjs          # exactly what ships → site-dist/
+pnpm --filter @workspace/uvid run test:e2e       # site-dist in Chromium, Supabase stubbed (CHROMIUM_PATH to use a local Chrome)
 ```
 
 Live-project checks (need credentials, hit production): `check:schema-drift`,
